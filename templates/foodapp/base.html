@@ -10,6 +10,8 @@
     <!-- Custom -->
     <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css" />
 
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+
     {% block extracss %}{% endblock extracss %}
 
     {% block extrajs %}{% endblock extrajs %}
@@ -20,8 +22,11 @@
             <nav>
                 <h3>Food App</h3>
                 <ul>
-                    <li><a href="{% url url_homepage %}">Place order</a></li>
+                    <li><a href="{% url url_homepage %}">Place Order</a></li>
                     <li><a href="{% url url_user_orders username=user %}">My Order History</a></li>
+                    <li><a href="{% url url_todays_orders %}">Today's Orders</a></li>
+                    {% block sidebar %}{% endblock sidebar %}
+                </ul>
             </nav>
         </div>
 
