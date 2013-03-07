@@ -1,0 +1,23 @@
+{% extends 'foodapp/base.html' %}
+
+{% block content %}
+<h1>Month Totals for {{ month }}, {{ year }}:</h1>
+<h4>Total # of Burritos: {{ num_burritos }}</h4>
+<h4>Total Cost: $ {{ cost }}</h4>
+<h4>Cost Per Burrito: $ {{ cost_per_burrito }}</h4>
+<br>
+<table class="table" border="1">
+    <tr class="table">
+        <td class="table">Username</td>
+        <td class="table"># Burritos</td>
+        <td class="table">Money Owed</td>
+    </tr>
+{% for user,orders in user_to_orders_dict.items %}
+    <tr class="table">
+        <td class="table">{{ user }}</td>
+        <td class="table">{{ orders.0 }}</td>
+        <td class="table">$ {{ orders.1}}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock content %}
