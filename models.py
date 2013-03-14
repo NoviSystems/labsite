@@ -50,4 +50,4 @@ class MonthlyCost(models.Model):
     date = models.DateField(default=datetime.date.today)
 
     def __unicode__(self):
-        return "%3.2d on %s." % (self.cost, self.date)
+        return "$%3.2f on %s." % (self.cost, self.date)

@@ -4,11 +4,12 @@ from decimal import *
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
-from django.views.generic import CreateView, ListView, TemplateView, date_based
-from django.http import HttpResponseRedirect, HttpResponse
+from django.views.generic import CreateView, ListView, TemplateView
+from django.http import HttpResponseRedirect
 from django.utils.functional import lazy
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.shortcuts import redirect
 
 from models import Item, Order, RiceCooker, MonthlyCost
 from forms import OrderForm
@@ -90,7 +91,7 @@ class UserOrderView(OrderListView):
 
     def get_context_data(self, **kwargs):
         context = super(UserOrderView, self).get_context_data(**kwargs)
-        context['title'] = 'Order History for ' + self.request.user.username
+        context['title'] = 'Order History for ' + self.request.user.username + ":"
         return context
 
 
@@ -111,7 +112,7 @@ class TodaysOrdersView(OrderListView):
                 burrito_count = burrito_count + order.quantity
         context['rice_quantity'] = burrito_count * 0.7
 
-        context['title'] = 'Today\'s Orders.'
+        context['title'] = 'Today\'s Orders:'
         return context
 
 
@@ -127,6 +128,19 @@ def rice_off_view(request):
     return HttpResponseRedirect(reverse('url_homepage'))
 
 
+def last_month_view(request):
+    now = datetime.date.today()
+    last_month = (now.month - 1)
+    year = now.year
+    if now.month == 1:
+        year = (now.year - 1)
+        last_month = 12
+
+    year = str(year)
+    last_month = "%02d" % last_month
+    return redirect('url_month_orders', year, last_month)
+
+
 class MonthOrdersView(TemplateView):
     template_name = 'foodapp/month.html'
 
@@ -140,8 +154,9 @@ class MonthOrdersView(TemplateView):
         #Grabs year and month keywords from url
         year = self.kwargs['year']
         month = self.kwargs['month']
+        now = datetime.date(int(year), int(month), 1)
         context['year'] = year
-        context['month'] = month
+        context['month'] = now.strftime('%B')
 
         #Calculates the total number of burritos in a given month
         month_orders = Order.objects.filter(date__month=month, date__year=year)

@@ -1,12 +1,12 @@
 {% extends 'foodapp/base.html' %}
 
 {% block sidebar %}
-<li><a href="{% url url_month_orders month=last_month year=year %}">Last Month's Totals</a></li> 
+<!-- <li><a href="{ % url 'url_month_orders' month=last_month year=year % }">Last Month's Totals</a></li>  -->
 {% if rice_is_on %}
-<li><input type="button" value="Stop Rice" id="riceButton" onclick="window.location='{% url url_rice_off %}'"></input></li>
+<li><input type="button" value="Stop Rice" id="riceButton" onclick="window.location='{% url 'url_rice_off' %}'"></input></li>
 <img id="riceCooker" src="../static/img/ricecooker.png" alt="Rice Cooker" style="display:block" height=200px width=200px />
 {% else %}
-<li><input type="button" value="Start Rice" id="riceButton" onclick="window.location='{% url url_rice_on %}'"></input></li>
+<li><input type="button" value="Start Rice" id="riceButton" onclick="window.location='{% url 'url_rice_on' %}'"></input></li>
 {% endif %}
 {% endblock sidebar %}
 
