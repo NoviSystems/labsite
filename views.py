@@ -158,7 +158,8 @@ class MonthOrdersView(TemplateView):
         context['year'] = year
         context['month'] = now.strftime('%B')
 
-        #Calculates the total number of burritos in a given month
+        #Calculates the total number of burritos in a given month.
+        #ASSUMES ALL MONTHLY COSTS ARE APPLIED TO BURRITOS ONLY!!!
         month_orders = Order.objects.filter(date__month=month, date__year=year)
         num_burritos = 0
         for order in month_orders:
@@ -166,11 +167,11 @@ class MonthOrdersView(TemplateView):
                 num_burritos += order.quantity
         context["num_burritos"] = num_burritos
 
-        #Gets the Monthly Cost, if none or more than one, value is set to zero
-        try:
-            cost = MonthlyCost.objects.get(date__month=month, date__year=year).cost
-        except (ObjectDoesNotExist, MultipleObjectsReturned):
-            cost = 0
+        #Sum the total MonthlyCosts objects for a given month/year. Set to zero if no objects returned.
+        cost = 0
+        costs = MonthlyCost.objects.filter(date__month=month, date__year=year)
+        for item in costs:
+            cost += item.cost
 
         context["cost"] = cost
 
