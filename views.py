@@ -64,7 +64,7 @@ class HomepageView(CreateView):
         now = datetime.datetime.now()
         context['last_month'] = "%02d" % (now.month - 1)
         context['year'] = now.year
-        context['rice_is_on'] = RiceCooker.objects.get(id=1).is_on
+        context['rice_is_on'] = RiceCooker.objects.all()[0].is_on;
         return context
 
 
