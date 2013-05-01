@@ -110,7 +110,7 @@ class TodaysOrdersView(OrderListView):
         for order in orders:
             if order.item.name.strip().lower().find('burrito') > -1:
                 burrito_count = burrito_count + order.quantity
-        context['rice_quantity'] = burrito_count * 0.7
+        context['rice_quantity'] = burrito_count * 0.5
 
         context['title'] = 'Today\'s Orders:'
         return context
