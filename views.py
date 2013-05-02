@@ -173,7 +173,8 @@ class MonthOrdersView(TemplateView):
         for item in costs:
             cost += item.cost
 
-        context["cost"] = cost
+        cost = float(cost)/0.9725
+        context["cost"] = ("%.2f" %  cost)
 
         #Calculates cost per burrito
         if num_burritos:
