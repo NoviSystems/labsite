@@ -11,13 +11,22 @@
         <td class="table">Username</td>
         <td class="table"># Burritos</td>
         <td class="table">Money Owed</td>
+        <td class="table">Money Paid</td>
+        <td class="table">Add To Paid</td>
     </tr>
+  <form method="post">
   {% for user,orders in user_to_orders_dict.items %}
     <tr class="table">
         <td class="table">{{ user }}</td>
         <td class="table">{{ orders.0 }}</td>
-	<td class="table">{{ orders.1 }}</td>
+        <td class="table">$ {{ orders.1}}</td>
+       	<td class="table">$ {{orders.2}} </td>
+        <td class="table">
+            <input type="number" name="id_{{user}}" maxlength="10" size="5" /></td>
     </tr>
   {% endfor %}
+    {% csrf_token %}
+    <input type="submit" value="Save" align="right" />
+  </form>
 </table>
 {% endblock content %}

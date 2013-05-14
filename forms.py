@@ -1,5 +1,6 @@
+from django import forms
 from django.forms import ModelForm
-from models import Order
+from models import Order, AmountPaid
 
 class OrderForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -8,3 +9,10 @@ class OrderForm(ModelForm):
     class Meta:
         model = Order
         exclude = ["user", "date"]
+
+class PaidForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ModelForm, self).__init__(*args, **kwargs)
+    class Meta:
+        model = AmountPaid
+	exclude = ["user", "date"]

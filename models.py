@@ -51,3 +51,10 @@ class MonthlyCost(models.Model):
 
     def __unicode__(self):
         return "$%3.2f on %s." % (self.cost, self.date)
+
+class AmountPaid(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(default=datetime.date.today)
+    user = models.ForeignKey(User)
+    def __unicode__(self):
+        return "$%3.2f by %s on %s" % (self.amount, self.user, self.date) 
