@@ -11,8 +11,8 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.shortcuts import redirect
 
-from models import Item, Order, RiceCooker, MonthlyCost
-from forms import OrderForm
+from models import Item, Order, RiceCooker, MonthlyCost, AmountPaid
+from forms import OrderForm, PaidForm
 
 # Workaround for using reverse with success_url in class based generic views
 # because direct usage of it throws an exception.
@@ -130,7 +130,8 @@ def rice_off_view(request):
 
 def last_month_view(request):
     now = datetime.date.today()
-    last_month = (now.month - 1)
+    #FIX THIS BACK
+    last_month = (now.month)
     year = now.year
     if now.month == 1:
         year = (now.year - 1)
@@ -138,8 +139,10 @@ def last_month_view(request):
 
     year = str(year)
     last_month = "%02d" % last_month
-    return redirect('url_month_orders', year, last_month)
-
+    if request.user.is_superuser:
+        return redirect('url_super_month_orders', year, last_month)
+    else:
+        return redirect('url_month_orders', year, last_month)
 
 class MonthOrdersView(TemplateView):
     template_name = 'foodapp/month.html'
@@ -174,7 +177,7 @@ class MonthOrdersView(TemplateView):
             cost += item.cost
 
         cost = float(cost)/0.9725
-        context["cost"] = ("%.2f" %  cost)
+        context["cost"] = ("%.2f" % cost)
 
         #Calculates cost per burrito
         if num_burritos:
@@ -196,3 +199,75 @@ class MonthOrdersView(TemplateView):
         context["user_to_orders_dict"] = user_to_orders_dict
 
         return context
+
+class SuperMonthOrdersView(TemplateView):
+    template_name = 'foodapp/super_month.html'
+    form_class = PaidForm
+    object = AmountPaid
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(SuperMonthOrdersView, self).dispatch(*args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        success_url = reverse_lazy('url_last_month_view')
+	if request.user.is_superuser:
+	    year = self.kwargs['year']
+            month = self.kwargs['month']
+            filtered_orders = Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year)
+	    for order in filtered_orders:
+    	        if request.method == 'POST':
+	            form_id = 'id_'+order.user.username
+		    form = request.POST.get(form_id)
+		    if form:
+		        new_save = AmountPaid(amount=form, user=order.user)
+		        new_save.save()	
+        return HttpResponseRedirect(success_url)
+	    
+    def get_context_data(self, **kwargs):
+        context = super(SuperMonthOrdersView, self).get_context_data(**kwargs)
+        #Grabs year and month keywords from url
+        year = self.kwargs['year']
+        month = self.kwargs['month']
+        now = datetime.date(int(year), int(month), 1)
+        context['year'] = year
+        context['month'] = now.strftime('%B')
+
+        #Calculates the total number of burritos in a given month.
+        #ASSUMES ALL MONTHLY COSTS ARE APPLIED TO BURRITOS ONLY!!!
+        month_orders = Order.objects.filter(date__month=month, date__year=year)
+        num_burritos = 0
+        for order in month_orders:
+            if order.item.name.lower() == "burrito":
+                num_burritos += order.quantity
+        context["num_burritos"] = num_burritos
+
+        #Sum the total MonthlyCosts objects for a given month/year. Set to zero if no objects returned.
+        cost = 0
+        costs = MonthlyCost.objects.filter(date__month=month, date__year=year)
+        for item in costs:
+            cost += item.cost
+
+        cost = float(cost)/0.9725
+        context["cost"] = ("%.2f" %  cost)
+
+        #Calculates cost per burrito
+        if num_burritos:
+            cost_per_burrito = Decimal(cost/num_burritos).quantize(Decimal('.01'), rounding=ROUND_UP)
+        else:
+            cost_per_burrito = 0
+
+        context["cost_per_burrito"] = cost_per_burrito
+	
+        #Creates a dictionary of user to number of burritos consumed
+        user_to_orders_dict = {}
+        for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
+            user_to_orders_dict[order.user.username] = user_to_orders_dict.get(order.user.username, 0) + order.quantity
+        for username in user_to_orders_dict:
+	    money_paid = Decimal(0)
+            for paid in AmountPaid.objects.filter(date__month=month).filter(date__year=year):   
+                if paid.user.username == username:
+                    money_paid += paid.amount
+            num_burritos = user_to_orders_dict[username]
+            user_to_orders_dict[username] = (num_burritos, num_burritos*cost_per_burrito, money_paid)
+
+        context["user_to_orders_dict"] = user_to_orders_dict
+	return context

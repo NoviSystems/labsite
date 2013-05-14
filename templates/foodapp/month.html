@@ -12,12 +12,12 @@
         <td class="table"># Burritos</td>
         <td class="table">Money Owed</td>
     </tr>
-{% for user,orders in user_to_orders_dict.items %}
+  {% for user,orders in user_to_orders_dict.items %}
     <tr class="table">
         <td class="table">{{ user }}</td>
         <td class="table">{{ orders.0 }}</td>
-        <td class="table">$ {{ orders.1}}</td>
+	<td class="table">{{ orders.1 }}</td>
     </tr>
-{% endfor %}
+  {% endfor %}
 </table>
 {% endblock content %}
