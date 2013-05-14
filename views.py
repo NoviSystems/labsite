@@ -131,7 +131,7 @@ def rice_off_view(request):
 def last_month_view(request):
     now = datetime.date.today()
     #FIX THIS BACK
-    last_month = (now.month)
+    last_month = (now.month-1)
     year = now.year
     if now.month == 1:
         year = (now.year - 1)
