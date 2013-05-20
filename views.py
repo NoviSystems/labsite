@@ -21,7 +21,7 @@ reverse_lazy = lambda name=None, *args: lazy(reverse, str)(name, args=args)
 
 class HomepageView(CreateView):
     form_class = OrderForm
-    success_url = reverse_lazy('url_todays_orders')
+    success_url = reverse_lazy('url_homepage')
     template_name = 'foodapp/homepage.html'
     object = Order
 
