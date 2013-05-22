@@ -10,6 +10,7 @@
     <tr class="table">
         <td class="table">Username</td>
         <td class="table"># Burritos</td>
+        <td class="table">Money Invoiced</td>
         <td class="table">Money Owed</td>
         <td class="table">Money Paid</td>
         <td class="table">Add To Paid</td>
@@ -19,10 +20,11 @@
     <tr class="table">
         <td class="table">{{ user }}</td>
         <td class="table">{{ orders.0 }}</td>
-        <td class="table">$ {{ orders.1}}</td>
-       	<td class="table">$ {{orders.2}} </td>
+        <td class="table">$ {{ orders.1 }}</td>
+        <td class="table">$ {{ orders.2 }}</td>
+       	<td class="table">$ {{ orders.3 }}</td>
         <td class="table">
-            <input type="number" name="id_{{user}}" maxlength="10" size="5" /></td>
+            <input type="text" name="id_{{user}}" maxlength="10" /></td>
     </tr>
   {% endfor %}
     {% csrf_token %}

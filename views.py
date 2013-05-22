@@ -218,7 +218,7 @@ class SuperMonthOrdersView(TemplateView):
 	            form_id = 'id_'+order.user.username
 		    form = request.POST.get(form_id)
 		    if form:
-		        new_save = AmountPaid(amount=form, user=order.user)
+		        new_save = AmountPaid(amount=form, user=order.user, date=order.date)
 		        new_save.save()	
         return HttpResponseRedirect(success_url)
 	    
@@ -263,11 +263,13 @@ class SuperMonthOrdersView(TemplateView):
             user_to_orders_dict[order.user.username] = user_to_orders_dict.get(order.user.username, 0) + order.quantity
         for username in user_to_orders_dict:
 	    money_paid = Decimal(0)
+            num_burritos = user_to_orders_dict[username]
+	    money_owed = num_burritos*cost_per_burrito
             for paid in AmountPaid.objects.filter(date__month=month).filter(date__year=year):   
                 if paid.user.username == username:
                     money_paid += paid.amount
-            num_burritos = user_to_orders_dict[username]
-            user_to_orders_dict[username] = (num_burritos, num_burritos*cost_per_burrito, money_paid)
+                    money_owed = (num_burritos*cost_per_burrito) - money_paid
+            user_to_orders_dict[username] = (num_burritos, num_burritos*cost_per_burrito, money_owed, money_paid)
 
         context["user_to_orders_dict"] = user_to_orders_dict
 	return context
