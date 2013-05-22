@@ -12,7 +12,7 @@ class OrderForm(ModelForm):
 
 class PaidForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        super(ModelForm, self).__init__(*args, **kwargs)
+        super(PaidForm, self).__init__(*args, **kwargs)
     class Meta:
         model = AmountPaid
 	exclude = ["user", "date"]
