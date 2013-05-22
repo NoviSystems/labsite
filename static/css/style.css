@@ -29,4 +29,5 @@ body .container .errorlist{
     border: solid;
     border-width: 2px;
     padding: 0px 15px;
+    width: 600px;
 }

@@ -287,7 +287,9 @@
 		margin-bottom: 20px; }
 	fieldset {
 		margin-bottom: 20px; }
-	input[type="text"],
+	input[type="text"]{
+                width: 50px;
+        },
 	input[type="password"],
 	input[type="email"],
 	textarea,
