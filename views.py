@@ -220,8 +220,6 @@ class SuperMonthOrdersView(TemplateView):
                 for username in usernames:
                     if order.user.username == usernames[username]:
                         user_used = True
-                print order.user.username
-		print user_used
 		if not user_used:
                     usernames[order] = order.user.username
     	            if request.method == 'POST':
