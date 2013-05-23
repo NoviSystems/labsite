@@ -213,13 +213,20 @@ class SuperMonthOrdersView(TemplateView):
 	    year = self.kwargs['year']
             month = self.kwargs['month']
             filtered_orders = Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year)
+            user_used = False
+            usernames = {}
 	    for order in filtered_orders:
-    	        if request.method == 'POST':
-	            form_id = 'id_'+order.user.username
-		    form = request.POST.get(form_id)
-		    if form:
-		        new_save = AmountPaid(amount=form, user=order.user, date=order.date)
-		        new_save.save()	
+                for username in usernames:
+                    if order.user == usernames[username]:
+                        user_used = True
+		if not user_used:
+                    usernames[order] = order.user
+    	            if request.method == 'POST':
+	                form_id = 'id_'+order.user.username
+		        form = request.POST.get(form_id)
+		        if form:
+		            new_save = AmountPaid(amount=form, user=order.user, date=order.date)
+		            new_save.save()	
         return HttpResponseRedirect(success_url)
 	    
     def get_context_data(self, **kwargs):
