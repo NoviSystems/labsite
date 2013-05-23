@@ -213,14 +213,17 @@ class SuperMonthOrdersView(TemplateView):
 	    year = self.kwargs['year']
             month = self.kwargs['month']
             filtered_orders = Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year)
-            user_used = False
+         
             usernames = {}
 	    for order in filtered_orders:
+                user_used = False
                 for username in usernames:
-                    if order.user == usernames[username]:
+                    if order.user.username == usernames[username]:
                         user_used = True
+                print order.user.username
+		print user_used
 		if not user_used:
-                    usernames[order] = order.user
+                    usernames[order] = order.user.username
     	            if request.method == 'POST':
 	                form_id = 'id_'+order.user.username
 		        form = request.POST.get(form_id)
