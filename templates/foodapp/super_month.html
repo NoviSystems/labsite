@@ -18,6 +18,7 @@
                 <th>Money Owed</th>
                 <th>Money Paid</th>
                 <th>Add To Paid</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -32,9 +33,10 @@
                     <td>
                         <input type="text" name="id_{{user}}" maxlength="10" />
                     </td>
+                    <td><button class="btn btn-primary" type="submit" value="Save">Save</button></td>
                 </tr>
                 {% csrf_token %}
-                <button class="btn btn-primary" type="submit" value="Save">Save</button>
+
             </form>
             {% endfor %}
         </tbody>
