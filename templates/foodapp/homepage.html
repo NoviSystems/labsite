@@ -13,7 +13,7 @@
         <div class="panel-body">
             {% if rice_is_on %}
             <button class="btn btn-danger" value="Stop Rice" id="riceButton" onclick="window.location='{% url 'url_rice_off' %}'">Stop Rice</button>
-            <img class='img-rounded' src="/img/ricecooker.png">
+            <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
             {% else %}
             <button class="btn btn-primary" value="Start Rice" id="riceButton" onclick="window.location='{% url 'url_rice_on' %}'">Start Rice</button>
             {% endif %}
