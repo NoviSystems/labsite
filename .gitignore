@@ -7,3 +7,6 @@ runtests
 django-admin
 local_settings.py
 secrets.py
+
+deploy/project_backup/
+deploy/commit_and_push.sh
