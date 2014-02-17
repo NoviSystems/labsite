@@ -6,20 +6,15 @@ This is the site code for lab.oscar.ncsu.edu
 
 ## Overview ##
 
-This repository only contains site configuration files - lab apps are maintained in separate git
-repositories hosted on github. These instruction exist to help get developers started on lab apps
-development. It's unlikely that the site repo will require much modification.
-
-This repo is not currently hosted on github. The current origin is located at
-lab-stag.oscar.ncsu.edu  
-
+These instruction exist to help get developers started on lab apps
+development. It's unlikely that the main site folder will require much modification.
 
 ## Layout ##
 
 /deploy  - contains deployment scripts, secrets
 /labsite - site configuration files
-/foodapp - food ordering app. This is a git module
-/worklog - work tracking app. Also is a git module
+/foodapp - food ordering app
+/worklog - work tracking app
 
 
 ## Quickstart ##
