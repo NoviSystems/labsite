@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit
 
-REPOSITORY_URL="git@lab-stag.oscar.ncsu.edu:/opt/git/labsite.git"
+REPOSITORY_URL="https://github.com/ITNG/labsite.git"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 DEPLOY_DIR="${ROOT_DIR}temp/"
 DEPLOY_USER="labuser"

@@ -4,7 +4,7 @@ set -o nounset
 
 whoami
 
-REPOSITORY_URL="git@lab-stag.oscar.ncsu.edu:/opt/git/labsite.git"
+REPOSITORY_URL="https://github.com/ITNG/labsite"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 PROJECT_DIR="${ROOT_DIR}labsite/"
 BACKUP_DIR="${ROOT_DIR}backup/"
@@ -88,11 +88,6 @@ else
         git stash pop
     fi
 fi
-
-# Update submodules
-cd $PROJECT_DIR
-git submodule init
-git submodule update
 
 # Create Virtual Environment
 if [ ! -d $PROJECT_DIR/.env ]; then
