@@ -40,8 +40,8 @@ function create_files {
     if [ ! -d $PROJECT_DIR/log ]; then
         mkdir $PROJECT_DIR/log
     fi
-    chmod a+rwx $PROJECT_DIR/log
-    chmod -R a+rw $PROJECT_DIR/log
+    sudo chmod  $PROJECT_FILES_OCTAL $PROJECT_DIR/log
+    sudo chmod -R $PROJECT_FILES_OCTAL $PROJECT_DIR/log
 }
 
 
@@ -157,3 +157,7 @@ python ${PROJECT_DIR}manage.py migrate --all --noinput --no-initial-data
 # Start Servers!
 sudo /sbin/service supervisord start
 sudo /sbin/service nginx start
+
+# project_dir_permissions
+create_files
+# project_dir_permissions
