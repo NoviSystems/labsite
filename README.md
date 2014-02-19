@@ -24,7 +24,7 @@ This is a guide to start developing lab.oscar apps. It assumes basic linux comma
 Now, you'll want to clone the repository and setup your
 [virtualenv](http://www.virtualenv.org/en/latest/). 
 
-    $ git clone git@lab-stag.oscar.ncsu.edu:/opt/git/labsite.git
+    $ git clone git@github.com:ITNG/labsite
     $ cd labsite
     $ virtualenv .env
 

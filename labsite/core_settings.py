@@ -35,6 +35,8 @@ WORKLOG_REMINDER_EMAIL_LINK_URLBASE = "https://lab-prod.oscar.ncsu.edu"
 #######################################
 
 
+LOGIN_REDIRECT_URL = '/worklog'
+
 DEFAULT_FROM_EMAIL = 'webmaster@lab.oscar.ncsu.edu'
 
 DEBUG = False 
