@@ -7,6 +7,10 @@ runtests
 django-admin
 local_settings.py
 secrets.py
+*.sqlite3
+
+.env/
 
 deploy/project_backup/
 deploy/commit_and_push.sh
+

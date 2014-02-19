@@ -1,6 +1,13 @@
 django<1.6
-django-celery
 celery
+django-celery
+xhtml2pdf
 south
-psycopg2
 gunicorn
+pytz
+flake8
+github3.py
+django_dajax
+psycopg2
+reportlab==2.7
+pisa
