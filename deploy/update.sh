@@ -113,14 +113,8 @@ else
     echo "No project requirements.pip found..."
 fi
 
-for DIR in `find /opt/lab/labsite -maxdepth 1 -type d -not -name ".*"`; do
-    if [ -f ${DIR}/requirements.pip ]; then
-        echo "Installing requirements from ${DIR} ..."
-        pip install -q -r ${DIR}/requirements.pip
-    else
-        echo "No requirements file found in ${DIR} ..."
-    fi
-done
+echo "Installing requirements from ${PROJECT_DIR} ..."
+pip install -q -r ${PROJECT_DIR}/requirements.pip
 
 # Copy settings file
 # settings.py in the deployment repo will have to be updated if the project's
