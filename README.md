@@ -21,13 +21,6 @@ development. It's unlikely that the main site folder will require much modificat
 
 This is a guide to start developing lab.oscar apps. It assumes basic linux command line knowledge.
 
-Before you can clone the repository, you need to add yourself to the git user's authorized_keys
-on staging. This allows you to push/pull to/from the repository.
-
-    $ sudo cp /path/to/your/id_rsa.pub /opt/git/.ssh/<user>.pub
-    $ sudo sh -c 'cat /opt/git/.ssh/<user>.pub >> /opt/git/.ssh/authorized_keys'
-    $ sudo rm /opt/git/.ssh/<user>.pub
-
 Now, you'll want to clone the repository and setup your
 [virtualenv](http://www.virtualenv.org/en/latest/). 
 
@@ -39,13 +32,6 @@ Activate the environment and install the site requirements.
 
     $ source .env/bin/activate
     $ pip install -r requirements.pip
-
-Lab apps are tracked as submodules to the repository. The directories exist, but are empty.
-
-    $ git submodule init
-    $ git submodule update
-
-If any of the apps contains a requirements file, make sure to install those as well. 
 
 Setup postgres user and database:
 
