@@ -40,8 +40,8 @@ function create_files {
     if [ ! -d $PROJECT_DIR/log ]; then
         mkdir $PROJECT_DIR/log
     fi
-    chmod u+s $PROJECT_DIR/log/
-    chmod g+s $PROJECT_DIR/log/
+    # fix supervisor issues
+    touch /opt/log/labuser/labsite/log/{celerybeat,celeryd}.log
     chmod  $PROJECT_FILES_OCTAL $PROJECT_DIR/log
     chmod -R $PROJECT_FILES_OCTAL $PROJECT_DIR/log
 
