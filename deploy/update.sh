@@ -41,7 +41,7 @@ function create_files {
         mkdir $PROJECT_DIR/log
     fi
     chmod u+s $PROJECT_DIR/log/
-    chmod g+s script2
+    chmod g+s $PROJECT_DIR/log/
     chmod  $PROJECT_FILES_OCTAL $PROJECT_DIR/log
     chmod -R $PROJECT_FILES_OCTAL $PROJECT_DIR/log
 
