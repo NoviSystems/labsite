@@ -1,13 +1,29 @@
-from django.forms import ModelForm, Select, Form, HiddenInput, Textarea, CharField
+from django.forms import ModelForm, Select, Form, HiddenInput, Textarea
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from models import WorkItem, Job, Repo, Issue 
 from django.db.models import Q
 from django.forms import models
+# define the custom formset here
+from django.forms.formsets import BaseFormSet
+
 
 import datetime
 import math
 import random
+
+
+class WorkItemBaseFormSet(BaseFormSet):
+    def __init__(self, *args, **kwargs):
+        self.reminder = kwargs.pop("reminder")
+        self.user = kwargs.pop("logged_in_user")
+        super(WorkItemBaseFormSet, self).__init__(*args, **kwargs)
+
+    def _construct_form(self, *args, **kwargs):
+        # inject user in each form on the formset
+        kwargs['user'] = self.user
+        kwargs['reminder'] = self.reminder       
+        return super(WorkItemBaseFormSet, self)._construct_form(*args, **kwargs)
 
 class BadWorkItemForm(Exception):
     pass
@@ -28,7 +44,7 @@ class WorkItemForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         reminder = kwargs.pop("reminder")
-        user = kwargs.pop("logged_in_user");
+        user = kwargs.pop("user");
         super(WorkItemForm,self).__init__(*args,**kwargs)
         
         if reminder:

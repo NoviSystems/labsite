@@ -1,18 +1,25 @@
 {% extends "worklog/base.html" %} {% load dajaxice_templatetags %} {% block content %} {% dajaxice_js_import %}
 
+
+
 <h2>New Work Item</h2>
 {% if holidays %}
 <h3>Today is a holiday. Work item hours will not count towards timesheet.</h3>
-{% endif %} {% if form %}
+{% endif %} {% if formset %}
 <h4>For: {{ date|date:"DATE_FORMAT" }}</h4>
 
 {% if reminder_id %}
-<form action="/worklog/add/reminder_{{reminder_id}}/" method="post">
-    {% else %}
-    <form action="/worklog/add/" method="post" role="form" class="form-inline">
-        {% endif %}
-        <table class='table'>
-            {% csrf_token %} {{ form.as_table }}
+<form action="/worklog/add/reminder_{{reminder_id}}/" method="post" id="workform" role="form" class="form-inline">
+{% else %}
+<form action="/worklog/add/" method="post" id="workform" role="form" class="form-inline">
+{% endif %}
+    {% csrf_token %} 
+    <table class='table'>
+
+            {% for form in formset.forms %}
+                {{ form.DELETE }}
+                {{ form.as_table }}
+            {% endfor %} 
             <tr>
                 <td>
                     <button class='btn btn-primary' type="submit" name="submit_and_exit">Submit and Exit</button>
@@ -21,7 +28,8 @@
                     <button class='btn btn-warning' type="submit" name="submit_and_add_another">Submit and Add Another</button>
                 </td>
             </tr>
-        </table>
+    </table>
+    {{ formset.management_form }}
     </form>
 
     <h4>Other Work Items Submitted on {{ date|date:"DATE_FORMAT" }}:</h4>
@@ -47,6 +55,11 @@
 
     <script>
     $(document).ready(function() {
+        $(function() {
+               $('#workform table').formset({
+                   prefix: '{{ formset.prefix }}'
+               });
+           })
         $(document).on('change', '#id_repo', function() {
             if ($(this).val() != '') {
                 Dajaxice.worklog.update_repo_issues(Dajax.process, {
