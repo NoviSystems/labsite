@@ -179,7 +179,8 @@
                     $(document).on('change', '#id_form-' + formCount + '-repo', function() {
                     if ($(this).val() != '') {
                         Dajaxice.worklog.update_repo_issues(Dajax.process, {
-                        'repo_id': $(this).val()
+                        'repo_id': $(this).val(),
+                        'formid' : formCount,
                         });
                     } else {
                       Dajaxice.worklog.initialize_issues(Dajax.process);

@@ -55,16 +55,18 @@
                    deleteText: 'Remove Form',
                });
            })
-        $(document).on('change', 'id_form-0-repo', function() {
-            if ($(this).val() != '') {
-                Dajaxice.worklog.update_repo_issues(Dajax.process, {
-                    'repo_id': $(this).val()
-                });
-            } else {
-                Dajaxice.worklog.initialize_issues(Dajax.process);
-            }
-        });
+
     });
+    $(document).on('change', '#id_form-0-repo', function() {
+        if ($(this).val() != '') {
+            Dajaxice.worklog.update_repo_issues(Dajax.process, {
+                'repo_id': $(this).val(),
+                'formid' : "0"
+            });
+        } else {
+        Dajaxice.worklog.initialize_issues(Dajax.process);
+    } });
+
     </script>
 
     {% endblock %}
