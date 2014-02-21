@@ -20,15 +20,8 @@
                 {{ form.DELETE }}
                 {{ form.as_table }}
             {% endfor %} 
-            <tr>
-                <td>
-                    <button class='btn btn-primary' type="submit" name="submit_and_exit">Submit and Exit</button>
-                </td>
-                <td>
-                    <button class='btn btn-warning' type="submit" name="submit_and_add_another">Submit and Add Another</button>
-                </td>
-            </tr>
     </table>
+    <button class='btn btn-success' style="margin: 25px;" type="submit" name="submit_and_exit">Submit and Exit</button>
     {{ formset.management_form }}
     </form>
 
@@ -57,10 +50,12 @@
     $(document).ready(function() {
         $(function() {
                $('#workform table').formset({
-                   prefix: '{{ formset.prefix }}'
+                   prefix: '{{ formset.prefix }}',
+                   addText: 'Add Another Form',
+                   deleteText: 'Remove Form',
                });
            })
-        $(document).on('change', '#id_repo', function() {
+        $(document).on('change', 'id_form-0-repo', function() {
             if ($(this).val() != '') {
                 Dajaxice.worklog.update_repo_issues(Dajax.process, {
                     'repo_id': $(this).val()
