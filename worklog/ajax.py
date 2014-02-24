@@ -19,7 +19,7 @@ def update_repo_issues(request, repo_id, formid):
     field = form.fields['issue']
     field.queryset = issues
 
-    dajax.assign('#id_form-' + str(formid) + '-issue', 'outerHTML', str(BoundField(form, field,'issue')))
+    dajax.assign('#id_form-' + str(formid) + '-issue', 'outerHTML', str(BoundField(form, field,'form-' + str(formid) + '-issue')))
     
     return dajax.json()
 
@@ -35,5 +35,5 @@ def initialize_issues(request, formid):
     field = form.fields['issue']
     field.queryset = qs
 
-    dajax.assign('#id_form-'+ str(formid) + '-issue', 'outerHTML', str(BoundField(form, field, 'issue')))
+    dajax.assign('#id_form-'+ str(formid) + '-issue', 'outerHTML', str(BoundField(form, field, 'form-' + str(formid) + '-issue')))
     return dajax.json()

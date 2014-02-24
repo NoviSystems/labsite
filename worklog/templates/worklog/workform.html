@@ -8,22 +8,58 @@
 {% endif %} {% if formset %}
 <h4>For: {{ date|date:"DATE_FORMAT" }}</h4>
 
-{% if reminder_id %}
-<form action="/worklog/add/reminder_{{reminder_id}}/" method="post" id="workform" role="form" class="form-inline">
-{% else %}
-<form action="/worklog/add/" method="post" id="workform" role="form" class="form-inline">
-{% endif %}
-    {% csrf_token %} 
-    <table class='table'>
 
-            {% for form in formset.forms %}
-                {{ form.DELETE }}
-                {{ form.as_table }}
-            {% endfor %} 
-    </table>
-    <button class='btn btn-success' style="margin: 25px;" type="submit" name="submit_and_exit">Submit and Exit</button>
-    {{ formset.management_form }}
+
+
+{% if reminder_id %}
+<form action="/worklog/add/reminder_{{reminder_id}}/" method="post" id="workform" role="form" class="form-horizontal">
+    {% else %}
+    <form action="/worklog/add/" method="post" id="workform" role="form" class="form-horizontal">
+        {% csrf_token %} {% endif %}
+        <div class="panel panel-default" id="formset">
+            <div class="panel-body">
+                {% for form in formset.forms %}
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="form-group" style="margin:15px;">
+                            <label>Job</label>
+                            {{ form.job }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="margin:15px;">
+                            <label>Repo</label>
+                            {{ form.repo }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="row">
+                        <div class="form-group" style="margin:15px;">
+                            <label>Hours</label>
+                            {{ form.hours }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group" style="margin:15px; ">
+                            {{ form.issue.label_tag }} {{ form.issue }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group" style="margin:15px;">
+                        <label>Description</label>
+                        {{form.text}}
+                    </div>
+                </div>
+
+                {{ form.DELETE }} {% endfor %}
+                </div>
+        </div>
+         {{ formset.management_form }}
+        <button class='btn btn-success' type="submit" name="submit_and_exit">Submit and Exit</button>
     </form>
+
 
     <h4>Other Work Items Submitted on {{ date|date:"DATE_FORMAT" }}:</h4>
     <table class="table table-striped">
@@ -49,24 +85,26 @@
     <script>
     $(document).ready(function() {
         $(function() {
-               $('#workform table').formset({
-                   prefix: '{{ formset.prefix }}',
-                   addText: 'Add Another Form',
-                   deleteText: 'Remove Form',
-               });
-           })
+            $('#formset').formset({
+                prefix: '{{ formset.prefix }}',
+                addText: 'Add Another Form',
+                deleteText: 'Remove Form',
+            });
+        })
 
     });
     $(document).on('change', '#id_form-0-repo', function() {
         if ($(this).val() != '') {
             Dajaxice.worklog.update_repo_issues(Dajax.process, {
                 'repo_id': $(this).val(),
-                'formid' : "0"
+                'formid': "0"
             });
+            console.log("what am i doing");
         } else {
-        Dajaxice.worklog.initialize_issues(Dajax.process);
-    } });
-
+            Dajaxice.worklog.initialize_issues(Dajax.process);
+            console.log("wow dajaxice initialized");
+        }
+    });
     </script>
 
     {% endblock %}

@@ -40,7 +40,7 @@ class WorkItemForm(ModelForm):
 
     class Meta:
         model = WorkItem
-        fields = ('hours','text','job','repo','issue')
+        fields = ('job','repo','hours','issue','text')
 
     def __init__(self, *args, **kwargs):
         reminder = kwargs.pop("reminder")
@@ -63,8 +63,7 @@ class WorkItemForm(ModelForm):
         self.fields["hours"].widget.attrs['placeholder'] = 'Hours Worked'
         self.fields["text"].widget.attrs['placeholder'] = 'Work Description'
 
-        self.fields["hours"].widget.attrs['style'] = 'width: 200px;'
-        self.fields["text"].widget.attrs['style'] = 'width: 300px;'
+        self.fields["text"].widget.attrs['rows'] = '6'
 
         if args: 
             data = args[0]
