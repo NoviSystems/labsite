@@ -1,4 +1,3 @@
-
 # lab.oscar #
 
 This is the site code for lab.oscar.ncsu.edu
@@ -6,7 +5,7 @@ This is the site code for lab.oscar.ncsu.edu
 
 ## Overview ##
 
-These instruction exist to help get developers started on lab apps
+These instructions exist to help get developers started on lab apps
 development. It's unlikely that the main site folder will require much modification.
 
 ## Layout ##
