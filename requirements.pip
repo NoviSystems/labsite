@@ -1,6 +1,7 @@
 django<1.6
-celery
-django-celery
+# lock celery version, as django-celery was deprecated by 3.1.x and so everything breaks
+celery==3.0.19
+django-celery==3.0.11
 xhtml2pdf
 south
 gunicorn
