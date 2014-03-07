@@ -15,48 +15,61 @@
 <form action="/worklog/add/reminder_{{reminder_id}}/" method="post" id="workform" role="form" class="form-horizontal">
     {% else %}
     <form action="/worklog/add/" method="post" id="workform" role="form" class="form-horizontal">
-        {% csrf_token %} {% endif %}
+        {% csrf_token %} {% endif %} {% for form in formset.forms %}
         <div class="panel panel-default" id="formset">
             <div class="panel-body">
-                {% for form in formset.forms %}
+                <script>
+                $(document).on('change', '#id_form-{{ forloop.counter0 }}-repo', function() {
+                    if ($(this).val() != '') {
+                        Dajaxice.worklog.update_repo_issues(Dajax.process, {
+                            'repo_id': $(this).val(),
+                            'formid': "{{ forloop.counter0 }}"
+                        });
+                    } else {
+                        Dajaxice.worklog.initialize_issues(Dajax.process);
+                    }
+                });
+                </script>
                 <div class="col-md-3">
                     <div class="row">
-                        <div class="form-group" style="margin:15px;">
-                            <label>Job</label>
+                        <div class="form-group {%if form.job.errors %}has-error{%endif%}" style="margin:15px;">
+                            <label class="control-label">{%if form.job.errors %}{{form.job.errors.as_text }} {% else %} Job {%endif%}</label>
                             {{ form.job }}
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group" style="margin:15px;">
-                            <label>Repo</label>
+                        <div class="form-group {%if form.repo.errors %}has-error{%endif%}" style="margin:15px;">
+                            <label class="control-label">{%if form.repo.errors %}{{form.repo.errors.as_text }} {% else %} Repo {%endif%}</label>
                             {{ form.repo }}
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="row">
-                        <div class="form-group" style="margin:15px;">
-                            <label>Hours</label>
+                        <div class="form-group {%if form.hours.errors %}has-error{%endif%}" style="margin:15px;">
+                            <label class="control-label">{%if form.hours.errors %}{{form.hours.errors.as_text }} {% else %} Hours {%endif%}</label>
                             {{ form.hours }}
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group" style="margin:15px; ">
-                            {{ form.issue.label_tag }} {{ form.issue }}
+                        <div class="form-group {%if form.issue.errors %}has-error{%endif%}" style="margin:15px; ">
+                            <label class="control-label">{%if form.issue.errors %}{{form.issue.errors.as_text }} {% else %} Issue {%endif%}</label>
+                            {{ form.issue }}
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-group" style="margin:15px;">
-                        <label>Description</label>
-                        {{form.text}}
+                    <div class="form-group {%if form.text.errors %}has-error{%endif%}" style="margin:15px;">
+                        <label class="control-label">{%if form.text.errors %}{{form.text.errors.as_text }} {% else %} Description {%endif%}</label>
+                        {{ form.text }}
+                        <p class="help-block">Try using 'commit &lt;sha1&gt;' here, and we'll swap in the GitHub commit message for you</p>
                     </div>
                 </div>
 
-                {{ form.DELETE }} {% endfor %}
-                </div>
+                {{ form.DELETE }}
+            </div>
         </div>
-         {{ formset.management_form }}
+        {% endfor %} {{ formset.management_form }}
         <button class='btn btn-success' type="submit" name="submit_and_exit">Submit and Exit</button>
     </form>
 
@@ -92,18 +105,6 @@
             });
         })
 
-    });
-    $(document).on('change', '#id_form-0-repo', function() {
-        if ($(this).val() != '') {
-            Dajaxice.worklog.update_repo_issues(Dajax.process, {
-                'repo_id': $(this).val(),
-                'formid': "0"
-            });
-            console.log("what am i doing");
-        } else {
-            Dajaxice.worklog.initialize_issues(Dajax.process);
-            console.log("wow dajaxice initialized");
-        }
     });
     </script>
 

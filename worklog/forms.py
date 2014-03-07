@@ -89,8 +89,14 @@ class WorkItemForm(ModelForm):
             text = None
         try:
             job = cleaned_data["job"]
+
         except KeyError:
             job = None
+
+        try:
+            issue = cleaned_data["issue"]
+        except KeyError:
+            issue = None
 
         # Only allows non-zero, non-negative hours to be entered in half hour increments.
         if (hours % 1 != 0.5) and (hours % 1 != 0):
@@ -99,14 +105,13 @@ class WorkItemForm(ModelForm):
                             "You thought we wouldn't notice that you didn't use half hour increments. You were wrong. Try again, jerk.", 
                             "Ceterum censeo numerum esse tibi delendum! Dimidiae incrementuli horae uti, amabo.",
                             "Hey buddy. How's it going? Listen, not a huge deal, but we've got this thing where we use half hour increments.",
-                            "If you could go ahead and use half hour increments, that would be grrrreeaat.",
-                            "Your input rapes teenagers in Indochina. Half hour increments don't."]
+                            "If you could go ahead and use half hour increments, that would be grrrreeaat."]
             error_message = message_list[random.randint(0, len(message_list) - 1)]
             self._errors["hours"] = self.error_class([error_message])
             if hours:
                 del cleaned_data["hours"]
         elif hours < 0:
-            error_message = "We here at <Insert Company Name here>  would like you to have a non-negative work experience. Please enter a non-negative number of hours."
+            error_message = "We here at <Insert Company Name here> would like you to have a non-negative work experience. Please enter a non-negative number of hours."
             self._errors["hours"] = self.error_class([error_message])
             if hours:
                 del cleaned_data["hours"]
@@ -117,16 +122,16 @@ class WorkItemForm(ModelForm):
                 del cleaned_data["hours"]
         
         # Custom error messages for empty fields
-        if text == None:
-            error_message = "This is where you describe the work you did when you weren't on r/banana, you pickle-hating scum."
+        if text == None or text == "":
+            error_message = "This is where you describe the work you did, as if you did any."
             self._errors["text"] = self.error_class([error_message])
             if text:
                 del cleaned_data["text"]
         
-        if job == None:
+        if job == None or job == "":
             error_message = "i.e., the thing you're supposed to wear pants for, but you probably don't, since you're a programmer."
             self._errors["job"] = self.error_class([error_message])
-            if text:
+            if job:
                 del cleaned_data["job"]
-        
+
         return cleaned_data

@@ -9,6 +9,7 @@
  * Licensed under the New BSD License
  * See: http://www.opensource.org/licenses/bsd-license.php
  */
+ 
 ;(function($) {
     $.fn.formset = function(opts)
     {
@@ -40,15 +41,15 @@
                 if (row.is('TR')) {
                     // If the forms are laid out in table rows, insert
                     // the remove button into the last table cell:
-                    row.children(':last').append('<a class="' + options.deleteCssClass +'"style="margin:15px;" href="javascript:void(0)">' + options.deleteText + '</a>');
+                    row.children(':last').append('<a class="' + options.deleteCssClass +'"style="margin-bottom:15px;margin-left:15px;" href="javascript:void(0)">' + options.deleteText + '</a>');
                 } else if (row.is('UL') || row.is('OL')) {
                     // If they're laid out as an ordered/unordered list,
                     // insert an <li> after the last list item:
-                    row.append('<li><a class="' + options.deleteCssClass + '"style="margin:15px;" href="javascript:void(0)">' + options.deleteText +'</a></li>');
+                    row.append('<li><a class="' + options.deleteCssClass + '"style="margin-bottom:15px;margin-left:15px;" href="javascript:void(0)">' + options.deleteText +'</a></li>');
                 } else {
                     // Otherwise, just insert the remove button as the
                     // last child element of the form's container:
-                    row.append('<a class="' + options.deleteCssClass + '"style="margin:15px;" href="javascript:void(0)">' + options.deleteText +'</a>');
+                    row.append('<a class="' + options.deleteCssClass + '"style="margin-bottom:15px;margin-left:15px;" href="javascript:void(0)">' + options.deleteText +'</a>');
                 }
                 row.find('.btn, .btn-danger').click(function() {
                     var row = $(this).parents('.' + options.formCssClass),
