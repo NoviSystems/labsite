@@ -19,16 +19,21 @@
         <div class="panel panel-default" id="formset">
             <div class="panel-body">
                 <script>
-                $(document).on('change', '#id_form-{{ forloop.counter0 }}-repo', function() {
-                    if ($(this).val() != '') {
-                        Dajaxice.worklog.update_repo_issues(Dajax.process, {
-                            'repo_id': $(this).val(),
-                            'formid': "{{ forloop.counter0 }}"
-                        });
-                    } else {
-                        Dajaxice.worklog.initialize_issues(Dajax.process);
-                    }
+                $(document).ready(function() {
+                    $(document).on('change', '#id_form-{{ forloop.counter0 }}-repo', function() {
+                        if ($(this).val() != '') {
+                            Dajaxice.worklog.update_repo_issues(Dajax.process, {
+                                'repo_id': $(this).val(),
+                                'formid': "{{ forloop.counter0 }}"
+                            });
+                        } else {
+                            Dajaxice.worklog.initialize_issues(Dajax.process, { "formid": {{ forloop.counter0 }}});
+                        }
+                    });
+
+                    $('#id_form-{{ forloop.counter0 }}-repo').change();
                 });
+                
                 </script>
                 <div class="col-md-3">
                     <div class="row">

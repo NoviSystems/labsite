@@ -9,9 +9,6 @@ from models import Repo, Issue
 def update_repo_issues(request, repo_id, formid):
     dajax = Dajax()
     
-    print "repo id " + repo_id
-    print formid
-
     repo = Repo.objects.get(github_id=repo_id)
     issues = Issue.objects.filter(repo=repo).order_by('number')
 
@@ -26,9 +23,6 @@ def update_repo_issues(request, repo_id, formid):
 @dajaxice_register
 def initialize_issues(request, formid):
     dajax = Dajax()
-
-    print formid
-
     qs = Issue.objects.none()
 
     form = WorkItemForm(reminder=None, user=request.user)

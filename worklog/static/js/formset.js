@@ -184,7 +184,7 @@
                         'formid' : formCount,
                         });
                     } else {
-                      Dajaxice.worklog.initialize_issues(Dajax.process);
+                      Dajaxice.worklog.initialize_issues(Dajax.process, {'formid': formCount} );
                     } });
 
                 // If a post-add callback was supplied, call it with the added form:

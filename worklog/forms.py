@@ -32,7 +32,7 @@ class WorkItemForm(ModelForm):
 
     job = forms.ModelChoiceField(queryset=Job.objects.none(), empty_label="None") # empty queryset, overridden in ctor   
     repo = forms.ModelChoiceField(queryset=Repo.objects.all(), empty_label="None", required=False)
-    issue = forms.ModelChoiceField(queryset=Issue.objects.none(), empty_label="None", required=False)
+    issue = forms.ModelChoiceField(queryset=Issue.objects.all(), empty_label="None", required=False)
 
     job.widget.attrs['class'] = 'form-control'
     repo.widget.attrs['class'] = 'form-control'
@@ -83,18 +83,22 @@ class WorkItemForm(ModelForm):
             hours = cleaned_data["hours"]
         except KeyError:
             hours = 0
+        
         try:
             text = cleaned_data["text"]
         except KeyError:
             text = None
+
         try:
             job = cleaned_data["job"]
-
         except KeyError:
             job = None
 
         try:
             issue = cleaned_data["issue"]
+            if issue == "":
+                issue = None
+
         except KeyError:
             issue = None
 
