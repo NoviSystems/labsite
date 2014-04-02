@@ -78,10 +78,9 @@ def createWorkItem(request, reminder_id=None):
                 # Add user and date before saving
                 form.user = request.user
                 form.date = date
-                try: 
-                    form.save()
-                except: 
-                    return HttpResponseRedirect(request.path)
+
+                form.save()
+
             if 'submit_and_add_another' in request.POST:
                 # redisplay workitem form so another item may be added
                 return HttpResponseRedirect(request.path)
