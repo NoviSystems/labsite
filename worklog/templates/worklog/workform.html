@@ -13,6 +13,7 @@
 
 {% if reminder_id %}
 <form action="/worklog/add/reminder_{{reminder_id}}/" method="post" id="workform" role="form" class="form-horizontal">
+    {% csrf_token %}
     {% else %}
     <form action="/worklog/add/" method="post" id="workform" role="form" class="form-horizontal">
         {% csrf_token %} {% endif %} {% for form in formset.forms %}
