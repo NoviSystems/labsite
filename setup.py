@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 def read(fname):
   return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -8,13 +8,15 @@ setup(
     name = "foodapp",
     version = "0.1",
     author = "OSCAR Lab",
-    packages=['foodapp'],
-    long_description=read('README'),
+    packages = find_packages(),
+    # long_description=read('README.md'),
     package_data = {
         'foodapp': [
-            'templates/foodapp/*',
+            'fixtures/*',
+            'static/*',
+            'templates/*',
         ],
-    }
+    },
     install_requires=[
         "django>=1.5",
         "south",
