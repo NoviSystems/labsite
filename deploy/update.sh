@@ -134,9 +134,9 @@ if [ ! -f ${PROJECT_DIR}labsite/secret_key ]; then
 fi
 
 # Create secrets file
-if [ ! -f ${PROJECT_DIR}worklog/secrets.py ]; then
+if [ ! -f ${PROJECT_DIR}labsite/secrets.py ]; then
     echo "No secrets file found, creating one"
-    touch ${PROJECT_DIR}worklog/secrets.py
+    touch ${PROJECT_DIR}labsite/secrets.py
     echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
     echo "@@@                                 @@@"
     echo "@@@ BE SURE TO CONFIGURE SECRETS.PY @@@"
