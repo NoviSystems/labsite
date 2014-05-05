@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 from datetime import timedelta
 import os
+from secrets import *
 
 SETTINGS_DIR = os.path.realpath(os.path.join(__file__, "../"))
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
