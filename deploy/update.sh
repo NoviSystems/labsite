@@ -111,7 +111,7 @@ sudo /sbin/service nginx stop
 
 
 echo "Installing requirements from ${PROJECT_DIR} ..."
-pip install -qr ${PROJECT_DIR}/requirements.pip --update
+pip install -qr ${PROJECT_DIR}/requirements.pip --upgrade
 
 # Copy settings file
 # settings.py in the deployment repo will have to be updated if the project's
