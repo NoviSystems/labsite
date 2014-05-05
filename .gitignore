@@ -11,6 +11,9 @@ secrets.py
 
 .env/
 
+foodapp
+worklog
+
 labsite/settings.py
 
 deploy/project_backup/
