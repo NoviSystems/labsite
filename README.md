@@ -20,7 +20,7 @@ development. It's unlikely that the main site folder will require much modificat
 
 This is a guide to start developing lab.oscar apps. It assumes basic linux command line knowledge.
 
-Now, you'll want to clone the repository and setup your
+First, you'll want to clone the repository and setup your
 [virtualenv](http://www.virtualenv.org/en/latest/). 
 
     $ git clone git@github.com:ITNG/labsite
@@ -55,7 +55,7 @@ You need your own django settings file.  This project comes with a sample that
 you should start from.  You'll need to modify your celery and postgres settings
 at the least, and generate a secret_key value.
 
-    $ cp settings.py.ex settings.py
+    $ cp settings.ex.py settings.py
     $ vim settings.py
 
 Next we need to create the database schema. When it asks you to create a user,

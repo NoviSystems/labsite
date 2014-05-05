@@ -1,30 +1,14 @@
+
 from core_settings import *
 
-########## CELERY SETTINGS ############
 
-# BROKER_HOST = "localhost"
-# BROKER_PORT = 5672
-# BROKER_VHOST = "lab_vhost"
-# BROKER_PASSWORD = "BN4bj1ptqlVx"
-# BROKER_USER = "labuser"
-BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
-CELERY_TIMEZONE = 'America/New_York'
-CELERY_ENABLE_UTC = True
-CELERYBEAT_SCHEDULE = {
-    'reconcile_db_with_gh-every-1-minutes': {
-        'task':'worklog.tasks.reconcile_db_with_gh',
-        'schedule':timedelta(hours=1),
-        'args': (16, 16)
-    },
-}
-#######################################
-
-WORKLOG_SEND_REMINDERS = False
+SECRET_KEY = open(os.path.join(SETTINGS_DIR, 'secret_key')).read()
 
 DEBUG = False
+
 TEMPLATE_DEBUG = DEBUG
 
-DATABASES = {  
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'stag_lab',  # Or path to database file if using sqlite3.
@@ -36,26 +20,16 @@ DATABASES = {
     }
 }
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
+
+# CELERY SETTINGS
+BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
+CELERYBEAT_SCHEDULE = {
+    'reconcile_db_with_gh-every-1-minutes': {
+        'task': 'worklog.tasks.reconcile_db_with_gh',
+        'schedule': timedelta(hours=1),
+        'args': (16, 16)
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
 }
+
+# WORKLOG SETTINGS
+WORKLOG_SEND_REMINDERS = False
