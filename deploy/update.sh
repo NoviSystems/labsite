@@ -109,16 +109,9 @@ set -o nounset
 sudo /sbin/service supervisord stop
 sudo /sbin/service nginx stop
 
-# Pip requirements
-if [ -f ${PROJECT_DIR}requirements.pip ]; then
-    echo "Installing project requirements..."
-    pip install -q -r ${PROJECT_DIR}requirements.pip
-else
-    echo "No project requirements.pip found..."
-fi
 
 echo "Installing requirements from ${PROJECT_DIR} ..."
-pip install -q -r ${PROJECT_DIR}/requirements.pip
+pip install -qr ${PROJECT_DIR}/requirements.pip --update
 
 # Copy settings file
 # settings.py in the deployment repo will have to be updated if the project's
