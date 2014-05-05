@@ -10,10 +10,10 @@ development. It's unlikely that the main site folder will require much modificat
 
 ## Layout ##
 
-/deploy  - contains deployment scripts, secrets
-/labsite - site configuration files
-/foodapp - food ordering app
-/worklog - work tracking app
+    /deploy  - contains deployment scripts, secrets
+    /labsite - site configuration files
+    /foodapp - food ordering app
+    /worklog - work tracking app
 
 
 ## Quickstart ##
