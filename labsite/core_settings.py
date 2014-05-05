@@ -25,8 +25,6 @@ ALLOWED_HOSTS = ['.oscar.ncsu.edu']
 SECRET_KEY = ''
 
 
-SITE_ID = 2  # Magic Number for '.oscar.ncsu.edu' site in Sites table in Admin pages
-
 DEFAULT_FROM_EMAIL = 'webmaster@lab.oscar.ncsu.edu'
 
 
@@ -36,7 +34,6 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -145,7 +142,7 @@ WORKLOG_REMINDER_EMAIL_LINK_URLBASE = "https://lab-prod.oscar.ncsu.edu"
 
 #######################################
 
-# LOGIN_REDIRECT_URL = '/worklog'
+LOGIN_REDIRECT_URL = '/'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
