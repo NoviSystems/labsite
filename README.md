@@ -32,10 +32,11 @@ Activate the environment and install the site requirements.
     $ source .env/bin/activate
     $ pip install -r requirements.pip
 
-Setup postgres user and database:
+SQLite should be sufficient for development. If you want or need to setup a
+postgres user and database, ssh into the postgres server and run the following:
 
     $ sudo -u postgres createuser --no-super --createdb --no-createrole <user>
-    $ sudo -u postgres createdb <user>_lab
+    $ createdb <user>_lab
 
 Setup Celery user:
 
@@ -58,19 +59,17 @@ at the least, and generate a secret_key value.
     $ cp settings.ex.py settings.py
     $ vim settings.py
 
-Next we need to create the database schema. When it asks you to create a user,
-answer NO.  We will do this later.
+Next we need to create the database schema and run migrations
 
     $ python manage.py syncdb
     $ python manage.py migrate --all
 
-Now that the database is setup, we can add a user:
-
-    $ python manage.py createsuperuser
-
 To run the development server, use the manage.py runserver command:
 
     $ python manage.py runserver 0.0.0.0:<port>
+
+To develop any of the labsite apps, follow the instructions posted in their
+respective repos.
 
 
 ## Troubleshooting ##
