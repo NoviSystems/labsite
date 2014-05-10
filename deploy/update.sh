@@ -5,7 +5,7 @@ set -o nounset
 whoami
 
 PROJECT_REPO_URL="git@github.com:ITNG/labsite.git"
-FOODAPP_REPO_URL="git@github.com:ITNG/fodapp.git"
+FOODAPP_REPO_URL="git@github.com:ITNG/foodapp.git"
 WORKLOG_REPO_URL="git@github.com:ITNG/worklog.git"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 PROJECT_DIR="${ROOT_DIR}labsite/"
