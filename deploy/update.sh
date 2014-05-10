@@ -168,6 +168,14 @@ else
         git stash pop
     fi
 
+    if [ ! -h '/opt/lab/labsite/foodapp' ]; then
+        ln -s ${FOODAPP_DIR}foodapp/
+    fi
+
+    if [ ! -h '/opt/lab/labsite/worklog' ]; then
+        ln -s ${WORKLOG_DIR}worklog/
+    fi
+
 fi
 
 # Create Virtual Environment
