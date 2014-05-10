@@ -117,7 +117,7 @@ pip install -qr ${PROJECT_DIR}/requirements.pip --upgrade
 # settings.py in the deployment repo will have to be updated if the project's
 # settings.py.sample file changes.
 echo "Copying deploy settings to core settings"
-cp ${DEPLOY_SETTINGS_DIR}/settings.py ${PROJECT_DIR}labsite/core_settings.py
+cp ${DEPLOY_SETTINGS_DIR}settings.py ${PROJECT_DIR}labsite/core_settings.py
 echo "Copying deploy settings from ${DEPLOY_SETTINGS} to ${PROJECT_DIR}labsite/settings.py"
 cp ${DEPLOY_SETTINGS} ${PROJECT_DIR}labsite/settings.py
 
