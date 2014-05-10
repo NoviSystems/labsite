@@ -33,6 +33,11 @@ days_of_week_map = {
 # CELERY SETTINGS
 BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
 
+# WORKLOG SETTINGS
+WORKLOG_SEND_REMINDERS_DAY = days_of_week_map[WORKLOG_SEND_REMINDERS_DAYSOFWEEK]
+
+CLEAR_REMINDERS_DAYSOFWEEK = days_of_week_map[WORKLOG_CLEAR_REMINDERS_DAYSOFWEEK]
+
 CELERYBEAT_SCHEDULE = {
     'reconcile_db_with_gh-every-1-hours': {
         'task': 'worklog.tasks.reconcile_db_with_gh',
@@ -56,9 +61,3 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=WORKLOG_CLEAR_REMINDERS_HOUR, minute=0, day_of_week=CLEAR_REMINDERS_DAYSOFWEEK),
     },
 }
-
-
-# WORKLOG SETTINGS
-WORKLOG_SEND_REMINDERS_DAY = days_of_week_map[WORKLOG_SEND_REMINDERS_DAYSOFWEEK]
-
-CLEAR_REMINDERS_DAYSOFWEEK = days_of_week_map[WORKLOG_CLEAR_REMINDERS_DAYSOFWEEK]
