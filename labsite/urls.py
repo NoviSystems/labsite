@@ -2,12 +2,15 @@ from django.conf.urls import patterns, include, url
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+from views import LabsiteView
+
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns(
     '',
+    url(r'^$', LabsiteView.as_view()),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),

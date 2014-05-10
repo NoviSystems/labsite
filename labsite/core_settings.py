@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'django.contrib.sites',
     'south',
     'worklog',
     'foodapp',
@@ -136,7 +137,7 @@ CELERYBEAT_SCHEDULE = {
 WORKLOG_SEND_REMINDERS = True
 WORKLOG_SEND_REMINDERS_HOUR = 17
 WORKLOG_SEND_REMINDERS_DAYSOFWEEK = "weekdays"
-WORKLOG_EMAIL_REMINDERS_EXPIRE_AFTER = 3
+WORKLOG_EMAIL_REMINDERS_EXPIRE_AFTER = 4
 WORKLOG_CLEAR_REMINDERS_DAYSOFWEEK = "weekdays"
 WORKLOG_CLEAR_REMINDERS_HOUR = 2
 WORKLOG_REMINDER_EMAIL_LINK_URLBASE = "https://lab-prod.oscar.ncsu.edu"
