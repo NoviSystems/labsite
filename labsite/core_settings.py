@@ -85,7 +85,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static-root')
 
 STATICFILES_DIRS = (
-    # "/opt/lab/labsite/foodapp/static/",
+    # "/opt/lab/labsite/foodapp/foodapp/static/",
 )
 
 STATICFILES_FINDERS = (
