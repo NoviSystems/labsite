@@ -4,9 +4,13 @@ set -o nounset
 
 whoami
 
-REPOSITORY_URL="https://github.com/ITNG/labsite"
+PROJECT_REPO_URL="https://github.com/ITNG/labsite"
+FOODAPP_REPO_URL="https://github.com/ITNG/fodapp"
+WORKLOG_REPO_URL="https://github.com/ITNG/worklog"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 PROJECT_DIR="${ROOT_DIR}labsite/"
+FOODAPP_DIR="${ROOT_DIR}foodapp/"
+WORKLOG_DIR="${ROOT_DIR}worklog/"
 BACKUP_DIR="${ROOT_DIR}backup/"
 DEPLOY_DIR="${ROOT_DIR}temp/"
 DEPLOY_SETTINGS_DIR="${DEPLOY_DIR}labsite/deploy/"
@@ -31,9 +35,26 @@ function project_dir_permissions {
     if [ ! -d $PROJECT_DIR ]; then
         sudo mkdir $PROJECT_DIR
     fi
+
+    if [ ! -d $FOODAPP_DIR ]; then
+        sudo mkdir $FOODAPP_DIR
+    fi
+
+    if [ ! -d $WORKLOG_DIR ]; then
+        sudo mkdir $WORKLOG_DIR
+    fi
+
     sudo chown -R $PROJECT_FILES_USER $PROJECT_DIR
     sudo chgrp -R $PROJECT_FILES_GROUP $PROJECT_DIR
     sudo chmod -R $PROJECT_FILES_OCTAL $PROJECT_DIR
+
+    sudo chown -R $PROJECT_FILES_USER $FOODAPP_DIR
+    sudo chgrp -R $PROJECT_FILES_GROUP $FOODAPP_DIR
+    sudo chmod -R $PROJECT_FILES_OCTAL $FOODAPP_DIR
+
+    sudo chown -R $PROJECT_FILES_USER $WORKLOG_DIR
+    sudo chgrp -R $PROJECT_FILES_GROUP $WORKLOG_DIR
+    sudo chmod -R $PROJECT_FILES_OCTAL $WORKLOG_DIR
 }
 
 function create_files {
@@ -68,10 +89,29 @@ fi
 
 # Clone project or update
 if [ ! -d $PROJECT_DIR/.git ]; then
-    echo "Cloning repository..."
-    git clone $REPOSITORY_URL $PROJECT_DIR
+    echo "Cloning project repository..."
+    git clone $PROJECT_REPO_URL $PROJECT_DIR
     cd $PROJECT_DIR
     git checkout $BRANCH
+
+    cd $ROOT_DIR
+
+    echo "Cloning foodapp repository..."
+    git clone $FOODAPP_REPO_URL $FOODAPP_DIR
+    cd $FOODAPP_DIR
+    git checkout $BRANCH
+
+    cd $ROOT_DIR
+
+    echo "Cloning worklog repository..."
+    git clone $WORKLOG_REPO_URL $WORKLOG_DIR
+    cd $WORKLOG_DIR
+    git checkout $BRANCH
+
+    cd $PROJECT_DIR
+
+    ln -s $FOODAPP_DIRfoodapp/
+    ln -s $WORKLOG_DIRworklog/
 else
     echo "Updating repository..."
     cd $PROJECT_DIR
@@ -91,6 +131,43 @@ else
     if [ $DIRTY ]; then
         git stash pop
     fi
+
+    cd $FOODAPP_DIR
+
+    set +o errexit      # git diff 'fails' if submodules are outdated. 
+    DIRTY=`git diff-index --quiet HEAD`
+    set -o errexit
+    if [ $DIRTY ]; then
+        echo "Stashing changes..."
+        git stash       # stash any changes (secrets, etc.. ) so checkout/pull doesn't fail
+    fi
+    
+    git fetch
+    git checkout $BRANCH
+    git pull origin
+
+    if [ $DIRTY ]; then
+        git stash pop
+    fi
+
+    cd $WORKLOG_DIR
+
+    set +o errexit      # git diff 'fails' if submodules are outdated. 
+    DIRTY=`git diff-index --quiet HEAD`
+    set -o errexit
+    if [ $DIRTY ]; then
+        echo "Stashing changes..."
+        git stash       # stash any changes (secrets, etc.. ) so checkout/pull doesn't fail
+    fi
+    
+    git fetch
+    git checkout $BRANCH
+    git pull origin
+
+    if [ $DIRTY ]; then
+        git stash pop
+    fi
+
 fi
 
 # Create Virtual Environment
