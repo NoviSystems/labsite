@@ -169,11 +169,15 @@ else
     fi
 
     if [ ! -h '/opt/lab/labsite/foodapp/foodapp' ]; then
+        echo "Creating symlink to foodapp..."
         ln -s ${FOODAPP_DIR}foodapp/
+        echo "Symlink to foodapp succeeded."
     fi
 
     if [ ! -h '/opt/lab/labsite/worklog/worklog' ]; then
+        echo "Creating symlink to worklog..."
         ln -s ${WORKLOG_DIR}worklog/
+        echo "Symlink to worklog succeeded."
     fi
 
 fi
