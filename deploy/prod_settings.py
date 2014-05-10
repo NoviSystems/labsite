@@ -9,7 +9,7 @@ ADMINS = (
 
 SECRET_KEY = open(os.path.join(SETTINGS_DIR, 'secret_key')).read()
 
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = DEBUG
 
