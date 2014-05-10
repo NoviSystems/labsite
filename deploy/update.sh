@@ -110,8 +110,8 @@ if [ ! -d $PROJECT_DIR/.git ]; then
 
     cd $PROJECT_DIR
 
-    ln -s $FOODAPP_DIRfoodapp/
-    ln -s $WORKLOG_DIRworklog/
+    ln -s ${FOODAPP_DIR}foodapp/
+    ln -s ${WORKLOG_DIR}worklog/
 else
     echo "Updating repository..."
     cd $PROJECT_DIR
