@@ -92,8 +92,9 @@ else
     git checkout $BRANCH
     git pull origin
 
+    echo $DIRTY
+    
     if [ $DIRTY ]; then
-        echo "Popping stash..."
         git stash pop
     fi
 fi
