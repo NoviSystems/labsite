@@ -78,8 +78,10 @@ else
     echo "Updating repository..."
     cd $PROJECT_DIR
 
-    set +o errexit      # git diff 'fails' if submodules are outdated. 
-    DIRTY=`git diff-index --quiet HEAD`
+    # quite mode forces error exit code
+    set +o errexit
+    `git diff-index --quiet HEAD`
+    DIRTY=$?
     set -o errexit
     if [ $DIRTY ]; then
         echo "Stashing changes..."
