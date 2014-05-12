@@ -4,9 +4,7 @@ set -o nounset
 
 whoami
 
-PROJECT_REPO_URL="git@github.com:ITNG/labsite.git"
-FOODAPP_REPO_URL="git@github.com:ITNG/foodapp.git"
-WORKLOG_REPO_URL="git@github.com:ITNG/worklog.git"
+PROJECT_URL="git@github.com:ITNG/labsite.git"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 PROJECT_DIR="${ROOT_DIR}labsite/"
 FOODAPP_DIR="${ROOT_DIR}foodapp/"
@@ -47,14 +45,6 @@ function project_dir_permissions {
     sudo chown -R $PROJECT_FILES_USER $PROJECT_DIR
     sudo chgrp -R $PROJECT_FILES_GROUP $PROJECT_DIR
     sudo chmod -R $PROJECT_FILES_OCTAL $PROJECT_DIR
-
-    sudo chown -R $PROJECT_FILES_USER $FOODAPP_DIR
-    sudo chgrp -R $PROJECT_FILES_GROUP $FOODAPP_DIR
-    sudo chmod -R $PROJECT_FILES_OCTAL $FOODAPP_DIR
-
-    sudo chown -R $PROJECT_FILES_USER $WORKLOG_DIR
-    sudo chgrp -R $PROJECT_FILES_GROUP $WORKLOG_DIR
-    sudo chmod -R $PROJECT_FILES_OCTAL $WORKLOG_DIR
 }
 
 function create_files {
@@ -90,28 +80,10 @@ fi
 # Clone project or update
 if [ ! -d $PROJECT_DIR/.git ]; then
     echo "Cloning project repository..."
-    git clone $PROJECT_REPO_URL $PROJECT_DIR
+    git clone $PROJECT_URL $PROJECT_DIR
     cd $PROJECT_DIR
     git checkout $BRANCH
 
-    cd $ROOT_DIR
-
-    echo "Cloning foodapp repository..."
-    git clone $FOODAPP_REPO_URL $FOODAPP_DIR
-    cd $FOODAPP_DIR
-    git checkout $BRANCH
-
-    cd $ROOT_DIR
-
-    echo "Cloning worklog repository..."
-    git clone $WORKLOG_REPO_URL $WORKLOG_DIR
-    cd $WORKLOG_DIR
-    git checkout $BRANCH
-
-    cd $PROJECT_DIR
-
-    ln -s ${FOODAPP_DIR}foodapp/
-    ln -s ${WORKLOG_DIR}worklog/
 else
     echo "Updating repository..."
     cd $PROJECT_DIR
@@ -131,57 +103,6 @@ else
     if [ $DIRTY ]; then
         git stash pop
     fi
-
-    cd $FOODAPP_DIR
-
-    set +o errexit      # git diff 'fails' if submodules are outdated. 
-    DIRTY=`git diff-index --quiet HEAD`
-    set -o errexit
-    if [ $DIRTY ]; then
-        echo "Stashing changes..."
-        git stash       # stash any changes (secrets, etc.. ) so checkout/pull doesn't fail
-    fi
-    
-    git fetch
-    git checkout $BRANCH
-    git pull origin
-
-    if [ $DIRTY ]; then
-        git stash pop
-    fi
-
-    cd $WORKLOG_DIR
-
-    set +o errexit      # git diff 'fails' if submodules are outdated. 
-    DIRTY=`git diff-index --quiet HEAD`
-    set -o errexit
-    if [ $DIRTY ]; then
-        echo "Stashing changes..."
-        git stash       # stash any changes (secrets, etc.. ) so checkout/pull doesn't fail
-    fi
-    
-    git fetch
-    git checkout $BRANCH
-    git pull origin
-
-    if [ $DIRTY ]; then
-        git stash pop
-    fi
-
-    if [ ! -L '/opt/lab/labsite/foodapp' ]; then
-        echo "Creating symlink to foodapp..."
-        cd $PROJECT_DIR
-        ln -s ${FOODAPP_DIR}foodapp/
-        echo "Symlink to foodapp succeeded."
-    fi
-
-    if [ ! -L '/opt/lab/labsite/worklog' ]; then
-        echo "Creating symlink to worklog..."
-        cd $PROJECT_DIR
-        ln -s ${WORKLOG_DIR}worklog/
-        echo "Symlink to worklog succeeded."
-    fi
-
 fi
 
 # Create Virtual Environment
