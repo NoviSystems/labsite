@@ -7,8 +7,6 @@ whoami
 PROJECT_URL="git@github.com:ITNG/labsite.git"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 PROJECT_DIR="${ROOT_DIR}labsite/"
-FOODAPP_DIR="${ROOT_DIR}foodapp/"
-WORKLOG_DIR="${ROOT_DIR}worklog/"
 BACKUP_DIR="${ROOT_DIR}backup/"
 DEPLOY_DIR="${ROOT_DIR}temp/"
 DEPLOY_SETTINGS_DIR="${DEPLOY_DIR}labsite/deploy/"
@@ -32,14 +30,6 @@ PROJECT_FILES_OCTAL=775
 function project_dir_permissions {
     if [ ! -d $PROJECT_DIR ]; then
         sudo mkdir $PROJECT_DIR
-    fi
-
-    if [ ! -d $FOODAPP_DIR ]; then
-        sudo mkdir $FOODAPP_DIR
-    fi
-
-    if [ ! -d $WORKLOG_DIR ]; then
-        sudo mkdir $WORKLOG_DIR
     fi
 
     sudo chown -R $PROJECT_FILES_USER $PROJECT_DIR
@@ -128,8 +118,6 @@ pip install -qr ${PROJECT_DIR}/requirements.pip --upgrade
 # Copy settings file
 # settings.py in the deployment repo will have to be updated if the project's
 # settings.py.sample file changes.
-echo "Copying deploy settings to core settings"
-cp ${DEPLOY_SETTINGS_DIR}settings.py ${PROJECT_DIR}labsite/core_settings.py
 echo "Copying deploy settings from ${DEPLOY_SETTINGS} to ${PROJECT_DIR}labsite/settings.py"
 cp ${DEPLOY_SETTINGS} ${PROJECT_DIR}labsite/settings.py
 

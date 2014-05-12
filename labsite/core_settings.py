@@ -38,7 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'django.contrib.sites',
     'south',
     'worklog',
     'foodapp',
@@ -85,7 +84,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static-root')
 
 STATICFILES_DIRS = (
-    # "/opt/lab/labsite/foodapp/foodapp/static/",
+    # "/opt/lab/labsite/foodapp/static/",
 )
 
 STATICFILES_FINDERS = (
