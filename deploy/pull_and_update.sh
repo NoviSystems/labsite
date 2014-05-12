@@ -1,5 +1,4 @@
 #!/bin/bash
-set -o errexit
 
 REPOSITORY_URL="https://github.com/ITNG/labsite.git"
 ROOT_DIR="/opt/lab/"  # Must be absolute path

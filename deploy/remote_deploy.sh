@@ -57,6 +57,7 @@ ssh -tNfM -o 'ControlPath=~/.ssh/%r@%h:%p.conn' $SERVER
 # uses existing connection, doesn't ask for password
 scp -o 'ControlPath=~/.ssh/%r@%h:%p.conn' ${DIR}/pull_and_update.sh "${SERVER}:/tmp/pull_and_update.sh"
 ssh -o 'ControlPath=~/.ssh/%r@%h:%p.conn' $SERVER -t "sudo -u labuser bash /tmp/pull_and_update.sh $BRANCH $DEPLOY_SETTINGS"
+ssh -o 'ControlPath=~/.ssh/%r@%h:%p.conn' $SERVER -t "sudo rm /tmp/pull_and_update.sh"
 
 
 # close the connection
