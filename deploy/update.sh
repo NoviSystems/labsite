@@ -83,7 +83,7 @@ else
     `git diff-index --quiet HEAD`
     DIRTY=$?
     set -o errexit
-    if [ $DIRTY ]; then
+    if [ $DIRTY -ne 0 ]; then
         echo "Stashing changes..."
         git stash       # stash any changes (secrets, etc.. ) so checkout/pull doesn't fail
     fi
@@ -92,9 +92,7 @@ else
     git checkout $BRANCH
     git pull origin
 
-    echo $DIRTY
-    
-    if [ $DIRTY ]; then
+    if [ $DIRTY -ne 0 ]; then
         git stash pop
     fi
 fi
