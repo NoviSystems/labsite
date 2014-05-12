@@ -4,7 +4,7 @@ set -o nounset
 
 whoami
 
-PROJECT_URL="git@github.com:ITNG/labsite.git"
+PROJECT_URL="https://github.com/ITNG/labsite"
 ROOT_DIR="/opt/lab/"  # Must be absolute path
 PROJECT_DIR="${ROOT_DIR}labsite/"
 BACKUP_DIR="${ROOT_DIR}backup/"
