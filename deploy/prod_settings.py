@@ -7,6 +7,8 @@ ADMINS = (
     ('John Bass', 'jbass@ncsu.edu'),
 )
 
+SITE_URL = "lab.oscar.ncsu.edu"
+
 SECRET_KEY = open(os.path.join(SETTINGS_DIR, 'secret_key')).read()
 
 DEBUG = False

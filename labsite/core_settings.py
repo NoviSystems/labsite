@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 from datetime import timedelta
 import os
+import socket
 from secrets import *
 
 SETTINGS_DIR = os.path.realpath(os.path.join(__file__, "../"))
@@ -20,6 +21,8 @@ DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
+
+SITE_URL = socket.gethostname()
 
 ALLOWED_HOSTS = ['.oscar.ncsu.edu']
 
