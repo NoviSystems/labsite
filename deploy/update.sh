@@ -93,6 +93,7 @@ else
     git pull origin
 
     if [ $DIRTY ]; then
+        echo "Popping stash..."
         git stash pop
     fi
 fi
