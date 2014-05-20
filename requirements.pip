@@ -14,3 +14,4 @@ reportlab==2.7
 pisa
 git+git://github.com/ITNG/foodapp.git
 git+git://github.com/ITNG/worklog.git
+djangorestframework

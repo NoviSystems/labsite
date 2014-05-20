@@ -46,8 +46,7 @@ INSTALLED_APPS = (
     'foodapp',
     'djcelery',
     'gunicorn',
-    'dajaxice',
-    'dajax',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
