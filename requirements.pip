@@ -8,7 +8,6 @@ gunicorn
 pytz
 flake8
 github3.py
-django_dajax
 psycopg2
 reportlab==2.7
 pisa
