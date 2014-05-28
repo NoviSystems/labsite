@@ -26,7 +26,7 @@ BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
 CELERYBEAT_SCHEDULE = {
     'reconcile_db_with_gh-every-1-minutes': {
         'task': 'worklog.tasks.reconcile_db_with_gh',
-        'schedule': timedelta(hours=1),
+        'schedule': timedelta(minutes=1),
         'args': (16, 16)
     },
 }
