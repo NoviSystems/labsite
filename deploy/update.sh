@@ -42,7 +42,12 @@ function create_files {
         mkdir $PROJECT_DIR/log
     fi
     # fix supervisor issues
-    touch /opt/lab/labsite/log/{celerybeat,celeryd}.log
+    if [ ! -e /opt/lab/labsite/log/celerybeat.log ]; then
+        touch /opt/lab/labsite/log/celerybeat.log;
+    fi
+    if [ ! -e /opt/lab/labsite/log/celeryd.log ]; then
+        touch /opt/lab/labsite/log/celeryd.log
+    fi
 
     chmod  $PROJECT_FILES_OCTAL $PROJECT_DIR/log
     chmod -R $PROJECT_FILES_OCTAL $PROJECT_DIR/log
