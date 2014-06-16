@@ -49,8 +49,8 @@ function create_files {
         touch /opt/lab/labsite/log/celeryd.log
     fi
 
-    chmod  $PROJECT_FILES_OCTAL {$PROJECT_DIR}log
-    chmod -R $PROJECT_FILES_OCTAL {$PROJECT_DIR}log
+    chmod  $PROJECT_FILES_OCTAL ${PROJECT_DIR}log
+    chmod -R $PROJECT_FILES_OCTAL ${PROJECT_DIR}log
 
 }
 
