@@ -19,3 +19,4 @@ labsite/settings.py
 deploy/project_backup/
 deploy/commit_and_push.sh
 
+lab-prod_data.bu
