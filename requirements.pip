@@ -14,3 +14,8 @@ pisa
 git+git://github.com/ITNG/foodapp.git
 git+git://github.com/ITNG/worklog.git
 djangorestframework
+coverage
+factory_boy
+fake-factory
+webtest
+django-webtest
