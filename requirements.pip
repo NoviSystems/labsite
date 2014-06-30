@@ -12,7 +12,7 @@ psycopg2
 reportlab==2.7
 pisa
 git+git://github.com/ITNG/foodapp.git
-git+git://github.com/ITNG/worklog.git@14-work-days-reconcile
+git+git://github.com/ITNG/worklog.git
 djangorestframework
 coverage
 factory_boy
