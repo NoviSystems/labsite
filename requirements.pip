@@ -2,15 +2,12 @@ django<1.6
 # lock celery version, as django-celery was deprecated by 3.1.x and so everything breaks
 celery==3.0.19
 django-celery==3.0.11
-xhtml2pdf
 south
 gunicorn
 pytz
 flake8
 github3.py
 psycopg2
-reportlab==2.7
-pisa
 git+git://github.com/ITNG/foodapp.git
 git+git://github.com/ITNG/worklog.git
 djangorestframework

@@ -6,7 +6,7 @@ DEPLOY_DIR="${ROOT_DIR}temp/"
 DEPLOY_USER="labuser"
 
 function usage {
-    echo "Usage: $0 [branch] [server environment]"
+    echo "Usage: $0 [branch] [server environment] [foodapp branch] [worklog branch]"
 }
 
 if [ `whoami` != $DEPLOY_USER ]; then
@@ -14,12 +14,14 @@ if [ `whoami` != $DEPLOY_USER ]; then
     exit -1
 fi
 
-if [ $# -ne 2 ]; then
+if [ $# -lt 2 ]; then
     usage
     exit
 else
     BRANCH=$1
     DEPLOY_SETTINGS=$2
+    FOODAPP_BRANCH=$3
+    WORKLOG_BRANCH=$4
 fi
 
 if [ -z "$BRANCH" ]; then
@@ -31,8 +33,10 @@ rm -rf $DEPLOY_DIR
 mkdir $DEPLOY_DIR
 cd $DEPLOY_DIR
 git clone $REPOSITORY_URL
+cd labsite
+git checkout $BRANCH
 
-bash ${DEPLOY_DIR}labsite/deploy/update.sh $BRANCH $DEPLOY_SETTINGS
+bash ${DEPLOY_DIR}labsite/deploy/update.sh $BRANCH $DEPLOY_SETTINGS $FOODAPP_BRANCH $WORKLOG_BRANCH
 
 cd $ROOT_DIR
 rm -rf $DEPLOY_DIR

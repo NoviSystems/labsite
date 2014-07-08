@@ -15,12 +15,14 @@ function usage {
     echo "Usage: $0 [branch] [server environment]"
 }
 
-if [ $# -ne 2 ]; then
+if [ $# -lt 2 ]; then
     usage
     exit
 else
     BRANCH=$1
     DEPLOY_SETTINGS="${DEPLOY_SETTINGS_DIR}$2_settings.py"
+    FOODAPP_BRANCH=$3
+    WORKLOG_BRANCH=$4
 fi
 
 PROJECT_FILES_USER=labuser
@@ -121,6 +123,9 @@ sudo /sbin/service nginx stop
 
 echo "Installing requirements from ${PROJECT_DIR} ..."
 pip install -qr ${PROJECT_DIR}/requirements.pip --upgrade
+pip install git+git://github.com/ITNG/worklog.git@$WORKLOG_BRANCH --upgrade
+pip install git+git://github.com/ITNG/foodapp.git@$FOODAPP_BRANCH --upgrade
+
 
 # Copy settings file
 # settings.py in the deployment repo will have to be updated if the project's
