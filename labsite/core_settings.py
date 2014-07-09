@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     'djcelery',
     'gunicorn',
     'rest_framework',
+    'raven.contrib.django.raven_compat',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -180,4 +181,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.SessionAuthentication',),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'PAGINATE_BY': None
+}
+
+RAVEN_CONFIG = {
+    'dsn': SENTRY_DSN
 }

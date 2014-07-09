@@ -16,3 +16,4 @@ factory_boy
 fake-factory
 webtest
 django-webtest
+raven
