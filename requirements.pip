@@ -1,5 +1,6 @@
 django<1.6
 # lock celery version, as django-celery was deprecated by 3.1.x and so everything breaks
+django-discover-runner
 celery==3.0.19
 django-celery==3.0.11
 south

@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'discover_runner',
     'south',
     'worklog',
     'foodapp',
@@ -49,6 +50,8 @@ INSTALLED_APPS = (
     'rest_framework',
     'raven.contrib.django.raven_compat',
 )
+
+TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -62,7 +65,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'labsite.urls'
 
 WSGI_APPLICATION = 'labsite.wsgi.application'
-
 
 LANGUAGE_CODE = 'en-us'
 
