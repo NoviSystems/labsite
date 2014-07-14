@@ -58,8 +58,4 @@ CELERYBEAT_SCHEDULE = {
         'task': 'worklog.tasks.generate_invoice_email',
         'schedule': crontab(hour=2, minute=0, day_of_week=days_of_week_map['everyday']),
     },
-    'clear_expired_reminder_records-every-1-days': {
-        'task': 'worklog.tasks.clear_expired_reminder_records',
-        'schedule': crontab(hour=WORKLOG_CLEAR_REMINDERS_HOUR, minute=0, day_of_week=CLEAR_REMINDERS_DAYSOFWEEK),
-    },
 }
