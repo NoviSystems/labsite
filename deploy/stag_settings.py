@@ -22,7 +22,7 @@ DATABASES = {
 
 
 # CELERY SETTINGS
-BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
+BROKER_URL = 'qpid://qpid-1.oscar.ncsu.edu:5672/lab_vhost'
 CELERYBEAT_SCHEDULE = {
     'reconcile_db_with_gh-every-1-minutes': {
         'task': 'worklog.tasks.reconcile_db_with_gh',

@@ -1,8 +1,8 @@
 django<1.6
-# lock celery version, as django-celery was deprecated by 3.1.x and so everything breaks
 django-discover-runner
-celery==3.0.19
-django-celery==3.0.11
+celery==3.1.11
+git+ssh://git@github.com/pulp/kombu.git@pulp-dep-3.0.15-with-qpid
+django-celery
 south
 gunicorn
 pytz
