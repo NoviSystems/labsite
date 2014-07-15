@@ -7,11 +7,9 @@ south
 gunicorn
 pytz
 flake8
-github3.py
 psycopg2
 git+git://github.com/ITNG/foodapp.git
 git+git://github.com/ITNG/worklog.git
-djangorestframework
 coverage
 factory_boy
 fake-factory
