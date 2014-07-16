@@ -122,9 +122,9 @@ sudo /sbin/service nginx stop
 
 
 echo "Installing requirements from ${PROJECT_DIR} ..."
-pip install -qr ${PROJECT_DIR}/requirements.pip --upgrade
 pip install git+git://github.com/ITNG/worklog.git@$WORKLOG_BRANCH --upgrade
 pip install git+git://github.com/ITNG/foodapp.git@$FOODAPP_BRANCH --upgrade
+pip install -qr ${PROJECT_DIR}/requirements.pip --upgrade
 
 
 # Copy settings file
