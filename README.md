@@ -26,6 +26,13 @@ First, you'll want to clone the repository and setup your
     $ git clone git@github.com:ITNG/labsite
     $ cd labsite
     $ virtualenv .env
+    
+If you're developing any of the labsite apps, follow the instructions posted in their
+respective repos. If you are not developing a specific app, you can simply
+pip install the repo. eg,
+
+    $ git+git://github.com/ITNG/foodapp.git
+    $ git+git://github.com/ITNG/worklog.git
 
 Activate the environment and install the site requirements. 
 
@@ -67,10 +74,6 @@ Next we need to create the database schema and run migrations
 To run the development server, use the manage.py runserver command:
 
     $ python manage.py runserver 0.0.0.0:<port>
-
-To develop any of the labsite apps, follow the instructions posted in their
-respective repos.
-
 
 ## Troubleshooting ##
 
