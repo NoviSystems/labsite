@@ -1,6 +1,8 @@
 django<1.6
 django-celery
 celery==3.1.11
+qpid-tools
+qpid-python
 git+ssh://git@github.com/pulp/kombu.git@pulp-dep-3.0.15-with-qpid
 gunicorn
 psycopg2
