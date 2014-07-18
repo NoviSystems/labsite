@@ -134,6 +134,8 @@ CELERYBEAT_SCHEDULE = {
         'args': (16, 16)
     },
 }
+import djcelery
+djcelery.setup_loader()
 
 # WORKLOG SETTINGS
 WORKLOG_SEND_REMINDERS = True
