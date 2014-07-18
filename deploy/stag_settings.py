@@ -22,7 +22,8 @@ DATABASES = {
 
 
 # CELERY SETTINGS
-BROKER_URL = 'qpid://qpid-1.oscar.ncsu.edu:5672/'
+BROKER_URL = 'django://qpid-1.oscar.ncsu.edu:5672/'
+CELERY_RESULT_BACKEND='qpid'
 CELERYBEAT_SCHEDULE = {
     'reconcile_db_with_gh-every-1-minutes': {
         'task': 'worklog.tasks.reconcile_db_with_gh',
