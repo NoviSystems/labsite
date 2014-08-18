@@ -50,10 +50,6 @@ CELERYBEAT_SCHEDULE = {
         'task': 'worklog.tasks.send_reminder_emails',
         'schedule': crontab(hour=WORKLOG_SEND_REMINDERS_HOUR, minute=0, day_of_week=WORKLOG_SEND_REMINDERS_DAY),
     },
-    'generate_timesheets-every-1-days': {
-        'task': 'worklog.tasks.generate_timesheets',
-        'schedule': crontab(hour=2, minute=0, day_of_week=days_of_week_map['everyday']),
-    },
     'generate_invoice_email-every-1-days': {
         'task': 'worklog.tasks.generate_invoice_email',
         'schedule': crontab(hour=2, minute=0, day_of_week=days_of_week_map['everyday']),
