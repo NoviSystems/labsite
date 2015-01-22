@@ -77,7 +77,7 @@ class HomeView(CreateView):
 
         return sorted(items_dict.items(), key=operator.itemgetter(1), reverse=True)
 
-    def helper(self, leaderboard, sorted_items leaderboardMax):
+    def helper(self, leaderboard, sorted_items, leaderboardMax):
         helper = 1
         mvp = ""
 
@@ -379,6 +379,7 @@ class MonthOrdersView(TemplateView):
         #ASSUMES ALL MONTHLY COSTS ARE APPLIED TO BURRITOS ONLY!!!
         month_orders = Order.objects.filter(date__month=month, date__year=year)
         num_burritos = 0
+        print month_orders
         for order in month_orders:
             if order.item.name.lower() == "burrito":
                 num_burritos += order.quantity
