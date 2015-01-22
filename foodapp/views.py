@@ -371,7 +371,8 @@ class MonthOrdersView(TemplateView):
         now = datetime.date(int(year), int(month), 1)
         context['year'] = year
         context['month'] = now.strftime('%B')
-
+        print year
+        print month
         #Calculates the total number of burritos in a given month.
         #ASSUMES ALL MONTHLY COSTS ARE APPLIED TO BURRITOS ONLY!!!
         month_orders = Order.objects.filter(date__month=month, date__year=year)
