@@ -41,6 +41,9 @@ class HomepageView(CreateView):
         if form.is_valid():
             obj = form.save(commit=False)
             item_pk = request.POST.get('item', None)
+            
+            if RiceCooker.objects.all()[0].is_on:
+                return self.render_to_response(self.get_context_data(form=form, error='Cannot place order, rice is currently cooking.'))
 
             if item_pk is not None:
                 item = Item.objects.get(pk=item_pk)
