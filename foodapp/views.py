@@ -1,4 +1,4 @@
-import datetime
+import datetime, operator
 from decimal import *
 
 from django.contrib.auth.decorators import login_required
@@ -32,6 +32,12 @@ class HomepageView(CreateView):
     def post(self, request, *args, **kwargs):
         form = OrderForm(request.POST)
 
+        if 'riceButton' in request.POST:
+            if RiceCooker.objects.all()[0].is_on:
+                RiceCooker.objects.all().update(is_on=False)
+            else:
+                RiceCooker.objects.all().update(is_on=True)
+
         if form.is_valid():
             obj = form.save(commit=False)
             item_pk = request.POST.get('item', None)
@@ -55,6 +61,8 @@ class HomepageView(CreateView):
                 obj.user = request.user
                 obj.save()
                 return HttpResponseRedirect(self.success_url)
+        elif 'riceButton' in request.POST:
+            return HttpResponseRedirect(reverse('url_homepage'))
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
@@ -116,18 +124,6 @@ class TodaysOrdersView(OrderListView):
         return context
 
 
-#Updates all RiceCooker objects to true and redirects to homepage
-def rice_on_view(request):
-    RiceCooker.objects.all().update(is_on=True)
-    return HttpResponseRedirect(reverse('url_homepage'))
-
-
-#Updates all RiceCooker objects to false and redirects to homepage
-def rice_off_view(request):
-    RiceCooker.objects.all().update(is_on=False)
-    return HttpResponseRedirect(reverse('url_homepage'))
-
-
 def last_month_view(request):
     now = datetime.date.today()
     #FIX THIS BACK
@@ -139,10 +135,106 @@ def last_month_view(request):
 
     year = str(year)
     last_month = "%02d" % last_month
-    if request.user.is_superuser:
-        return redirect('url_super_month_orders', year, last_month)
-    else:
-        return redirect('url_month_orders', year, last_month)
+    #if request.user.is_superuser:
+        #return redirect('url_super_month_orders', year, last_month)
+    #else:
+    return redirect('url_month_orders', year, last_month)
+
+class LeaderboardView(TemplateView):
+    template_name = 'foodapp/leader.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(LeaderboardView, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(LeaderboardView, self).get_context_data(**kwargs)
+        now = datetime.date.today()
+        user = self.request.user
+        print user
+
+        last_month_date = now - datetime.timedelta(days=now.day + 1)
+        context['last_month_year'] = last_month_date.year
+        context['last_month_month'] = last_month_date.strftime('%B')
+
+        last_year_date = datetime.date(int(now.year - 1), 1, 1)
+        context['last_year'] = last_year_date.year
+
+        user_to_orders_dict_alltime = {}
+        user_to_orders_dict_year = {}
+        user_to_orders_dict_month = {}
+
+        for order in Order.objects.filter(item__name__iexact="Burrito"):
+            user_to_orders_dict_alltime[order.user.username] = user_to_orders_dict_alltime.get(order.user.username, 0) + order.quantity
+
+        for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__year=last_year_date.year):
+            user_to_orders_dict_year[order.user.username] = user_to_orders_dict_year.get(order.user.username, 0) + order.quantity
+
+        for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__month=last_month_date.month).filter(date__year=last_month_date.year):
+            user_to_orders_dict_month[order.user.username] = user_to_orders_dict_month.get(order.user.username, 0) + order.quantity
+
+
+        sorted_alltime_items = sorted(user_to_orders_dict_alltime.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_year_items = sorted(user_to_orders_dict_year.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_month_items = sorted(user_to_orders_dict_month.items(), key=operator.itemgetter(1), reverse=True)
+
+        sorted_alltime = []
+        sorted_year = []
+        sorted_month = []
+
+        month_mvp = sorted_month_items[0][0]
+        year_mvp = sorted_year_items[0][0]
+        alltime_mvp = sorted_alltime_items[0][0]
+
+        helper = 1
+
+        for i in range(0, len(sorted_year_items)):
+            item = sorted_year_items[i]
+            if item[0] not in year_mvp and item[1] == sorted_year_items[0][1]:
+                year_mvp += ", " + item[0]
+            if i > 0 and sorted_year_items[i][1] == sorted_year_items[i-1][1]:
+                helper = helper - 1
+            if len(sorted_year) in range(0, 5):
+                sorted_year.append((i + helper, item[0], item[1]))
+            elif item[0] == str(user):
+                sorted_year[len(sorted_year) - 1] = (i + helper, item[0], item[1])
+        
+        helper = 1
+
+        for i in range(0, len(sorted_month_items)):
+            item = sorted_month_items[i]
+            if item[0] not in month_mvp and item[1] == sorted_month_items[0][1]:
+                mont_mvp += ", " + item[0]
+            if i > 0 and sorted_month_items[i][1] == sorted_month_items[i-1][1]:
+                helper = helper - 1
+            if len(sorted_month) in range(0, 5):
+                sorted_month.append((i + helper, item[0], item[1]))
+            elif item[0] == str(user):
+                sorted_month[len(sorted_month) - 1] = (i + helper, item[0], item[1])
+
+        helper = 1
+
+        for i in range(0, len(sorted_alltime_items)):
+            item = sorted_alltime_items[i]
+            if item[0] not in alltime_mvp and item[1] == sorted_alltime_items[0][1]:
+                alltime_mvp += ", " + item[0]
+            if i > 0 and sorted_alltime_items[i][1] == sorted_alltime_items[i-1][1]:
+                helper = helper - 1
+            if len(sorted_alltime) in range(0, 5):
+                sorted_alltime.append((i + helper, item[0], item[1]))
+            elif item[0] == str(user):
+                sorted_alltime[len(sorted_alltime) - 1] = (i + helper, item[0], item[1])
+
+        context['alltime_dict'] = sorted_alltime
+        context['year_dict'] = sorted_year
+        context['month_dict'] = sorted_month
+        context['current_user'] = str(user)
+        context['month_mvp'] = month_mvp
+        context['year_mvp'] = year_mvp
+        context['alltime_mvp'] = alltime_mvp
+
+        return context
+
 
 class MonthOrdersView(TemplateView):
     template_name = 'foodapp/month.html'
@@ -189,7 +281,7 @@ class MonthOrdersView(TemplateView):
 
         #Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
-        for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
+        for order in Order.objects.filter(item__name__iexact="Burrito"):#.filter(date__month=month).filter(date__year=year):
             user_to_orders_dict[order.user.username] = user_to_orders_dict.get(order.user.username, 0) + order.quantity
 
         for username in user_to_orders_dict:
@@ -213,7 +305,7 @@ class SuperMonthOrdersView(TemplateView):
 	    year = self.kwargs['year']
             month = self.kwargs['month']
             filtered_orders = Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year)
-         
+
             usernames = {}
 	    for order in filtered_orders:
                 user_used = False
@@ -227,9 +319,9 @@ class SuperMonthOrdersView(TemplateView):
 		        form = request.POST.get(form_id)
 		        if form:
 		            new_save = AmountPaid(amount=form, user=order.user, date=order.date)
-		            new_save.save()	
+		            new_save.save()
         return HttpResponseRedirect(success_url)
-	    
+
     def get_context_data(self, **kwargs):
         context = super(SuperMonthOrdersView, self).get_context_data(**kwargs)
         #Grabs year and month keywords from url
@@ -264,7 +356,7 @@ class SuperMonthOrdersView(TemplateView):
             cost_per_burrito = 0
 
         context["cost_per_burrito"] = cost_per_burrito
-	
+
         #Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
         for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
@@ -273,7 +365,7 @@ class SuperMonthOrdersView(TemplateView):
 	    money_paid = Decimal(0)
             num_burritos = user_to_orders_dict[username]
 	    money_owed = num_burritos*cost_per_burrito
-            for paid in AmountPaid.objects.filter(date__month=month).filter(date__year=year):   
+            for paid in AmountPaid.objects.filter(date__month=month).filter(date__year=year):
                 if paid.user.username == username:
                     money_paid += paid.amount
                     money_owed = (num_burritos*cost_per_burrito) - money_paid

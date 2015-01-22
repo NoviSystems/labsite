@@ -1,0 +1,95 @@
+{% extends 'foodapp/base.html' %} {% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-4">
+<div class="panel panel-default" style="margin-top:35px;">
+    <div class="panel-heading">
+        <h3 class="panel-title text-center">Last Month: {{ last_month_month }}, {{ last_month_year }}</h3>
+    </div>
+    <div class="panel-body text-center">
+        <h4><i class="glyphicon glyphicon-star"></i> MVP: {{ month_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
+    </div>
+
+    <table class="table text-center">
+        <thead>
+            <tr>
+                <td>Rank</td>
+                <td>Username</td>
+                <td># Burritos</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rank, user, count in month_dict %}
+            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
+                <td>{{ rank }}</td>
+                <td>{{ user }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+        </div>
+        <div class="col-xs-4">
+<div class="panel panel-default" style="margin-top:35px;">
+    <div class="panel-heading">
+        <h3 class="panel-title text-center">Last Year: {{ last_year }}</h3>
+    </div>
+    <div class="panel-body text-center">
+        <h4><i class="glyphicon glyphicon-star"></i> MVP: {{ year_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
+    </div>
+
+    <table class="table text-center">
+        <thead>
+            <tr>
+                <td>Rank</td>
+                <td>Username</td>
+                <td># Burritos</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rank, user, count in year_dict %}
+            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
+                <td>{{ rank }}</td>
+                <td>{{ user }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+        </div>
+        <div class="col-xs-4">
+<div class="panel panel-default" style="margin-top:35px;">
+    <div class="panel-heading">
+        <h3 class="panel-title text-center">Lifetime</h3>
+    </div>
+    <div class="panel-body text-center">
+        <h4><i class="glyphicon glyphicon-star"></i> MVP: {{ alltime_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
+    </div>
+
+    <table class="table text-center">
+        <thead>
+            <tr>
+                <td>Rank</td>
+                <td>Username</td>
+                <td># Burritos</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rank, user, count in alltime_dict %}
+            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
+                <td>{{ rank }}</td>
+                <td>{{ user }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
