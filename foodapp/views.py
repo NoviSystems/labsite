@@ -18,6 +18,139 @@ from forms import OrderForm, PaidForm
 # because direct usage of it throws an exception.
 reverse_lazy = lambda name=None, *args: lazy(reverse, str)(name, args=args)
 
+
+class HomeView(CreateView):
+    form_class = OrderForm
+    success_url = reverse_lazy('url_home')
+    template_name = 'foodapp/home.html'
+    object = Order
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(HomeView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = OrderForm(request.POST)
+
+        if 'riceButton' in request.POST:
+            if RiceCooker.objects.all()[0].is_on:
+                RiceCooker.objects.all().update(is_on=False)
+            else:
+                RiceCooker.objects.all().update(is_on=True)
+
+        if form.is_valid():
+            obj = form.save(commit=False)
+            item_pk = request.POST.get('item', None)
+
+            if item_pk is not None:
+                item = Item.objects.get(pk=item_pk)
+            else:
+                raise AttributeError('Could not locate item with pk %s' % item_pk)
+            
+            if RiceCooker.objects.all()[0].is_on:
+                return self.render_to_response(self.get_context_data(form=form, error='Sorry, but the rice has is already cooking.'))
+
+            if item and item.once_a_day:
+                order = None
+
+                try:
+                    order = Order.objects.filter(user=request.user).get(item__pk=item_pk, date=datetime.date.today)
+                    return self.render_to_response(self.get_context_data(form=form, error='This item has already been ordered.'))
+                except Order.DoesNotExist:
+                    obj.user = request.user
+                    obj.save()
+                    return HttpResponseRedirect(self.success_url)
+            else:
+                obj.user = request.user
+                obj.save()
+                return HttpResponseRedirect(self.success_url)
+        elif 'riceButton' in request.POST:
+            return HttpResponseRedirect(reverse('url_home'))
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+    
+
+    def helper(self, user, items, listing, leaderboardMax):
+        helper = 1
+        mvp = items[0][0]
+
+        for i in range(0, len(items)):
+            item = items[i]
+            if item[0] not in mvp and item[1] == items[0][1]:
+                mvp +=", " + item[0]
+            if i > 0 and item[1] == items[i-1][1]:
+                helper = helper - 1
+            if len(listing) < leaderboardMax:
+                listing.append((i + helper, item[0], item[1]))
+            elif item[0] == str(user):
+                listing.pop()
+                listing.append((i + helper, item[0], item[1]))
+
+        return mvp
+
+    def get_context_data(self, **kwargs):
+        context = super(HomeView, self).get_context_data(**kwargs)
+        now = datetime.date.today()
+        user = self.request.user
+        orders = Order.objects.filter(date=now)
+        # Context generation for leaderboards
+        last_month_date = now - datetime.timedelta(days=now.day + 1)
+        last_year_date = datetime.date(int(now.year - 1), 1, 1)
+        user_to_orders_dict_alltime = {}
+        user_to_orders_dict_year = {}
+        user_to_orders_dict_month = {}
+        user_to_orders_dict_current = {}
+        burritos = Order.objects.filter(item__name__iexact="Burrito")
+        
+        for order in burritos:
+            user_to_orders_dict_alltime[order.user.username] = user_to_orders_dict_alltime.get(order.user.username, 0) + order.quantity
+        for order in burritos.filter(date__year=last_year_date.year):
+            user_to_orders_dict_year[order.user.username] = user_to_orders_dict_year.get(order.user.username, 0) + order.quantity
+        for order in burritos.filter(date__month=last_month_date.month).filter(date__year=last_month_date.year):
+            user_to_orders_dict_month[order.user.username] = user_to_orders_dict_month.get(order.user.username, 0) + order.quantity
+        for order in burritos.filter(date__month=now.month).filter(date__year=now.year):
+            user_to_orders_dict_current[order.user.username] = user_to_orders_dict_current.get(order.user.username, 0) + order.quantity
+
+        sorted_alltime_items = sorted(user_to_orders_dict_alltime.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_year_items = sorted(user_to_orders_dict_year.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_month_items = sorted(user_to_orders_dict_month.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_current_items = sorted(user_to_orders_dict_current.items(), key=operator.itemgetter(1), reverse=True)
+        sorted_alltime = []
+        sorted_year = []
+        sorted_month = []
+        sorted_current = []
+        month_mvp = self.helper(user, sorted_month_items, sorted_month, 5)
+        year_mvp = self.helper(user, sorted_year_items, sorted_year, 5)
+        alltime_mvp = self.helper(user, sorted_alltime_items, sorted_alltime, 5)
+        current_mvp = self.helper(user, sorted_current_items, sorted_current, 5)
+        # Context generation for today's orders
+        burrito_count = 0
+        for order in orders:
+            if order.item.name.strip().lower().find('burrito') > -1:
+                burrito_count += order.quantity
+        # Context assignment
+        context['alltime_dict'] = sorted_alltime
+        context['year_dict'] = sorted_year
+        context['month_dict'] = sorted_month
+        context['current_dict'] = sorted_current
+        context['current_user'] = str(user)
+        context['month_mvp'] = month_mvp
+        context['year_mvp'] = year_mvp
+        context['alltime_mvp'] = alltime_mvp
+        context['current_mvp'] = current_mvp
+
+        context['current_month'] = now.strftime('%B')
+        context['last_month_month'] = last_month_date.strftime('%B')
+        context['last_year'] = last_year_date.year
+
+        context['rice_quantity'] = burrito_count * 0.5
+        context['orders'] = orders
+        context['last_month'] = "%02d" % (now.month - 1)
+        context['year'] = now.year
+        context['rice_is_on'] = RiceCooker.objects.all()[0].is_on
+
+        return context
+
 class HomepageView(CreateView):
     form_class = OrderForm
     success_url = reverse_lazy('url_homepage')
