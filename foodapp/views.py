@@ -373,13 +373,11 @@ class MonthOrdersView(TemplateView):
         now = datetime.date(int(year), int(month), 1)
         context['year'] = year
         context['month'] = now.strftime('%B')
-        print year
-        print month
         #Calculates the total number of burritos in a given month.
         #ASSUMES ALL MONTHLY COSTS ARE APPLIED TO BURRITOS ONLY!!!
         month_orders = Order.objects.filter(date__month=month, date__year=year)
         num_burritos = 0
-        print month_orders
+
         for order in month_orders:
             if order.item.name.lower() == "burrito":
                 num_burritos += order.quantity
@@ -404,7 +402,7 @@ class MonthOrdersView(TemplateView):
 
         #Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
-        for order in Order.objects.filter(item__name__iexact="Burrito"):#.filter(date__month=month).filter(date__year=year):
+        for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
             user_to_orders_dict[order.user.username] = user_to_orders_dict.get(order.user.username, 0) + order.quantity
 
         for username in user_to_orders_dict:
