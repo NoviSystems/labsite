@@ -1,9 +1,8 @@
 from django.conf.urls.defaults import url
-from views import HomeView, HomepageView, OrderListView, UserOrderView, TodaysOrdersView, LeaderboardView, MonthOrdersView, last_month_view, SuperMonthOrdersView
+from views import HomepageView, OrderListView, UserOrderView, TodaysOrdersView, LeaderboardView, MonthOrdersView, last_month_view, SuperMonthOrdersView
 
 urlpatterns = (
-    url(r'^$', HomeView.as_view(), name='url_home'),
-    url(r'^home/$', HomepageView.as_view(), name='url_homepage'),
+    url(r'^$', HomepageView.as_view(), name='url_homepage'),
     url(r'^orders/$', OrderListView.as_view(), name='url_orders'),
     url(r'^orders/user/(?P<username>\w+)/$', UserOrderView.as_view(), name='url_user_orders'),
     url(r'^orders/today/$', TodaysOrdersView.as_view(), name='url_todays_orders'),
