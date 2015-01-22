@@ -121,10 +121,10 @@ class HomeView(CreateView):
         sorted_month = []
         sorted_current = []
 
-        month_mvp = self.helper(user, sorted_month_items, sorted_month, 5)
-        year_mvp = self.helper(user, sorted_year_items, sorted_year, 5)
-        alltime_mvp = self.helper(user, sorted_alltime_items, sorted_alltime, 5)
-        current_mvp = self.helper(user, sorted_current_items, sorted_current, 5)
+        month_mvp = self.helper(sorted_month_items, sorted_month, 5)
+        year_mvp = self.helper(sorted_year_items, sorted_year, 5)
+        alltime_mvp = self.helper(sorted_alltime_items, sorted_alltime, 5)
+        current_mvp = self.helper(sorted_current_items, sorted_current, 5)
         # Context generation for today's orders
         burrito_count = 0
         for order in orders:
