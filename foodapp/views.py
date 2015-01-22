@@ -93,7 +93,7 @@ class HomeView(CreateView):
             if i > 0 and item[1] == sorted_items[i-1][1]:
                 helper = helper - 1
 
-            if len(lleaderboard) < leaderboardMax:
+            if len(leaderboard) < leaderboardMax:
                 leaderboard.append((i + helper, item[0], item[1]))
             elif item[0] == str(self.request.user):
                 leaderboard.pop()
@@ -121,16 +121,17 @@ class HomeView(CreateView):
         sorted_month = []
         sorted_current = []
 
-        month_mvp = self.helper(sorted_month_items, sorted_month, 5)
-        year_mvp = self.helper(sorted_year_items, sorted_year, 5)
-        alltime_mvp = self.helper(sorted_alltime_items, sorted_alltime, 5)
-        current_mvp = self.helper(sorted_current_items, sorted_current, 5)
+        month_mvp = self.helper(sorted_month, sorted_month_items, 5)
+        year_mvp = self.helper(sorted_year, sorted_year_items, 5)
+        alltime_mvp = self.helper(sorted_alltime, sorted_alltime_items, 5)
+        current_mvp = self.helper(sorted_current, sorted_current_items, 5)
         # Context generation for today's orders
         burrito_count = 0
         for order in orders:
             if order.item.name.strip().lower().find('burrito') > -1:
                 burrito_count += order.quantity
         # Context assignment
+        print sorted_alltime
         context['alltime_dict'] = sorted_alltime
         context['year_dict'] = sorted_year
         context['month_dict'] = sorted_month
