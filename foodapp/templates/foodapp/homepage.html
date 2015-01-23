@@ -12,14 +12,14 @@
         </div>
         <div class="panel-body">
             <form class="form" id="rice_form" method="post" target="">
-                {% csrf_token %}
+            {% csrf_token %}
             {% if rice_is_on %}
-            <button class="btn btn-danger" type="submit" value="Stop Rice" name="riceButton" id="riceButton">Stop Rice</button>
-            <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
+                <button class="btn btn-danger" type="submit" value="Stop Rice" name="riceButton" id="riceButton">Stop Rice</button>
+                <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
             {% else %}
-            <button class="btn btn-primary" type="submit" value="Start Rice" name="riceButton" id="riceButton">Start Rice</button>
+                <button class="btn btn-primary" type="submit" value="Start Rice" name="riceButton" id="riceButton">Start Rice</button>
             {% endif %}
-        </form>
+            </form>
         </div>
 
     </div>
