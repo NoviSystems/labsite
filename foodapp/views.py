@@ -29,22 +29,26 @@ class HomepageView(CreateView):
     def dispatch(self, *args, **kwargs):
         return super(HomepageView, self).dispatch(*args, **kwargs)
 
+    def ricecooker_power(self, power):
+        RiceCooker.objects.all().update(is_on=power)
+        return HttpResponseRedirect(reverse('url_homepage'))
+
     def post(self, request, *args, **kwargs):
         form = OrderForm(request.POST)
+        ricecooker_is_on = RiceCooker.objects.all()[0].is_on
 
-        if 'riceButton' in request.POST:
-            if RiceCooker.objects.all()[0].is_on:
-                RiceCooker.objects.all().update(is_on=False)
-            else:
-                RiceCooker.objects.all().update(is_on=True)
+        if 'riceOn' in request.POST:
+            return self.ricecooker_power(True)
+        if 'riceOff' in request.POST:
+            return self.ricecooker_power(False)
 
         if form.is_valid():
             obj = form.save(commit=False)
             item_pk = request.POST.get('item', None)
             
-            if RiceCooker.objects.all()[0].is_on:
+            if ricecooker_is_on:
                 return self.render_to_response(self.get_context_data(form=form, error='Cannot place order, rice is currently cooking.'))
-
+            
             if item_pk is not None:
                 item = Item.objects.get(pk=item_pk)
             else:
@@ -61,11 +65,9 @@ class HomepageView(CreateView):
                     obj.save()
                     return HttpResponseRedirect(self.success_url)
             else:
-                obj.user = request.user
+                obj.user = request.user 
                 obj.save()
                 return HttpResponseRedirect(self.success_url)
-        elif 'riceButton' in request.POST:
-            return HttpResponseRedirect(reverse('url_homepage'))
         else:
             return self.render_to_response(self.get_context_data(form=form))
 
