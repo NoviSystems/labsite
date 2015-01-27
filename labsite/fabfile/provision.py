@@ -36,8 +36,6 @@ def base():
 def application():
     secrets_context = {
         'SECRET_KEY': get_random_string(50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'),
-        # 'linkedin_key': prompt("LinkedIn API key:"),
-        # 'linkedin_secret': prompt("LinkedIn API secret:"),
         'sentry_dsn': prompt("Sentry DSN:"),
     }
 
