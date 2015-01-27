@@ -1,13 +1,13 @@
 django<1.6
 django-celery
-celery==3.1.11
-qpid-tools
-qpid-python
-git+git://github.com/pulp/kombu.git@pulp-dep-3.0.15-with-qpid
+celery[redis]==3.1.11
 gunicorn
-psycopg2
 south
 raven
 pytz
+contextdecorator
 # git+git://github.com/ITNG/foodapp.git
 # git+git://github.com/ITNG/worklog.git
+
+git+git://github.com/ITNG/fabtools.git
+fabric
