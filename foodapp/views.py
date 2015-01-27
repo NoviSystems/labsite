@@ -29,13 +29,26 @@ class HomepageView(CreateView):
     def dispatch(self, *args, **kwargs):
         return super(HomepageView, self).dispatch(*args, **kwargs)
 
+    def ricecooker_power(self, power):
+        RiceCooker.objects.all().update(is_on=power)
+        return HttpResponseRedirect(reverse('url_homepage'))
+
     def post(self, request, *args, **kwargs):
         form = OrderForm(request.POST)
+        ricecooker_is_on = RiceCooker.objects.all()[0].is_on
+
+        if 'riceOn' in request.POST:
+            return self.ricecooker_power(True)
+        if 'riceOff' in request.POST:
+            return self.ricecooker_power(False)
 
         if form.is_valid():
             obj = form.save(commit=False)
             item_pk = request.POST.get('item', None)
-
+            
+            if ricecooker_is_on:
+                return self.render_to_response(self.get_context_data(form=form, error='Cannot place order, rice is currently cooking.'))
+            
             if item_pk is not None:
                 item = Item.objects.get(pk=item_pk)
             else:
@@ -52,7 +65,7 @@ class HomepageView(CreateView):
                     obj.save()
                     return HttpResponseRedirect(self.success_url)
             else:
-                obj.user = request.user
+                obj.user = request.user 
                 obj.save()
                 return HttpResponseRedirect(self.success_url)
         else:
@@ -114,18 +127,6 @@ class TodaysOrdersView(OrderListView):
 
         context['title'] = 'Today\'s Orders:'
         return context
-
-
-#Updates all RiceCooker objects to true and redirects to homepage
-def rice_on_view(request):
-    RiceCooker.objects.all().update(is_on=True)
-    return HttpResponseRedirect(reverse('url_homepage'))
-
-
-#Updates all RiceCooker objects to false and redirects to homepage
-def rice_off_view(request):
-    RiceCooker.objects.all().update(is_on=False)
-    return HttpResponseRedirect(reverse('url_homepage'))
 
 
 def last_month_view(request):
@@ -213,7 +214,7 @@ class SuperMonthOrdersView(TemplateView):
 	    year = self.kwargs['year']
             month = self.kwargs['month']
             filtered_orders = Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year)
-         
+
             usernames = {}
 	    for order in filtered_orders:
                 user_used = False
@@ -227,9 +228,9 @@ class SuperMonthOrdersView(TemplateView):
 		        form = request.POST.get(form_id)
 		        if form:
 		            new_save = AmountPaid(amount=form, user=order.user, date=order.date)
-		            new_save.save()	
+		            new_save.save()
         return HttpResponseRedirect(success_url)
-	    
+
     def get_context_data(self, **kwargs):
         context = super(SuperMonthOrdersView, self).get_context_data(**kwargs)
         #Grabs year and month keywords from url
@@ -264,7 +265,7 @@ class SuperMonthOrdersView(TemplateView):
             cost_per_burrito = 0
 
         context["cost_per_burrito"] = cost_per_burrito
-	
+
         #Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
         for order in Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
@@ -273,7 +274,7 @@ class SuperMonthOrdersView(TemplateView):
 	    money_paid = Decimal(0)
             num_burritos = user_to_orders_dict[username]
 	    money_owed = num_burritos*cost_per_burrito
-            for paid in AmountPaid.objects.filter(date__month=month).filter(date__year=year):   
+            for paid in AmountPaid.objects.filter(date__month=month).filter(date__year=year):
                 if paid.user.username == username:
                     money_paid += paid.amount
                     money_owed = (num_burritos*cost_per_burrito) - money_paid

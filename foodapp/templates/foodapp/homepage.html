@@ -11,16 +11,17 @@
             {% endif %}
         </div>
         <div class="panel-body">
+            <form class="form" id="rice_form" method="post" target="">
+            {% csrf_token %}
             {% if rice_is_on %}
-            <button class="btn btn-danger" value="Stop Rice" id="riceButton" onclick="window.location='{% url 'url_rice_off' %}'">Stop Rice</button>
-            <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
+                <button class="btn btn-danger" type="submit" value="Stop Rice" name="riceOff" id="riceButton">Stop Rice</button>
+                <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
             {% else %}
-            <button class="btn btn-primary" value="Start Rice" id="riceButton" onclick="window.location='{% url 'url_rice_on' %}'">Start Rice</button>
+                <button class="btn btn-primary" type="submit" value="Start Rice" name="riceOn" id="riceButton">Start Rice</button>
             {% endif %}
+            </form>
         </div>
-
     </div>
-
 </div>
 
 <div class="col-md-10" style="margin-top:35px;">
@@ -50,8 +51,6 @@
                 {% endif %}
             </form>
         </div>
-
     </div>
-
 </div>
 {% endblock content %}
