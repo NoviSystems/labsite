@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 import datetime
 
-
 class Item(models.Model):
     name = models.CharField(max_length=56)
     description = models.CharField(max_length=256)
@@ -17,7 +16,7 @@ class Item(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='orders')
     date = models.DateField(default=datetime.date.today)
     item = models.ForeignKey(Item)
     QUANTITY_CHOICES = (
