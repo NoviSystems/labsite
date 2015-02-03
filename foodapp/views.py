@@ -10,6 +10,7 @@ from django.utils.functional import lazy
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.shortcuts import redirect
+from django.db.models import Sum
 
 from models import Item, Order, RiceCooker, MonthlyCost, AmountPaid
 from forms import OrderForm, PaidForm
@@ -150,28 +151,21 @@ class LeaderboardView(TemplateView):
     def dispatch(self, *args, **kwargs):
         return super(LeaderboardView, self).dispatch(*args, **kwargs)
 
-    def get_sorted_items(self, orders):
-        items_dict = {}
-
-        for order in orders:
-            items_dict[order.user.username] = items_dict.get(order.user.username, 0) + order.quantity
-
-        return sorted(items_dict.items(), key=operator.itemgetter(1), reverse=True)
-
-    def helper(self, leaderboard, sorted_items, leaderboardMax):
+    def helper(self, leaderboard, items, leaderboardMax):
         helper = 1
         mvp = ""
+        item_values = items.values_list('username', 'b_count')
 
-        if len(sorted_items) > 0:
-            mvp = sorted_items[0][0]
+        if len(item_values) > 0:
+            mvp = item_values[0][0]
 
-        for i in range(0, len(sorted_items)):
-            item = sorted_items[i]
+        for i in range(0, len(item_values)):
+            item = item_values[i]
 
-            if item[0] not in mvp and item[1] == sorted_items[0][1]:
+            if item[0] not in mvp and item[1] == item_values[0][1]:
                 mvp += ", " + item[0]
 
-            if i > 0 and sorted_items[i][1] == sorted_items[i-1][1]:
+            if i > 0 and item_values[i][1] == item_values[i-1][1]:
                 helper = helper - 1
 
             if len(leaderboard) < leaderboardMax:
@@ -182,6 +176,16 @@ class LeaderboardView(TemplateView):
 
         return mvp
 
+    def annotate_user_orders(self, order_users):
+        return order_users.annotate(b_count=Sum('orders__quantity')).order_by('-b_count')
+
+    def get_burrito_eater_diet(self, year=None, month=None):
+        if month == None and year != None:
+            return User.objects.filter(orders__item__name__iexact="Burrito", orders__date__year=year)
+        if month != None and year != None:
+            return User.objects.filter(orders__item__name__iexact="Burrito", orders__date__year=year, orders__date__month=month)
+        return User.objects.filter(orders__item__name__iexact="Burrito")
+
     def get_context_data(self, **kwargs):
         context = super(LeaderboardView, self).get_context_data(**kwargs)
         now = datetime.date.today()
@@ -189,22 +193,21 @@ class LeaderboardView(TemplateView):
 
         last_month_date = now - datetime.timedelta(days=now.day + 1)
         last_year_date = datetime.date(int(now.year - 1), 1, 1)
-        burritos = Order.objects.filter(item__name__iexact="Burrito")
 
-        sorted_alltime_items = self.get_sorted_items(burritos)
-        sorted_year_items = self.get_sorted_items(burritos.filter(date__year=last_year_date.year))
-        sorted_month_items = self.get_sorted_items(burritos.filter(date__month=last_month_date.month).filter(date__year=last_month_date.year))
-        sorted_current_items = self.get_sorted_items(burritos.filter(date__month=now.month).filter(date__year=now.year))
+        all_time_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet())
+        last_year_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_year_date.year))
+        last_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_month_date.year, month=last_month_date.month))
+        current_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year, month=now.month))
 
         sorted_alltime = []
         sorted_year = []
         sorted_month = []
         sorted_current = []
 
-        month_mvp = self.helper(sorted_month, sorted_month_items, 5)
-        year_mvp = self.helper(sorted_year, sorted_year_items, 5)
-        alltime_mvp = self.helper(sorted_alltime, sorted_alltime_items, 5)
-        current_mvp = self.helper(sorted_current, sorted_current_items, 5)
+        month_mvp = self.helper(sorted_month, last_month_burrito_eaters_score, 5)
+        year_mvp = self.helper(sorted_year, last_year_burrito_eaters_score, 5)
+        alltime_mvp = self.helper(sorted_alltime, all_time_burrito_eaters_score, 5)
+        current_mvp = self.helper(sorted_current, current_month_burrito_eaters_score, 5)
 
         context['last_month_month'] = last_month_date.strftime('%B')
         context['current_month_month'] = now.strftime('%B')

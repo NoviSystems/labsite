@@ -17,7 +17,7 @@ class Item(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name="orders")
     date = models.DateField(default=datetime.date.today)
     item = models.ForeignKey(Item)
     QUANTITY_CHOICES = (
