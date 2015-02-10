@@ -26,7 +26,12 @@ SITE_URL = socket.gethostname()
 
 ALLOWED_HOSTS = ['.oscar.ncsu.edu']
 
-SECRET_KEY = ''
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SECURE = True
 
 
 DEFAULT_FROM_EMAIL = 'webmaster@lab.oscar.ncsu.edu'

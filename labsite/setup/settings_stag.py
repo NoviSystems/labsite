@@ -1,8 +1,6 @@
 
-from core_settings import *
+from labsite.settings_core import *
 
-
-SECRET_KEY = open(os.path.join(SETTINGS_DIR, 'secret_key')).read()
 
 DEBUG = False
 

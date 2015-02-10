@@ -1,5 +1,5 @@
 
-from core_settings import *
+from labsite.settings_core import *
 from celery.schedules import crontab
 
 
@@ -8,8 +8,6 @@ ADMINS = (
 )
 
 SITE_URL = "lab.oscar.ncsu.edu"
-
-SECRET_KEY = open(os.path.join(SETTINGS_DIR, 'secret_key')).read()
 
 DEBUG = False
 
