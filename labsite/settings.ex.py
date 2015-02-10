@@ -20,3 +20,6 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+
+BROKER_URL = 'redis://192.168.10.10:6379/0'

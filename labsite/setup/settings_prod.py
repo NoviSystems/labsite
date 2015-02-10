@@ -31,8 +31,9 @@ days_of_week_map = {
 }
 
 # CELERY SETTINGS
-#BROKER_URL = 'qpid://qpid-1.oscar.ncsu.edu:5672//'
-BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
+# BROKER_URL = 'qpid://qpid-1.oscar.ncsu.edu:5672//'
+# BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
+BROKER_URL = 'redis://lab-broker.oscar.priv:6379/0'
 # WORKLOG SETTINGS
 WORKLOG_SEND_REMINDERS_DAY = days_of_week_map[WORKLOG_SEND_REMINDERS_DAYSOFWEEK]
 
