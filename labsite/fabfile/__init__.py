@@ -1,8 +1,8 @@
 
-import deploy
-import provision
-import vagrant
+PROJECT_NAME = 'labsite'
+USERNAME = 'labuser'
+PG_VERSION = '9.4'
 
 __all__ = [
-    'deploy', 'provision', 'vagrant',
+    'config', 'deploy', 'provision', 'vagrant',
 ]
