@@ -1,0 +1,64 @@
+{
+    "prod": {
+        "django_settings": "labsite.settings_prod",
+
+        "env": {
+            "use_ssh_config": true,
+            "forward_agent": true,
+
+            "roledefs": {
+                "application": ["lab-prod.oscar.priv"],
+                "broker": ["lab-prod.oscar.priv"],
+                "database": ["lab-prod.oscar.priv"]
+            }
+        }
+    },
+
+    "stag": {
+        "django_settings": "labsite.settings_stag",
+
+        "env": {
+            "use_ssh_config": true,
+            "forward_agent": true,
+
+            "roledefs": {
+                "application": ["lab-stag.oscar.priv"],
+                "broker": ["lab-stag.oscar.priv"],
+                "database": ["lab-stag.oscar.priv"]
+            } 
+        }
+    },
+
+    "test": {
+        "django_settings": "labsite.settings_test",
+
+        "env": {
+            "user": "vagrant",
+            "key_filename": "labsite/setup/vagrant",
+            "forward_agent": true,
+
+            "roledefs": {
+                "application": ["192.168.10.20"],
+                "broker": ["192.168.10.10"],
+                "database": ["192.168.10.11"]
+            } 
+        }
+    },
+
+    "default": {
+        "django_settings": "labsite.settings",
+        "upload_settings": true,
+
+        "env": {
+            "user": "vagrant",
+            "key_filename": "labsite/setup/vagrant",
+            "forward_agent": true,
+
+            "roledefs": {
+                "application": ["192.168.10.20"],
+                "broker": ["192.168.10.10"],
+                "database": ["192.168.10.11"]
+            } 
+        }
+    }
+}

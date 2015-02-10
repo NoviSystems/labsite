@@ -1,65 +1,39 @@
 
 from fabric.api import env, task
 from fabric.contrib import django
-from functools import partial
+import json
 
 from labsite.fabfile import *
 
 
-settings = task(django.settings_module)
+# turn fabric helper method into an actual task.
+settings = task(name='settings')(django.settings_module)
 
-env.forward_agent = True
+
+def load_environ_config():
+    with open('environ.json') as configfile:
+        conf = json.load(configfile)[env.environ]
+
+        django.settings_module(conf['django_settings'])
+
+        env.update(conf['env'])
+
+        # for now, also use env to store other global state
+        del conf['env']
+        env.update(conf)
 
 
 @task
-def environ(environ=None):
+def environ(environ):
     """
     Setup the environment that is being worked on.  [prod, stag, test, default]
     """
     env.environ = environ
-
-    # django settings
-    if environ:
-        django.settings_module('labsite.settings_%s' % environ)
-    else:
-        django.settings_module('labsite.settings')
-
-    # connection settings
-    if environ and environ != 'test':
-        env.use_ssh_config = True
-    else:
-        env.user = 'vagrant'
-        env.password = 'vagrant'
-
-    # load roledefs
-    env.roledefs = {
-        'application': partial(_hosts, environ, 'application'),
-        'broker': partial(_hosts, environ, 'broker'),
-        'database': partial(_hosts, environ, 'database'),
-    }
+    load_environ_config()
 
 
-def _hosts(environ, role):
-    defs = {
-        'prod': {
-            'application': ['lab-prod.oscar.priv', ],
-            'broker': ['lab-prod.oscar.priv', ],
-            'database': ['lab-prod.oscar.priv', ],
-        },
-        'stag': {
-            'application': ['lab-stag.oscar.priv', ],
-            'broker': ['lab-stag.oscar.priv', ],
-            'database': ['lab-stag.oscar.priv', ],
-        },
-        'test': {
-            'application': ['192.168.11.20', ],
-            'broker': ['192.168.11.11', ],
-            'database': ['192.168.11.10', ],
-        }
-    }.get(environ, {  # default/fallback lookup
-        'application': ['192.168.10.20', ],
-        'broker': ['192.168.10.11', ],
-        'database': ['192.168.10.10', ],
-    })
+# set default environ and load
+if not hasattr(env, 'environ'):
+    env.environ = 'default'
 
-    return defs[role]
+load_environ_config()
