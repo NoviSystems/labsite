@@ -8,8 +8,8 @@
 
             "roledefs": {
                 "application": ["lab-prod.oscar.priv"],
-                "broker": ["lab-prod.oscar.priv"],
-                "database": ["lab-prod.oscar.priv"]
+                "broker": ["lab-broker.oscar.priv"],
+                "database": ["lab-db.oscar.priv"]
             }
         }
     },
@@ -23,8 +23,8 @@
 
             "roledefs": {
                 "application": ["lab-stag.oscar.priv"],
-                "broker": ["lab-stag.oscar.priv"],
-                "database": ["lab-stag.oscar.priv"]
+                "broker": ["lab-broker.oscar.priv"],
+                "database": ["lab-db.oscar.priv"]
             } 
         }
     },
