@@ -1,5 +1,6 @@
 
 from fabric.api import task, roles, env, execute, sudo
+from fabric.contrib.files import sed
 from fabtools import require
 from fabtools import user
 import fabtools
@@ -18,10 +19,15 @@ def base():
     fabtools.ssh.harden()
     fabtools.systemd.restart('sshd')
 
-    # enable selinux
-    # ...
+    # selinux - reference:
+    # http://wiki.centos.org/HowTos/SELinux
+    sudo('setenforce 1')
+    sed('/etc/selinux/config', r'^SELINUX=.*$', 'SELINUX=enforcing', use_sudo=True)
 
     # setup hostname?
+    # http://ask.xmodulo.com/change-hostname-centos-rhel-7.html
+    # http://www.rackspace.com/knowledge_center/article/centos-hostname-change
+    sudo('hostnamectl set-hostname %(host)s' % env)
 
     require.package('ntp')
     require.service.enabled('ntpd')
@@ -52,6 +58,10 @@ def application():
         'gcc',
     ])
 
+    # nginx certs and SELinux rules
+    execute(config.certify)
+    sudo('setsebool -P httpd_read_user_content 1')
+
     sudo('firewall-cmd --add-port=80/tcp')
     sudo('firewall-cmd --add-port=80/tcp --permanent')
     sudo('firewall-cmd --add-port=443/tcp')
@@ -70,7 +80,6 @@ def application():
         require.python.virtualenv('venv')
 
         execute(config.application_secrets, **secrets_context)
-        execute(config.certify)
 
 
 @task
