@@ -148,11 +148,12 @@ def application(branch='master', **kwargs):
             run('python manage.py collectstatic --noinput')
             # run('python manage.py compress --force')
 
-    config = {'USERNAME': 'labuser'}
-    config['HOME_DIR'] = user.home_directory('labuser')
-    config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
-
+    # deploy the webserver/proxy configurations
     with user.unmasque():
+        config = {'USERNAME': 'labuser'}
+        config['HOME_DIR'] = user.home_directory('labuser')
+        config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
+
         require.files.template_file(
             '/etc/nginx/conf.d/labsite.conf',
             sudo('cat %(PROJ_DIR)s/labsite/setup/nginx.conf' % config, quiet=True),
@@ -166,9 +167,11 @@ def application(branch='master', **kwargs):
             use_sudo=True
         )
 
+        # ensure that the services are started
         require.service.started('supervisord')
         require.service.started('nginx')
 
+        # and that their configurations/processes are reloaded
         supervisor.update_config()
         supervisor.restart_process('all')
         service.restart('nginx')
