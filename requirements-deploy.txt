@@ -1,0 +1,2 @@
+fabric
+git+git://github.com/ITNG/fabtools.git

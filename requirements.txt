@@ -10,6 +10,3 @@ pytz
 contextdecorator
 # git+git://github.com/ITNG/foodapp.git
 # git+git://github.com/ITNG/worklog.git
-
-git+git://github.com/ITNG/fabtools.git
-fabric

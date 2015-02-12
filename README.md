@@ -45,7 +45,7 @@ inside a virtual environment.
     $ cd labsite
     $ virtualenv .env
     $ source .env/bin/activate
-    $ pip install -Ur requirements.txt
+    $ pip install -Ur requirements-deploy.txt
 
 If you're developing any of the labsite apps, follow the instructions posted in their
 respective repos. 
