@@ -29,16 +29,17 @@ This guide assumes some prior familiarization with [Bash](ss64.com/bash/),
 
 The roles described in the project's organization are the basis of the Vagrantfile and
 fabfile's structure. The Vagrantfile provides a production-like environment with three
-VMs that fill the above roles. The fabfile is structured to provision and deploy to
-these three host roles. 
+VMs that provide the above roles. This environment is useful for testing your changes
+before deploying them to staging and production. The fabfile is structured to provision
+and deploy to the three host roles. 
 
-To enable easier local development, a fourth `local` Vagrant VM is defined. It syncs
-this project directory to the vagrant user's home directory, and is structured to bypass
-the deployment process and manually run Django's development server.
+Development should be performed locally with vagrant, or remotely on the development
+server. It is not recommended that you develop locally without vagrant, as installing
+and running the various services correctly (postgres, redis) can be problematic.
 
 
-### Project Setup ###
-To get started, you'll need to clone the repository and install the project requirements
+### Local development ###
+To get started, you'll need to clone the repository and install the deploy requirements
 inside a virtual environment.
 
     $ git clone git@github.com:ITNG/labsite
@@ -52,13 +53,11 @@ respective repos.
 
 After installing the software, you'll need to configure labsite's django settings. Copy
 the example secrets and settings and customize them to fit your needs. At minimum, the
-postgres settings will need to be updated.
+postgres settings will need to be updated. Make sure that you set the SECRET_KEY value.
 
     $ cp labsite/secrets.ex.py labsite/secrets.py
     $ cp labsite/settings.ex.py labsite/settings.py
 
-
-### Development Environment ###
 With labsite configured, we need to setup the Vagrant development environment. These VMs
 will provide the database and broker services in addition to an application server.
 Simply boot the VMs and run the provisioning scripts.
@@ -71,7 +70,16 @@ These roles can also be referred to by name and individual provisioned. For exam
     $ vagrant up database
     $ fab provision.database
 
-### Local development ###
+The development environment can now be deployed to in order to test changes. However,
+committing and deploying each set of changes is not an efficient development workflow.
+You should only really deploy to the dev environment before attempting to deploy to
+staging and production.
+
+#### The local VM ####
+To enable easier local development, a fourth `local` Vagrant VM is defined. It syncs
+this project directory to the vagrant user's home directory, and is structured to
+manually run Django's development server.
+
 To develop locally, you will need to provision the `local` VM. This VM syncs your project
 folder to the vagrant user's home directory on `local`. Provisioning will allow you to
 install the necessary dependencies for the project.
@@ -109,6 +117,56 @@ You may also need to run the celery worker to execute asynchronous tasks:
     $ python manage.py celeryd
 
 The `local` VM has an assigned IP Address of `192.168.10.2`.
+
+
+### Remote development ###
+To develop remotely, SSH into the development server, clone the repository, and install
+the project requirements.
+
+    $ git clone git@github.com:ITNG/labsite
+    $ cd labsite
+    $ virtualenv .env
+    $ source .env/bin/activate
+    $ pip install -Ur requirements-deploy.txt
+
+If you're developing any of the labsite apps, follow the instructions posted in their
+respective repos. Otherwise, pip install the apps. Do not pip install the app while
+developing locally, as files may conflict.
+
+    $ pip install git+git://github.com/ITNG/foodapp.git
+    $ pip install git+git://github.com/ITNG/worklog.git
+
+After installing the software, you'll need to configure labsite's django settings. Copy
+the example secrets and settings and customize them to fit your needs. At minimum, the
+postgres settings and broker URL will need to be updated.
+
+    $ cp labsite/secrets.ex.py labsite/secrets.py
+    $ cp labsite/settings.ex.py labsite/settings.py
+
+You will also need to ensure that the database and broker are setup to allow your
+incoming connection requests. For postgres, this will require creating a user and a
+database and setting up the rules that allow access from the development server. On the
+postgres server:
+
+    $ sudo -iu postgres
+    $ createuser <username> --no-superuser --no-createdb --no-createrole
+    $ createdb <username>_lab -O <username>
+
+Add a rule like the following to the pg_hba.conf:
+
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+    ...
+    host    <username>_lab  <username>      dev.oscar.priv          peer
+
+With labsite setup, you should verify that your development environment can access the
+services.
+
+    # To test your postgres connection:
+    $ python manage.py dbshell
+
+    # To test your broker connection:
+    $ python manage.py celeryd status
+    (verify that this works)
 
 
 ### Development Database ###
