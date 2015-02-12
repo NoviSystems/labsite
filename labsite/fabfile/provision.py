@@ -1,16 +1,18 @@
 
-from fabric.api import task, roles, env, execute, sudo
-from fabric.contrib.files import sed
+from fabric.api import task, roles, env, execute, run, sudo
+from fabric.contrib import files
 from fabtools import require
 from fabtools import user
 import fabtools
+
+import re
 
 from labsite.fabfile import config
 from labsite.fabfile import PG_VERSION
 
 
 __all__ = [
-    'application', 'broker', 'database', 'all',
+    'application', 'broker', 'database', 'local', 'all',
 ]
 
 
@@ -22,7 +24,7 @@ def base():
     # selinux - reference:
     # http://wiki.centos.org/HowTos/SELinux
     sudo('setenforce 1')
-    sed('/etc/selinux/config', r'^SELINUX=.*$', 'SELINUX=enforcing', use_sudo=True)
+    files.sed('/etc/selinux/config', r'^SELINUX=.*$', 'SELINUX=enforcing', use_sudo=True)
 
     # setup hostname?
     # http://ask.xmodulo.com/change-hostname-centos-rhel-7.html
@@ -125,6 +127,32 @@ def database(name='default', db_version=None):
     # not relevant to labsite, but for future deployment scripts
     # sudo('psql -c "CREATE EXTENSION postgis" -d %(NAME)s' % db, user='postgres')
     # sudo('psql -c "CREATE EXTENSION postgis_topology" -d %(NAME)s' % db, user='postgres')
+
+
+@task
+def local():
+    require.postgres.packages(PG_VERSION)
+
+    require.rpm.repository('epel')
+    require.packages([
+        'git',
+        'gcc',
+    ])
+
+    require.python.pip()
+    require.python.package('virtualenv', use_sudo=True)
+    require.python.virtualenv('venv')
+
+    if not files.contains('.bash_profile', 'PATH='):
+        files.append('.bash_profile', 'PATH=$PATH:/usr/pgsql-%s/bin' % PG_VERSION)
+        files.append('export PATH')
+
+    else:
+        profile = run('cat ~/.bash_profile', quiet=True)
+        path = re.search(r'PATH=(.*)', profile).group(0).strip()
+        path += ':/usr/pgsql-%s/bin' % PG_VERSION
+        # print path
+        files.sed('.bash_profile', 'PATH=(.*)$', path)
 
 
 @task(default=True)

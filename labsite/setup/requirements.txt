@@ -1,2 +1,0 @@
-# production/deploy requirements
-psycopg2
