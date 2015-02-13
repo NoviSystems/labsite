@@ -1,6 +1,7 @@
 Vagrant.configure("2") do |config|
 
     config.vm.box = "chef/centos-7.0"
+    config.ssh.insert_key = false
 
     # disabled the shared folder for all boxes
     config.vm.synced_folder '.', '/vagrant', disabled: true
