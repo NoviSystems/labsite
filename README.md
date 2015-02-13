@@ -100,7 +100,8 @@ virtualenv will not work within the `local` VM, as the symlinks will break. Inst
 Additionally, you will need to install the apps manually to the virtualenv. If you are
 developing an app, you would need to install the app's requirements. For example:
 
-    $ pip install git+git://github.com/ITNG/foodapp.git
+    $ pip install git+git://github.com/ITNG/worklog.git
+    or
     $ pip install -Ur path/to/worklog/requirements.txt
 
 Finally, migrate the database
@@ -181,6 +182,12 @@ server's installation to a particular revision in git. By default the server is 
 to master, but you can deploy a server to a different branch. Additionally, you can
 specify which branch to deploy for the labsite apps.
 
+Labsite also operates on the notion of server environments. An environment a
+configuration that describes how to properly connect and communicate with the hosts in
+a specific deployment. For example, the 'stag' environment contains the variables
+necessary for connecting to OSCAR's staging environment. These configurations live in
+`environ.json`. If no environ is specified, it defaults to 'default'.
+
 ### How to Deploy ###
 
 Before deploying, make sure you've committed your latest changes. You will also need to
@@ -202,7 +209,7 @@ You can also deploy specific app branches:
 
     $ fab deploy:worklog=<some other branch>
 
-To deploy to production or staging:
+To deploy to a specific environment such as staging:
 
     $ fab environ:stag deploy
     or
