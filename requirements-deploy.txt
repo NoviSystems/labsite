@@ -1,3 +1,4 @@
 django<1.6
+contextdecorator
 fabric
 git+git://github.com/ITNG/fabtools.git
