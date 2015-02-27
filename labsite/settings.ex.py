@@ -16,6 +16,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': '<username>_lab',
         'USER': '<username>',
-        'HOST': '192.168.10.11',
+        'HOST': '192.168.10.10',
     }
 }
