@@ -25,7 +25,7 @@
                 "application": ["lab-stag.oscar.priv"],
                 "broker": ["lab-broker.oscar.priv"],
                 "database": ["lab-db.oscar.priv"]
-            } 
+            }
         }
     },
 
@@ -40,8 +40,8 @@
             "roledefs": {
                 "application": ["192.168.10.20"],
                 "broker": ["192.168.10.10"],
-                "database": ["192.168.10.11"]
-            } 
+                "database": ["192.168.10.10"]
+            }
         }
     },
 
@@ -57,8 +57,8 @@
             "roledefs": {
                 "application": ["192.168.10.20"],
                 "broker": ["192.168.10.10"],
-                "database": ["192.168.10.11"]
-            } 
+                "database": ["192.168.10.10"]
+            }
         }
     }
 }
