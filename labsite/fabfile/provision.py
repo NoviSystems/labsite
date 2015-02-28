@@ -1,9 +1,13 @@
 
-from fabric.api import task, roles, env, execute, run, sudo
+from fabric.api import task, roles, env, execute, cd, sudo
 from fabric.contrib import files
 from fabtools import require
+from fabtools import postgres
+from fabtools import python
 from fabtools import user
-import fabtools
+from prefab import pipeline
+from prefab import secrets
+from prefab.utils import host_roles, role_hosts
 
 import re
 
@@ -11,26 +15,24 @@ from labsite.fabfile import config
 from labsite.fabfile import PG_VERSION
 
 
+IP_ADDR = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
+
+
 __all__ = [
-    'application', 'broker', 'database', 'local', 'all',
+    'application', 'broker', 'database', 'devel', 'all',
 ]
 
 
 @task
+@pipeline.once
 def base():
     require.system.defaults()
-    fabtools.ssh.harden()
-    fabtools.systemd.restart('sshd')
+    require.ssh.hardened()
 
     # selinux - reference:
     # http://wiki.centos.org/HowTos/SELinux
     sudo('setenforce 1')
     files.sed('/etc/selinux/config', r'^SELINUX=.*$', 'SELINUX=enforcing', use_sudo=True)
-
-    # setup hostname?
-    # http://ask.xmodulo.com/change-hostname-centos-rhel-7.html
-    # http://www.rackspace.com/knowledge_center/article/centos-hostname-change
-    sudo('hostnamectl set-hostname %(host)s' % env)
 
     require.package('ntp')
     require.service.enabled('ntpd')
@@ -38,17 +40,16 @@ def base():
     sudo('ntpdate pool.ntp.org')
     require.service.started('ntpd')
 
-    require.package('firewalld')
-    require.service.started('firewalld')
-    require.service.enabled('firewalld')
+    require.firewall.service()
+    config.firewall()
 
 
 @task
-@roles('application')
+@pipeline.once
+@pipeline.requires(base)
 def application():
-    secrets_context = config.secrets_context()
-
-    execute(base)
+    # resolve secrets input as soon as possible
+    secrets.context('application')
 
     require.user('labuser', home='/opt/lab/', shell='/bin/bash')
     require.postgres.packages(PG_VERSION)
@@ -62,39 +63,49 @@ def application():
     ])
 
     # nginx certs and SELinux rules
-    execute(config.certify)
-    sudo('setsebool -P httpd_read_user_content 1')
-
-    sudo('firewall-cmd --add-port=80/tcp')
-    sudo('firewall-cmd --add-port=80/tcp --permanent')
-    sudo('firewall-cmd --add-port=443/tcp')
-    sudo('firewall-cmd --add-port=443/tcp --permanent')
     require.python.pip()
     require.python.package('virtualenv', use_sudo=True)
 
     with user.masquerade('labuser'):
         require.directory('log')
-        require.file('log/celeryd.log')
-        require.file('log/celerybeat.log')
         require.file('log/deployment.log')
 
         require.directory('backups')
 
         require.python.virtualenv('venv')
 
-        execute(config.application_secrets, **secrets_context)
+        execute(config.application_secrets)
+
+
+@task
+@roles('application')
+@pipeline.once
+@pipeline.requires(application)
+def frontend():
+    execute(config.certify)
+    sudo('setsebool -P httpd_read_user_content 1')
+
+
+@task
+@roles('application')
+@pipeline.once
+@pipeline.requires(application)
+def worker():
+    with user.masquerade('labuser'):
+        require.directory('log')
+        require.file('log/celeryd.log')
+        require.file('log/celerybeat.log')
 
 
 @task
 @roles('broker')
+@pipeline.requires(base)
 def broker():
-    execute(base)
-
     require.rpm.repository('epel')
     require.package('redis')
 
-    sudo('firewall-cmd --add-port=6379/tcp')
-    sudo('firewall-cmd --add-port=6379/tcp --permanent')
+    require.service.started('redis')
+    require.service.enabled('redis')
 
 
 @task
@@ -110,17 +121,16 @@ def database(name='default', db_version=None):
     # initialize postgres
     require.postgres.server(PG_VERSION)
 
-    pg_service = require.postgres._service_name(PG_VERSION)
+    pg_service = postgres.service_name(PG_VERSION)
     require.service.started(pg_service)
     require.service.enabled(pg_service)
     require.postgres.listening_on('*')
 
     # This should be more secure, but it's on the private network currently so ehhhh
     for host in env.roledefs['application']:
-        require.postgres.hba_rule('host', db['NAME'], db['USER'], "%s/32" % host, 'trust')
-
-    sudo('firewall-cmd --add-port=5432/tcp')
-    sudo('firewall-cmd --add-port=5432/tcp --permanent')
+        if IP_ADDR.match(host):
+            host = "%s/32" % host
+        require.postgres.hba_rule('host', db['NAME'], db['USER'], host, 'trust')
 
     require.postgres.user(db['USER'])
     require.postgres.database(db['NAME'], db['USER'])
@@ -131,7 +141,10 @@ def database(name='default', db_version=None):
 
 
 @task
-def local():
+def devel():
+    """
+    Provision a host in preparation for development.
+    """
     require.postgres.packages(PG_VERSION)
 
     require.rpm.repository('epel')
@@ -144,20 +157,27 @@ def local():
     require.python.package('virtualenv', use_sudo=True)
     require.python.virtualenv('venv')
 
-    if not files.contains('.bash_profile', 'PATH='):
-        files.append('.bash_profile', 'PATH=$PATH:/usr/pgsql-%s/bin' % PG_VERSION)
-        files.append('export PATH')
-
-    else:
-        profile = run('cat ~/.bash_profile', quiet=True)
-        path = re.search(r'PATH=(.*)', profile).group(0).strip()
-        path += ':/usr/pgsql-%s/bin' % PG_VERSION
-        # print path
-        files.sed('.bash_profile', 'PATH=(.*)$', path)
+    with python.virtualenv('venv'), cd('labsite'):
+        require.python.requirements('requirements.txt', upgrade=True)
 
 
 @task(default=True)
 def all():
-    execute(application)
-    execute(broker)
-    execute(database)
+    secrets.context('application')
+    execute(_all, hosts=role_hosts())
+
+
+@task
+def _all():
+    role_tasks = {
+        'application': [frontend, worker, ],
+        'broker': [broker, ],
+        'database': [database, ],
+    }
+
+    tasks = []
+    for role in host_roles(env.host):
+        if role in role_tasks:
+            tasks.extend(role_tasks[role])
+
+    pipeline.process(*tasks)

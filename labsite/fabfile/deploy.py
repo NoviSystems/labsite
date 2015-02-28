@@ -1,20 +1,18 @@
 
-from fabric.api import task, runs_once, execute
-from fabric.api import settings, env, hide, cd, path
+from fabric.api import task, runs_once
+from fabric.api import settings, env, hide, cd
 from fabric.api import local, run, sudo
 from fabric.contrib.files import append, upload_template
 from fabtools import require
-from fabtools import service
 from fabtools import supervisor
 from fabtools import python
 from fabtools import files
 from fabtools import user
+from prefab import pipeline
 
 from importlib import import_module
 from inspect import getsourcefile
 import posixpath
-
-from labsite.fabfile import PG_VERSION
 
 
 __all__ = (
@@ -23,6 +21,7 @@ __all__ = (
 
 
 @task
+@pipeline.once
 def pre_log():
     with settings(hide('running')):
         # these details need to be retrieved before masquerading as labuser
@@ -43,6 +42,7 @@ def pre_log():
 
 
 @task
+@pipeline.once
 def post_log():
     with settings(hide('running')), \
          user.masquerade('labuser'):
@@ -56,7 +56,7 @@ def post_log():
 
 
 @task
-@runs_once
+@pipeline.once
 @user.masquerade('labuser')
 def backup(depth=9):
     """
@@ -92,6 +92,7 @@ def backup(depth=9):
 
 
 @task
+@pipeline.once
 @user.masquerade('labuser')
 def rollback(depth=9):
     """
@@ -117,67 +118,115 @@ def rollback(depth=9):
 
 
 @task
+@pipeline.once
+@pipeline.requires(backup)
 @user.masquerade('labuser')
-def application(branch='master', **kwargs):
+def application(labsite=None, foodapp=None, worklog=None):
+    """
+    Deploys the application code.
+    """
+    branches = env.git_branches
 
+    # set branch defaults and local overrides
+    for repo in ['labsite', 'foodapp', 'worklog']:
+        branches.setdefault(repo, 'master')
+
+        if locals()[repo] is not None:
+            branches[repo] = locals()[repo]
+
+    # clone labsite repo
     with settings(prompts={'Are you sure you want to continue connecting (yes/no)? ': 'yes'}):
-        require.git.working_copy('git@github.com:ITNG/labsite.git', branch=branch)
+        require.git.working_copy('git@github.com:ITNG/labsite.git', branch=branches['labsite'])
 
+    # install packages
     require.python.virtualenv('venv')
     with python.virtualenv('venv'):
-        kwargs.setdefault('foodapp', 'master')
-        kwargs.setdefault('worklog', 'master')
 
         require.python.packages([
-            'git+git://github.com/ITNG/foodapp.git@%(foodapp)s' % kwargs,
-            'git+git://github.com/ITNG/worklog.git@%(worklog)s' % kwargs,
+            'git+git://github.com/ITNG/foodapp.git@%(foodapp)s' % branches,
+            'git+git://github.com/ITNG/worklog.git@%(worklog)s' % branches,
         ], upgrade=True)
 
-        with cd('labsite'):
-            require.python.requirements('requirements.txt', upgrade=True)
-            with path('/usr/pgsql-%s/bin' % PG_VERSION):
-                require.python.requirements('labsite/setup/requirements.txt', upgrade=True)
+        require.python.requirements('labsite/requirements.txt', upgrade=True)
 
-            if env.upload_settings:
-                settings_module = import_module(env.django_settings)
-                upload_template(getsourcefile(settings_module), 'labsite/settings.py', {})
-            else:
-                files.copy('labsite/settings_%s.py' % env.environ, 'labsite/settings.py')
-            files.copy('%s/secrets.py' % user.home_directory('labuser'), 'labsite/secrets.py')
+    # move files, run commands
+    with python.virtualenv('venv'), cd('labsite'):
 
-            run('python manage.py collectstatic --noinput')
-            # run('python manage.py compress --force')
+        if env.upload_settings:
+            settings_module = import_module(env.django_settings)
+            upload_template(getsourcefile(settings_module), 'labsite/settings.py', {})
+        else:
+            files.copy('labsite/settings_%s.py' % env.environ, 'labsite/settings.py')
+        files.copy('%s/secrets.py' % user.home_directory('labuser'), 'labsite/secrets.py')
 
-    # deploy the webserver/proxy configurations
-    with user.unmasque():
-        config = {'USERNAME': 'labuser'}
-        config['HOME_DIR'] = user.home_directory('labuser')
-        config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
-
-        require.files.template_file(
-            '/etc/nginx/conf.d/labsite.conf',
-            sudo('cat %(PROJ_DIR)s/labsite/setup/nginx.conf' % config, quiet=True),
-            context=config,
-            use_sudo=True
-        )
-        require.files.template_file(
-            '/etc/supervisord.d/labsite.ini',
-            sudo('cat %(PROJ_DIR)s/labsite/setup/supervisord.ini' % config, quiet=True),
-            context=config,
-            use_sudo=True
-        )
-
-        # ensure that the services are started
-        require.service.started('supervisord')
-        require.service.started('nginx')
-
-        # and that their configurations/processes are reloaded
-        supervisor.update_config()
-        supervisor.restart_process('all')
-        service.restart('nginx')
+        run('python manage.py collectstatic --noinput')
+        # run('python manage.py compress --force')
 
 
 @task
+@pipeline.once
+@pipeline.requires(application)
+def frontend():
+    config = {'USERNAME': 'labuser'}
+    config['HOME_DIR'] = user.home_directory('labuser')
+    config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
+
+    # supervisor ini
+    require.supervisor.process_template(
+        'gunicorn',
+        sudo('cat %(PROJ_DIR)s/labsite/setup/gunicorn.ini' % config, quiet=True),
+        context=config,
+        use_sudo=True,
+    )
+
+    require.service.started('supervisord')
+    require.service.enabled('supervisord')
+    supervisor.update_config()
+    supervisor.restart_process('all')
+
+    require.files.template_file(
+        '/etc/nginx/conf.d/labsite.conf',
+        sudo('cat %(PROJ_DIR)s/labsite/setup/nginx.conf' % config, quiet=True),
+        context=config,
+        use_sudo=True,
+    )
+
+    require.service.started('nginx')
+    require.service.enabled('nginx')
+    require.service.restarted('nginx')
+
+
+@task
+@pipeline.once
+@pipeline.requires(application)
+def worker():
+    config = {'USERNAME': 'labuser'}
+    config['HOME_DIR'] = user.home_directory('labuser')
+    config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
+
+    # supervisor ini's
+    require.supervisor.process_template(
+        'celery-beat',
+        sudo('cat %(PROJ_DIR)s/labsite/setup/celery-beat.ini' % config, quiet=True),
+        context=config,
+        use_sudo=True,
+    )
+    require.supervisor.process_template(
+        'celery-worker',
+        sudo('cat %(PROJ_DIR)s/labsite/setup/celery-worker.ini' % config, quiet=True),
+        context=config,
+        use_sudo=True,
+    )
+
+    require.service.started('supervisord')
+    require.service.enabled('supervisord')
+    supervisor.update_config()
+    supervisor.restart_process('all')
+
+
+@task
+@runs_once
+@pipeline.requires(application)
 @user.masquerade('labuser')
 def database():
     require.python.virtualenv('venv')
@@ -187,9 +236,19 @@ def database():
 
 
 @task(default=True)
-def process(*args, **kwargs):
-    execute(pre_log, roles=['application'])
-    execute(backup, roles=['application'])
-    execute(application, roles=['application'], *args, **kwargs)
-    execute(database, roles=['application'])
-    execute(post_log, roles=['application'])
+def process(labsite='master', foodapp='master', worklog='master'):
+    env.roles = ['application']
+    env.git_branches = {
+        'labsite': labsite,
+        'foodapp': foodapp,
+        'worklog': worklog,
+    }
+
+    pipeline.process(
+        pre_log,
+        backup,
+        frontend,
+        worker,
+        database,
+        post_log,
+    )
