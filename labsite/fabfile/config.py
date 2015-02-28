@@ -1,12 +1,11 @@
 
-from fabric.api import task, prompt, env, sudo
+from fabric.api import task, env, sudo
 from fabric.contrib import files
 from fabtools.files import is_file
 from fabtools import require
 from fabtools import user
-
-from django.utils.crypto import get_random_string
-from functools import partial
+from prefab import pipeline
+from prefab import secrets
 from prefab import utils
 import posixpath
 
@@ -16,30 +15,18 @@ __all__ = (
 )
 
 
-# @task
-def secrets_context(**kwargs):
-    def r(value):
-        return value() if callable(value) else value
-
-    defaults = {
-        'SECRET_KEY':   partial(get_random_string, 50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'),
-        'GITHUB_USER':  partial(prompt, "Worklog GitHub username:"),
-        'GITHUB_PASS':  partial(prompt, "Worklog GitHub password:"),
-        'SENTRY_DSN':   partial(prompt, "Sentry DSN:"),
-    }
-    return {key: r(kwargs.get(key, value)) for key, value in defaults.items()}
-
-
 @task
 def application_secrets(**kwargs):
     """
+    Upload and template the application secrets.
     """
-    context = secrets_context(**kwargs)
+    context = secrets.context('application', **kwargs)
     with user.masquerade('labuser'):
         files.upload_template('labsite/setup/secrets.tmpl.py', 'secrets.py', context=context)
 
 
 @task
+@pipeline.once
 def certify(force=False):
     """
     Generates a self-signed server cert.
@@ -66,12 +53,13 @@ def certify(force=False):
 @task
 def recertify():
     """
-    Forces regeneration of self-signed server certs
+    Forces regeneration of self-signed server certs.
     """
     certify(force=True)
 
 
 @task
+@pipeline.once
 def firewall():
     """
     Configure the host's firewall based on its assigned roles.
