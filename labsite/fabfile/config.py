@@ -7,11 +7,12 @@ from fabtools import user
 
 from django.utils.crypto import get_random_string
 from functools import partial
+from prefab import utils
 import posixpath
 
 
 __all__ = (
-    'application_secrets', 'certify', 'recertify',
+    'application_secrets', 'certify', 'recertify', 'firewall',
 )
 
 
@@ -68,3 +69,31 @@ def recertify():
     Forces regeneration of self-signed server certs
     """
     certify(force=True)
+
+
+@task
+def firewall():
+    """
+    Configure the host's firewall based on its assigned roles.
+    """
+    roles = utils.host_roles(env.host)
+
+    port_defs = {
+        'application': {None: [80, 443, ], },  # None implies the default zone
+        'broker': {'internal': [6379, ], },
+        'database': {'internal': [5432, ], },
+    }
+
+    source_defs = {
+        'application': {},
+        'broker': {'internal': utils.role_hosts('application'), },
+        'database': {'internal': utils.role_hosts('application'), },
+    }
+
+    ports = {}
+    sources = {}
+    for role in roles:
+        ports.update(port_defs[role])
+        sources.update(source_defs[role])
+
+    require.firewall.basic_config(ports, sources)

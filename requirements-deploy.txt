@@ -1,4 +1,5 @@
 django<1.6
-contextdecorator
+contextlib2
 fabric
 git+git://github.com/ITNG/fabtools.git
+git+git://github.com/ITNG/prefab.git

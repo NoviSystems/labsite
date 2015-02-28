@@ -7,6 +7,5 @@ psycopg2
 south
 raven
 pytz
-contextdecorator
 # git+git://github.com/ITNG/foodapp.git
 # git+git://github.com/ITNG/worklog.git
