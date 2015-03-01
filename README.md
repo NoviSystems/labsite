@@ -9,107 +9,172 @@ These instructions exist to help get developers started on development for Oscar
 internal applications. It's unlikely that the labsite project itself will see much
 development over time.
 
-### Organization ###
+### System Structure ###
 
-Labsite is composed of three primary services:
-- the application server (running [Django](http://djangoproject.com) &
-[Celery](http://www.celeryproject.org/))
-- the message broker ([redis](http://redis.io/))
-- and the database ([PostgreSQL](http://www.postgresql.org/))
+Labsite has a fairly common and simple structure. It is composed of a web application
+and server, and is supported by a message broker and database server. The web application
+is built on top of the [Django](http://djangoproject.com) web framework, and uses
+[Celery](http://www.celeryproject.org/)) for handling asynchronous task execution. In a
+production like environment, the application server would be a gunicorn or uWSGI server
+operating behind [nginx](http://nginx.org). In development, the web server would simply
+be Django's builtin development server.
 
-The deployment scripts and server setup assume that there are host roles that provide
-these services. That is specifically, that there are the ``application``, ``broker``,
-and ``database`` roles that a host may be assigned.
+The message broker is used for routing tasks to the Celery worker processes. These
+workers operate in the background and are largely independently of the web app. Labsite
+uses [redis](http://redis.io/) primarily due to its ease of use and configuration.
+
+The database is used for persisting data. [PostgreSQL](http://www.postgresql.org/) is
+our database of choice.
+
+If you're unfamiliar with any of those projects or there purposes, don't worry too much -
+most of your development work will be with the Django framework. It's only important now
+to ensure that they're setup properly, and you'll learn more about them as they become
+relevant to your development work.
+
+#### Host Roles ####
+Labsite is built around the concept of host roles. A role provides a service that is
+used in the overall system. Labsite has three host roles:
+
+- application: Provides the web application, worker processes, and web server.
+- broker: Provides the message broker service.
+- database: Provides the database server.
+
+A host may be assigned one or more of these roles. In our production environments, a host
+usually only provides a single role. When developing labsite, you'll either hook into 
+existing hosts that provide these service, or you'll set them up in an automated fashion
+with vagrant and fabric.
+
 
 ## Getting Started ##
 
 This guide assumes some prior familiarization with [Bash](ss64.com/bash/), 
-[Vagrant](https://vagrantup.com), [Fabric](http://www.fabfile.org), and
-[virtualenv](http://www.virtualenv.org/en/latest/).
+[Git](http://git-scm.com/), [virtualenv](http://www.virtualenv.org/en/latest/),
+[Vagrant](https://vagrantup.com), and [Fabric](http://www.fabfile.org).
 
-The roles described in the project's organization are the basis of the Vagrantfile and
-fabfile's structure. The Vagrantfile provides a production-like environment with three
-VMs that provide the above roles. This environment is useful for testing your changes
-before deploying them to staging and production. The fabfile is structured to provision
-and deploy to the three host roles. 
+Before doing anything, ensure that you have a github account and that you've setup
+your SSH keys.
 
-Development should be performed locally with vagrant, or remotely on the development
-server. It is not recommended that you develop locally without vagrant, as installing
-and running the various services correctly (postgres, redis) can be problematic.
+Next, you need to decide on your development workflow. There are two main stragies: 
 
+- local development
+- remote development
+
+The names are self-explanatory, however their workflows are somewhat different. 
+
+#### local development overview ####
+This workflow leverages your local system. Because the software installation process is
+fairly involved and requires a lot of additional software packages, a Vagrantfile has
+been provided that describes a production-like environment. Using vagrant will allow you
+to isolate the installed software to the virtual machines, allowing you to easily tear
+them down and reinitialize them. 
+
+The primary advantage with using vagrant is that it enables you to use our provisioning
+and deployment scripts. They are an automated way of installing all of the necessary
+software. The downside is that vagrant will eat some of your system resources. There are
+also some potential issues when working on Windows. 
+
+[Local development workflow](#local-development)
+
+This workflow is recommended for when you have a fairly capable machine running Linux or
+OS X. 
+
+#### remote development overview ####
+This workflow leverages resources located within OSCAR Lab's internal network. The
+advantage here is that all software and services are installed on OSCAR Lab's develpment machines. While the service will already be setup/installed, they will however require
+configuring. Additionally, you may experience connection issues when operating outside
+of NCSU's network. This is not always the case, but some public networks exhibit poor
+performance when attempting to SSH into the lab.
+
+[Remote development workflow](#remote-development)
 
 ### Local development ###
-To get started, you'll need to clone the repository and install the deploy requirements
-inside a virtual environment.
+To get started, you'll need to clone the repository. It contains the Vagrantfile that
+enables the local development workflow as well as the scripts for provisioning the VMs
+and deploying the software.
 
+    $ cd <your/working/directory>
     $ git clone git@github.com:ITNG/labsite
+
+With the repository downloaded, we'll setup a virtual enviroment and install the python
+packages used by the deployment scripts.
+
     $ cd labsite
     $ virtualenv .env
     $ source .env/bin/activate
-    $ pip install -Ur requirements-deploy.txt
+    $ pip install -Ur deploy-requirements.txt
 
-If you're developing any of the labsite apps, follow the instructions posted in their
-respective repos. 
+Additionally, go ahead and boot the Vagrant VMs. If this is your first time booting the
+VMs, it may be slow as it has to download the vagrant boxes/images.
+
+    # vagrant up
+
+The Vagrantfile describes two hosts - ``application`` and ``services``. The application
+VM has been setup to run both a production like server, as well as allow you to develop
+and run the management server. The services VM is where the broker and database will be
+installed. 
+
+It's important to note that the current directory is synced to the home directory on the
+application VM. Any changes to this directory will also have effect in the application
+VM. 
+
+If you're developing any of the labsite apps, you should go ahead and follow the
+instructions posted in their respective readme files. 
+
+- [worklog](github.com/ITNG/worklog)
+- [foodapp](github.com/ITNG/foodapp)
 
 After installing the software, you'll need to configure labsite's django settings. Copy
 the example secrets and settings and customize them to fit your needs. At minimum, the
-postgres settings will need to be updated. Make sure that you set the SECRET_KEY value.
+postgres settings will need to be updated. Make sure that you also set the SECRET_KEY
+value, which can be located in secrets.py. It may also be overridden in the settings.
 
     $ cp labsite/secrets.ex.py labsite/secrets.py
     $ cp labsite/settings.ex.py labsite/settings.py
 
-With labsite configured, we need to setup the Vagrant development environment. These VMs
-will provide the database and broker services in addition to an application server.
-Simply boot the VMs and run the provisioning scripts.
+With our requirements installed, the vagrant machines booted, and labsite configured,
+we're ready to provision the Vagrant machines. This may take a little while, so grab a
+cup of coffee or something.
 
-    $ vagrant up
     $ fab provision.all
 
-These roles can also be referred to by name and individual provisioned. For example:
+At this point, postgres and redis are installed and running on the services VM. They have also been configured to accept connections from the application host. The application
+host has most of the software installed, and is ready to be deployed to for production
+level testing. It also has this directory synced to the vagrant user's home directory,
+which will allow us to run the django development server.
 
-    $ vagrant up database
-    $ fab provision.database
+To finish setting up the development environment:
 
-The development environment can now be deployed to in order to test changes. However,
-committing and deploying each set of changes is not an efficient development workflow.
-You should only really deploy to the dev environment before attempting to deploy to
-staging and production.
+    $ fab vagrant.on:local provision.devel
 
-#### The local VM ####
-To enable easier local development, a fourth `local` Vagrant VM is defined. It syncs
-this project directory to the vagrant user's home directory, and is structured to
-manually run Django's development server.
+Once provisioned, SSH into `application` and finish installing the python packages. Note
+that the existing `.env` virtualenv will not work within the `application` VM, as the symlinks will break (discussing this is outside the scope of this tutorial).  Instead, a
+`venv` has been created in the vagrant home directory.
 
-To develop locally, you will need to provision the `local` VM. This VM syncs your project
-folder to the vagrant user's home directory on `local`. Provisioning will allow you to
-install the necessary dependencies for the project.
-
-    $ vagrant up local
-    $ fab vagrant.on:local provision.local
-
-Once provisioned, SSH into `local` and setup the software. Note that the existing `.env`
-virtualenv will not work within the `local` VM, as the symlinks will break. Instead, a
-`venv` exists in the vagrant home directory.
-
-    $ vagrant ssh local
+    $ vagrant ssh application
     $ source venv/bin/activate
 
     $ cd labsite
     $ pip install -Ur requirements.txt
 
-Additionally, you will need to install the apps manually to the virtualenv. If you are
-developing an app, you would need to install the app's requirements. For example:
+Additionally, if you are developing an app, you will need to install it's requirements.
+If you are not developing that app, you will need to install the app to the virtualenv.
+
+Using worklog as an example, to install the requirements:
+
+    $ pip install -Ur path/to/worklog/requirements.txt
+    # probably something like:
+    $ pip install -Ur .app/worklog/requirements.txt
+
+To install the app:
 
     $ pip install git+git://github.com/ITNG/worklog.git
-    or
-    $ pip install -Ur path/to/worklog/requirements.txt
 
-Finally, migrate the database
+Now, migrate the database
 
     $ python manage.py syncdb
     $ python manage.py migrate --all
 
-To run the development server, use the manage.py runserver command:
+Finally, you can run the development server:
 
     $ python manage.py runserver 0.0.0.0:8000
 
@@ -117,7 +182,8 @@ You may also need to run the celery worker to execute asynchronous tasks:
 
     $ python manage.py celeryd
 
-The `local` VM has an assigned IP Address of `192.168.10.2`.
+The application VM has a static IP of `192.168.10.20`. You should be able to reach the
+development server at http://192.168.10.20:8000.
 
 
 ### Remote development ###
@@ -231,3 +297,6 @@ To deploy to a specific environment such as staging:
     list match the Host header, Django will automatically serve a 500 error.
     To fix this issue, insert the appropriate URLs into the list of allowed hosts. 
 
+    If lunchapp is serving an Internal Server Error, ensure that there is an 
+    instance of a RiceCooker in the database. Login to the admin pages as a
+    superuser and create a RiceCooker. Refresh the page.
