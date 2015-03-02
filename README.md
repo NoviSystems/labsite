@@ -23,9 +23,6 @@ The message broker is used for routing tasks to the Celery worker processes. The
 workers operate in the background and are largely independently of the web app. Labsite
 uses [redis](http://redis.io/) primarily due to its ease of use and configuration.
 
-The database is used for persisting data. [PostgreSQL](http://www.postgresql.org/) is
-our database of choice.
-
 If you're unfamiliar with any of those projects or there purposes, don't worry too much -
 most of your development work will be with the Django framework. It's only important now
 to ensure that they're setup properly, and you'll learn more about them as they become
@@ -33,7 +30,7 @@ relevant to your development work.
 
 #### Host Roles ####
 Labsite is built around the concept of host roles. A role provides a service that is
-used in the overall system. Labsite has three host roles:
+used within system. Labsite has three host roles:
 
 - application: Provides the web application, worker processes, and web server.
 - broker: Provides the message broker service.
@@ -41,8 +38,8 @@ used in the overall system. Labsite has three host roles:
 
 A host may be assigned one or more of these roles. In our production environments, a host
 usually only provides a single role. When developing labsite, you'll either hook into 
-existing hosts that provide these service, or you'll set them up in an automated fashion
-with vagrant and fabric.
+existing hosts that provide these service, or you'll set them up on your local machine in
+an automated fashion with vagrant and fabric.
 
 
 ## Getting Started ##
@@ -80,7 +77,8 @@ OS X.
 
 #### remote development overview ####
 This workflow leverages resources located within OSCAR Lab's internal network. The
-advantage here is that all software and services are installed on OSCAR Lab's develpment machines. While the service will already be setup/installed, they will however require
+advantage here is that all software and services are installed on OSCAR Lab's develpment
+machines. While the service will already be setup/installed, they will however require
 configuring. Additionally, you may experience connection issues when operating outside
 of NCSU's network. This is not always the case, but some public networks exhibit poor
 performance when attempting to SSH into the lab.
@@ -133,11 +131,13 @@ value, which can be located in secrets.py. It may also be overridden in the sett
 
 With our requirements installed, the vagrant machines booted, and labsite configured,
 we're ready to provision the Vagrant machines. This may take a little while, so grab a
-cup of coffee or something.
+cup of coffee or something. Note that the provisioning process will ask you for some
+settings values up front. For now, you can skip those questions.
 
     $ fab provision.all
 
-At this point, postgres and redis are installed and running on the services VM. They have also been configured to accept connections from the application host. The application
+At this point, postgres and redis are installed and running on the services VM. They have
+also been configured to accept connections from the application host. The application
 host has most of the software installed, and is ready to be deployed to for production
 level testing. It also has this directory synced to the vagrant user's home directory,
 which will allow us to run the django development server.
@@ -147,7 +147,8 @@ To finish setting up the development environment:
     $ fab vagrant.on:local provision.devel
 
 Once provisioned, SSH into `application` and finish installing the python packages. Note
-that the existing `.env` virtualenv will not work within the `application` VM, as the symlinks will break (discussing this is outside the scope of this tutorial).  Instead, a
+that the existing `.env` virtualenv will not work within the `application` VM, as the
+symlinks will break (discussing this is outside the scope of this tutorial).  Instead, a
 `venv` has been created in the vagrant home directory.
 
     $ vagrant ssh application
@@ -156,8 +157,10 @@ that the existing `.env` virtualenv will not work within the `application` VM, a
     $ cd labsite
     $ pip install -Ur requirements.txt
 
-Additionally, if you are developing an app, you will need to install it's requirements.
-If you are not developing that app, you will need to install the app to the virtualenv.
+Additionally, if you are developing one of the labsite apps, you will need to follow its
+setup instructions and install it's requirements. If you are not developing that app, you
+will need to install the app to the virtualenv. You do *not* want to both setup the
+project and install it to your environment, as you may get file conflicts.
 
 Using worklog as an example, to install the requirements:
 
@@ -187,43 +190,126 @@ development server at http://192.168.10.20:8000.
 
 
 ### Remote development ###
-To develop remotely, SSH into the development server, clone the repository, and install
-the project requirements.
+To develop remotely on OSCAR Lab's infrastructure, you'll need to install the software
+on the development server, then configure the database and broker servers to accept
+connections from the dev server. 
+
+
+#### Installing software ####
+First, SSH into the the dev server, clone the repository, and install the project
+requirements into a virtualenv.
 
     $ git clone git@github.com:ITNG/labsite
     $ cd labsite
     $ virtualenv .env
     $ source .env/bin/activate
-    $ pip install -Ur requirements-deploy.txt
+    $ pip install -Ur requirements.txt
 
-If you're developing any of the labsite apps, follow the instructions posted in their
-respective repos. Otherwise, pip install the apps. Do not pip install the app while
-developing locally, as files may conflict.
+Additionally, if you are developing one of the labsite apps, you will need to follow its
+setup instructions and install it's requirements. If you are not developing that app, you
+will need to install the app to the virtualenv. You do *not* want to both setup the
+project and install it to your environment, as you may get file conflicts.
 
-    $ pip install git+git://github.com/ITNG/foodapp.git
+- [worklog](github.com/ITNG/worklog)
+- [foodapp](github.com/ITNG/foodapp)
+
+Using worklog as an example, to install the requirements:
+
+    $ pip install -Ur path/to/worklog/requirements.txt
+    # probably something like:
+    $ pip install -Ur .app/worklog/requirements.txt
+
+To install the app:
+
     $ pip install git+git://github.com/ITNG/worklog.git
 
 After installing the software, you'll need to configure labsite's django settings. Copy
 the example secrets and settings and customize them to fit your needs. At minimum, the
-postgres settings and broker URL will need to be updated.
+postgres settings and broker URL will need to be updated. Make sure that you also set the
+SECRET_KEY value, which can be located in secrets.py. It may also be overridden in the
+settings.
 
     $ cp labsite/secrets.ex.py labsite/secrets.py
     $ cp labsite/settings.ex.py labsite/settings.py
 
-You will also need to ensure that the database and broker are setup to allow your
-incoming connection requests. For postgres, this will require creating a user and a
-database and setting up the rules that allow access from the development server. On the
-postgres server:
+
+#### Configuring the postgres database ####
+
+Before setting up postgres, you need to be aware of a few details:
+
+- The 'postgres server' is a software service running on an actual server/host.
+- There is a postgres system user that is useful to use when configuring postgres. Simply
+`sudo -iu postgres` to open a shell as the postgres user.
+- Postgres has database users (also known as roles). These roles are not directly related
+to system users.
+- The postgres server has multiple databases within it. Each database is owned by a user.
+- Database access is controlled in the pg_hba.conf file. Each record specifies a
+connection type, a client address (IP address, range, or hostname), a database name, a
+user name, and the authentication method. The first matching record is used to determine
+access and perform authentication.
+
+At minimum, you will need to manually create a user and database. You may also need to
+configure the pg_hba.conf file. It is convention at the lab to use your system username
+as your database username. It also common to use <username>_<project name> as the name
+for your database.
+
+SSH into the posgres server and run the following, replacing <username> with your actual
+username:
 
     $ sudo -iu postgres
-    $ createuser <username> --no-superuser --no-createdb --no-createrole
+    $ createuser <username>
     $ createdb <username>_lab -O <username>
 
-Add a rule like the following to the pg_hba.conf:
+You can now test connecting to your database from the dev server. On dev:
 
-    # TYPE  DATABASE        USER            ADDRESS                 METHOD
-    ...
-    host    <username>_lab  <username>      dev.oscar.priv          peer
+    $ psql -d <username>_lab -h <pg hostname>
+
+###### Troubleshooting connection issues ######
+
+If you're having trouble connecting to your database, there are a few places to start
+troubleshooting. 
+
+- check that the postgres service is running
+- check the firewall
+- check the postgres settings
+
+*check the postgres service*
+    
+    $ sudo systemctl status postgresql
+
+*check the firewall*
+
+Postgres runs on port 5432. Make sure that the firewall is accepting connections on that
+port.
+
+    $ sudo firewall-cmd --query-port=5432/tcp
+
+*check the postgres settings*
+
+Postgres by default only listens to connections on the localhost. Ensure that it is also
+listening on its IP address.
+
+    $ sudo -iu postgres
+    $ cd data 
+    # or
+    $ cd <version>/data
+    $ cat postgresql.conf
+
+The `listen_addresses` value should have a string value of '*' or its IP address.
+
+Check the pg_hba.conf file. This is a very common source of connection issues.
+
+    $ sudo -iu postgres
+    $ cd data 
+    # or
+    $ cd <version>/data
+    $ cat pg_hba.conf
+
+Make sure that the first matching rule allows you to connect. If there are no rules that
+allow you to connect from the dev server, add a rule like the following to the
+pg_hba.conf:
+
+    host    <username>_lab  <username>      dev.oscar.priv          trust
 
 With labsite setup, you should verify that your development environment can access the
 services.
