@@ -94,7 +94,8 @@ and deploying the software.
     $ git clone git@github.com:ITNG/labsite
 
 With the repository downloaded, we'll setup a virtual enviroment and install the python
-packages used by the deployment scripts.
+packages used by the deployment scripts. NOTE: For Windows users, the activate script
+is in .env/Scripts/activate
 
     $ cd labsite
     $ virtualenv .env
@@ -118,8 +119,8 @@ VM.
 If you're developing any of the labsite apps, you should go ahead and follow the
 instructions posted in their respective readme files. 
 
-- [worklog](github.com/ITNG/worklog)
-- [foodapp](github.com/ITNG/foodapp)
+- [worklog](https://github.com/ITNG/worklog)
+- [foodapp](https://github.com/ITNG/foodapp)
 
 After installing the software, you'll need to configure labsite's django settings. Copy
 the example secrets and settings and customize them to fit your needs. At minimum, the
@@ -144,7 +145,7 @@ which will allow us to run the django development server.
 
 To finish setting up the development environment:
 
-    $ fab vagrant.on:local provision.devel
+    $ fab vagrant.on:application provision.devel
 
 Once provisioned, SSH into `application` and finish installing the python packages. Note
 that the existing `.env` virtualenv will not work within the `application` VM, as the
