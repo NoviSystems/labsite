@@ -170,6 +170,7 @@ def frontend():
     config = {'USERNAME': 'labuser'}
     config['HOME_DIR'] = user.home_directory('labuser')
     config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
+    config['HOSTNAME'] = env.host
 
     # supervisor ini
     require.supervisor.process_template(
@@ -203,6 +204,7 @@ def worker():
     config = {'USERNAME': 'labuser'}
     config['HOME_DIR'] = user.home_directory('labuser')
     config['PROJ_DIR'] = posixpath.join(config['HOME_DIR'], 'labsite')
+    config['HOSTNAME'] = env.host
 
     # supervisor ini's
     require.supervisor.process_template(
