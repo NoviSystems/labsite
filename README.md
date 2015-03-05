@@ -182,6 +182,12 @@ Finally, you can run the development server:
 
     $ python manage.py runserver 0.0.0.0:8000
 
+If you're unable to reach the development server from your browser, you probably need to
+open the port to allow incoming connections.
+
+    $ sudo firewall-cmd --add-port=8000/tcp --permanent
+    $ sudo firewall-cmd --add-port=8000/tcp
+
 You may also need to run the celery worker to execute asynchronous tasks:
 
     $ python manage.py celeryd
