@@ -238,6 +238,12 @@ settings.
 
     $ cp labsite/secrets.ex.py labsite/secrets.py
     $ cp labsite/settings.ex.py labsite/settings.py
+    
+If you need to work on a labsite app which has previously been installed using pip, be sure
+to uninstall it and use the setup instructions in the app's readme. Otherwise, labsite may
+use the installed version of the app rather than the one you are making changes to.
+
+    $ pip uninstall [appname]
 
 
 #### Configuring the postgres database ####
