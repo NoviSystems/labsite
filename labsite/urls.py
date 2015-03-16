@@ -1,7 +1,5 @@
 from django.conf.urls import patterns, include, url
 
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
 from views import LabsiteView
 
 # Uncomment the next two lines to enable the admin:
@@ -18,5 +16,3 @@ urlpatterns = patterns(
     url(r'^lunch/', include('foodapp.urls')),
     url(r'^worklog/', include('worklog.urls')),
 )
-
-urlpatterns += staticfiles_urlpatterns()
