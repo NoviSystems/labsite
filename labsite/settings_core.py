@@ -17,7 +17,7 @@ SETTINGS_DIR = os.path.realpath(os.path.join(__file__, "../"))
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = DEBUG
 
