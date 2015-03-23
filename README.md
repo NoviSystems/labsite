@@ -129,6 +129,8 @@ value, which can be located in secrets.py. It may also be overridden in the sett
 
     $ cp labsite/secrets.ex.py labsite/secrets.py
     $ cp labsite/settings.ex.py labsite/settings.py
+    
+Make sure that both files have been set up properly, otherwise the following step may fail.
 
 With our requirements installed, the vagrant machines booted, and labsite configured,
 we're ready to provision the Vagrant machines. This may take a little while, so grab a
