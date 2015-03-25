@@ -22,7 +22,7 @@ def application_secrets(**kwargs):
     """
     context = secrets.context('application', **kwargs)
     with user.masquerade('labuser'):
-        files.upload_template('labsite/setup/secrets.tmpl.py', 'secrets.py', context=context)
+        files.upload_template('project/setup/secrets.tmpl.py', 'secrets.py', context=context)
 
 
 @task
