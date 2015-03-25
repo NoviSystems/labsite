@@ -233,8 +233,7 @@ def worker():
 def database():
     require.python.virtualenv('venv')
     with python.virtualenv('venv'), cd('labsite'):
-        run('python manage.py syncdb --noinput')
-        run('python manage.py migrate --all --noinput --no-initial-data')
+        run('python manage.py migrate --noinput')
 
 
 @task(default=True)
