@@ -6,7 +6,7 @@ import datetime
 class Item(models.Model):
     name = models.CharField(max_length=56)
     description = models.CharField(max_length=256)
-    once_a_day = models.BooleanField()
+    once_a_day = models.BooleanField(default=False)
 
     def __unicode__(self):
         return '%s: %s' % (self.name, self.description,)
@@ -39,7 +39,7 @@ class Order(models.Model):
 
 
 class RiceCooker(models.Model):
-    is_on = models.BooleanField()
+    is_on = models.BooleanField(default=False)
 
     def __unicode__(self):
         return "%s." % (self.is_on)
@@ -52,9 +52,11 @@ class MonthlyCost(models.Model):
     def __unicode__(self):
         return "$%3.2f on %s." % (self.cost, self.date)
 
+
 class AmountPaid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=datetime.date.today)
     user = models.ForeignKey(User)
+
     def __unicode__(self):
-        return "$%3.2f by %s on %s" % (self.amount, self.user, self.date) 
+        return "$%3.2f by %s on %s" % (self.amount, self.user, self.date)
