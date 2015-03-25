@@ -8,9 +8,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
+from __future__ import absolute_import
 import os
 import socket
-from secrets import *
+from project.secrets import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 

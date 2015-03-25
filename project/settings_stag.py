@@ -1,5 +1,6 @@
 
-from labsite.settings_core import *
+from __future__ import absolute_import
+from project.settings_core import *
 from datetime import timedelta
 from celery.schedules import crontab
 
