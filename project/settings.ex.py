@@ -1,6 +1,7 @@
 
 from labsite.settings_core import *
 from datetime import timedelta
+from celery.schedules import crontab
 
 SECRET_KEY = 'xz#=4k+4we__68ge_i6v_e5v^+km*p+j=+8qjcq(ox%qle!@k*'
 
@@ -33,5 +34,9 @@ CELERYBEAT_SCHEDULE = {
         'task': 'worklog.tasks.reconcile_db_with_gh',
         'schedule': timedelta(hours=1),
         'args': (16, 16)
+    },
+    'reset-rice-cooker': {
+        'task': 'foodapp.tasks.reset_rice_cooker',
+        'schedule': crontab(hour=0, minute=1, day_of_week=[0, 1, 2, 3, 4, 5, 6]),
     },
 }

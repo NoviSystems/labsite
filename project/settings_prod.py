@@ -24,6 +24,7 @@ DATABASES = {
 BROKER_URL = 'redis://lab-broker.oscar.priv:6379/0'
 
 CELERYBEAT_SCHEDULE = {
+    # worklog
     'reconcile_db_with_gh-every-1-hours': {
         'task': 'worklog.tasks.reconcile_db_with_gh',
         'schedule': timedelta(hours=1),
@@ -36,6 +37,12 @@ CELERYBEAT_SCHEDULE = {
     'generate_invoice_email-every-1-days': {
         'task': 'worklog.tasks.generate_invoice_email',
         'schedule': crontab(hour=2, minute=0, day_of_week=[0, 1, 2, 3, 4, 5, 6]),
+    },
+
+    # foodapp
+    'reset-rice-cooker': {
+        'task': 'foodapp.tasks.reset_rice_cooker',
+        'schedule': crontab(hour=0, minute=1, day_of_week=[0, 1, 2, 3, 4, 5, 6]),
     },
 }
 

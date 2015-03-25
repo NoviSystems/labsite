@@ -1,5 +1,5 @@
 django>=1.7,<1.7.99
-celery[redis]==3.1.11
+celery[redis]
 gunicorn
 psycopg2
 raven
