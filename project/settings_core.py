@@ -2,24 +2,18 @@
 Django settings for labsite project.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
+https://docs.djangoproject.com/en/1.7/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
+https://docs.djangoproject.com/en/1.7/ref/settings/
 """
 
-from datetime import timedelta
+from __future__ import absolute_import
 import os
 import socket
-from secrets import *
+from project.secrets import *
 
-SETTINGS_DIR = os.path.realpath(os.path.join(__file__, "../"))
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-
-DEBUG = False
-
-TEMPLATE_DEBUG = DEBUG
 
 
 SITE_URL = socket.gethostname()
@@ -40,36 +34,34 @@ DEFAULT_FROM_EMAIL = 'webmaster@lab.oscar.ncsu.edu'
 # Application definition
 
 INSTALLED_APPS = (
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.admin',
-    'discover_runner',
-    'south',
+    'raven.contrib.django.raven_compat',
+    'rest_framework',
     'worklog',
     'foodapp',
-    'djcelery',
-    'gunicorn',
-    'rest_framework',
-    'raven.contrib.django.raven_compat',
 )
-
-TEST_RUNNER = 'discover_runner.DiscoverRunner'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'labsite.urls'
+ROOT_URLCONF = 'project.urls'
 
-WSGI_APPLICATION = 'labsite.wsgi.application'
+WSGI_APPLICATION = 'project.wsgi.application'
+
+# Internationalization
+# https://docs.djangoproject.com/en/1.7/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -88,14 +80,11 @@ MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../media-root'))
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
+# https://docs.djangoproject.com/en/1.7/howto/static-files/
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static-root'))
 
-STATICFILES_DIRS = (
-    # "/opt/lab/labsite/foodapp/static/",
-)
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -124,32 +113,17 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 
 # CELERY SETTINGS
-
-# BROKER_HOST = "localhost"
-# BROKER_PORT = 5672
-# BROKER_VHOST = "lab_vhost"
-# BROKER_PASSWORD = "BN4bj1ptqlVx"
-# BROKER_USER = "labuser"
 CELERY_TIMEZONE = 'America/New_York'
+
 CELERY_ENABLE_UTC = True
-CELERYBEAT_SCHEDULE = {
-    'reconcile_db_with_gh-every-1-minutes': {
-        'task': 'worklog.tasks.reconcile_db_with_gh',
-        'schedule': timedelta(hours=1),
-        'args': (16, 16)
-    },
-}
-import djcelery
-djcelery.setup_loader()
+
 
 # WORKLOG SETTINGS
-WORKLOG_SEND_REMINDERS = True
+WORKLOG_SEND_REMINDERS = False
+
 WORKLOG_SEND_REMINDERS_HOUR = 17
-WORKLOG_SEND_REMINDERS_DAYSOFWEEK = "weekdays"
+
 WORKLOG_EMAIL_REMINDERS_EXPIRE_AFTER = 4
-WORKLOG_CLEAR_REMINDERS_DAYSOFWEEK = "weekdays"
-WORKLOG_CLEAR_REMINDERS_HOUR = 2
-WORKLOG_REMINDER_EMAIL_LINK_URLBASE = "https://lab-prod.oscar.ncsu.edu"
 
 #######################################
 
@@ -184,13 +158,13 @@ LOGGING = {
     }
 }
 
+RAVEN_CONFIG = {
+    'dsn': SENTRY_DSN
+}
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.SessionAuthentication',),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'PAGINATE_BY': None
-}
-
-RAVEN_CONFIG = {
-    'dsn': SENTRY_DSN
 }

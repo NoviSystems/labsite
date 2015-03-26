@@ -11,8 +11,8 @@ from prefab.utils import host_roles, role_hosts
 
 import re
 
-from labsite.fabfile import config
-from labsite.fabfile import PG_VERSION
+from project.fabfile import config
+from project.fabfile import PG_VERSION
 
 
 IP_ADDR = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
@@ -99,8 +99,6 @@ def frontend():
 def worker():
     with user.masquerade('labuser'):
         require.directory('log')
-        require.file('log/celeryd.log')
-        require.file('log/celerybeat.log')
 
 
 @task

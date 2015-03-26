@@ -1,6 +1,6 @@
 {
     "prod": {
-        "django_settings": "labsite.settings_prod",
+        "django_settings": "project.settings_prod",
 
         "env": {
             "use_ssh_config": true,
@@ -15,7 +15,7 @@
     },
 
     "stag": {
-        "django_settings": "labsite.settings_stag",
+        "django_settings": "project.settings_stag",
 
         "env": {
             "use_ssh_config": true,
@@ -30,11 +30,11 @@
     },
 
     "test": {
-        "django_settings": "labsite.settings_test",
+        "django_settings": "project.settings_test",
 
         "env": {
             "user": "vagrant",
-            "key_filename": "labsite/setup/vagrant",
+            "key_filename": "project/setup/vagrant",
             "forward_agent": true,
 
             "roledefs": {
@@ -46,12 +46,12 @@
     },
 
     "default": {
-        "django_settings": "labsite.settings",
+        "django_settings": "project.settings",
         "upload_settings": true,
 
         "env": {
             "user": "vagrant",
-            "key_filename": "labsite/setup/vagrant",
+            "key_filename": "project/setup/vagrant",
             "forward_agent": true,
 
             "roledefs": {

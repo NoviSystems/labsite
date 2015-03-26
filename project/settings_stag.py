@@ -1,10 +1,11 @@
 
-from labsite.settings_core import *
+from __future__ import absolute_import
+from project.settings_core import *
+from datetime import timedelta
+from celery.schedules import crontab
 
+SITE_URL = "lab-stag.oscar.ncsu.edu"
 
-DEBUG = False
-
-TEMPLATE_DEBUG = DEBUG
 
 DATABASES = {
     'default': {
@@ -17,16 +18,20 @@ DATABASES = {
 
 
 # CELERY SETTINGS
-# BROKER_URL = 'django://qpid-1.oscar.ncsu.edu:5672/'
-# CELERY_RESULT_BACKEND='qpid'
-# BROKER_URL = 'qpid://qpid-1.oscar.ncsu.edu:5672//'
-# BROKER_URL = 'amqp://labuser:BN4bj1ptqlVx@localhost:5672/lab_vhost'
 BROKER_URL = 'redis://lab-broker.oscar.priv:6379/1'
+
 CELERYBEAT_SCHEDULE = {
+    # worklog
     'reconcile_db_with_gh-every-1-minutes': {
         'task': 'worklog.tasks.reconcile_db_with_gh',
         'schedule': timedelta(minutes=1),
         'args': (16, 16)
+    },
+
+    # foodapp
+    'reset-rice-cooker': {
+        'task': 'foodapp.tasks.reset_rice_cooker',
+        'schedule': crontab(hour=0, minute=1, day_of_week=[0, 1, 2, 3, 4, 5, 6]),
     },
 }
 

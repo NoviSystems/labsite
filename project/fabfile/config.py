@@ -1,5 +1,5 @@
 
-from fabric.api import task, env, sudo
+from fabric.api import task, env, sudo, puts
 from fabric.contrib import files
 from fabtools.files import is_file
 from fabtools import require
@@ -22,7 +22,7 @@ def application_secrets(**kwargs):
     """
     context = secrets.context('application', **kwargs)
     with user.masquerade('labuser'):
-        files.upload_template('labsite/setup/secrets.tmpl.py', 'secrets.py', context=context)
+        files.upload_template('project/setup/secrets.tmpl.py', 'secrets.py', context=context)
 
 
 @task
@@ -66,22 +66,39 @@ def firewall():
     """
     roles = utils.host_roles(env.host)
 
+    if not roles:
+        puts("Warning: Host '%s' has no roles" % env.host)
+        return
+
     port_defs = {
-        'application': {None: [80, 443, ], },  # None implies the default zone
-        'broker': {'internal': [6379, ], },
-        'database': {'internal': [5432, ], },
+        'application': {None: {80, 443, }, },  # None implies the default zone
+        'broker': {'internal': {6379, }, },
+        'database': {'internal': {5432, }, },
     }
 
     source_defs = {
         'application': {},
-        'broker': {'internal': utils.role_hosts('application'), },
-        'database': {'internal': utils.role_hosts('application'), },
+        'broker': {'internal': set(utils.role_hosts('application')), },
+        'database': {'internal': set(utils.role_hosts('application')), },
     }
 
     ports = {}
     sources = {}
     for role in roles:
-        ports.update(port_defs[role])
-        sources.update(source_defs[role])
+        # ports.update(port_defs[role])
+        # sources.update(source_defs[role])
+
+        # we need to make sure that we update the value, itself not the value for the key.
+        for key, value in port_defs[role].items():
+            if key not in ports:
+                ports[key] = value
+            else:
+                ports[key].update(value)
+
+        for key, value in source_defs[role].items():
+            if key not in sources:
+                sources[key] = value
+            else:
+                sources[key].update(value)
 
     require.firewall.basic_config(ports, sources)

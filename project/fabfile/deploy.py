@@ -16,7 +16,7 @@ import posixpath
 
 
 __all__ = (
-    'backup', 'rollback', 'application', 'database', 'process',
+    'backup', 'rollback', 'application', 'frontend', 'worker', 'database', 'process',
 )
 
 
@@ -154,10 +154,10 @@ def application(labsite=None, foodapp=None, worklog=None):
 
         if env.upload_settings:
             settings_module = import_module(env.django_settings)
-            upload_template(getsourcefile(settings_module), 'labsite/settings.py', {})
+            upload_template(getsourcefile(settings_module), 'project/settings.py', {})
         else:
-            files.copy('labsite/settings_%s.py' % env.environ, 'labsite/settings.py')
-        files.copy('%s/secrets.py' % user.home_directory('labuser'), 'labsite/secrets.py')
+            files.copy('project/settings_%s.py' % env.environ, 'project/settings.py')
+        files.copy('%s/secrets.py' % user.home_directory('labuser'), 'project/secrets.py')
 
         run('python manage.py collectstatic --noinput')
         # run('python manage.py compress --force')
@@ -175,7 +175,7 @@ def frontend():
     # supervisor ini
     require.supervisor.process_template(
         'gunicorn',
-        sudo('cat %(PROJ_DIR)s/labsite/setup/gunicorn.ini' % config, quiet=True),
+        sudo('cat %(PROJ_DIR)s/project/setup/gunicorn.ini' % config, quiet=True),
         context=config,
         use_sudo=True,
     )
@@ -187,7 +187,7 @@ def frontend():
 
     require.files.template_file(
         '/etc/nginx/conf.d/labsite.conf',
-        sudo('cat %(PROJ_DIR)s/labsite/setup/nginx.conf' % config, quiet=True),
+        sudo('cat %(PROJ_DIR)s/project/setup/nginx.conf' % config, quiet=True),
         context=config,
         use_sudo=True,
     )
@@ -209,13 +209,13 @@ def worker():
     # supervisor ini's
     require.supervisor.process_template(
         'celery-beat',
-        sudo('cat %(PROJ_DIR)s/labsite/setup/celery-beat.ini' % config, quiet=True),
+        sudo('cat %(PROJ_DIR)s/project/setup/celery-beat.ini' % config, quiet=True),
         context=config,
         use_sudo=True,
     )
     require.supervisor.process_template(
         'celery-worker',
-        sudo('cat %(PROJ_DIR)s/labsite/setup/celery-worker.ini' % config, quiet=True),
+        sudo('cat %(PROJ_DIR)s/project/setup/celery-worker.ini' % config, quiet=True),
         context=config,
         use_sudo=True,
     )
@@ -233,8 +233,7 @@ def worker():
 def database():
     require.python.virtualenv('venv')
     with python.virtualenv('venv'), cd('labsite'):
-        run('python manage.py syncdb --noinput')
-        run('python manage.py migrate --all --noinput --no-initial-data')
+        run('python manage.py migrate --noinput')
 
 
 @task(default=True)

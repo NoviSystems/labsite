@@ -1,6 +1,6 @@
-django<1.6
+django>=1.7,<1.7.99
 contextlib2
 fabric
-django-celery
+celery
 git+git://github.com/ITNG/fabtools.git
 git+git://github.com/ITNG/prefab.git
