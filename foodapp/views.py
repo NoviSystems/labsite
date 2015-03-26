@@ -7,8 +7,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.views.generic import CreateView, ListView, TemplateView
 from django.http import HttpResponseRedirect
-from django.utils.functional import lazy
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.shortcuts import redirect
 from django.db.models import Sum
@@ -39,12 +38,6 @@ class HomepageView(CreateView):
             return self.ricecooker_power(True)
         if 'riceOff' in request.POST:
             return self.ricecooker_power(False)
-
-        if 'riceButton' in request.POST:
-            if RiceCooker.objects.all()[0].is_on:
-                RiceCooker.objects.all().update(is_on=False)
-            else:
-                RiceCooker.objects.all().update(is_on=True)
 
         if form.is_valid():
             obj = form.save(commit=False)
