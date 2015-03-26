@@ -16,7 +16,7 @@ import posixpath
 
 
 __all__ = (
-    'backup', 'rollback', 'application', 'database', 'process',
+    'backup', 'rollback', 'application', 'frontend', 'worker', 'database', 'process',
 )
 
 

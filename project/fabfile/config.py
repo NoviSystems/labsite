@@ -1,5 +1,5 @@
 
-from fabric.api import task, env, sudo
+from fabric.api import task, env, sudo, puts
 from fabric.contrib import files
 from fabtools.files import is_file
 from fabtools import require
@@ -65,6 +65,10 @@ def firewall():
     Configure the host's firewall based on its assigned roles.
     """
     roles = utils.host_roles(env.host)
+
+    if not roles:
+        puts("Warning: Host '%s' has no roles" % env.host)
+        return
 
     port_defs = {
         'application': {None: {80, 443, }, },  # None implies the default zone

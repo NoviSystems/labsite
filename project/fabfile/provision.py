@@ -99,8 +99,6 @@ def frontend():
 def worker():
     with user.masquerade('labuser'):
         require.directory('log')
-        require.file('log/celeryd.log')
-        require.file('log/celerybeat.log')
 
 
 @task
