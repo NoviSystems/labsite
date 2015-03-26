@@ -1,18 +1,33 @@
 from django import forms
-from django.forms import ModelForm
-from models import Order, AmountPaid
+from foodapp import models
+import datetime
 
-class OrderForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(OrderForm, self).__init__(*args, **kwargs)
+
+class OrderForm(forms.ModelForm):
 
     class Meta:
-        model = Order
+        model = models.Order
+        exclude = ['date']
+        widgets = {
+            'user': forms.HiddenInput(),
+        }
+
+    def clean_item(self):
+        item = self.cleaned_data['item']
+        user = self.cleaned_data['user']
+
+        if item.once_a_day and models.Order.objects.filter(
+            user=user,
+            date=datetime.date.today,
+            item=item
+        ).exists():
+            raise forms.ValidationError('This item has already been ordered.')
+
+        return item
+
+
+class PaidForm(forms.ModelForm):
+
+    class Meta:
+        model = models.AmountPaid
         exclude = ["user", "date"]
-
-class PaidForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(PaidForm, self).__init__(*args, **kwargs)
-    class Meta:
-        model = AmountPaid
-	exclude = ["user", "date"]

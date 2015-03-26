@@ -46,16 +46,10 @@
             <div class="navbar-collapse collapse">
                 {% if user.is_authenticated %}
                 <ul class="nav navbar-nav">
-                    <li><a href="{% url 'url_homepage' %}">Place Order <i class="fa fa-cutlery"></i></a>
-                    </li>
-                    <li><a href="{% url 'url_user_orders' username=user %}">My Order History <i class="fa fa-book"></i></a>
-                    </li>
-                    <li><a href="{% url 'url_todays_orders' %}">Today's Orders <i class="fa fa-calendar"></i></a>
-                    </li>
-                    <li><a href="{% url 'url_last_month_view' %}">Last Month's Orders <i class="fa fa-archive"></i></a>
-                    </li>
-                    <li><a href="{% url 'url_leaderboard' %}">Leaderboards <i class="glyphicon glyphicon-star-empty"></i></a>
-                    </li>
+                    <li><a href="{% url 'url_home' %}">Place Order <i class="fa fa-cutlery"></i></a></li>
+                    <li><a href="{% url 'url_user_orders' username=user %}">My Order History <i class="fa fa-book"></i></a></li>
+                    <li><a href="{% url 'url_last_month_view' %}">Last Month's Orders <i class="fa fa-calendar"></i></a></li>
+                    <li><a href="{% url 'url_leaderboard' %}">Leaderboards <i class="glyphicon glyphicon-star-empty"></i></a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="">{{ user }}</i></a>

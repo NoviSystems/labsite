@@ -1,212 +1,96 @@
-{% extends 'foodapp/base.html' %} {% block content %}
-<!-- <li><a href="{ % url 'url_month_orders' month=last_month year=year % }">Last Month's Totals</a></li>  -->
-{% if error %}
-    <div class="text-center">
-        <h3 class="errorlist">{{ error }}</h3>
-    </div>
-{% endif %}
+{% extends 'foodapp/base.html' %}
+
+{% block content %}
 <div class="row">
-<div class="col-md-2" style="margin-top:35px;">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            {% if rice_is_on %}
-            <h3 class="panel-title text-center">RICE ON</h3>
-            {% else %}
-            <h3 class="panel-title text-center">RICE OFF</h3>
-            {% endif %}
-        </div>
-        <div class="panel-body">
-            <form class="form" id="rice_form" method="post" target="">
-                <center>   {% csrf_token %}
-            {% if rice_is_on %}
-            <button class="btn btn-danger" type="submit" value="Stop Rice" name="riceButton" id="riceButton">Stop Rice</button>
-            <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
-            {% else %}
-            <button class="btn btn-primary" type="submit" value="Start Rice" name="riceButton" id="riceButton">Start Rice</button>
-            <img class='img-rounded' src="/static/img/ricecooker_off.png" style="max-width: 100px;">
-            {% endif %}
-        </center>
-        </form>
-        </div>
-
-    </div>
-
-</div>
-
-<div class="col-md-5" style="margin-top:35px;">
-    <div class="row">
-    {% if rice_is_on %}
-    <div class="panel panel-danger">
-    {% else %}
-    <div class="panel panel-info">
-    {% endif %}
-        <div class="panel-heading">
-            {% if rice_is_on %}
-            <h3 class="panel-title">You can't place your order right now!</h3>
-            {% else %}
-            <h3 class="panel-title">Place your Order</h3>
-            {% endif %}
-        </div>
-        <div class="panel-body">
-            <form class="form" id="order_form" method="post" target="">
-                {% csrf_token %} {% if form.errors %}
-                <ul>
-                    {% for field in form %} {% if field.errors %}
-                    <li class="errorlist">{{ field.label }}: {{ field.errors|first }}</li>
-                    {% endif %} {% endfor %}
-                </ul>
-                {% endif %} {% for field in form %}
-                <label for="id_{{ field.name }}">{{ field.label }}</label>
-                {{ field }} {% endfor %} {% if rice_is_on %}
-                <h3>Rice is Cooking!</h3>
-                {% else %}
-                <br/>
-                <br/>
-                <button class="btn btn-primary" type="submit" value="Place Order">Place Order</button>
-                {% endif %}
-            </form>
-        </div>
-    </div>
-    </div>
-    <div class="row">
+    <div class="col-md-2" style="margin-top:35px;">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Today's Orders:</h3>
-            </div>
-            <div class="panel-body" style="padding: 0px 0px 0px 10px;">
-                {% if rice_quantity %}
-                <h3>{{ rice_quantity }} cups of rice needed today</h3>
+                {% if rice_is_on %}
+                <h3 class="panel-title">RICE ON</h3>
+                {% else %}
+                <h3 class="panel-title">RICE OFF</h3>
                 {% endif %}
-                <table class="table table-striped" style="margin-bottom: 0px;">
+            </div>
+            <div class="panel-body text-center">
+                <form id="rice_form" method="post">
+                {% csrf_token %}
+                {% if rice_is_on %}
+                    <button class="btn btn-danger" type="submit" value="Stop Rice" name="riceOff" id="riceButton">Stop Rice</button>
+                    <img class='img-rounded' src="/static/img/ricecooker.png" style="max-width: 100px;">
+                {% else %}
+                    <button class="btn btn-primary" type="submit" value="Start Rice" name="riceOn" id="riceButton">Start Rice</button>
+                    <img class='img-rounded' src="/static/img/ricecooker_off.png" style="max-width: 100px;">
+                {% endif %}
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7" style="margin-top:35px;">
+        <div class="row">
+            <div class="panel {% if rice_is_on %}panel-danger{% else %}panel-primary{% endif %}">
+                <div class="panel-heading">
+                    {% if rice_is_on %}
+                    <h3 class="panel-title">You can't place your order right now!</h3>
+                    {% else %}
+                    <h3 class="panel-title">Place your Order</h3>
+                    {% endif %}
+                </div>
+                <div class="panel-body">
+                    <form class="form" id="order_form" method="post" target="">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% if not field.is_hidden %}
+                        <label for="id_{{ field.name }}">{{ field.label }}</label>
+                        {% endif %}
+                        {{ field }}
+                    {% endfor %}
+                    {% if form.errors %}
+                        <ul>
+                        {% for field in form %} {% if field.errors %}
+                            <li class="errorlist">{{ field.label }}: {{ field.errors|first }}</li>
+                        {% endif %} {% endfor %}
+                        </ul>
+                    {% else %}
+                        <br><br>
+                    {% endif %}
+                    {% if rice_is_on %}
+                        <h4>Rice is Cooking!</h4>
+                    {% else %}
+                        <button class="btn btn-primary" type="submit" value="Place Order">Place Order</button>
+                    {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Today's Orders:</h3>
+                </div>
+                <div class="panel-body">
+                    {% if rice_quantity %}
+                    <h3>{{ rice_quantity }} cups of rice needed today</h3>
+                    {% endif %}
+
+                    {% if not orders %}
+                    <h3>No orders today :(</h3>
+                    {% endif %}
+                </div>
+                {% if orders %}
+                <table class="table table-striped">
                     <tbody>
-                    {% if orders %}
                         {% for order in orders %}
                         <tr>
                             <td>{{ order }} by {{ order.user }}</td>
                         </tr>
                         {% endfor %}
-                    {% else %}
-                        <h4>No orders today :(</h4>
-                    {% endif %}
                     </tbody>
                 </table>
+                {% endif %}
             </div>
         </div>
+
     </div>
-
-</div>
-<div class="col-md-5" style="margin-top: 35px;">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Leaderboards:</h3>
-        </div>
-        <div role="tabpanel" style="padding: 0;">
-            <ul role="tablist" class="nav nav-tabs nav-justified" style="margin-bottom: 10px;">
-                <li role="presentation" class="active"><a role="tab" href="#current_leaderboard" aria-controls="current_leaderboard" data-toggle="tab">{{ current_month }}</a></li>
-                <li role="presentation"><a role="tab" href="#month_leaderboard" aria-controls="month_leaderboard" data-toggle="tab">{{ last_month_month }}</a></li>
-                <li role="presentation"><a role="tab" href="#year_leaderboard" aria-controls="year_leaderboard" data-toggle="tab">{{ last_year }}</a></li>
-                <li role="presentation"><a role="tab" href="#alltime_leaderboard" aria-controls="alltime_leaderboard" data-toggle="tab">All Time</a></li>
-            </ul>
-            <div class="tab-content" style="border: 1px solid #DDDDDD; border-top-style: none; margin-top: -10px;">
-                <div role="tabpanel" class="tab-pane active" id="current_leaderboard" style="padding: 0; margin: 0;">
-                    <div class="text-center" style="padding: 5px 0px 0px 10px;">
-                        <h4>{{ current_month }} MVP: <i class="glyphicon glyphicon-star"></i> {{ current_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
-                    </div>
-
-                    <table class="table text-center table-striped" style="margin-bottom: 0px;">
-                        <thead>
-                            <tr>
-                                <td>Rank</td>
-                                <td>Username</td>
-                                <td># Burritos</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rank, user, count in current_dict %}
-                            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
-                                <td>{{ rank }}</td>
-                                <td>{{ user }}</td>
-                                <td>{{ count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="month_leaderboard" style="padding: 0; margin: 0;">
-                    <div class="text-center" style="padding: 5px 0px 0px 10px;">
-                        <h4>{{ last_month_month }} MVP: <i class="glyphicon glyphicon-star"></i> {{ month_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
-                    </div>
-
-                    <table class="table text-center table-striped" style="margin-bottom: 0px;">
-                        <thead>
-                            <tr>
-                                <td>Rank</td>
-                                <td>Username</td>
-                                <td># Burritos</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rank, user, count in month_dict %}
-                            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
-                                <td>{{ rank }}</td>
-                                <td>{{ user }}</td>
-                                <td>{{ count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="year_leaderboard">
-                    <div class="text-center" style="padding: 5px 0px 0px 10px;">
-                        <h4>{{ last_year }} MVP: <i class="glyphicon glyphicon-star"></i> {{ year_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
-                    </div>
-
-                    <table class="table text-center table-striped" style="margin-bottom: 0px;">
-                        <thead>
-                            <tr>
-                                <td>Rank</td>
-                                <td>Username</td>
-                                <td># Burritos</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rank, user, count in year_dict %}
-                            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
-                                <td>{{ rank }}</td>
-                                <td>{{ user }}</td>
-                                <td>{{ count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div role="tabpanel" class="tab-pane" id="alltime_leaderboard">
-                    <div class="text-center" style="padding: 5px 0px 0px 10px;">
-                        <h4>All Time MVP: <i class="glyphicon glyphicon-star"></i> {{ alltime_mvp }} <i class="glyphicon glyphicon-star"></i></h4>
-                    </div>
-
-                    <table class="table text-center table-striped" style="margin-bottom: 0px;">
-                        <thead>
-                            <tr>
-                                <td>Rank</td>
-                                <td>Username</td>
-                                <td># Burritos</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rank, user, count in alltime_dict %}
-                            <tr {% if current_user == user %}style="border: 2px solid #747474;"{% endif %}>
-                                <td>{{ rank }}</td>
-                                <td>{{ user }}</td>
-                                <td>{{ count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 </div>
 {% endblock content %}
