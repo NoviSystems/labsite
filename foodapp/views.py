@@ -1,4 +1,5 @@
-import datetime, operator
+import datetime
+import operator
 from decimal import *
 
 from django.contrib.auth.decorators import login_required
@@ -7,7 +8,7 @@ from django.contrib.auth.models import User
 from django.views.generic import CreateView, ListView, TemplateView
 from django.http import HttpResponseRedirect
 from django.utils.functional import lazy
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.shortcuts import redirect
 from django.db.models import Sum
@@ -15,9 +16,6 @@ from django.db.models import Sum
 from models import Item, Order, RiceCooker, MonthlyCost, AmountPaid
 from forms import OrderForm, PaidForm
 
-# Workaround for using reverse with success_url in class based generic views
-# because direct usage of it throws an exception.
-reverse_lazy = lambda name=None, *args: lazy(reverse, str)(name, args=args)
 
 class HomepageView(CreateView):
     form_class = OrderForm
@@ -29,8 +27,18 @@ class HomepageView(CreateView):
     def dispatch(self, *args, **kwargs):
         return super(HomepageView, self).dispatch(*args, **kwargs)
 
+    def ricecooker_power(self, power):
+        RiceCooker.objects.all().update(is_on=power)
+        return HttpResponseRedirect(reverse('url_homepage'))
+
     def post(self, request, *args, **kwargs):
         form = OrderForm(request.POST)
+        ricecooker_is_on = RiceCooker.objects.all()[0].is_on
+
+        if 'riceOn' in request.POST:
+            return self.ricecooker_power(True)
+        if 'riceOff' in request.POST:
+            return self.ricecooker_power(False)
 
         if 'riceButton' in request.POST:
             if RiceCooker.objects.all()[0].is_on:
@@ -42,8 +50,8 @@ class HomepageView(CreateView):
             obj = form.save(commit=False)
             item_pk = request.POST.get('item', None)
 
-            if RiceCooker.objects.all()[0].is_on:
-                return self.render_to_response(self.get_context_data(form=form, error='Could not order item, rice is already cooking.'))
+            if ricecooker_is_on:
+                return self.render_to_response(self.get_context_data(form=form, error='Cannot place order, rice is currently cooking.'))
 
             if item_pk is not None:
                 item = Item.objects.get(pk=item_pk)
