@@ -341,6 +341,13 @@ services.
 For development, you can either manually populate from an empty database, or make a copy
 of a production database and import it into your development database.
 
+Since you likely don't have permissions to access the production database, you will need
+to get a dump of the database from another lab member with access.  
+
+    $ psql <username>_lab < [dump_file_name]
+    
+Your database should now be populated with production values (users, workitems, jobs, etc.)
+
 
 ## Deployment ##
 
