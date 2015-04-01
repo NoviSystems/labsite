@@ -127,8 +127,8 @@ the example secrets and settings and customize them to fit your needs. At minimu
 postgres settings will need to be updated. Make sure that you also set the SECRET_KEY
 value, which can be located in secrets.py. It may also be overridden in the settings.
 
-    $ cp labsite/secrets.ex.py labsite/secrets.py
-    $ cp labsite/settings.ex.py labsite/settings.py
+    $ cp project/secrets.ex.py project/secrets.py
+    $ cp project/settings.ex.py project/settings.py
     
 Make sure that both files have been set up properly, otherwise the following step may fail.
 
@@ -238,8 +238,8 @@ postgres settings and broker URL will need to be updated. Make sure that you als
 SECRET_KEY value, which can be located in secrets.py. It may also be overridden in the
 settings.
 
-    $ cp labsite/secrets.ex.py labsite/secrets.py
-    $ cp labsite/settings.ex.py labsite/settings.py
+    $ cp project/secrets.ex.py project/secrets.py
+    $ cp project/settings.ex.py project/settings.py
     
 If you need to work on a labsite app which has previously been installed using pip, be sure
 to uninstall it and use the setup instructions in the app's readme. Otherwise, labsite may
