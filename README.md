@@ -177,7 +177,6 @@ To install the app:
 
 Now, migrate the database
 
-    $ python manage.py syncdb
     $ python manage.py migrate --all
 
 Finally, you can run the development server:
