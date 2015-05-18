@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'raven.contrib.django.raven_compat',
     'rest_framework',
+    'registration',
     'worklog',
     'foodapp',
 )
@@ -124,6 +125,11 @@ WORKLOG_SEND_REMINDERS = False
 WORKLOG_SEND_REMINDERS_HOUR = 17
 
 WORKLOG_EMAIL_REMINDERS_EXPIRE_AFTER = 4
+
+# DJANGO REGISTRATION SETTINGS
+ACCOUNT_ACTIVATION_DAYS = 7
+
+REGISTRATION_OPEN = True
 
 #######################################
 
