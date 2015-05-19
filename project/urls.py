@@ -12,6 +12,7 @@ urlpatterns = [
 
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': "/accounts/login"}, name="logout"),
+    url(r'^accounts/', include('itng.registration.backends.invite.urls')),
 
     # App urls
     url(r'^lunch/', include('foodapp.urls')),

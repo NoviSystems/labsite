@@ -5,3 +5,4 @@ celery
 git+git://github.com/ITNG/fabtools.git
 git+git://github.com/ITNG/prefab.git
 git+git://github.com/ITNG/django-registration.git
+git+ssh://git@github.com/ITNG/ng-utils
