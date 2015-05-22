@@ -1,11 +1,11 @@
 {% extends "labsite.html" %}
 
-{% block title %}Invite User{% endblock %}
+{% block title %}Activate{% endblock %}
 {% block content %}
-  <p></p>
+
   <form action="#" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form }}
     <input type="submit" value="Submit" />
   </form>
 {% endblock %}

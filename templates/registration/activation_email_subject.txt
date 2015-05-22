@@ -1,0 +1,1 @@
+Activate your lab.oscar.ncsu.edu account - you have {{ expiration_days }} days!
