@@ -1,5 +1,5 @@
 You have been invited to create a new account at lab.oscar.ncsu.edu using this email address. To create your new account, click the link below or copy and paste it into your web browser's address bar:
 
-http://lab.oscar.ncsu.edu/accounts/activate/{{ activation_key }}/
+https://{{ site }}{% url 'activate' activation_key %}
 
 If you didn't request this, you don't need to do anything; you won't receive any more email from us, and the account will expire automatically in {{ expiration_days }} days.

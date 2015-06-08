@@ -43,7 +43,8 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'registration',
-    'itng',
+    'accounts',
+    'itng.registration.backends.invite',
     'worklog',
     'foodapp',
 )
