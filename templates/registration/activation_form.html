@@ -2,8 +2,7 @@
 
 {% block title %}Activate{% endblock %}
 {% block content %}
-  <p></p>
-  <form action="#" method="post">
+  <form action="#" method="post" style="padding-top: 50px;">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Submit" />
