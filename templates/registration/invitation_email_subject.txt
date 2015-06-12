@@ -1,1 +1,1 @@
-Create your lab.oscar.ncsu.edu account
+Create your {{ site }} account
