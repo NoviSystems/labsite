@@ -44,7 +44,9 @@ INSTALLED_APPS = (
     'rest_framework',
     'registration',
     'accounts',
+    'itng.common',
     'itng.registration.backends.invite',
+    'itng.registration.templates',
     'worklog',
     'foodapp',
 )
@@ -111,7 +113,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.static',
     'django.core.context_processors.request',
-    'django.contrib.messages.context_processors.messages'
+    'django.contrib.messages.context_processors.messages',
+    'itng.registration.templates.context_processors.auth_base',
 )
 
 
