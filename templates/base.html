@@ -46,7 +46,14 @@
             <div class="navbar-collapse collapse">
                 {% if user.is_authenticated %}
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="">{{ user }}</i></a>
+                    <li>
+                        <a class="dropdown-toggle" type="button" id="userDropMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            {{ user }}
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropMenu">
+                            <li><a href="{% url 'password_change' %}">Change Password</a></li>
+                        </ul>
                     </li>
                     <li>
                         <a href="/lunch/">
