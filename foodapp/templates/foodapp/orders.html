@@ -8,12 +8,14 @@
         <h3 class="panel-title">Order History</h3>
         {% endif %}
     </div>
+
     {% if rice_quantity %}
     <div class="panel-body">
         <h3>{{ rice_quantity }} cups of rice needed today</h3>
     </div>
     {% endif %}
 
+    {% if orders %}
     <table class="table table-striped">
         <tbody>
             {% if counts %} {% for key, value in counts %}
@@ -22,15 +24,21 @@
             </tr>
             {% endfor %} {% endif %}
         </tbody>
+
         {% if error %}
         <h4 class="errorlist">{{ error }}</h4>
-        {% endif %} {% if orders %} {% for order in orders %}
+        {% endif %}
+
+        {% for order in orders %}
         <tr>
             <td>{{ order }} by {{ order.user }}</td>
         </tr>
-        {% endfor %} {% else %}
-        <h4>No orders today :(</h4>
-        {% endif %}
+        {% endfor %}
     </table>
+    {% else %}
+    <div class="panel-body">
+        <h4>No orders today :(</h4>
+    </div>
+    {% endif %}
 </div>
 {% endblock content %}
