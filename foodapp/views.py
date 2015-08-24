@@ -54,7 +54,7 @@ class HomeView(CreateView):
         context['last_month'] = "%02d" % (now.month - 1)
         context['year'] = now.year
         context['orders'] = orders
-        context['rice_quantity'] = orders.filter(item__name__icontains='burrito').count() * 0.5
+        context['rice_quantity'] = (orders.filter(item__name__icontains='burrito').aggregate(Sum('quantity'))['quantity__sum'] or 0) * .5
         context['rice_is_on'] = models.RiceCooker.objects.filter(is_on=True).exists()
         return context
 
