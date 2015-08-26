@@ -15,13 +15,13 @@
 
     <!-- Loading everything off BootstrapCDN -->
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     {% block app-styles %}{% endblock %}
     {% block styles %}{% endblock %}
 
     <!-- Load JQuery from Google's CDN, and BootstrapCDN -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     {% block app-scripts %}{% endblock %}
     {% block scripts %}{% endblock %}
 
@@ -45,18 +45,29 @@
                     <span class="icon-bar"></span>
                 </button>
 
-                <a class="navbar-brand" href="/{% block link %}{% endblock %}">
-                    <span class="label {% block color %}label-primary{% endblock %}">{% block label %}Labsite{% endblock %} <i class="fa {% block icon %}fa-cloud{% endblock %}"></i>
+            {% if current_app %}
+            {% for app in labsite_apps %}
+                    {% if current_app == app.app_name %}
+                    <a class="navbar-brand" href="{{ app.url }}">
+                        <span class="label" style="background-color:{{ app.color }}">{{ app.display_name }} <i class="fa {{ app.font_image }} "></i>
+                        </span>
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <a class="navbar-brand" href="/">
+                    <span class="label label-primary">Labsite <i class="fa fa-cloud"></i>
                     </span>
                 </a>
+            {% endif %}
 
             </div>
 
             {% block nav-links %}{% endblock %}
 
             <div class="navbar-collapse collapse">
-                {% if user.is_authenticated %}
                 <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
                     <li><a href="">{{ user }}</i></a></li>
 
                     {% block page-links %}
@@ -70,13 +81,19 @@
                                 </li>
                             {% endif %}
                         {% endfor %}
-
                     {% endblock %}
 
                     <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i></a>
                     </li>
-                </ul>
+
+                {% else %}
+
+                    <li><a href="{% url 'login' %}">Login <i class="fa fa-sign-in"></i></a>
+                    </li>
+
                 {% endif %}
+
+                </ul>
             </div>
 
             <!--/.nav-collapse -->
