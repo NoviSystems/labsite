@@ -9,7 +9,7 @@ class Item(models.Model):
     once_a_day = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return '%s: %s' % (self.name, self.description,)
+        return u'%s: %s' % (self.name, self.description,)
 
     class Meta:
         verbose_name = "Item"
@@ -30,7 +30,7 @@ class Order(models.Model):
     quantity = models.PositiveSmallIntegerField(choices=QUANTITY_CHOICES, default=1)
 
     def __unicode__(self):
-        return "%d %s(s) on %s." % (self.quantity, self.item.name, self.date)
+        return u"%d %s(s) on %s." % (self.quantity, self.item.name, self.date)
 
     class Meta:
         verbose_name = "Order"
@@ -42,15 +42,15 @@ class RiceCooker(models.Model):
     is_on = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "%s." % (self.is_on)
+        return u"%s." % (self.is_on)
 
 
 class MonthlyCost(models.Model):
-    cost  = models.DecimalField(max_digits=10, decimal_places=2)
+    cost = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=datetime.date.today)
 
     def __unicode__(self):
-        return "$%3.2f on %s." % (self.cost, self.date)
+        return u"$%3.2f on %s." % (self.cost, self.date)
 
 
 class AmountPaid(models.Model):
@@ -59,4 +59,4 @@ class AmountPaid(models.Model):
     user = models.ForeignKey(User)
 
     def __unicode__(self):
-        return "$%3.2f by %s on %s" % (self.amount, self.user, self.date)
+        return u"$%3.2f by %s on %s" % (self.amount, self.user, self.date)
