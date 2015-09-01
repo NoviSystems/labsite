@@ -217,7 +217,7 @@ class MonthOrdersView(TemplateView):
 
         # Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
-        rice_products = models.Order.objects.filter(item__description__icontains="rice").filter(date__month=month).filter(date__year=year)
+        rice_products = month_orders.filter(item__description__icontains="rice")
 
         for order in rice_products.filter(item__name__iexact="Burrito"):
             user_to_orders_dict[order.user.username] = [user_to_orders_dict.get(order.user.username, [0,0])[0] + order.quantity, 0]
