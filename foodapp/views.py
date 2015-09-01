@@ -54,7 +54,7 @@ class HomeView(CreateView):
         context['last_month'] = "%02d" % (now.month - 1)
         context['year'] = now.year
         context['orders'] = orders
-        context['rice_quantity'] = (orders.filter(item__name__icontains='burrito').aggregate(Sum('quantity'))['quantity__sum'] or 0) * .5
+        context['rice_quantity'] = (orders.filter(item__description__icontains='rice').aggregate(Sum('quantity'))['quantity__sum'] or 0) * .5
         context['rice_is_on'] = models.RiceCooker.objects.filter(is_on=True).exists()
         return context
 
@@ -204,37 +204,31 @@ class MonthOrdersView(TemplateView):
         # ASSUMES ALL MONTHLY COSTS ARE APPLIED TO BURRITOS ONLY!!!
         month_orders = models.Order.objects.filter(date__month=month, date__year=year)
         num_burritos = 0
+        num_rice = 0
 
         for order in month_orders:
             if order.item.name.lower() == "burrito":
                 num_burritos += order.quantity
+            elif "rice" in order.item.description.lower():
+                num_rice += order.quantity * .5
+
         context["num_burritos"] = num_burritos
-
-        # Sum the total MonthlyCosts objects for a given month/year. Set to zero if no objects returned.
-        cost = 0
-        costs = models.MonthlyCost.objects.filter(date__month=month, date__year=year)
-        for item in costs:
-            cost += item.cost
-
-        cost = float(cost)/0.9725
-        context["cost"] = ("%.2f" % cost)
-
-        # Calculates cost per burrito
-        if num_burritos:
-            cost_per_burrito = Decimal(cost/num_burritos).quantize(Decimal('.01'), rounding=ROUND_UP)
-        else:
-            cost_per_burrito = 0
-
-        context["cost_per_burrito"] = cost_per_burrito
+        context["num_rice"] = num_rice
 
         # Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
-        for order in models.Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
-            user_to_orders_dict[order.user.username] = user_to_orders_dict.get(order.user.username, 0) + order.quantity
+        rice_products = models.Order.objects.filter(item__description__icontains="rice").filter(date__month=month).filter(date__year=year)
+
+        for order in rice_products.filter(item__name__iexact="Burrito"):
+            user_to_orders_dict[order.user.username] = [user_to_orders_dict.get(order.user.username, [0,0])[0] + order.quantity, 0]
+
+        for order in rice_products.exclude(item__name__iexact="Burrito"):
+            user_to_orders_dict[order.user.username][1] = user_to_orders_dict.get(order.user.username, [0,0])[1] + order.quantity * .5
 
         for username in user_to_orders_dict:
-            num_burritos = user_to_orders_dict[username]
-            user_to_orders_dict[username] = (num_burritos, num_burritos*cost_per_burrito)
+            num_burritos = user_to_orders_dict[username][0]
+            num_just_rice = user_to_orders_dict[username][1]
+            user_to_orders_dict[username] = (num_burritos, num_just_rice)
 
         context["user_to_orders_dict"] = user_to_orders_dict
 
