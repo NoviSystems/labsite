@@ -12,6 +12,7 @@ from __future__ import absolute_import
 import os
 import socket
 from project.secrets import *
+from django.core.urlresolvers import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -90,6 +91,9 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static-root'))
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -115,6 +119,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
     'itng.registration.templates.context_processors.auth_base',
+    'project.context_processors.navbar_context',
 )
 
 
@@ -180,3 +185,32 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'PAGINATE_BY': None,
 }
+
+LABSITE_APPS = [
+    {
+        'app_name': 'worklog',
+        'display_name': "Worklog",
+        'color': '#D9534F',
+        'font_image': 'fa-flask',
+        'url': reverse_lazy('worklog-home'),
+        'new_tab': 'false',
+    },
+    {
+        'app_name': 'foodapp',
+        'display_name': "Food App",
+        'color': '#5CB85C',
+        'font_image': 'fa-beer',
+        'url': reverse_lazy('url_home'),
+        'new_tab': 'false',
+        'margin': '30',
+    },
+    {
+        'app_name': 'KABA',
+        'display_name': "KABA",
+        'color': '#428BCA',
+        'font_image': 'fa-clock-o',
+        'url': 'https://kaba.oit.ncsu.edu/WebTimeClock/main/index.jsp?actionEvent=cmd://startdialog',
+        'new_tab': 'true',  # Opens in new tab
+    }
+]
+

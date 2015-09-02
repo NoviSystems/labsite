@@ -1,11 +1,11 @@
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from views import LabsiteView
+from views import HomepageView
 
 
 urlpatterns = [
-    url(r'^$', LabsiteView.as_view()),
+    url(r'^$', HomepageView.as_view()),
 
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
@@ -16,6 +16,6 @@ urlpatterns = [
     url(r'^accounts/', include('itng.registration.backends.invite.urls.activation')),
 
     # App urls
-    url(r'^lunch/', include('foodapp.urls')),
-    url(r'^worklog/', include('worklog.urls')),
+    url(r'^lunch/', include('foodapp.urls', app_name='foodapp')),
+    url(r'^worklog/', include('worklog.urls', app_name='worklog')),
 ]

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+
+{% block styles %}
+<style>
+p {
+    font-size:25px;
+    color: white boarder: black;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Add padding to the top -->
+
+<div style="margin-top:35px">
+
+<div class="row">
+ {% for apps in labsite_apps %}
+      <div class="col-md-4">
+        <a
+            class='btn btn-default btn-block well'
+            href='{{ apps.url }}'
+            {% if apps.new_tab == 'true' %}
+            target="_blank"
+            {% endif %}
+            >
+            <i 
+                class="fa {{ apps.font_image }}"
+                style="font-size:15em; 
+                {% if apps.margin > 0 %}
+                margin-right: {{apps.margin}}px;
+                {% endif %}
+                color: {{ apps.color }};">
+            </i>
+            </br>
+            <p>
+                {{ apps.display_name }}
+            </p>
+        </a>
+    </div>
+{% endfor %}
+</div>
+
+{% endblock %}
