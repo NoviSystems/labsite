@@ -15,7 +15,7 @@
 
     <!-- Loading everything off BootstrapCDN -->
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
     {% block app-styles %}{% endblock %}
     {% block styles %}{% endblock %}
@@ -69,7 +69,15 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
-                    <li><a href="">{{ user }}</i></a></li>
+                    <li>
+                        <a class="dropdown-toggle" type="button" id="userDropMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            {{ user }}
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropMenu">
+                            <li><a href="{% url 'password_change' %}">Change Password</a></li>
+                        </ul>
+                    </li>
 
                     {% block page-links %}
 
@@ -84,12 +92,14 @@
                         {% endfor %}
                     {% endblock %}
 
-                    <li><a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i></a>
+                    <li>
+                        <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i></a>
                     </li>
 
                 {% else %}
 
-                    <li><a href="{% url 'login' %}">Login <i class="fa fa-sign-in"></i></a>
+                    <li>
+                        <a href="{% url 'login' %}">Login <i class="fa fa-sign-in"></i></a>
                     </li>
 
                 {% endif %}

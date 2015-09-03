@@ -43,6 +43,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'raven.contrib.django.raven_compat',
     'rest_framework',
+    'registration',
+    'accounts',
+    'itng.common',
+    'itng.registration.backends.invite',
+    'itng.registration.templates',
     'worklog',
     'foodapp',
 )
@@ -113,6 +118,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
+    'itng.registration.templates.context_processors.auth_base',
     'project.context_processors.navbar_context',
 )
 
@@ -129,6 +135,11 @@ WORKLOG_SEND_REMINDERS = False
 WORKLOG_SEND_REMINDERS_HOUR = 17
 
 WORKLOG_EMAIL_REMINDERS_EXPIRE_AFTER = 4
+
+# DJANGO REGISTRATION SETTINGS
+ACCOUNT_ACTIVATION_DAYS = 7
+
+REGISTRATION_OPEN = True
 
 #######################################
 
