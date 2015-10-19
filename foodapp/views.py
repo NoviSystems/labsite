@@ -220,12 +220,12 @@ class MonthOrdersView(TemplateView):
         rice_products = month_orders.filter(item__description__icontains="rice")
 
         for order in rice_products.filter(item__name__iexact="Burrito"):
-            user_to_orders_dict[order.user.username] = [user_to_orders_dict.get(order.user.username, [0,0])[0] + order.quantity, 0]
+            user_to_orders_dict[order.user.username] = [user_to_orders_dict.get(order.user.username, [0, 0])[0] + order.quantity, 0]
 
         for order in rice_products.exclude(item__name__iexact="Burrito"):
-            if (order.user.username not in user_to_orders_dict)
-+                user_to_orders_dict[order.user.username] = [0, 0]
-            user_to_orders_dict[order.user.username][1] = user_to_orders_dict.get(order.user.username, [0,0])[1] + order.quantity * .5
+            if (order.user.username not in user_to_orders_dict):
+                user_to_orders_dict[order.user.username] = [0, 0]
+            user_to_orders_dict[order.user.username][1] = user_to_orders_dict.get(order.user.username, [0, 0])[1] + order.quantity * .5
 
         for username in user_to_orders_dict:
             num_burritos = user_to_orders_dict[username][0]
