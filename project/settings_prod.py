@@ -6,7 +6,7 @@ from celery.schedules import crontab
 
 
 ADMINS = (
-    ('John Bass', 'jbass@ncsu.edu'),
+    # ('John Bass', 'jbass@ncsu.edu'),
 )
 
 SITE_URL = "lab.oscar.ncsu.edu"
