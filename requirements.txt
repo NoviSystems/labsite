@@ -5,6 +5,6 @@ psycopg2
 raven
 pytz
 git+git://github.com/ITNG/django-registration.git
-git+ssh://git@github.com/ITNG/ng-utils
+git+ssh://git@github.com/ITNG/ng-utils.git
 # git+git://github.com/ITNG/foodapp.git
 # git+git://github.com/ITNG/worklog.git

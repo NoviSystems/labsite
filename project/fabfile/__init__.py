@@ -26,6 +26,7 @@ secrets.register('application', OrderedDict([
     ])
 )
 
+env.forward_agent = True
 
 # set default environ and load
 if not hasattr(env, 'environ'):
