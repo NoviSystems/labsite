@@ -8,7 +8,7 @@ django-admin
 local_settings.py
 secrets.py
 *.sqlite3
-
+.apps/
 .env/
 .vagrant/
 
