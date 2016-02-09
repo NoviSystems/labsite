@@ -16,6 +16,6 @@ urlpatterns = [
     url(r'^accounts/', include('itng.registration.backends.invite.urls.activation')),
 
     # App urls
-    url(r'^lunch/', include('foodapp.urls', app_name='foodapp')),
-    url(r'^worklog/', include('worklog.urls', app_name='worklog')),
+    url(r'^lunch/', include('foodapp.urls', namespace='foodapp', app_name='foodapp')),
+    url(r'^worklog/', include('worklog.urls', namespace='worklog', app_name='worklog')),
 ]
