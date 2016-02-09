@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 # Create your models here.
 class FiscalYear(models.Model):
@@ -81,3 +82,13 @@ class Expense(models.Model):
     data_payable = models.DateField()
     date_payed = models.DateField()
     reoccuring = models.IntegerField()
+
+
+class LineItem(models.Model):
+    month = models.ForeignKey(Month)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+
