@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 
 class BusinessUnit(models.Model):
-    business_unit_name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64)
 
 
 # Create your models here.
