@@ -15,6 +15,15 @@ class Month(models.Model):
     actual_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
 
+class LineItem(models.Model):
+    month = models.ForeignKey(Month)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    
+
 class Contract(models.Model):
     CONTRACT_STATE = {
         ('ACTIVE', "active" ),
@@ -87,11 +96,5 @@ class Expense(models.Model):
     lineItem = GenericRelation(LineItem)
 
 
-class LineItem(models.Model):
-    month = models.ForeignKey(Month)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+
 
