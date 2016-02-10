@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class BusinessUnit(models.Model):
     business_unit_name = models.CharField(max_length=64)
-
+    user = models.ManyToManyField(User)
 
 # Create your models here.
 class FiscalYear(models.Model):
