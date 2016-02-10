@@ -3,8 +3,14 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
+
+class BusinessUnit(models.Model):
+    business_unit_name = models.CharField(max_length=64)
+
+
 # Create your models here.
 class FiscalYear(models.Model):
+    business_unit = models.ForeignKey(BusinessUnit)
     start_month = models.DateField()
     number_of_months = models.IntegerField()
 
@@ -22,7 +28,7 @@ class LineItem(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    
+
 
 class Contract(models.Model):
     CONTRACT_STATE = {
