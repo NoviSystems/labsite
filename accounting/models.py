@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 
 # Create your models here.
 class FiscalYear(models.Model):
@@ -30,7 +31,7 @@ class Contract(models.Model):
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
     contract_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
-
+    
 
 class Invoice(models.Model):
     TRANSATION_STATE = {
@@ -43,6 +44,7 @@ class Invoice(models.Model):
     invoice_date = models.DateField()
     invoice_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
+    lineItem = GenericRelation(LineItem)
 
 
 class Personnel(models.Model):
@@ -82,6 +84,7 @@ class Expense(models.Model):
     data_payable = models.DateField()
     date_payed = models.DateField()
     reoccuring = models.IntegerField()
+    lineItem = GenericRelation(LineItem)
 
 
 class LineItem(models.Model):
