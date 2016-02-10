@@ -1,15 +1,29 @@
 {% extends "base.html" %}
 
 {% block title %}
-	Accounting
+Accounting
 {% endblock %}
 
 {% load staticfiles %}
 
 {% block nav-links %}
 <ul class="nav navbar-nav">
+    {% if buisness_units %}
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            {% for buisness_unit in buisness_units %}
+            <li><a href="#">{{buisness_unit.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% else %}
+    <li><a href=''>{{ buisness_unit.name }}</a></li>
+
+    {% endif %}
     <li><a href=''>Test</a></li>
     <li><a href=''>Test</a></li>
-    <li><a href=''>Test</a></li>
+
+
 </ul>
- {% endblock %}
+{% endblock %}
