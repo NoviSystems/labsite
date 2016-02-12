@@ -30,7 +30,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
 
 class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'accounting/business_unit_create_form.html'
+    template_name = 'accounting/businessunit_create_form.html'
     form_class = BusinessUnitCreateForm
     model = BusinessUnit
 
@@ -55,7 +55,7 @@ class BusinessUnitDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class BusinessUnitUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'accounting/business_unit_update_form.html'
+    template_name_suffix = '_update_form'
     form_class = BusinessUnitUpdateForm
     model = BusinessUnit
 
