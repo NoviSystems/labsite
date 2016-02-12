@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, FormView, CreateView, DeleteView
+from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from models import *
@@ -35,7 +35,7 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
     model = BusinessUnit
 
     def get_success_url(self):
-	return reverse_lazy('accounting:home')
+	   return reverse_lazy('accounting:home')
 
     def form_valid(self, form):
 	response = super(BusinessUnitCreateView, self).form_valid(form)
@@ -52,3 +52,20 @@ class BusinessUnitDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:home')
+
+
+class BusinessUnitUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'accounting/business_unit_update_form.html'
+    form_class = BusinessUnitUpdateForm
+    model = BusinessUnit
+
+    def get_object(self):
+        return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:home')
+
+    def form_valid(self, form):
+        response = super(BusinessUnitUpdateView, self).form_valid(form)
+        form.instance.user.add(self.request.user)
+        return response
