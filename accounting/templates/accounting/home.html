@@ -2,7 +2,28 @@
 {% load staticfiles %}
 
 {% block content %}
+
+{% if business_units %}
+
 {% for buisness_unit in business_units %}
-	<a href={% url 'accounting:dashboard' pk=buisness_unit.pk %}>{{buisness_unit.name}}</a>
+
+    <div class= "row">
+        <div class="col-md-12">
+            <h4><a href={% url 'accounting:dashboard' pk=buisness_unit.pk %}>{{buisness_unit.name}}</a></h4>
+        </div>
+    </div>
+
 {% endfor %}
+{% else %}
+
+    <div class= "row">
+        <div class="col-md-12">
+            <h3> You currently are not associated with any buisness units. </h3>
+        </div>
+    </div>
+
+
+{% endif %}
+    <a class="btn btn-primary" href={% url 'accounting:create_business_unit' %}>Create New Buisness Unit</a>
+
 {% endblock %}
