@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, FormView, CreateView
+from django.views.generic import TemplateView, FormView, CreateView, DeleteView
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from models import *
@@ -19,7 +19,6 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
-    success_url = reverse_lazy('dashboard')
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
@@ -42,3 +41,14 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
 	response = super(BusinessUnitCreateView, self).form_valid(form)
 	form.instance.user.add(self.request.user)
 	return response
+
+
+class BusinessUnitDeleteView(LoginRequiredMixin, DeleteView):
+    model = BusinessUnit
+    template_name_suffix = '_delete_form'
+
+    def get_object(self):
+        return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:home')
