@@ -2,5 +2,7 @@
 {% load staticfiles %}
 
 {% block content %}
-<h1>test</h1>
+{% for buisness_unit in business_units %}
+	<a href={% url 'accounting:dashboard' pk=buisness_unit.pk %}>{{buisness_unit.name}}</a>
+{% endfor %}
 {% endblock %}
