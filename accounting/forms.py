@@ -14,3 +14,15 @@ class BusinessUnitCreateForm(ModelForm):
         exclude = [
         	'user'
         ]
+
+class BusinessUnitUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(BusinessUnitUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = BusinessUnit
+        fields = '__all__'
+        exclude = [
+        	'user'
+        ]
