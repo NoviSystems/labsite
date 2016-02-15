@@ -23,9 +23,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
         business_units = BusinessUnit.objects.filter(user=self.request.user)
-        current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['business_units'] = business_units
+        current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+        fiscal_years = FiscalYear.objects.filter(business_unit=current)
+        context['fiscal_years'] = fiscal_years
         return context
 
 
@@ -69,3 +71,7 @@ class BusinessUnitUpdateView(LoginRequiredMixin, UpdateView):
         response = super(BusinessUnitUpdateView, self).form_valid(form)
         form.instance.user.add(self.request.user)
         return response
+
+
+class FiscalYearCreateView(LoginRequiredMixin, CreateView):
+        model = FiscalYear

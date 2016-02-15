@@ -9,7 +9,6 @@ class BusinessUnit(models.Model):
     user = models.ManyToManyField(User)
 
 
-# Create your models here.
 class FiscalYear(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
     start_month = models.DateField()
