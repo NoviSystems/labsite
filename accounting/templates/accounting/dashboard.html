@@ -35,6 +35,9 @@
         <h1>test</h1>
     {% else %}
         <h4>
+            There are no fiscal year data created for this business unit.
+        </h4>
+        <h4>
             <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' %}>Create Fiscal Year</a>
         </h4>
     {% endif %}

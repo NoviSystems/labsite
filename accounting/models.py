@@ -16,6 +16,7 @@ class FiscalYear(models.Model):
 
 
 class Month(models.Model):
+    fiscal_year = models.ForeignKey(FiscalYear)
     month = models.DateField()
     projected_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
