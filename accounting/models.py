@@ -8,6 +8,8 @@ class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)
     user = models.ManyToManyField(User)
 
+    def __str__(self):
+        return self.name
 
 class FiscalYear(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
@@ -16,7 +18,7 @@ class FiscalYear(models.Model):
 
 
 class Month(models.Model):
-    fiscal_year = models.ForeignKey(FiscalYear)
+    fiscal_year = models.ForeignKey(FiscalYear, default=None)
     month = models.DateField()
     projected_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)

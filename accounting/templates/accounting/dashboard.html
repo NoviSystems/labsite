@@ -32,7 +32,11 @@
     <div class="row">
         <div class="col-md-12">
     {% if fiscal_years %}
-        <h1>test</h1>
+        {% for fiscal_year in fiscal_years %}
+        <a class="btn btn-primary" href={% url 'accounting:delete_fiscal_year' fiscal_year=fiscal_year.pk %}>Delete Fiscal Year</a>
+        <h1>{{ fiscal_year.start_month }}</h1>
+        <h1>{{ fiscal_year.number_of_months }}</h1>
+        {% endfor %}
     {% else %}
         <h4>
             There are no fiscal year data created for this business unit.
