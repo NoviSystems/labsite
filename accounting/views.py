@@ -74,4 +74,38 @@ class BusinessUnitUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class FiscalYearCreateView(LoginRequiredMixin, CreateView):
-        model = FiscalYear
+    template_name = 'accounting/fiscalyear_create_form.html'
+    model = FiscalYear
+    form_class = FiscalYearCreateForm
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:home')
+
+    def form_valid(self, form):
+        response = super(FiscalYearCreateView, self).form_valid(form)
+        return response
+
+class FiscalYearDeleteView(LoginRequiredMixin, DeleteView):
+    model = FiscalYear
+    template_name_suffix = '_delete_form'
+
+    def get_object(self):
+        return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:home')
+
+class FiscalYearUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+    form_class = FiscalYearUpdateForm
+    model = FiscalYear
+
+    def get_object(self):
+        return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:home')
+
+    def form_valid(self, form):
+        response = super(FiscalYearUpdateView, self).form_valid(form)
+        return response

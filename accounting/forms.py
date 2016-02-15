@@ -26,3 +26,27 @@ class BusinessUnitUpdateForm(ModelForm):
         exclude = [
         	'user'
         ]
+
+class FiscalYearCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(FiscalYearCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = FiscalYear
+        fields = '__all__'
+        exclude = [
+            'user'
+        ]
+
+class FiscalYearUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(FiscalYearUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = FiscalYear
+        fields = '__all__'
+        exclude = [
+            'user'
+        ]
