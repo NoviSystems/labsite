@@ -53,3 +53,53 @@ class FiscalYearUpdateForm(ModelForm):
         exclude = [
             'business_unit'
         ]
+
+class ContractCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ContractCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Contract
+        fields = '__all__'
+        exclude = [
+            
+        ]
+
+
+class ContractUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ContractUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Contract
+        fields = '__all__'
+        exclude = [
+            
+        ]
+
+class ExpenseCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ExpenseCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Expense
+        fields = '__all__'
+        exclude = [
+            
+        ]
+
+
+class ExpenseUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ExpenseUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Expense
+        fields = '__all__'
+        exclude = [
+            
+        ]

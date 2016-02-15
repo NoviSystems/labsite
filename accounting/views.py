@@ -116,3 +116,90 @@ class FiscalYearUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         response = super(FiscalYearUpdateView, self).form_valid(form)
         return response
+
+
+class ContractCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'accounting/contract_create_form.html'
+    model = Contract
+    form_class = ContractCreateForm
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ContractCreateView, self).get_context_data()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        response = super(ContractCreateView, self).form_valid(form)
+        return response
+
+
+class ContractDeleteView(LoginRequiredMixin, DeleteView):
+    model = Contract
+    template_name_suffix = '_delete_form'
+
+    def get_object(self):
+        return Contract.objects.get(pk=self.kwargs['contract'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+
+
+class ContractUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+    form_class = ContractUpdateForm
+    model = Contract
+
+    def get_object(self):
+        return Contract.objects.get(contract=self.kwargs['contract'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        response = super(ContractUpdateView, self).form_valid(form)
+        return response
+
+class ExpenseCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'accounting/expense_create_form.html'
+    model = Expense
+    form_class = ExpenseCreateForm
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ExpenseCreateView, self).get_context_data()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        response = super(ExpenseCreateView, self).form_valid(form)
+        return response
+
+
+class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
+    model = Expense
+    template_name_suffix = '_delete_form'
+
+    def get_object(self):
+        return Expense.objects.get(pk=self.kwargs['expense'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+
+
+class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+    form_class = ExpenseUpdateForm
+    model = Expense
+
+    def get_object(self):
+        return Expense.objects.get(Expense=self.kwargs['expense'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        response = super(ExpenseUpdateView, self).form_valid(form)
+        return response
