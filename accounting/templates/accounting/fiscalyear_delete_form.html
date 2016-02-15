@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container">
 <div class="page-header">
-    <h3>Delete Business Unit</h3>
+    <h3>Remove Fiscal Year</h3>
 </div>
 <div class="row">
         {% if form.errors %}
@@ -12,14 +12,14 @@
 
         <div class="row">
         	<div class="col-md-12">
-        		<h4>{{ businessunit.name }}</h4>
+        		<h4>{{ fiscalyear.business_unit }}</h4>
         	</div>
         </div>
 
         <form class="form" method="POST" action="">
                 {% csrf_token %}
                 {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">Delete Business Unit</button>
+            <button class="btn btn-primary" type="submit">Delete Fiscal Year</button>
         </form>
 </div>
 {% endblock %}
