@@ -69,7 +69,6 @@ class BusinessUnitUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super(BusinessUnitUpdateView, self).form_valid(form)
-        form.instance.user.add(self.request.user)
         return response
 
 
@@ -78,12 +77,19 @@ class FiscalYearCreateView(LoginRequiredMixin, CreateView):
     model = FiscalYear
     form_class = FiscalYearCreateForm
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(FiscalYearCreateView, self).get_context_data()
+        context['business_unit'] = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        return context
+
     def get_success_url(self):
-        return reverse_lazy('accounting:home')
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
 
     def form_valid(self, form):
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(FiscalYearCreateView, self).form_valid(form)
         return response
+
 
 class FiscalYearDeleteView(LoginRequiredMixin, DeleteView):
     model = FiscalYear
@@ -93,7 +99,8 @@ class FiscalYearDeleteView(LoginRequiredMixin, DeleteView):
         return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:home')
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+
 
 class FiscalYearUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
@@ -104,7 +111,7 @@ class FiscalYearUpdateView(LoginRequiredMixin, UpdateView):
         return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:home')
+        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
 
     def form_valid(self, form):
         response = super(FiscalYearUpdateView, self).form_valid(form)

@@ -15,6 +15,7 @@ class BusinessUnitCreateForm(ModelForm):
         	'user'
         ]
 
+
 class BusinessUnitUpdateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -27,6 +28,7 @@ class BusinessUnitUpdateForm(ModelForm):
         	'user'
         ]
 
+
 class FiscalYearCreateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -36,8 +38,9 @@ class FiscalYearCreateForm(ModelForm):
         model = FiscalYear
         fields = '__all__'
         exclude = [
-            'user'
+            'business_unit'
         ]
+
 
 class FiscalYearUpdateForm(ModelForm):
 
@@ -48,5 +51,5 @@ class FiscalYearUpdateForm(ModelForm):
         model = FiscalYear
         fields = '__all__'
         exclude = [
-            'user'
+            'business_unit'
         ]
