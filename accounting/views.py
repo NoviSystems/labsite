@@ -99,7 +99,7 @@ class FiscalYearDeleteView(LoginRequiredMixin, DeleteView):
         return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
 
 
 class FiscalYearUpdateView(LoginRequiredMixin, UpdateView):
