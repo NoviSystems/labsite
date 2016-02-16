@@ -23,8 +23,8 @@
         </ul>
     </li>
     {% endif %}
-    <li><a href=''>Test</a></li>
-    <li><a href=''>Test</a></li>
+    <li><a href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a></li>
+
 </ul>
 {% endblock %}
 
@@ -46,7 +46,6 @@
         </h4>
     {% endif %}
             <h4>
-            <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
         </h4>
         </div>
     </div>
