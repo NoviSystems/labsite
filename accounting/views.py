@@ -28,6 +28,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['current'] = current
         fiscal_years = FiscalYear.objects.filter(business_unit=current)
         context['fiscal_years'] = fiscal_years
+        fscl_yr_mnth = []
+        for fiscal_year in fiscal_years:
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+            fscl_yr_mnth.extend(
+                    [{
+                        'fiscal_year': fiscal_year, 
+                        'months': months,
+                    }]
+                )
+        context['fscl_yr_mnth'] = fscl_yr_mnth
+
         return context
 
 

@@ -31,20 +31,23 @@
 {% block content %}
     <div class="row">
         <div class="col-md-12">
-    {% if fiscal_years %}
-        {% for fiscal_year in fiscal_years %}
-        <a class="btn btn-primary" href={% url 'accounting:delete_fiscal_year' pk=current.pk fiscal_year=fiscal_year.pk %}>Delete Fiscal Year</a>
-        <h1>{{ fiscal_year.start_month }}</h1>
-        <h1>{{ fiscal_year.number_of_months }}</h1>
+    {% if fscl_yr_mnth %}
+        {% for x in fscl_yr_mnth %}
+        <a class="btn btn-primary" href={% url 'accounting:delete_fiscal_year' pk=current.pk fiscal_year=x.fiscal_year.pk %}>Delete Fiscal Year</a>
+        <h1>{{ x.fiscal_year.start_month }}</h1>
+        <h1>{{ x.fiscal_year.number_of_months }}</h1>
+            {% for month in x.months %}
+                <p>{{ month.month }}</p>
+            {% endfor %}
         {% endfor %}
     {% else %}
         <h4>
             There are no fiscal year data created for this business unit.
         </h4>
-        <h4>
+    {% endif %}
+            <h4>
             <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
         </h4>
-    {% endif %}
         </div>
     </div>
 {% endblock %}

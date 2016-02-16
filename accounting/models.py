@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from datetime import date
 
 
 class BusinessUnit(models.Model):
@@ -105,5 +108,9 @@ class Expense(models.Model):
     lineItem = GenericRelation(LineItem)
 
 
-
-
+@receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
+def createMonthsForFiscalYear(sender, instance, **kwargs):
+    start_month = instance.start_month
+    number_of_months = instance.number_of_months
+    for i in range(number_of_months):
+        Month.objects.create(fiscal_year=instance, month=date(start_month.year, start_month.month + i, start_month.day), projected_values=0.00, actual_values=0.00)
