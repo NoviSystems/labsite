@@ -28,17 +28,42 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['current'] = current
         fiscal_years = FiscalYear.objects.filter(business_unit=current)
         context['fiscal_years'] = fiscal_years
-        fscl_yr_mnth = []
+
+        fiscal_year_data = []
         for fiscal_year in fiscal_years:
             months = Month.objects.filter(fiscal_year=fiscal_year)
-            fscl_yr_mnth.extend(
-                    [{
-                        'fiscal_year': fiscal_year, 
-                        'months': months,
-                    }]
+            months_data = []
+            for month in months:
+                months_data.extend(
+                    [
+                        {
+                        'month': month,
+                        'line_items':  LineItem.objects.filter(month=month)
+                        }
+                    ]
                 )
-        context['fscl_yr_mnth'] = fscl_yr_mnth
+            fiscal_year_data.extend(
+                [
+                    {
+                    'fiscal_year': fiscal_year,
+                    'months': months_data
+                    }
+                ]
+                )
 
+        context['fiscal_year_data'] = fiscal_year_data
+        return context
+
+
+class ContractsView(LoginRequiredMixin, TemplateView):
+    template_name = 'accounting/contracts.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ContractsView, self).get_context_data()
+        business_units = BusinessUnit.objects.filter(user=self.request.user)
+        context['business_units'] = business_units
+        current = BusinessUnit.objects.get(pk=kwargs['pk'])
+        context['current'] = current
         return context
 
 
@@ -214,3 +239,15 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         response = super(ExpenseUpdateView, self).form_valid(form)
         return response
+
+
+class ExpensesView(LoginRequiredMixin, TemplateView):
+    template_name = 'accounting/expenses.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ExpensesView, self).get_context_data()
+        business_units = BusinessUnit.objects.filter(user=self.request.user)
+        context['business_units'] = business_units
+        current = BusinessUnit.objects.get(pk=kwargs['pk'])
+        context['current'] = current
+        return context

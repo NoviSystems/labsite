@@ -34,36 +34,16 @@
 
     </br>
     <ul class="nav nav-tabs">
-        <li class="active"><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
+        <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
         <li><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
-        <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
+        <li class="active"><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
         <li><a href="#">Personel</a></li>
         <li><a href="#">Prospects</a></li>
     </ul>
 
     <div class="row">
         <div class="col-md-12">
-    {% if fiscal_year_data %}
-        {% for x in fiscal_year_data %}
-        <a class="btn btn-primary" href={% url 'accounting:delete_fiscal_year' pk=current.pk fiscal_year=x.fiscal_year.pk %}>Delete Fiscal Year</a>
-        <h1>{{ x.fiscal_year.start_month }}</h1>
-        <h1>{{ x.fiscal_year.number_of_months }}</h1>
-            {% for y in x.months %}
-                <p>{{ y.month.month }}</p>
-                {% if y.month.line_items %}
-                    <p> line items </p>
-                {% else %}
-                    <p>No line items for this month.</p>
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-    {% else %}
-        <h4>
-            There are no fiscal year data created for this business unit.
-        </h4>
-    {% endif %}
-            <h4>
-        </h4>
+
         </div>
     </div>
 {% endblock %}
