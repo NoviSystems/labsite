@@ -34,7 +34,7 @@ class LineItem(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-
+    reconciled = models.BooleanField(default=False)
 
 class Contract(models.Model):
     CONTRACT_STATE = {
