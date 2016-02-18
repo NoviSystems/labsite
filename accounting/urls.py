@@ -14,7 +14,7 @@ urlpatterns = [
 	url(r'^dashboard/(?P<pk>\d+)/update_fiscal_year/(?P<fiscal_year>\d+)/$', FiscalYearUpdateView.as_view(), name='update_fiscal_year'),
 	url(r'^dashboard/(?P<pk>\d+)/delete_fiscal_year/(?P<fiscal_year>\d+)/$', FiscalYearDeleteView.as_view(), name='delete_fiscal_year'),
 
-	url(r'^dashboard/(?P<pk>\d+)/create_expense/$', ExpenseCreateView.as_view(), name='create_expense'),
+	url(r'^dashboard/(?P<pk>\d+)/create_expense/(?P<month>\d+)/$', ExpenseCreateView.as_view(), name='create_expense'),
 	url(r'^dashboard/(?P<pk>\d+)/update_expense/(?P<expense>\d+)/$', ExpenseUpdateView.as_view(), name='update_expense'),
 	url(r'^dashboard/(?P<pk>\d+)/delete_expense/(?P<expense>\d+)/$', ExpenseDeleteView.as_view(), name='delete_expense'),
 

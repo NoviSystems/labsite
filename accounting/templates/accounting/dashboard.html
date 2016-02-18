@@ -54,6 +54,8 @@
                     <p> line items </p>
                 {% else %}
                     <p>No line items for this month.</p>
+                    
+                    <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=y.month.pk%}>Create Expense</a>
                 {% endif %}
             {% endfor %}
         {% endfor %}
