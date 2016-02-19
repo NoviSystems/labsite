@@ -29,13 +29,10 @@ class Month(models.Model):
 
 
 class LineItem(models.Model):
-    month = models.ForeignKey(Month)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     reconciled = models.BooleanField(default=False)
+
 
 class Contract(models.Model):
     CONTRACT_STATE = {
@@ -46,30 +43,32 @@ class Contract(models.Model):
         ('FIXED', "fixed" ),
         ('HOURLY', "hourly" ),
     }
-
+    
+    business_unit = models.ForeignKey(BusinessUnit)
     contract_number = models.IntegerField()
     organization_name = models.CharField(max_length=255)
     start_date = models.DateField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
-    contract_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
     
 
-class Invoice(models.Model):
+class Invoice(LineItem):
     TRANSATION_STATE = {
         ('INVOICED', "invoiced"),
         ('NOT_INVOICED', "not invoiced"),
         ('RECIEVED', "recieved"),
     }
 
-    invoice_number = models.IntegerField()
-    invoice_date = models.DateField()
-    invoice_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    month = models.ForeignKey(Month)
+    number = models.IntegerField()
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
-    lineItem = GenericRelation(LineItem)
 
 
 class Personnel(models.Model):
+    business_unit = models.ForeignKey(BusinessUnit)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     employee_id = models.IntegerField()
@@ -100,13 +99,13 @@ class PartTime(models.Model):
     hours_work = models.IntegerField()
 
 
-class Expense(models.Model):
+class Expense(LineItem):
+    month = models.ForeignKey(Month)
     name = models.CharField(max_length=50)
     amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     data_payable = models.DateField()
     date_payed = models.DateField()
     reoccuring = models.IntegerField()
-    lineItem = GenericRelation(LineItem)
 
 
 @receiver(post_save, sender=Expense, dispatch_uid="createExpenseLineItem")

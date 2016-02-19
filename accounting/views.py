@@ -38,7 +38,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     [
                         {
                         'month': month,
-                        'line_items':  LineItem.objects.filter(month=month)
+                        'line_items':  LineItem.objects.filter()
                         }
                     ]
                 )
@@ -52,6 +52,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 )
 
         context['fiscal_year_data'] = fiscal_year_data
+
+        personnel = Personnel.objects.filter(business_unit=current)
+        context['personnel'] = personnel
+        contracts = Contract.objects.filter(business_unit=current)
+        context['contracts'] = contracts
+
         return context
 
 

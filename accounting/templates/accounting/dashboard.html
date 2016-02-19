@@ -18,19 +18,34 @@
     <div class="row">
         <div class="col-md-12">
     {% if fiscal_year_data %}
+
         {% for x in fiscal_year_data %}
+
         <a class="btn btn-primary" href={% url 'accounting:delete_fiscal_year' pk=current.pk fiscal_year=x.fiscal_year.pk %}>Delete Fiscal Year</a>
-        <h1>{{ x.fiscal_year.start_month }}</h1>
-        <h1>{{ x.fiscal_year.number_of_months }}</h1>
+
+
+        {% if personnel %}
+
+        {% else %}
+            <p class="lead"><a href={% url 'accounting:home' %}>No personnel for this business unit. Create Personnel.</a></p>
+        {% endif %}
+
+        {% if contracts %}
+
+        {% else %}
+            <p class="lead"><a href={% url 'accounting:home' %}>No contracts for this business unit. Create Contract.</a></p>
+        {% endif %}
+
             {% for y in x.months %}
                 <p>{{ y.month.month }}</p>
+
                 {% if y.month.line_items %}
                     <p> line items </p>
                 {% else %}
-                    <p>No line items for this month.</p>
-                    
-                    <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=y.month.pk%}>Create Expense</a>
+                    <a href={% url 'accounting:create_expense' pk=current.pk month=y.month.pk%}>No line items for this month. Create Expense.</a>
                 {% endif %}
+
+
             {% endfor %}
         {% endfor %}
     {% else %}
