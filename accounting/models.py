@@ -29,6 +29,7 @@ class Month(models.Model):
 
 
 class LineItem(models.Model):
+    month = models.ForeignKey(Month)
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     reconciled = models.BooleanField(default=False)
@@ -60,10 +61,8 @@ class Invoice(LineItem):
         ('RECIEVED', "recieved"),
     }
 
-    month = models.ForeignKey(Month)
     number = models.IntegerField()
     date = models.DateField()
-    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
 
 
@@ -100,10 +99,9 @@ class PartTime(models.Model):
 
 
 class Expense(LineItem):
-    month = models.ForeignKey(Month)
     name = models.CharField(max_length=50)
     data_payable = models.DateField()
-    date_payed = models.DateField()
+    date_payed = models.DateField(default=None, null=True)
     reoccuring = models.IntegerField()
 
 
