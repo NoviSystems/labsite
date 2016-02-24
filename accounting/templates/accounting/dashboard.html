@@ -32,9 +32,9 @@
 
         {% if contracts %}
 
-        {% else %}
+<!--         {% else %}
             <p class="lead"><a href={% url 'accounting:home' %}>No contracts for this business unit. Create Contract.</a></p>
-        {% endif %}
+        {% endif %} -->
 
             {% for y in x.months %}
                 <p>{{ y.month.month }}</p>

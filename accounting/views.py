@@ -70,6 +70,8 @@ class ContractsView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+        contracts = Contract.objects.filter(business_unit=current)
+        context['contracts'] = contracts
         return context
 
 
@@ -194,7 +196,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
     model = Contract
 
     def get_object(self):
-        return Contract.objects.get(contract=self.kwargs['contract'])
+        return Contract.objects.get(pk=self.kwargs['contract'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
@@ -237,7 +239,7 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     model = Expense
 
     def get_object(self):
-        return Expense.objects.get(Expense=self.kwargs['expense'])
+        return Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)

@@ -17,9 +17,23 @@
         <li><a href="#">Prospects</a></li>
     </ul>
 
+
+        <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+
+    {% for contract in contracts %}
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-4">
+        <h4>
+            <a href=#>{{contract.organization_name}}</a>
+        </h4>
+        </div>
+        <div class="col-md-8">
+            <h4>
+                <a class="btn btn-primary" href={% url 'accounting:update_contract' pk=current.pk contract=contract.pk %}>Update</a>
+                <a class="btn btn-primary" href={% url 'accounting:delete_contract' pk=current.pk contract=contract.pk %}>Delete</a>
+            </h4>
 
         </div>
     </div>
+    {% endfor %}
 {% endblock %}
