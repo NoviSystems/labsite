@@ -266,4 +266,8 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+
+        expenses = Expense.objects.all()
+        context['expenses'] = expenses
+
         return context
