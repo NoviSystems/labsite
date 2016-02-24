@@ -203,6 +203,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         response = super(ContractUpdateView, self).form_valid(form)
         return response
 
+
 class ExpenseCreateView(LoginRequiredMixin, CreateView):
     template_name = 'accounting/expense_create_form.html'
     model = Expense
@@ -213,10 +214,13 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
+        form.instance.date_payed = '2016-01-01'
+        form.instance.month = Month.objects.get(pk=self.kwargs['month'])
         response = super(ExpenseCreateView, self).form_valid(form)
+
         return response
 
 
