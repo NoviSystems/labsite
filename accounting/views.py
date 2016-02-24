@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from models import *
 from django.contrib.auth.models import User
 from forms import *
-
+from decimal import *
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/home.html'
@@ -34,11 +34,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             months = Month.objects.filter(fiscal_year=fiscal_year)
             months_data = []
             for month in months:
+                line_items = LineItem.objects.filter(month=month)
+                predicted = Decimal('0.00')
+                actual = Decimal('0.00')
+                for line_item in line_items:
+                    predicted += line_item.predicted_amount
+                    actual += line_item.actual_amount
                 months_data.extend(
                     [
                         {
                         'month': month,
-                        'line_items':  LineItem.objects.filter()
+                        'predicted': predicted,
+                        'actual': actual,
+                        'line_items': line_items,
                         }
                     ]
                 )
@@ -52,7 +60,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 )
 
         context['fiscal_year_data'] = fiscal_year_data
-
         personnel = Personnel.objects.filter(business_unit=current)
         context['personnel'] = personnel
         contracts = Contract.objects.filter(business_unit=current)
@@ -205,6 +212,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         response = super(ContractUpdateView, self).form_valid(form)
         return response
 
+
 class ExpenseCreateView(LoginRequiredMixin, CreateView):
     template_name = 'accounting/expense_create_form.html'
     model = Expense
@@ -215,10 +223,12 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
+        form.instance.month = Month.objects.get(pk=self.kwargs['month'])
         response = super(ExpenseCreateView, self).form_valid(form)
+
         return response
 
 
@@ -258,4 +268,8 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+
+        expenses = Expense.objects.all()
+        context['expenses'] = expenses
+
         return context

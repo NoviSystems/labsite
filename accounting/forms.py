@@ -79,6 +79,7 @@ class ContractUpdateForm(ModelForm):
             
         ]
 
+
 class ExpenseCreateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -88,7 +89,10 @@ class ExpenseCreateForm(ModelForm):
         model = Expense
         fields = '__all__'
         exclude = [
-            
+            'actual_amount',
+            'reconciled',
+            'month',
+            'date_payed',
         ]
 
 

@@ -29,6 +29,7 @@ class Month(models.Model):
 
 
 class LineItem(models.Model):
+    month = models.ForeignKey(Month)
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     reconciled = models.BooleanField(default=False)
@@ -60,10 +61,8 @@ class Invoice(LineItem):
         ('RECIEVED', "recieved"),
     }
 
-    month = models.ForeignKey(Month)
     number = models.IntegerField()
     date = models.DateField()
-    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
 
 
@@ -100,24 +99,10 @@ class PartTime(models.Model):
 
 
 class Expense(LineItem):
-    month = models.ForeignKey(Month)
     name = models.CharField(max_length=50)
-    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     data_payable = models.DateField()
-    date_payed = models.DateField()
+    date_payed = models.DateField(default=None, null=True)
     reoccuring = models.IntegerField()
-
-
-@receiver(post_save, sender=Expense, dispatch_uid="createExpenseLineItem")
-def createExpenseLineItem(sender, instance, **kwargs):
-    try:
-        lineItem = LineItem.objects.get(object_id=instance.pk)
-        lineItem.content_object = instance
-        lineItem.save()
-    except ObjectDoesNotExist:
-        print "MONTH: ", kwargs
-        lineItem = LineItem.objects.create(content_object=instance, object_id=instance.pk, month=Month.objects.get(kwargs['month']))
-        lineItem.save()
 
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
