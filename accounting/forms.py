@@ -107,3 +107,53 @@ class ExpenseUpdateForm(ModelForm):
         exclude = [
             
         ]
+
+class SalaryCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(SalaryCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Salary
+        fields = '__all__'
+        exclude = [
+
+        ]
+
+
+class SalaryUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(SalaryUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Salary
+        fields = '__all__'
+        exclude = [
+            
+        ]
+
+class PartTimeCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PartTimeCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = PartTime
+        fields = '__all__'
+        exclude = [
+
+        ]
+
+
+class PartTimeUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PartTimeUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = PartTime
+        fields = '__all__'
+        exclude = [
+            
+        ]

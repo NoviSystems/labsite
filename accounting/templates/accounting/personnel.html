@@ -1,0 +1,36 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+
+
+
+{% block content %}
+
+    </br>
+    <ul class="nav nav-tabs">
+        <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
+        <li><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
+        <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
+        <li class="active"><a href={% url 'accounting:personnel' pk=current.pk %}>Personnel</a></li>
+        <li><a href="#">Prospects</a></li>
+    </ul>
+
+<!-- Add tabs for salary vs. partime -->
+
+
+<a class="btn btn-primary" href={% url 'accounting:create_salary' pk=current.pk %}>Create Salary Employee</a>
+
+<a class="btn btn-primary" href={% url 'accounting:create_part_time' pk=current.pk  %}>Create Part Time Employee</a>
+
+
+    <div class="row">
+        <div class="col-md-4">
+            {% for personnel in personnel %}
+                <p class="lead">{{ personnel.first_name }}{{ personnel.last_name }}- {{personnel.position}}</p> 
+            {% endfor %}
+        </div>
+        <div class="col-md-8">
+<!--  -->
+        </div>
+    </div>
+{% endblock %}
