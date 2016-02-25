@@ -74,7 +74,7 @@ class Personnel(models.Model):
     position = models.CharField(max_length=50)
 
 
-class Salary(models.Model):
+class Salary(Personnel):
     SALARY_TYPE = {
         ('EPA', 'EPA'),
         ('SPA', 'SPA'),
@@ -88,7 +88,7 @@ class Salary(models.Model):
     fringe_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
 
-class PartTime(models.Model):
+class PartTime(Personnel):
     HOURLY_TYPE = {
         ('STUDENT', 'student'),
         ('NON_STUDENT', 'non student')
