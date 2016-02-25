@@ -179,9 +179,10 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
 
     def form_valid(self, form):
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(ContractCreateView, self).form_valid(form)
         return response
 
@@ -194,7 +195,7 @@ class ContractDeleteView(LoginRequiredMixin, DeleteView):
         return Contract.objects.get(pk=self.kwargs['contract'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
 
 
 class ContractUpdateView(LoginRequiredMixin, UpdateView):
@@ -206,7 +207,7 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         return Contract.objects.get(pk=self.kwargs['contract'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
 
     def form_valid(self, form):
         response = super(ContractUpdateView, self).form_valid(form)

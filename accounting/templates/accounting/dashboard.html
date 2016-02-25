@@ -27,14 +27,28 @@
         {% if personnel %}
 
         {% else %}
-            <p class="lead"><a href={% url 'accounting:home' %}>No personnel for this business unit. Create Personnel.</a></p>
+        <div class="row">
+            <div class="col-md-6">
+            <p class="lead">No personnel for this business unit.</p>
+            </div>
+            <div class="col-md-6">
+                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Personnel</a>
+            </div>
+        </div>
         {% endif %}
 
         {% if contracts %}
 
-<!--         {% else %}
-            <p class="lead"><a href={% url 'accounting:home' %}>No contracts for this business unit. Create Contract.</a></p>
-        {% endif %} -->
+        {% else %}
+        <div class="row">
+            <div class="col-md-6">
+                <p class="lead">No contracts for this business unit.</p>
+            </div>
+            <div class="col-md-6">
+                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+            </div>
+        </div>
+        {% endif %}
 
             {% for y in x.months %}
                 <div class="row">

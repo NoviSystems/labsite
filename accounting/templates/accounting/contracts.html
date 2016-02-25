@@ -2,10 +2,6 @@
 
 {% load staticfiles %}
 
-
-
-
-
 {% block content %}
 
     </br>
@@ -17,23 +13,54 @@
         <li><a href="#">Prospects</a></li>
     </ul>
 
-
-        <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
-
-    {% for contract in contracts %}
     <div class="row">
-        <div class="col-md-4">
-        <h4>
-            <a href=#>{{contract.organization_name}}</a>
-        </h4>
-        </div>
-        <div class="col-md-8">
-            <h4>
-                <a class="btn btn-primary" href={% url 'accounting:update_contract' pk=current.pk contract=contract.pk %}>Update</a>
-                <a class="btn btn-primary" href={% url 'accounting:delete_contract' pk=current.pk contract=contract.pk %}>Delete</a>
-            </h4>
+        <div class="col-md-12">
 
+        {% if contracts %}
+            {% for contract in contracts %}
+
+            <div class="panel-heading" role="tab" id="headingOne">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract.pk}}">
+                        <p class="lead'">Contact for {{ contract.organization_name }}</p>
+                    </a>
+                </h4>
+            </div>
+
+            <div id="collapse{{contract.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{contract.pk}}">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h4>
+                                <p>Organization Name: {{contract.organization_name}}</p>
+                                <p>Start Date:</p>
+                                <p>Total Amount: </p>
+                            </h4>
+                        </div>
+                        <div class="col-md-8">
+                            <h4>
+                                <a class="btn btn-primary" href={% url 'accounting:update_contract' pk=current.pk contract=contract.pk %}>Update</a>
+                                <a class="btn btn-primary" href={% url 'accounting:delete_contract' pk=current.pk contract=contract.pk %}>Delete</a>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+        {% else %}
+            <p class="lead">No contracts for this business unit.</p>
+        {% endif %}
+            <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
         </div>
     </div>
-    {% endfor %}
 {% endblock %}
+
+
+
+    contract_number = models.IntegerField()
+    organization_name = models.CharField(max_length=255)
+    start_date = models.DateField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
+    contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
