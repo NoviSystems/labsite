@@ -134,6 +134,7 @@ class InvoiceUpdateForm(ModelForm):
         fields = '__all__'
         exclude = [
             'contract'
+        ]
 
 
 class SalaryCreateForm(ModelForm):
@@ -161,6 +162,7 @@ class SalaryUpdateForm(ModelForm):
             
         ]
 
+
 class PartTimeCreateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -183,3 +185,4 @@ class PartTimeUpdateForm(ModelForm):
         model = PartTime
         fields = '__all__'
         exclude = [
+        ]
