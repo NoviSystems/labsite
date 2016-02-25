@@ -61,6 +61,7 @@ class Invoice(LineItem):
         ('RECIEVED', "recieved"),
     }
 
+    contract = models.ForeignKey(Contract)
     number = models.IntegerField()
     date = models.DateField()
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
