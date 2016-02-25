@@ -29,4 +29,17 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/delete_invoice/$', InvoiceDeleteView.as_view(), name='delete_invoice'),
 
 	url(r'^(?P<pk>\d+)/expenses/$', ExpensesView.as_view(), name='expenses'),
+
+	url(r'^(?P<pk>\d+)/personnel/$', PersonnelView.as_view(), name='personnel'),
+
+	url(r'^(?P<pk>\d+)/personnel/create_salary/$', SalaryCreateView.as_view(), name='create_salary'),
+	url(r'^(?P<pk>\d+)/personnel/(?P<salary>\d+)/update_salary/$', SalaryUpdateView.as_view(), name='update_salary'),
+	url(r'^(?P<pk>\d+)/personnel/(?P<salary>\d+)/delete_salary/$', SalaryDeleteView.as_view(), name='delete_salary'),
+
+	url(r'^(?P<pk>\d+)/personnel/create_part_time/$', PartTimeCreateView.as_view(), name='create_part_time'),
+	url(r'^(?P<pk>\d+)/personnel/(?P<part_time>\d+)/update_part_time/$', PartTimeUpdateView.as_view(), name='update_part_time'),
+	url(r'^(?P<pk>\d+)/personnel/(?P<part_time>\d+)/delete_part_time/$', PartTimeDeleteView.as_view(), name='delete_part_time'),
+
+
+
 ]
