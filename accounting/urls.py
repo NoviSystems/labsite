@@ -24,5 +24,9 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/update_contract/$', ContractUpdateView.as_view(), name='update_contract'),
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/delete_contract/$', ContractDeleteView.as_view(), name='delete_contract'),
 
+	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/create_invoice/$', InvoiceCreateView.as_view(), name='create_invoice'),
+	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/udpate_invoice/$', InvoiceUpdateView.as_view(), name='udpate_invoice'),
+	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/delete_invoice/$', InvoiceDeleteView.as_view(), name='delete_invoice'),
+
 	url(r'^(?P<pk>\d+)/expenses/$', ExpensesView.as_view(), name='expenses'),
 ]

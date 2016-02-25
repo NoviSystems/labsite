@@ -77,8 +77,36 @@ class ContractsView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+
         contracts = Contract.objects.filter(business_unit=current)
-        context['contracts'] = contracts
+        contract_invoices = []
+        for contract in contracts:
+            invoices = Invoice.objects.filter(contract=contract)
+            contract_invoices.extend(
+            [
+                {
+                    'contract': contract,
+                    'invoices': invoices,
+                }
+            ]
+            )
+        context['contract_invoices'] = contract_invoices
+        return context
+
+
+class ExpensesView(LoginRequiredMixin, TemplateView):
+    template_name = 'accounting/expenses.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ExpensesView, self).get_context_data()
+        business_units = BusinessUnit.objects.filter(user=self.request.user)
+        context['business_units'] = business_units
+        current = BusinessUnit.objects.get(pk=kwargs['pk'])
+        context['current'] = current
+
+        expenses = Expense.objects.all()
+        context['expenses'] = expenses
+
         return context
 
 
@@ -207,10 +235,57 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         return Contract.objects.get(pk=self.kwargs['contract'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
+        return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
 
     def form_valid(self, form):
         response = super(ContractUpdateView, self).form_valid(form)
+        return response
+
+
+class InvoiceCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'accounting/invoice_create_form.html'
+    model = Invoice
+    form_class = InvoiceCreateForm
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(InvoiceCreateView, self).get_context_data()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:contracts', kwargs={ 'pk':self.kwargs['pk'] } )
+
+    def form_valid(self, form):
+        month = Month.objects.get(fiscal_year__business_unit=self.kwargs['pk'], month__month=form.instance.date.month)
+        form.instance.month = month
+        form.instance.contract = Contract.objects.get(pk=self.kwargs['contract'])
+        response = super(InvoiceCreateView, self).form_valid(form)
+        return response
+
+
+class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
+    model = Invoice
+    template_name_suffix = '_delete_form'
+
+    def get_object(self):
+        return Invoice.objects.get(pk=self.kwargs['invoice'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
+
+
+class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+    form_class = InvoiceUpdateForm
+    model = Invoice
+
+    def get_object(self):
+        return Invoice.objects.get(pk=self.kwargs['invoice'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
+
+    def form_valid(self, form):
+        response = super(InvoiceUpdateView, self).form_valid(form)
         return response
 
 
@@ -258,19 +333,3 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         response = super(ExpenseUpdateView, self).form_valid(form)
         return response
-
-
-class ExpensesView(LoginRequiredMixin, TemplateView):
-    template_name = 'accounting/expenses.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(ExpensesView, self).get_context_data()
-        business_units = BusinessUnit.objects.filter(user=self.request.user)
-        context['business_units'] = business_units
-        current = BusinessUnit.objects.get(pk=kwargs['pk'])
-        context['current'] = current
-
-        expenses = Expense.objects.all()
-        context['expenses'] = expenses
-
-        return context

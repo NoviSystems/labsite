@@ -5,25 +5,17 @@
 {% block content %}
 <div class="container">
 <div class="page-header">
-    <h3>Delete Fiscal Year</h3>
+    <h3>Update Invoice</h3>
 </div>
 <div class="row">
         {% if form.errors %}
         <div class="alert alert-danger"> {{ form.errors }} </div>
         {% endif %}
 
-        <div class="row">
-        	<div class="col-md-12">
-        	     <h4>{{ fiscalyear.business_unit }}</h4>
-                <h4>Start: {{ fiscalyear.start_month }}</h4>
-                <h4>Months: {{ fiscalyear.number_of_months }}</h4>
-        	</div>
-        </div>
-
         <form class="form" method="POST" action="">
                 {% csrf_token %}
                 {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">Delete Fiscal Year</button>
+            <button class="btn btn-primary" type="submit">Update Invoice</button>
         </form>
 </div>
 {% endblock %}

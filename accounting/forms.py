@@ -107,3 +107,32 @@ class ExpenseUpdateForm(ModelForm):
         exclude = [
             
         ]
+
+
+class InvoiceCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(InvoiceCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+        exclude = [
+            'actual_amount',
+            'reconciled',
+            'month',
+            'contract'
+        ]
+
+
+class InvoiceUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(InvoiceUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Invoice
+        fields = '__all__'
+        exclude = [
+            'contract'
+        ]
