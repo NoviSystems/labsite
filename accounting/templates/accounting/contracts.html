@@ -22,7 +22,7 @@
             <div class="panel-heading" role="tab" id="headingOne">
                 <h4 class="panel-title">
                     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract.pk}}">
-                        <p class="lead'">Contact for {{ contract.organization_name }}</p>
+                        <p class="lead'">#{{ contract.contract_number }} - {{ contract.organization_name }}</p>
                     </a>
                 </h4>
             </div>
@@ -33,8 +33,10 @@
                         <div class="col-md-4">
                             <h4>
                                 <p>Organization Name: {{contract.organization_name}}</p>
-                                <p>Start Date:</p>
-                                <p>Total Amount: </p>
+                                <p>Start Date: {{contract.start_date}}</p>
+                                <p>Total Amount: {{contract.amount }}</p>
+                                <p>Contract State: {{contract.contract_state }}</p>
+                                <p>Contract Type: {{contract.contract_type }}</p>
                             </h4>
                         </div>
                         <div class="col-md-8">
@@ -55,12 +57,3 @@
         </div>
     </div>
 {% endblock %}
-
-
-
-    contract_number = models.IntegerField()
-    organization_name = models.CharField(max_length=255)
-    start_date = models.DateField()
-    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
-    contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
-    contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
