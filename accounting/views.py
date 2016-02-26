@@ -348,6 +348,12 @@ class PersonnelView(LoginRequiredMixin, TemplateView):
         personnel = Personnel.objects.all()
         context['personnel'] = personnel
 
+        salary = Salary.objects.all()
+        context['salary'] = salary
+
+        part_time = PartTime.objects.all()
+        context['part_time'] = part_time
+
         return context
 
 
@@ -361,9 +367,10 @@ class SalaryCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(SalaryCreateView, self).form_valid(form)
 
         return response
@@ -377,7 +384,7 @@ class SalaryDeleteView(LoginRequiredMixin, DeleteView):
         return Salary.objects.get(pk=self.kwargs['salary'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
 
 
 class SalaryUpdateView(LoginRequiredMixin, UpdateView):
@@ -389,7 +396,7 @@ class SalaryUpdateView(LoginRequiredMixin, UpdateView):
         return Salary.objects.get(pk=self.kwargs['salary'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:personnel', kwargs=self.kwargs)
 
     def form_valid(self, form):
         response = super(SalaryUpdateView, self).form_valid(form)
@@ -406,9 +413,10 @@ class PartTimeCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(PartTimeCreateView, self).form_valid(form)
 
         return response
@@ -416,17 +424,17 @@ class PartTimeCreateView(LoginRequiredMixin, CreateView):
 
 class PartTimeDeleteView(LoginRequiredMixin, DeleteView):
     model = PartTime
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/part_time_delete_form.html'
 
     def get_object(self):
         return PartTime.objects.get(pk=self.kwargs['part_time'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
 
 
 class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/part_time_update_form.html'
     form_class = PartTimeUpdateForm
     model = PartTime
 
@@ -434,7 +442,7 @@ class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
         return PartTime.objects.get(pk=self.kwargs['part_time'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:personnel', kwargs=self.kwargs)
 
     def form_valid(self, form):
         response = super(PartTimeUpdateView, self).form_valid(form)

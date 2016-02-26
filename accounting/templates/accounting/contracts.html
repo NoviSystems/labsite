@@ -57,7 +57,7 @@
                                     <p>Status: {{invoice.transation_state}}</p>
                                 </div>
                                 <div class="col-md-3">
-                                    <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' pk=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Delete</a>
                                 </div>
                                 {% endfor %}
