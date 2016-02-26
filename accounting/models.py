@@ -29,6 +29,7 @@ class Month(models.Model):
 
 
 class LineItem(models.Model):
+    business_unit = models.ForeignKey(BusinessUnit, editable=False, default=1)
     month = models.ForeignKey(Month)
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
