@@ -18,19 +18,67 @@
 <!-- Add tabs for salary vs. partime -->
 
 
-<a class="btn btn-primary" href={% url 'accounting:create_salary' pk=current.pk %}>Create Salary Employee</a>
+<div id="contentContainer" class="col-xs-0 col-sm-9">
+    <div id="workTab" class="tabbable">
+        <ul class= "nav nav-tabs">
+            <li class="active">
+                <a  data-toggle="tab" href="#salary" aria-expanded="true">Salary Personnel</a>
+            </li>
+            <li >
+                <a  data-toggle="tab" href="#part-time" aria-expanded="true">Part Time Personnel</a>
+            </li>
 
-<a class="btn btn-primary" href={% url 'accounting:create_part_time' pk=current.pk  %}>Create Part Time Employee</a>
+        </ul>
+        <div class= "tab-content" >
+            <div id="salary" class="tab-pane active">
+                <a class="btn btn-primary" href={% url 'accounting:create_salary' pk=current.pk %}>Create Salary Employee</a>
 
 
-    <div class="row">
-        <div class="col-md-4">
-            {% for personnel in personnel %}
-                <p class="lead">{{ personnel.first_name }}{{ personnel.last_name }}- {{personnel.position}}</p> 
-            {% endfor %}
-        </div>
-        <div class="col-md-8">
-<!--  -->
+                <div class="row">
+                    <div class="col-md-4">
+                        {% for personnel in personnel %}
+                        <p class="lead">{{ personnel.first_name }}{{ personnel.last_name }}- {{personnel.position}}</p> 
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-8">
+
+                    </div>
+                </div>
+
+            </div>
+            <div id="part-time" class="tab-pane ">
+                <a class="btn btn-primary" href={% url 'accounting:create_part_time' pk=current.pk  %}>Create Part Time Employee</a>
+
+
+                <div class="row">
+                    <div class="col-md-4">
+                        {% for personnel in personnel %}
+                        <p class="lead">{{ personnel.first_name }}{{ personnel.last_name }}- {{personnel.position}}</p> 
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-8">
+
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
 {% endblock %}
