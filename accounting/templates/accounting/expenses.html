@@ -35,6 +35,9 @@
             </div>
         </div>
         <div class="row">
+                <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=month_data.month.pk %}>Create Expense</a>
+        </div>
+        <div class="row">
             {% if month_data.expenses %}
                 {% for expense in month_data.expenses %}
                     <div class="col-md-4">
