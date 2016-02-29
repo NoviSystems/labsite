@@ -147,7 +147,7 @@ class SalaryCreateForm(ModelForm):
         model = Salary
         fields = '__all__'
         exclude = [
-
+            'business_unit'
         ]
 
 
@@ -173,7 +173,7 @@ class PartTimeCreateForm(ModelForm):
         model = PartTime
         fields = '__all__'
         exclude = [
-
+            'business_unit'
         ]
 
 
