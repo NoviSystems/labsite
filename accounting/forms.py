@@ -93,6 +93,7 @@ class ExpenseCreateForm(ModelForm):
             'reconciled',
             'month',
             'date_payed',
+            'business_unit',
         ]
 
 

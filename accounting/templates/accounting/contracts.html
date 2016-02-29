@@ -8,7 +8,7 @@
     <ul class="nav nav-tabs">
         <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
         <li class="active"><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
-        <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
+        <li><a href={% url 'accounting:expenses' pk=current.pk month=current_month.pk %}>Expenses</a></li>
         <li><a href={% url 'accounting:personnel' pk=current.pk %}>Personnel</a></li>
         <li><a href="#">Prospects</a></li>
     </ul>

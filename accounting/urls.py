@@ -28,7 +28,7 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/udpate_invoice/$', InvoiceUpdateView.as_view(), name='udpate_invoice'),
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/delete_invoice/$', InvoiceDeleteView.as_view(), name='delete_invoice'),
 
-	url(r'^(?P<pk>\d+)/expenses/$', ExpensesView.as_view(), name='expenses'),
+	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/$', ExpensesView.as_view(), name='expenses'),
 
 	url(r'^(?P<pk>\d+)/personnel/$', PersonnelView.as_view(), name='personnel'),
 

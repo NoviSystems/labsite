@@ -6,6 +6,7 @@ from models import *
 from django.contrib.auth.models import User
 from forms import *
 from decimal import *
+import datetime 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/home.html'
@@ -26,8 +27,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+
         fiscal_years = FiscalYear.objects.filter(business_unit=current)
         context['fiscal_years'] = fiscal_years
+
+        now = datetime.datetime.now()
+        current_month = None
+        for fiscal_year in fiscal_years:
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+            for month in months:
+                if month.month.month == now.month:
+                    current_month = month
+        context['current_month'] = current_month
 
         fiscal_year_data = []
         for fiscal_year in fiscal_years:
@@ -78,6 +89,17 @@ class ContractsView(LoginRequiredMixin, TemplateView):
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
 
+        fiscal_years = FiscalYear.objects.filter(business_unit=current)
+
+        now = datetime.datetime.now()
+        current_month = None
+        for fiscal_year in fiscal_years:
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+            for month in months:
+                if month.month.month == now.month:
+                    current_month = month
+        context['current_month'] = current_month
+
         contracts = Contract.objects.filter(business_unit=current)
         contract_invoices = []
         for contract in contracts:
@@ -103,9 +125,26 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+        fiscal_years = FiscalYear.objects.filter(business_unit=current)
+        now = datetime.datetime.now()
 
-        expenses = Expense.objects.all()
-        context['expenses'] = expenses
+        months_data = []
+        current_month = None
+        for fiscal_year in fiscal_years:
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+            for month in months:
+                if month.month.month == now.month:
+                    current_month = month
+
+        month = Month.objects.get(pk=kwargs['month'])
+        month_data = {
+            'month': month,
+            'expenses': Expense.objects.filter(month=month),
+        }
+
+        context['months'] = months
+        context['current_month'] = current_month
+        context['month_data'] = month_data
 
         return context
 
@@ -303,6 +342,7 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.month = Month.objects.get(pk=self.kwargs['month'])
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(ExpenseCreateView, self).form_valid(form)
 
         return response
@@ -344,6 +384,18 @@ class PersonnelView(LoginRequiredMixin, TemplateView):
         context['business_units'] = business_units
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
+
+        fiscal_years = FiscalYear.objects.filter(business_unit=current)
+
+        now = datetime.datetime.now()
+        current_month = None
+        for fiscal_year in fiscal_years:
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+            for month in months:
+                if month.month.month == now.month:
+                    current_month = month
+        context['current_month'] = current_month
+
 
         personnel = Personnel.objects.all()
         context['personnel'] = personnel
