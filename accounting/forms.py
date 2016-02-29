@@ -173,7 +173,8 @@ class PartTimeCreateForm(ModelForm):
         model = PartTime
         fields = '__all__'
         exclude = [
-            'business_unit'
+            'business_unit',
+            'hours_work'
         ]
 
 
