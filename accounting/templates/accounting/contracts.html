@@ -22,7 +22,7 @@
             <div class="panel-heading" role="tab" id="headingOne">
                 <h4 class="panel-title">
                     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract_invoice.contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract_invoice.contract.pk}}">
-                        <p class="lead'">#{{ contract_invoice.contract.contract_number }} - {{ contract_invoice.contract.organization_name }}</p>
+                        <h4 class="lead'">#{{ contract_invoice.contract.contract_number }}: {{ contract_invoice.contract.organization_name }} - {{contract_invoice.contract.contract_state }}</h4><hr>
                     </a>
                 </h4>
             </div>
