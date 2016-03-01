@@ -104,7 +104,6 @@ class Expense(LineItem):
     name = models.CharField(max_length=50)
     data_payable = models.DateField()
     date_payed = models.DateField(default=None, null=True)
-    reoccuring = models.IntegerField()
 
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
