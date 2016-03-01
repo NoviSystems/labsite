@@ -23,91 +23,43 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Column chart with negative values'
+            text: 'Predicted / Actual Values for Months'
         },
         xAxis: {
-            categories: ['January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ]
+            categories: {{ months | safe }}
         },
         credits: {
             enabled: false
         },
         series: [{
-            name: 'Positive',
-            data: [5, 3, 4, 7, 2]
+            name: 'Predicted',
+            data: {{ predicted_totals | safe }}
         }, {
-            name: 'Negative',
-            data: [2, -2, -3, 2, 1]
+            name: 'Actual',
+            data: {{ actual_totals | safe }}
         }]
     });
 });
 </script>
 
+{% if not personnel %}
     <div class="row">
         <div class="col-md-12">
-    {% if fiscal_year_data %}
-
-        {% for x in fiscal_year_data %}
-
-        <a class="btn btn-primary" href={% url 'accounting:delete_fiscal_year' pk=current.pk fiscal_year=x.fiscal_year.pk %}>Delete Fiscal Year</a>
-
-
-        {% if personnel %}
-
-        {% else %}
-        <div class="row">
-            <div class="col-md-6">
-            <p class="lead">No personnel for this business unit.</p>
-            </div>
-            <div class="col-md-6">
-                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Personnel</a>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if contracts %}
-
-        {% else %}
-        <div class="row">
-            <div class="col-md-6">
-                <p class="lead">No contracts for this business unit.</p>
-            </div>
-            <div class="col-md-6">
-                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
-            </div>
-        </div>
-        {% endif %}
-
-            {% for y in x.months %}
-                <div class="row">
-                    <div class="col-md-3">
-                        <p>{{ y.month.month }}</p>
-                    </div>
-                    <div class="col-md-3">
-                        <p>Predicted: {{ y.predicted }}</p>
-                    </div>
-                    <div class="col-md-3">
-                        <p>Actual: {{ y.actual }}</p>
-                    </div>
-                </div>
-
-                {% if y.line_items %}
-                    {% for z in y.line_items %}
-                    <p> {{ z }} </p>
-                    {% endfor %}
-                {% else %}
-                    <a href={% url 'accounting:create_expense' pk=current.pk month=y.month.pk%}>No line items for this month. Create Expense.</a>
-                {% endif %}
-
-
-            {% endfor %}
-        {% endfor %}
-    {% else %}
-        <h4>
-            There are no fiscal year data created for this business unit.
-        </h4>
-    {% endif %}
-            <h4>
+        <h4>No personnel for this business unit.
+            <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Personnel</a>
         </h4>
         </div>
     </div>
+{% endif %}
+
+{% if not contracts %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4>No contracts for this business unit.
+                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+            </h4>
+        </div>
+    </div>
+{% endif %}
+
 {% endblock %}
