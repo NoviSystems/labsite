@@ -468,6 +468,7 @@ class PartTimeCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.hours_work = 20
         response = super(PartTimeCreateView, self).form_valid(form)
 
         return response
