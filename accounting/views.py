@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from forms import *
 from decimal import *
 import datetime 
+import json
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/home.html'
@@ -40,37 +41,35 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     current_month = month
         context['current_month'] = current_month
 
-        fiscal_year_data = []
+        months = []
+        predicted_totals = []
+        actual_totals = []
         for fiscal_year in fiscal_years:
-            months = Month.objects.filter(fiscal_year=fiscal_year)
-            months_data = []
-            for month in months:
-                line_items = LineItem.objects.filter(month=month)
+            mnths = Month.objects.filter(fiscal_year=fiscal_year)
+            for month in mnths:
+                months.append(month.month.strftime("%B"))
+                expenses = Expense.objects.filter(month=month)
+                invoices = Invoice.objects.filter(month=month)
                 predicted = Decimal('0.00')
                 actual = Decimal('0.00')
-                for line_item in line_items:
-                    predicted += line_item.predicted_amount
-                    actual += line_item.actual_amount
-                months_data.extend(
-                    [
-                        {
-                        'month': month,
-                        'predicted': predicted,
-                        'actual': actual,
-                        'line_items': line_items,
-                        }
-                    ]
-                )
-            fiscal_year_data.extend(
-                [
-                    {
-                    'fiscal_year': fiscal_year,
-                    'months': months_data
-                    }
-                ]
-                )
+                for expense in expenses:
+                    if expense.reconciled:
+                        actual -= expense.actual_amount
+                    else:
+                        predicted -= expense.predicted_amount
+                for invoice in invoices:
+                    if invoice.reconciled:
+                        actual += invoice.actual_amount
+                    else:
+                        predicted += invoice.predicted_amount
+                predicted_totals.append(float(predicted))
+                actual_totals.append(float(actual))
+        context['months'] = json.dumps(months)
+        print "P: ", predicted_totals
+        print "A: ", actual_totals
+        context['predicted_totals'] = json.dumps(predicted_totals)
+        context['actual_totals'] = json.dumps(actual_totals)
 
-        context['fiscal_year_data'] = fiscal_year_data
         personnel = Personnel.objects.filter(business_unit=current)
         context['personnel'] = personnel
         contracts = Contract.objects.filter(business_unit=current)
@@ -321,7 +320,7 @@ class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
         return Invoice.objects.get(pk=self.kwargs['invoice'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
+        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
         response = super(InvoiceUpdateView, self).form_valid(form)
@@ -368,7 +367,7 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
         return Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
         response = super(ExpenseUpdateView, self).form_valid(form)
