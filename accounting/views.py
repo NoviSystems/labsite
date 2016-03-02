@@ -355,7 +355,7 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
                             name = form.instance.name,
                             data_payable = form.instance.data_payable,
                         )
-            return redirect('accounting:dashboard', pk=self.kwargs['pk'] )
+            return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'] )
         except KeyError:
             print "Exception thrown"
             form.instance.month = month
