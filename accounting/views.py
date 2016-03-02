@@ -62,7 +62,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     if income.reconciled:
                         actual += income.actual_amount
                     else:
-                        predicted += invoice.predicted_amount
+                        predicted += income.predicted_amount
                 predicted_totals.append(float(predicted))
                 actual_totals.append(float(actual))
         context['months'] = json.dumps(months)
