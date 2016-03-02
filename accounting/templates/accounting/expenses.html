@@ -72,6 +72,44 @@
                 <p>No expenses for this month. </p>
                 {% endif %}
         </div>
+        <div class="row">
+            <div class="col-md-10">
+                <a class="btn btn-primary" href={% url 'accounting:create_income' pk=current.pk month=month_data.month.pk %}>Create Income</a>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+
+            {% if month_data.incomes %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name:</th>
+                        <th>Date Payable: </th>
+                        <th>Date Paid: </th>
+                        <th>Amount: </th>
+                        <th>Update/Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for income in month_data.incomes %}
+                    <tr>
+                        <th scope="row">{{ income.name }}</th>
+                            <td>{{ income.data_payable }}</td>
+                            <td>{{ income.date_payed }}</td>
+                            <td>${{ income.predicted_amount }}</td>
+                            <td>
+                                <a class="btn btn-primary" href={% url 'accounting:update_income' pk=current.pk income=income.pk month=month_data.month.pk %}>Update</a>
+                                <a class="btn btn-primary" href={% url 'accounting:delete_income' pk=current.pk income=income.pk month=month_data.month.pk %}>Delete</a>
+                            </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+                {% else %}
+                <p>No incomes for this month. </p>
+                {% endif %}
+        </div>
     </div>
 
 {% endblock %}

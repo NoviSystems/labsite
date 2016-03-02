@@ -140,7 +140,9 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
         month_data = {
             'month': month,
             'expenses': Expense.objects.filter(month=month),
+            'incomes':Income.objects.filter(month=month),
         }
+
 
         context['months'] = months
         context['current_month'] = current_month
@@ -515,4 +517,67 @@ class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super(PartTimeUpdateView, self).form_valid(form)
+        return response
+
+
+class IncomeCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'accounting/income_create_form.html'
+    model = Income
+    form_class = IncomeCreateForm
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(IncomeCreateView, self).get_context_data()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:expenses', kwargs= { 'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
+
+    def form_valid(self, form):
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        month = Month.objects.get(pk=self.kwargs['month'])
+        try:
+            if self.request.POST['reocurring']:
+                months = Month.objects.filter(fiscal_year=month.fiscal_year)
+                for m in months:
+                    if m.month >= month.month:
+                        Income.objects.create(
+                            business_unit = form.instance.business_unit,
+                            month = m,
+                            predicted_amount = form.instance.predicted_amount,
+                            name = form.instance.name,
+                            data_payable = form.instance.data_payable,
+                        )
+            return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'] )
+        except KeyError:
+            print "Exception thrown"
+            form.instance.month = month
+        response = super(IncomeCreateView, self).form_valid(form)
+
+        return response
+
+
+class IncomeDeleteView(LoginRequiredMixin, DeleteView):
+    model = Income
+    template_name_suffix = '_delete_form'
+
+    def get_object(self):
+        return Income.objects.get(pk=self.kwargs['income'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:expenses', kwargs={'pk': self.kwargs["pk"], 'month': self.kwargs['month']})
+
+
+class IncomeUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+    form_class = IncomeUpdateForm
+    model = Income
+
+    def get_object(self):
+        return Income.objects.get(pk=self.kwargs['income'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:expenses', kwargs= {'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
+
+    def form_valid(self, form):
+        response = super(IncomeUpdateView, self).form_valid(form)
         return response

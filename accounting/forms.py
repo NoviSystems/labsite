@@ -190,3 +190,35 @@ class PartTimeUpdateForm(ModelForm):
         fields = '__all__'
         exclude = [
         ]
+
+
+class IncomeCreateForm(ModelForm):
+
+    reocurring = BooleanField(label='Reocurring', initial=False, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(IncomeCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Income
+        fields = '__all__'
+        exclude = [
+            'actual_amount',
+            'reconciled',
+            'month',
+            'date_payed',
+            'business_unit',
+        ]
+
+
+class IncomeUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(IncomeUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Income
+        fields = '__all__'
+        exclude = [
+            
+        ]

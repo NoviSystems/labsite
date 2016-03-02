@@ -54,8 +54,16 @@ class Contract(models.Model):
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
     
+class Income(LineItem):
+    name = models.CharField(max_length=50)
+    data_payable = models.DateField()
+    date_payed = models.DateField(default=None, null=True)
 
-class Invoice(LineItem):
+
+class Invoice(models.Model):
+
+    
+
     TRANSATION_STATE = {
         ('INVOICED', "invoiced"),
         ('NOT_INVOICED', "not invoiced"),
@@ -66,6 +74,8 @@ class Invoice(LineItem):
     number = models.IntegerField()
     date = models.DateField()
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
+    income = models.OneToOneField(Income)
+
 
 
 class Personnel(models.Model):
@@ -105,10 +115,7 @@ class Expense(LineItem):
     data_payable = models.DateField()
     date_payed = models.DateField(default=None, null=True)
 
-class Income(LineItem):
-    name = models.CharField(max_length=50)
-    data_payable = models.DateField()
-    date_payed = models.DateField(default=None, null=True)
+
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
 def createMonthsForFiscalYear(sender, instance, **kwargs):

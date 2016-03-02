@@ -18,6 +18,11 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<expense>\d+)/update_expense/$', ExpenseUpdateView.as_view(), name='update_expense'),
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<expense>\d+)/delete_expense/$', ExpenseDeleteView.as_view(), name='delete_expense'),
 
+	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/create_income/$', IncomeCreateView.as_view(), name='create_income'),
+	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<income>\d+)/update_income/$', IncomeUpdateView.as_view(), name='update_income'),
+	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<income>\d+)/delete_income/$', IncomeDeleteView.as_view(), name='delete_income'),
+
+
 	url(r'^(?P<pk>\d+)/contracts/$', ContractsView.as_view(), name='contracts'),
 
 	url(r'^(?P<pk>\d+)/contracts/create_contract/$', ContractCreateView.as_view(), name='create_contract'),
