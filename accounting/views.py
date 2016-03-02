@@ -50,7 +50,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             for month in mnths:
                 months.append(month.month.strftime("%B"))
                 expenses = Expense.objects.filter(month=month)
-                invoices = Invoice.objects.filter(month=month)
+                incomes = Income.objects.filter(month=month)
                 predicted = Decimal('0.00')
                 actual = Decimal('0.00')
                 for expense in expenses:
@@ -58,9 +58,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                         actual -= expense.actual_amount
                     else:
                         predicted -= expense.predicted_amount
-                for invoice in invoices:
-                    if invoice.reconciled:
-                        actual += invoice.actual_amount
+                for income in incomes:
+                    if income.reconciled:
+                        actual += income.actual_amount
                     else:
                         predicted += invoice.predicted_amount
                 predicted_totals.append(float(predicted))
