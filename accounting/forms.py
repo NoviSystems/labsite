@@ -1,4 +1,4 @@
-from django.forms import ModelForm, EmailField, TextInput, Select
+from django.forms import ModelForm, EmailField, TextInput, Select, BooleanField
 from django.contrib.auth.models import User
 from models import *
 
@@ -81,6 +81,8 @@ class ContractUpdateForm(ModelForm):
 
 
 class ExpenseCreateForm(ModelForm):
+
+    reocurring = BooleanField(label='Reocurring', initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         super(ExpenseCreateForm, self).__init__(*args, **kwargs)
