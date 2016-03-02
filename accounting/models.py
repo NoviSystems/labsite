@@ -105,6 +105,10 @@ class Expense(LineItem):
     data_payable = models.DateField()
     date_payed = models.DateField(default=None, null=True)
 
+class Income(LineItem):
+    name = models.CharField(max_length=50)
+    data_payable = models.DateField()
+    date_payed = models.DateField(default=None, null=True)
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
 def createMonthsForFiscalYear(sender, instance, **kwargs):

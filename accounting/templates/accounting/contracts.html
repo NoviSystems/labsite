@@ -30,14 +30,22 @@
             <div id="collapse{{contract_invoice.contract.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{contract_invoice.contract.pk}}">
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-4">
-                                <p>Organization Name: {{contract_invoice.contract.organization_name}}</p>
-                                <p>Start Date: {{contract_invoice.contract.start_date}}</p>
-                                <p>Total Amount: {{contract_invoice.contract.amount }}</p>
-                                <p>Contract State: {{contract_invoice.contract.contract_state }}</p>
-                                <p>Contract Type: {{contract_invoice.contract.contract_type }}</p>
+                        <div class="col-md-3">
+                            <p>Organization Name: </p>
+                            <p>Start Date: </p>
+                            <p>Total Amount: </p>
+                            <p>Contract State: </p>
+                            <p>Contract Type: </p>
                         </div>
-                        <div class="col-md-8">
+
+                        <div class="col-md-5">
+                            <p>{{contract_invoice.contract.organization_name}}</p>
+                            <p>{{contract_invoice.contract.start_date}}</p>
+                            <p>{{contract_invoice.contract.amount }}</p>
+                            <p>{{contract_invoice.contract.contract_state }}</p>
+                            <p>{{contract_invoice.contract.contract_type }}</p>
+                        </div>
+                        <div class="col-md-4">
                             <h4>
                                 <a class="btn btn-primary" href={% url 'accounting:update_contract' pk=current.pk contract=contract_invoice.contract.pk %}>Update</a>
                                 <a class="btn btn-primary" href={% url 'accounting:delete_contract' pk=current.pk contract=contract_invoice.contract.pk %}>Delete</a>
