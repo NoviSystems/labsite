@@ -321,7 +321,7 @@ class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
         return Invoice.objects.get(pk=self.kwargs['invoice'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:contracts', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
         response = super(InvoiceUpdateView, self).form_valid(form)
@@ -338,7 +338,7 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:expenses', kwargs= { 'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
         form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
@@ -372,7 +372,7 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
         return Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:expenses', kwargs={'pk': self.kwargs["pk"], 'month': self.kwargs['month']})
 
 
 class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
@@ -384,7 +384,7 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
         return Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:expenses', kwargs= {'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
         response = super(ExpenseUpdateView, self).form_valid(form)
