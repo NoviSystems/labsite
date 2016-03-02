@@ -108,7 +108,8 @@ class ExpenseUpdateForm(ModelForm):
         model = Expense
         fields = '__all__'
         exclude = [
-            
+            'business_unit',
+            'month'
         ]
 
 class InvoiceCreateForm(ModelForm):

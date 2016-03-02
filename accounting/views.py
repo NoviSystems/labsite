@@ -350,12 +350,13 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
                 months = Month.objects.filter(fiscal_year=month.fiscal_year)
                 for m in months:
                     if m.month >= month.month:
+                        new_date_payable = date( m.month.year, m.month.month, form.instance.data_payable.day)
                         Expense.objects.create(
                             business_unit = form.instance.business_unit,
                             month = m,
                             predicted_amount = form.instance.predicted_amount,
                             name = form.instance.name,
-                            data_payable = form.instance.data_payable,
+                            data_payable = new_date_payable,
                         )
             return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'] )
         except KeyError:
