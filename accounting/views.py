@@ -8,6 +8,7 @@ from forms import *
 from decimal import *
 import datetime 
 import json
+from django.shortcuts import redirect
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/home.html'
@@ -340,8 +341,24 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('accounting:dashboard', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
-        form.instance.month = Month.objects.get(pk=self.kwargs['month'])
         form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        month = Month.objects.get(pk=self.kwargs['month'])
+        try:
+            if self.request.POST['reocurring']:
+                months = Month.objects.filter(fiscal_year=month.fiscal_year)
+                for m in months:
+                    if m.month >= month.month:
+                        Expense.objects.create(
+                            business_unit = form.instance.business_unit,
+                            month = m,
+                            predicted_amount = form.instance.predicted_amount,
+                            name = form.instance.name,
+                            data_payable = form.instance.data_payable,
+                        )
+            return redirect('accounting:dashboard', pk=self.kwargs['pk'] )
+        except KeyError:
+            print "Exception thrown"
+            form.instance.month = month
         response = super(ExpenseCreateView, self).form_valid(form)
 
         return response
