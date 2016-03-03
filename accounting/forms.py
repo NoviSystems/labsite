@@ -1,4 +1,4 @@
-from django.forms import ModelForm, EmailField, TextInput, Select, BooleanField
+from django.forms import ModelForm, EmailField, TextInput, Select, BooleanField, DecimalField
 from django.contrib.auth.models import User
 from models import *
 
@@ -114,6 +114,9 @@ class ExpenseUpdateForm(ModelForm):
 
 class InvoiceCreateForm(ModelForm):
 
+    predicted_amount = DecimalField(label='Predicted Amount', initial=0, required=True)
+
+
     def __init__(self, *args, **kwargs):
         super(InvoiceCreateForm, self).__init__(*args, **kwargs)
 
@@ -124,7 +127,10 @@ class InvoiceCreateForm(ModelForm):
             'actual_amount',
             'reconciled',
             'month',
-            'contract'
+            'contract',
+            'income'
+            
+
         ]
 
 
@@ -209,6 +215,7 @@ class IncomeCreateForm(ModelForm):
             'month',
             'date_payed',
             'business_unit',
+
         ]
 
 

@@ -9,6 +9,8 @@ from decimal import *
 import datetime 
 import json
 from django.shortcuts import redirect
+from django.core.exceptions import ObjectDoesNotExist
+
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/home.html'
@@ -298,8 +300,26 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         month = Month.objects.get(fiscal_year__business_unit=self.kwargs['pk'], month__month=form.instance.date.month)
         form.instance.month = month
+        print form.instance
+        print self.request.POST
         form.instance.contract = Contract.objects.get(pk=self.kwargs['contract'])
         response = super(InvoiceCreateView, self).form_valid(form)
+        predicted_amount = self.request.POST['predicted_amount']
+        try:
+            i = Income.objects.create(
+                business_unit = form.instance.business_unit,
+                month = month,
+                predicted_amount = predicted_amount,
+                name = form.instance.name,
+                data_payable = new_date_payable,
+            )
+            i.save()
+            form.instance.income = Income.objects.get(pk=i.pk)
+        except:
+
+            print "cant make income"
+
+        
         return response
 
 
