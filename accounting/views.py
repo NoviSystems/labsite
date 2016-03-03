@@ -298,28 +298,27 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('accounting:contracts', kwargs={ 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
-        month = Month.objects.get(fiscal_year__business_unit=self.kwargs['pk'], month__month=form.instance.date.month)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        month = Month.objects.get(fiscal_year__business_unit=business_unit, month__month=form.instance.date.month)
         form.instance.month = month
-        print form.instance
-        print self.request.POST
         form.instance.contract = Contract.objects.get(pk=self.kwargs['contract'])
-        response = super(InvoiceCreateView, self).form_valid(form)
-        predicted_amount = self.request.POST['predicted_amount']
         try:
-            i = Income.objects.create(
-                business_unit = form.instance.business_unit,
-                month = month,
-                predicted_amount = predicted_amount,
-                name = form.instance.name,
-                data_payable = new_date_payable,
-            )
-            i.save()
-            form.instance.income = Income.objects.get(pk=i.pk)
-        except:
-
-            print "cant make income"
-
-        
+            predicted_amount = self.request.POST['predicted_amount']
+            income = None
+            try:
+                income = Income.objects.create(
+                    business_unit = business_unit,
+                    month = month,
+                    predicted_amount = predicted_amount,
+                    name = "Invoice",
+                    data_payable = form.instance.date,
+                )
+                form.instance.income = income
+            except:
+                print "Could Not Create Income Object For Invoice"
+        except KeyError:
+            print "No Predicted Amount In Post Request"
+        response = super(InvoiceCreateView, self).form_valid(form)
         return response
 
 
