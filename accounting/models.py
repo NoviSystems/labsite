@@ -116,6 +116,10 @@ class Expense(LineItem):
     date_payed = models.DateField(default=None, null=True)
 
 
+class Payroll(models.Model):
+    month = models.OneToOneField(Month)
+    expense = models.OneToOneField(Expense)
+
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
 def createMonthsForFiscalYear(sender, instance, **kwargs):

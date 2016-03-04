@@ -506,10 +506,11 @@ class PartTimeCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = business_unit
         form.instance.hours_work = 20
         response = super(PartTimeCreateView, self).form_valid(form)
-
+        updatePayroll(business_unit=business_unit)
         return response
 
 
@@ -601,3 +602,43 @@ class IncomeUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         response = super(IncomeUpdateView, self).form_valid(form)
         return response
+
+
+def updatePayroll(business_unit):
+    # for personnel in business unit
+    # total up salary
+    # total up part time
+    payroll_amount = Decimal('0.00')
+    salary = Salary.objects.filter(business_unit=business_unit)
+    for salary in salary:
+       payroll_amount += (salary.social_security_amount + salary.fed_health_insurance_amount + salary.retirement_amount + salary.medical_insurance_amount + salary.staff_benefits_amount + salary.fringe_amount)
+    part_time = PartTime.objects.filter(business_unit=business_unit)
+    for part_time in part_time:
+        payroll_amount += part_time.hourly_amount * part_time.hours_work
+
+    print "DOLLAROOS ", payroll_amount
+
+    # for month in month in fiscal year
+    # get payroll object
+    # if payroll object expese is not reconciled
+    # update its predicted value with the total
+    fiscal_years = FiscalYear.objects.filter(business_unit=business_unit)
+    for fiscal_year in fiscal_years:
+        months = Month.objects.filter(fiscal_year=fiscal_year)
+        for month in months:
+            payroll = None
+            try:
+                payroll = Payroll.objects.get(month=month)
+            except ObjectDoesNotExist:
+                expense = Expense.objects.create(
+                    business_unit = business_unit,
+                    month = month,
+                    name = 'Payroll',
+                    data_payable = month.month
+                )
+                payroll = Payroll.objects.create(month=month, expense=expense)
+            if not payroll.expense.reconciled:
+                print "DO 1: ", payroll.expense.predicted_amount
+                payroll.expense.predicted_amount = payroll_amount
+                print "DO 2: ", payroll.expense.predicted_amount
+                payroll.expense.save()
