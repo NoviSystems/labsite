@@ -63,7 +63,6 @@ class Income(LineItem):
 class Invoice(models.Model):
 
     
-
     TRANSATION_STATE = {
         ('INVOICED', "invoiced"),
         ('NOT_INVOICED', "not invoiced"),

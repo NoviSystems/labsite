@@ -47,6 +47,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         months = []
         predicted_totals = []
         actual_totals = []
+        cash_predicted = Decimal('0.00')
+        cash_actual = Decimal('0.00')
+        surplus_predicted = Decimal('0.00')
+        surplus_actual = Decimal('0.00')
         for fiscal_year in fiscal_years:
             mnths = Month.objects.filter(fiscal_year=fiscal_year)
             for month in mnths:
@@ -67,11 +71,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                         predicted += income.predicted_amount
                 predicted_totals.append(float(predicted))
                 actual_totals.append(float(actual))
+                cash_predicted += predicted
+                cash_actual += actual
         context['months'] = json.dumps(months)
-        print "P: ", predicted_totals
-        print "A: ", actual_totals
         context['predicted_totals'] = json.dumps(predicted_totals)
         context['actual_totals'] = json.dumps(actual_totals)
+
+        context['cash_actual']= cash_actual
+        context['cash_predicted'] = cash_predicted
 
         personnel = Personnel.objects.filter(business_unit=current)
         context['personnel'] = personnel
@@ -137,6 +144,7 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
             for month in months:
                 if month.month.month == now.month:
                     current_month = month
+
 
         month = Month.objects.get(pk=kwargs['month'])
         month_data = {
@@ -310,7 +318,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                     business_unit = business_unit,
                     month = month,
                     predicted_amount = predicted_amount,
-                    name = "Invoice",
+                    name = form.instance.contract.organization_name,
                     data_payable = form.instance.date,
                 )
                 form.instance.income = income
