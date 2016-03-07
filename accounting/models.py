@@ -61,8 +61,6 @@ class Income(LineItem):
 
 
 class Invoice(models.Model):
-
-    
     TRANSATION_STATE = {
         ('INVOICED', "invoiced"),
         ('NOT_INVOICED', "not invoiced"),
@@ -74,7 +72,6 @@ class Invoice(models.Model):
     date = models.DateField()
     transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
     income = models.OneToOneField(Income)
-
 
 
 class Personnel(models.Model):
@@ -114,6 +111,14 @@ class Expense(LineItem):
     data_payable = models.DateField()
     date_payed = models.DateField(default=None, null=True)
 
+
+class Payroll(models.Model):
+    month = models.OneToOneField(Month)
+    expense = models.OneToOneField(Expense)
+    
+    def delete(self, *args, **kwargs):
+        self.expense.delete()
+        return super(self.__class__, self).delete(*args, **kwargs)
 
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
