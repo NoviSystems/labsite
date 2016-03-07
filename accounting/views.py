@@ -68,8 +68,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 predicted_totals.append(float(predicted))
                 actual_totals.append(float(actual))
         context['months'] = json.dumps(months)
-        print "P: ", predicted_totals
-        print "A: ", actual_totals
         context['predicted_totals'] = json.dumps(predicted_totals)
         context['actual_totals'] = json.dumps(actual_totals)
 
@@ -460,9 +458,10 @@ class SalaryCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = business_unit
         response = super(SalaryCreateView, self).form_valid(form)
-
+        updatePayroll(business_unit=business_unit)
         return response
 
 
@@ -476,6 +475,12 @@ class SalaryDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
 
+    def delete(self, request, *args, **kwargs):
+        response = super(SalaryDeleteView, self).delete(request, *args, **kwargs)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updatePayroll(business_unit=business_unit)
+        return response
+
 
 class SalaryUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
@@ -486,10 +491,12 @@ class SalaryUpdateView(LoginRequiredMixin, UpdateView):
         return Salary.objects.get(pk=self.kwargs['salary'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs=self.kwargs)
+        return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
 
     def form_valid(self, form):
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(SalaryUpdateView, self).form_valid(form)
+        updatePayroll(business_unit=business_unit)
         return response
 
 
@@ -524,6 +531,11 @@ class PartTimeDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
 
+    def delete(self, request, *args, **kwargs):
+        response = super(PartTimeDeleteView, self).delete(request, *args, **kwargs)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updatePayroll(business_unit=business_unit)
+        return response
 
 class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'accounting/part_time_update_form.html'
@@ -534,10 +546,12 @@ class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
         return PartTime.objects.get(pk=self.kwargs['part_time'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs=self.kwargs)
+        return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(PartTimeUpdateView, self).form_valid(form)
+        updatePayroll(business_unit=business_unit)
         return response
 
 
@@ -616,8 +630,6 @@ def updatePayroll(business_unit):
     for part_time in part_time:
         payroll_amount += part_time.hourly_amount * part_time.hours_work
 
-    print "DOLLAROOS ", payroll_amount
-
     # for month in month in fiscal year
     # get payroll object
     # if payroll object expese is not reconciled
@@ -637,8 +649,5 @@ def updatePayroll(business_unit):
                     data_payable = month.month
                 )
                 payroll = Payroll.objects.create(month=month, expense=expense)
-            if not payroll.expense.reconciled:
-                print "DO 1: ", payroll.expense.predicted_amount
-                payroll.expense.predicted_amount = payroll_amount
-                print "DO 2: ", payroll.expense.predicted_amount
-                payroll.expense.save()
+            payroll.expense.predicted_amount = payroll_amount
+            payroll.expense.save()
