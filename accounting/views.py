@@ -73,7 +73,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 actual_totals.append(float(actual))
                 cash_predicted += predicted
                 cash_actual += actual
-        context['months'] = json.dumps(months)
+        context['months'] = mnths
+        context['months_j'] = json.dumps(months)
         context['predicted_totals'] = json.dumps(predicted_totals)
         context['actual_totals'] = json.dumps(actual_totals)
 
@@ -86,6 +87,19 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['contracts'] = contracts
 
         return context
+
+
+class DashboardMonthView(DashboardView):
+    template_name = 'accounting/dashboard_month.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(DashboardMonthView, self).get_context_data(**kwargs)
+        month_data = {
+            'month': Month.objects.get(pk=kwargs['month']),
+        }
+        context['month_data'] = month_data
+        return context
+
 
 
 class ContractsView(LoginRequiredMixin, TemplateView):

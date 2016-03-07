@@ -26,7 +26,7 @@ $(function () {
             text: 'Predicted / Actual Values for Months'
         },
         xAxis: {
-            categories: {{ months | safe }}
+            categories: {{ months_j | safe }}
         },
         credits: {
             enabled: false
@@ -42,6 +42,45 @@ $(function () {
 });
 </script>
 
+{% if not personnel %}
+    <div class="row">
+        <div class="col-md-12">
+        <h4>No personnel for this business unit.
+            <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Personnel</a>
+        </h4>
+        </div>
+    </div>
+{% endif %}
+
+{% if not contracts %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4>No contracts for this business unit.
+                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+            </h4>
+        </div>
+    </div>
+{% endif %}
+
+<hr>
+
+<div class="dropdown">
+    <h4 class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        {% if month_data %}
+            {{ month_data.month.month }}
+        {% else %}
+            Fiscal Year Values
+        {% endif %}
+    <span class="caret"></span></h4>
+    <ul class="dropdown-menu">
+        <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Fiscal Year Values</a></li>
+        {% for month in months %}
+            <li><a href={% url 'accounting:dashboard_month' pk=current.pk month=month.pk %}>{{ month.month }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% block breakdown %}
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -67,26 +106,6 @@ $(function () {
             </div>
         </div>
     </div>
-    <hr>
-
-{% if not personnel %}
-    <div class="row">
-        <div class="col-md-12">
-        <h4>No personnel for this business unit.
-            <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Personnel</a>
-        </h4>
-        </div>
-    </div>
-{% endif %}
-
-{% if not contracts %}
-    <div class="row">
-        <div class="col-md-12">
-            <h4>No contracts for this business unit.
-                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
-            </h4>
-        </div>
-    </div>
-{% endif %}
+{% endblock %}
 
 {% endblock %}
