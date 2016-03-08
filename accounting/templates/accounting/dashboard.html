@@ -83,27 +83,98 @@ $(function () {
 {% block breakdown %}
     <div class="container">
         <div class="row">
-            <div class="col-md-12">
-                <h3>Total Amounts</h3>
-                <div class="row">
-                    <div class="col-md-3">  
-                        <p>Cash Projected:</p>    
-                        <p>Cash Actual:</p>                          
-                    </div>
-                    <div class="col-md-3">
-                        <p>{{ cash_predicted }}</p>
-                        <p>{{ cash_actual }}</p>
-                    </div>
-                    <div class="col-md-3">  
-                        <p>Surplus Projected:</p>    
-                        <p>Surplus Actual:</p>                          
-                    </div>
-                    <div class="col-md-3">
-                        <p>{{ salary.position }}</p>
-                        <p>{{ salary.employee_id }}</p>
-                    </div>
-                </div>               
-            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        {% for month in months %}
+                        <th>{{ month.month }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <th scope="row">Cash Projected</th>
+                        {% for month in months %}
+                            <td>{{ cash_predicted }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Cash Actual</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Receivables Month Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Receivables Booked Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Total Assets Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Total Assets Actual</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Expenses Month Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Expenses Booked Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Payroll Month Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Payroll Booked Projected</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Expenses Month Actual</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Payroll Booked Actual</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Payroll Month Actual</th>
+                        {% for month in months%}
+                            <td>{{ cash_actual }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}

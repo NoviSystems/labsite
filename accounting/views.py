@@ -35,6 +35,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         fiscal_years = FiscalYear.objects.filter(business_unit=current)
         context['fiscal_years'] = fiscal_years
 
+        # Finding the current month context
         now = datetime.datetime.now()
         current_month = None
         for fiscal_year in fiscal_years:
@@ -44,43 +45,63 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     current_month = month
         context['current_month'] = current_month
 
+        # array values for graph
         months = []
         predicted_totals = []
         actual_totals = []
+
+        # Decimal values for the table
         cash_predicted = Decimal('0.00')
         cash_actual = Decimal('0.00')
         surplus_predicted = Decimal('0.00')
         surplus_actual = Decimal('0.00')
+
+        # Computes totals for the whole fiscal year
         for fiscal_year in fiscal_years:
             mnths = Month.objects.filter(fiscal_year=fiscal_year)
             for month in mnths:
                 months.append(month.month.strftime("%B"))
+
                 expenses = Expense.objects.filter(month=month)
                 incomes = Income.objects.filter(month=month)
                 predicted = Decimal('0.00')
                 actual = Decimal('0.00')
+
+                # adds together all expenses and predicted values
                 for expense in expenses:
                     if expense.reconciled:
                         actual -= expense.actual_amount
+                        predicted -= expense.predicted_amount
                     else:
                         predicted -= expense.predicted_amount
                 for income in incomes:
                     if income.reconciled:
                         actual += income.actual_amount
+                        predicted += income.predicted_amount
                     else:
                         predicted += income.predicted_amount
+
+                # values for bars on the graph
                 predicted_totals.append(float(predicted))
                 actual_totals.append(float(actual))
-                cash_predicted += predicted
-                cash_actual += actual
+
+                #total values
+                if month == current_month:
+                    cash_predicted += predicted
+                    cash_actual += actual
+
+
+        # Context totals for the Graph values
         context['months'] = mnths
         context['months_j'] = json.dumps(months)
         context['predicted_totals'] = json.dumps(predicted_totals)
         context['actual_totals'] = json.dumps(actual_totals)
 
+        # Computed totals for table
         context['cash_actual']= cash_actual
         context['cash_predicted'] = cash_predicted
 
+        # Personnel and Contracts totals
         personnel = Personnel.objects.filter(business_unit=current)
         context['personnel'] = personnel
         contracts = Contract.objects.filter(business_unit=current)
