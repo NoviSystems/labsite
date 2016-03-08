@@ -130,12 +130,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
                 cash_month_actual = Decimal('0.00')
                 cash_month_projected = Decimal('0.00')
-                
+
 
                 income_booked_projected = Decimal('0.00')
                 for value in imp['values']:
                     income_booked_projected += value
-                total_assets_month_projected += cash_month_projected + income_booked_projected
+                total_assets_month_projected = cash_month_projected + income_booked_projected
                 tamp['values'].append(total_assets_month_projected)
 
                 income_booked_actual = Decimal('0.00')
