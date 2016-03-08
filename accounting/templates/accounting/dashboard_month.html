@@ -4,4 +4,59 @@
 
 {% block breakdown %}
 	<h1>{{month_data.month.month}}</h1>
+
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div id="workTab" class="tabbable">
+			<div class="col-xs-0 col-sm-3">
+	    			<ul class= "nav nav-stacked nav-tabs">
+			            <li class="active"><a data-toggle="tab" href="#cash_actual" aria-expanded="true">Cash Actual</a></li>
+			            <li><a data-toggle="tab" href="#cash_projected" aria-expanded="true">Cash Projected</a></li>
+			            <li><a data-toggle="tab" href="#expenses_actual" aria-expanded="true">Expenses Actual</a></li>
+			            <li><a data-toggle="tab" href="#expenses_projected" aria-expanded="true">Expenses Projected</a></li>
+			            <li><a data-toggle="tab" href="#recievables_actual" aria-expanded="true">Recievables Actual</a></li>
+			            <li><a data-toggle="tab" href="#recievables_projected" aria-expanded="true">Recievables Projected</a></li>
+			            <li><a data-toggle="tab" href="#payroll_actual" aria-expanded="true">Payroll Actual</a></li>
+			            <li><a data-toggle="tab" href="#payroll_projected" aria-expanded="true">Payroll Projected</a></li>
+			            <li><a data-toggle="tab" href="#assets_actual" aria-expanded="true">Assets Actual</a></li>
+			            <li><a data-toggle="tab" href="#assets_projected" aria-expanded="true">Assets Projected</a></li>
+			        </ul>	
+	 		</div>
+	 		<div class="col-xs-0 col-sm-9">
+		 		<div class= "tab-content" >
+		    		<div id="cash_actual" class="tab-pane active">
+		    			<table class="table">
+			                <thead>
+			                    <tr>
+			                        <th>Date</th>
+			                        {% for month in months_names %}
+			                        <th>{{ month }}</th>
+			                        {% endfor %}
+			                    </tr>
+			                </thead>
+			                <tbody>
+			                    {% for data in dashboard_data %}
+			                    <tr>
+			                        {% for value in data.values %}
+			                            <td>${{ value }}</td>
+			                        {% endfor %}
+			                    </tr>
+			                    {% endfor %}
+			                </tbody>
+			            </table>
+		    		</div>
+		    		<div id="cash_projected" class="tab-pane ">
+		    			{{month_data.month.month}}
+		    		</div>
+		    		<div id="expenses_actual" class="tab-pane ">
+		    			{{month_data.month.month}}
+		    		</div>
+		    		<div id="expenses_projected" class="tab-pane ">
+		    			{{month_data.month.month}}
+		    		</div>
+		    	</div>
+	 		</div>
+ 		</div>
+	</div><!--/row-->
+</div><!--/.fluid-container-->
 {% endblock %}
