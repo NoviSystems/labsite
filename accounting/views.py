@@ -27,79 +27,133 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
+
+        # Get all business units for a user
         business_units = BusinessUnit.objects.filter(user=self.request.user)
         context['business_units'] = business_units
+
+        # Get the business unit the user is currently viewing
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
 
+        # Get the fical years associated for the business unit
         fiscal_years = FiscalYear.objects.filter(business_unit=current)
         context['fiscal_years'] = fiscal_years
 
-        # Finding the current month context
-        now = datetime.datetime.now()
+        # Finding the current month
         current_month = None
+        now = datetime.datetime.now()
+
+        cma = {
+            'title': 'Cash Month Actual',
+            'values': []
+        }
+        cmpr = {
+            'title': 'Cash Month Projected',
+            'values': []
+        }
+        ema = {
+            'title': 'Expenses Month Actual',
+            'values': []
+        }
+        emp = {
+            'title': 'Expenses Month Projected',
+            'values': []
+        }
+        ima = {
+            'title': 'Recievables Month Actual',
+            'values': []
+        }
+        imp = {
+            'title': 'Recievables Month Projected',
+            'values': []
+        }
+        pma = {
+            'title': 'Payroll Month Actual',
+            'values': []
+        }
+        pmp = {
+            'title': 'Payroll Month Projected',
+            'values': []
+        }
+        tama = {
+            'title': 'Total Assets Projected',
+            'values': []
+        }
+        tamp = {
+            'title': 'Total Assets Actual',
+            'values': []
+        }
+
+        # Month names used on graph and table
+        months_names = []
+
+        # Computes totals for the whole fiscal year
         for fiscal_year in fiscal_years:
             months = Month.objects.filter(fiscal_year=fiscal_year)
             for month in months:
                 if month.month.month == now.month:
                     current_month = month
-        context['current_month'] = current_month
+                months_names.append(month.month.strftime("%B"))
 
-        # array values for graph
-        months = []
-        predicted_totals = []
-        actual_totals = []
+                payroll_month_actual = Decimal('0.00')
+                payroll_month_projected = Decimal('0.00')
+                for payroll in Payroll.objects.filter(month=month):
+                    if payroll.expense.reconciled:
+                        payroll_month_actual += payroll.expense.actual_amount
+                    payroll_month_projected += payroll.expense.predicted_amount
 
-        # Decimal values for the table
-        cash_predicted = Decimal('0.00')
-        cash_actual = Decimal('0.00')
-        surplus_predicted = Decimal('0.00')
-        surplus_actual = Decimal('0.00')
+                pma['values'].append(payroll_month_actual)
+                pmp['values'].append(payroll_month_projected)
 
-        # Computes totals for the whole fiscal year
-        for fiscal_year in fiscal_years:
-            mnths = Month.objects.filter(fiscal_year=fiscal_year)
-            for month in mnths:
-                months.append(month.month.strftime("%B"))
-
-                expenses = Expense.objects.filter(month=month)
-                incomes = Income.objects.filter(month=month)
-                predicted = Decimal('0.00')
-                actual = Decimal('0.00')
-
-                # adds together all expenses and predicted values
-                for expense in expenses:
+                expenses_month_actual = Decimal('0.00')
+                expense_month_projected = Decimal('0.00')
+                for expense in Expense.objects.filter(month=month):
                     if expense.reconciled:
-                        actual -= expense.actual_amount
-                        predicted -= expense.predicted_amount
-                    else:
-                        predicted -= expense.predicted_amount
-                for income in incomes:
+                        expenses_month_actual += expense.actual_amount
+                    expense_month_projected += expense.predicted_amount
+                expenses_month_actual -= payroll_month_actual
+                expense_month_projected -= payroll_month_actual
+
+                ema['values'].append(expenses_month_actual)
+                emp['values'].append(expense_month_projected)
+
+                income_month_actual = Decimal('0.00')
+                income_month_projected = Decimal('0.00')
+                for income in Income.objects.filter(month=month):
                     if income.reconciled:
-                        actual += income.actual_amount
-                        predicted += income.predicted_amount
-                    else:
-                        predicted += income.predicted_amount
+                        income_month_actual += income.actual_amount
+                    income_month_projected += income.predicted_amount
 
-                # values for bars on the graph
-                predicted_totals.append(float(predicted))
-                actual_totals.append(float(actual))
+                ima['values'].append(income_month_actual)
+                imp['values'].append(income_month_projected)
 
-                #total values
-                if month == current_month:
-                    cash_predicted += predicted
-                    cash_actual += actual
+                cash_month_actual = Decimal('0.00')
+                cash_month_projected = Decimal('0.00')
+                
 
+                income_booked_projected = Decimal('0.00')
+                for value in imp['values']:
+                    income_booked_projected += value
+                total_assets_month_projected += cash_month_projected + income_booked_projected
+                tamp['values'].append(total_assets_month_projected)
 
+                income_booked_actual = Decimal('0.00')
+                for value in ima['values']:
+                    income_booked_actual += value
+                total_assets_month_actual = cash_month_actual + income_booked_actual
+                tama['values'].append(total_assets_month_actual)
+
+        dashboard_data = [ cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp ]
+        
+        context['current_month'] = current_month
         # Context totals for the Graph values
-        context['months'] = mnths
-        context['months_j'] = json.dumps(months)
-        context['predicted_totals'] = json.dumps(predicted_totals)
-        context['actual_totals'] = json.dumps(actual_totals)
+        context['months_names'] = months_names
+        # context['months_j'] = json.dumps(months)
+        context['predicted_totals'] = json.dumps(cmpr['values'])
+        context['actual_totals'] = json.dumps(cma['values'])
 
-        # Computed totals for table
-        context['cash_actual']= cash_actual
-        context['cash_predicted'] = cash_predicted
+        context['dashboard_data'] = dashboard_data
 
         # Personnel and Contracts totals
         personnel = Personnel.objects.filter(business_unit=current)

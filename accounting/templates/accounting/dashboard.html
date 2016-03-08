@@ -88,91 +88,20 @@ $(function () {
                 <thead>
                     <tr>
                         <th>Date</th>
-                        {% for month in months %}
-                        <th>{{ month.month }}</th>
+                        {% for month in months_names %}
+                        <th>{{ month }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    
+                    {% for data in dashboard_data %}
                     <tr>
-                        <th scope="row">Cash Projected</th>
-                        {% for month in months %}
-                            <td>{{ cash_predicted }}</td>
+                        <th scope="row">{{ data.title }}</th>
+                        {% for value in data.values %}
+                            <td>${{ value }}</td>
                         {% endfor %}
                     </tr>
-                    <tr>
-                        <th scope="row">Cash Actual</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Receivables Month Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Receivables Booked Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Total Assets Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Total Assets Actual</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Expenses Month Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Expenses Booked Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Payroll Month Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Payroll Booked Projected</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Expenses Month Actual</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Payroll Booked Actual</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Payroll Month Actual</th>
-                        {% for month in months%}
-                            <td>{{ cash_actual }}</td>
-                        {% endfor %}
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
