@@ -113,7 +113,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                         expenses_month_actual += expense.actual_amount
                     expense_month_projected += expense.predicted_amount
                 expenses_month_actual -= payroll_month_actual
-                expense_month_projected -= payroll_month_actual
+                expense_month_projected -= payroll_month_projected
 
                 ema['values'].append(expenses_month_actual)
                 emp['values'].append(expense_month_projected)
@@ -130,7 +130,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
                 cash_month_actual = Decimal('0.00')
                 cash_month_projected = Decimal('0.00')
-
                 cash_month_projected = cash_month_projected - expense_month_projected - payroll_month_projected + income_month_projected
                 cash_month_actual = cash_month_actual - expenses_month_actual - payroll_month_actual + income_month_projected
 
