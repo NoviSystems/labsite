@@ -131,6 +131,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 cash_month_actual = Decimal('0.00')
                 cash_month_projected = Decimal('0.00')
 
+                cash_month_projected = cash_month_projected - expense_month_projected - payroll_month_projected + income_month_projected
+                cash_month_actual = cash_month_actual - expenses_month_actual - payroll_month_actual + income_month_projected
+
+                cmpr['values'].append(cash_month_projected)
+                cma['values'].append(cash_month_actual)
 
                 income_booked_projected = Decimal('0.00')
                 for value in imp['values']:
@@ -149,9 +154,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['current_month'] = current_month
         # Context totals for the Graph values
         context['months_names'] = months_names
-        # context['months_j'] = json.dumps(months)
-        context['predicted_totals'] = json.dumps(cmpr['values'])
-        context['actual_totals'] = json.dumps(cma['values'])
+        context['months'] = months
+        context['months_j'] = json.dumps(months_names)
+        context['predicted_totals'] = json.dumps( [float(value) for value in cmpr['values']] )
+        context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
 
         context['dashboard_data'] = dashboard_data
 
