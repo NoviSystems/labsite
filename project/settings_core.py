@@ -191,7 +191,7 @@ LABSITE_APPS = [
         'display_name': "Worklog",
         'color': '#D9534F',
         'font_image': 'fa-flask',
-        'url': reverse_lazy('worklog:worklog-home'),
+        'url': reverse_lazy('worklog:home'),
         'new_tab': 'false',
     },
     {
@@ -199,7 +199,7 @@ LABSITE_APPS = [
         'display_name': "Food App",
         'color': '#5CB85C',
         'font_image': 'fa-beer',
-        'url': reverse_lazy('foodapp:url_home'),
+        'url': reverse_lazy('foodapp:home'),
         'new_tab': 'false',
         'margin': '30',
     },
