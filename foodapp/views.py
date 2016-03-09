@@ -16,7 +16,7 @@ from foodapp import forms, models
 class HomeView(CreateView):
     model = models.Order
     form_class = forms.OrderForm
-    success_url = reverse_lazy('url_home')
+    success_url = reverse_lazy('foodapp:home')
     template_name = 'foodapp/home.html'
 
     @method_decorator(login_required)
@@ -98,9 +98,9 @@ def last_month_view(request):
     year = str(year)
     last_month = "%02d" % last_month
     # if request.user.is_superuser:
-    #     return redirect('url_super_month_orders', year, last_month)
+    #     return redirect('foodapp:super_month_orders', year, last_month)
     # else:
-    return redirect('url_month_orders', year, last_month)
+    return redirect('foodapp:month_orders', year, last_month)
 
 
 class LeaderboardView(TemplateView):
@@ -247,7 +247,7 @@ class SuperMonthOrdersView(TemplateView):
         return super(SuperMonthOrdersView, self).dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        success_url = reverse_lazy('url_last_month_view')
+        success_url = reverse_lazy('foodapp:last_month_view')
         if request.user.is_superuser:
             year = self.kwargs['year']
             month = self.kwargs['month']
