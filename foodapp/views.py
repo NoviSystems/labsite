@@ -49,7 +49,7 @@ class HomeView(CreateView):
         context = super(HomeView, self).get_context_data(**kwargs)
 
         now = datetime.datetime.now()
-        orders = models.Order.objects.filter(date=datetime.date.today)
+        orders = models.Order.objects.filter(date=datetime.date.today())
 
         context['last_month'] = "%02d" % (now.month - 1)
         context['year'] = now.year
