@@ -18,7 +18,7 @@ class OrderForm(forms.ModelForm):
 
         if item.once_a_day and models.Order.objects.filter(
             user=user,
-            date=datetime.date.today,
+            date=datetime.date.today(),
             item=item
         ).exists():
             raise forms.ValidationError('This item has already been ordered.')
