@@ -136,7 +136,7 @@ def application(labsite=None, foodapp=None, worklog=None):
 
     # clone labsite repo
     with settings(prompts={'Are you sure you want to continue connecting (yes/no)? ': 'yes'}):
-        require.git.working_copy('git@github.com:ITNG/labsite.git', branch=branches['labsite'])
+        require.git.working_copy('git@github.com:ITNG/labsite.git', branch=branches['labsite'], clean=True)
 
     # install packages
     require.python.virtualenv('venv')

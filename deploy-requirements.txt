@@ -1,4 +1,4 @@
-django>=1.7,<1.7.99
+django>=1.9,<1.10
 contextlib2
 fabric
 celery
