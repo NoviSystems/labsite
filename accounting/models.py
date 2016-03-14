@@ -54,6 +54,11 @@ class Contract(models.Model):
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
     
+
+class Cash(LineItem):
+    name = models.CharField(max_length=50)
+
+
 class Income(LineItem):
     name = models.CharField(max_length=50)
     data_payable = models.DateField()
@@ -121,9 +126,12 @@ class Payroll(models.Model):
         return super(self.__class__, self).delete(*args, **kwargs)
 
 
-@receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsForFiscalYear")
-def createMonthsForFiscalYear(sender, instance, **kwargs):
+@receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsCashForFiscalYear")
+def createMonthsCashForFiscalYear(sender, instance, **kwargs):
     start_month = instance.start_month
     number_of_months = instance.number_of_months
     for i in range(number_of_months):
         Month.objects.create(fiscal_year=instance, month=date(start_month.year, start_month.month + i, start_month.day), projected_values=0.00, actual_values=0.00)
+    months = Month.objects.filter(fiscal_year=instance.pk)
+    for month in months:
+        Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
