@@ -28,12 +28,51 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-md-10">
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-3">
+                    <h4>Cash</h4>
+            </div>
+            <div class="col-md-9">
+                {% if not month_data.cash %}
+                    <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=month_data.month.pk %}>Create Cash</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            {% if month_data.cash %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name:</th>
+                        <th>Predicted Amount: </th>
+                        <th>Actual Amount: </th>
+                        <th>Update/Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">{{ month_data.cash.name }}</th>
+                            <td>${{ month_data.cash.predicted_amount }}</td>
+                            <td>${{ month_data.cash.actual_amount }}</td>
+                            <td>
+                                <a class="btn btn-primary" href=#>Update</a>
+                                <a class="btn btn-primary" href=#>Delete</a>
+                            </td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                    <h4>Expenses</h4>
+            </div>
+            <div class="col-md-9">
                     <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=month_data.month.pk %}>Create Expense</a>
             </div>
         </div>
-        <br>
-
         <div class="row">
             {% if month_data.expenses %}
             <table class="table">
@@ -66,11 +105,13 @@
                 {% endif %}
         </div>
         <div class="row">
-            <div class="col-md-10">
+            <div class="col-md-3">
+                    <h4>Income</h4>
+            </div>
+            <div class="col-md-9">
                 <a class="btn btn-primary" href={% url 'accounting:create_income' pk=current.pk month=month_data.month.pk %}>Create Income</a>
             </div>
         </div>
-        <br>
         <div class="row">
 
             {% if month_data.incomes %}

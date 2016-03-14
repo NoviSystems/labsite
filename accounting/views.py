@@ -153,7 +153,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['current_month'] = current_month
         # Context totals for the Graph values
         context['months_names'] = months_names
-        context['months'] = months
+        # context['months'] = months
         context['months_j'] = json.dumps(months_names)
         context['predicted_totals'] = json.dumps( [float(value) for value in cmpr['values']] )
         context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
@@ -233,25 +233,30 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
 
         months_data = []
         current_month = None
+        months = []
         for fiscal_year in fiscal_years:
-            months = Month.objects.filter(fiscal_year=fiscal_year)
+            months.extend(Month.objects.filter(fiscal_year=fiscal_year))
             for month in months:
                 if month.month.month == now.month:
                     current_month = month
 
 
         month = Month.objects.get(pk=kwargs['month'])
+        try:
+            cash = Cash.objects.get(month=month)
+        except ObjectDoesNotExist:
+            cash = None
         month_data = {
             'month': month,
             'expenses': Expense.objects.filter(month=month),
             'incomes':Income.objects.filter(month=month),
+            'cash': cash
         }
 
 
         context['months'] = months
         context['current_month'] = current_month
         context['month_data'] = month_data
-
         return context
 
 

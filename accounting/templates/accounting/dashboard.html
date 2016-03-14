@@ -2,8 +2,9 @@
 
 {% load staticfiles %}
 
-{% block content %}
 
+{% block content %}
+{% if current_month %}
     </br>
     <ul class="nav nav-tabs">
         <li class="active"><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
@@ -107,5 +108,9 @@ $(function () {
         </div>
     </div>
 {% endblock %}
+{% else %}
+<h4>Create fiscal year to generate data</h4>
+<a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
+{% endif %}
 
 {% endblock %}
