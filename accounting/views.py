@@ -89,6 +89,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         months_names = []
 
         # Computes totals for the whole fiscal year
+        months = []
         for fiscal_year in fiscal_years:
             months = Month.objects.filter(fiscal_year=fiscal_year)
             for month in months:
@@ -130,9 +131,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
                 cash_month_actual = Decimal('0.00')
                 cash_month_projected = Decimal('0.00')
-                cash_month_projected = cash_month_projected - expense_month_projected - payroll_month_projected + income_month_projected
-                cash_month_actual = cash_month_actual - expenses_month_actual - payroll_month_actual + income_month_projected
-
+                for cash in Cash.objects.filter(month=month):
+                    cash_month_projected += cash_month_projected - expense_month_projected - payroll_month_projected + income_month_projected
+                    cash_month_actual += cash_month_actual - expenses_month_actual - payroll_month_actual + income_month_projected
                 cmpr['values'].append(cash_month_projected)
                 cma['values'].append(cash_month_actual)
 
@@ -153,7 +154,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['current_month'] = current_month
         # Context totals for the Graph values
         context['months_names'] = months_names
-        # context['months'] = months
+        context['months'] = months
         context['months_j'] = json.dumps(months_names)
         context['predicted_totals'] = json.dumps( [float(value) for value in cmpr['values']] )
         context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
@@ -308,8 +309,16 @@ class FiscalYearCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(FiscalYearCreateView, self).get_context_data()
-        context['business_unit'] = BusinessUnit.objects.get(pk=self.kwargs['pk'])
-        return context
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        context['business_unit'] = business_unit
+        try:
+            fiscal_year = FiscalYear.objects.filter(business_unit=business_unit).last()
+            last_month = Month.objects.filter(fiscal_year=fiscal_year).last()
+            last_cash = Cash.objects.get(month=last_month)
+            context['last_cash'] = last_cash
+            return context
+        except ObjectDoesNotExist:
+            return context
 
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
@@ -317,6 +326,7 @@ class FiscalYearCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(FiscalYearCreateView, self).form_valid(form)
+        populateCashPredicted()
         return response
 
 

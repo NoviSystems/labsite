@@ -14,8 +14,16 @@
         {% endif %}
 
         <form class="form" method="POST" action="">
-                {% csrf_token %}
-                {{ form.as_p }}
+	{% csrf_token %}
+	<p><label for="id_start_month">Start month:</label> <input id="id_start_month" name="start_month" type="text" /></p>
+	<p><label for="id_number_of_months">Number of months:</label> <input id="id_number_of_months" name="number_of_months" type="number" /></p>
+	
+	{% if last_cash %}
+	<input class="hidden" id="id_cash_amount" name="cash_amount" step="any" type="number" value="{{ last_cash.actual_amount }}" />
+	{% else %}
+	<p><label for="id_cash_amount">Cash Amount:</label> <input id="id_cash_amount" name="cash_amount" step="any" type="number" value="0" /></p>
+	{% endif %}
+
             <button class="btn btn-primary" type="submit">Create Fiscal Year</button>
         </form>
 </div>

@@ -126,8 +126,8 @@ class Payroll(models.Model):
         return super(self.__class__, self).delete(*args, **kwargs)
 
 
-@receiver(post_save, sender=FiscalYear, dispatch_uid="createMonthsCashForFiscalYear")
-def createMonthsCashForFiscalYear(sender, instance, **kwargs):
+@receiver(post_save, sender=FiscalYear, dispatch_uid="createItemsForFiscalYear")
+def createItemsForFiscalYear(sender, instance, **kwargs):
     start_month = instance.start_month
     number_of_months = instance.number_of_months
     for i in range(number_of_months):
