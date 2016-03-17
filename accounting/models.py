@@ -15,10 +15,12 @@ class BusinessUnit(models.Model):
     def __str__(self):
         return self.name
 
+
 class FiscalYear(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
     start_month = models.DateField()
     number_of_months = models.IntegerField()
+    cash_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
 
 class Month(models.Model):
