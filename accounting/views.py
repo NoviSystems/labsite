@@ -132,8 +132,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 cash_month_actual = Decimal('0.00')
                 cash_month_projected = Decimal('0.00')
                 for cash in Cash.objects.filter(month=month):
-                    cash_month_projected += cash_month_projected - expense_month_projected - payroll_month_projected + income_month_projected
-                    cash_month_actual += cash_month_actual - expenses_month_actual - payroll_month_actual + income_month_projected
+                    cash_month_projected += cash.predicted_amount
+                    cash_month_actual += cash.actual_amount
                 cmpr['values'].append(cash_month_projected)
                 cma['values'].append(cash_month_actual)
 
@@ -307,26 +307,16 @@ class FiscalYearCreateView(LoginRequiredMixin, CreateView):
     model = FiscalYear
     form_class = FiscalYearCreateForm
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(FiscalYearCreateView, self).get_context_data()
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
-        context['business_unit'] = business_unit
-        try:
-            fiscal_year = FiscalYear.objects.filter(business_unit=business_unit).last()
-            last_month = Month.objects.filter(fiscal_year=fiscal_year).last()
-            last_cash = Cash.objects.get(month=last_month)
-            context['last_cash'] = last_cash
-            return context
-        except ObjectDoesNotExist:
-            return context
-
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = business_unit
         response = super(FiscalYearCreateView, self).form_valid(form)
-        populateCashPredicted()
+        fiscal_year = form.instance
+        cash_amount = form.instance.cash_amount
+        populateCashPredicted(fiscal_year=fiscal_year, cash_amount=cash_amount)
         return response
 
 
@@ -436,6 +426,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         except KeyError:
             print "No Predicted Amount In Post Request"
         response = super(InvoiceCreateView, self).form_valid(form)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -448,6 +439,12 @@ class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
+
+    def delete(self, request, *args, **kwargs):
+        response = super(InvoiceDeleteView, self).delete(request, *args, **kwargs)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updateCashPredicted(business_unit=business_unit)
+        return response
 
 
 class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
@@ -463,6 +460,8 @@ class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super(InvoiceUpdateView, self).form_valid(form)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -499,7 +498,8 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
             print "Exception thrown"
             form.instance.month = month
         response = super(ExpenseCreateView, self).form_valid(form)
-
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -512,6 +512,12 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:expenses', kwargs={'pk': self.kwargs["pk"], 'month': self.kwargs['month']})
+
+    def delete(self, request, *args, **kwargs):
+        response = super(ExpenseDeleteView, self).delete(request, *args, **kwargs)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updateCashPredicted(business_unit=business_unit)
+        return response
 
 
 class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
@@ -527,6 +533,8 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         response = super(ExpenseUpdateView, self).form_valid(form)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -598,6 +606,7 @@ class SalaryDeleteView(LoginRequiredMixin, DeleteView):
         response = super(SalaryDeleteView, self).delete(request, *args, **kwargs)
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -616,6 +625,7 @@ class SalaryUpdateView(LoginRequiredMixin, UpdateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(SalaryUpdateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -637,6 +647,7 @@ class PartTimeCreateView(LoginRequiredMixin, CreateView):
         form.instance.hours_work = 20
         response = super(PartTimeCreateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -654,7 +665,9 @@ class PartTimeDeleteView(LoginRequiredMixin, DeleteView):
         response = super(PartTimeDeleteView, self).delete(request, *args, **kwargs)
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
         return response
+
 
 class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'accounting/part_time_update_form.html'
@@ -671,6 +684,7 @@ class PartTimeUpdateView(LoginRequiredMixin, UpdateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(PartTimeUpdateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -720,6 +734,12 @@ class IncomeDeleteView(LoginRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy('accounting:expenses', kwargs={'pk': self.kwargs["pk"], 'month': self.kwargs['month']})
 
+    def delete(self, request, *args, **kwargs):
+        response = super(IncomeDeleteView, self).delete(request, *args, **kwargs)
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        updateCashPredicted(business_unit=business_unit)
+        return response
+
 
 class IncomeUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
@@ -733,7 +753,9 @@ class IncomeUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('accounting:expenses', kwargs= {'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(IncomeUpdateView, self).form_valid(form)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
@@ -770,3 +792,48 @@ def updatePayroll(business_unit):
                 payroll = Payroll.objects.create(month=month, expense=expense)
             payroll.expense.predicted_amount = payroll_amount
             payroll.expense.save()
+
+
+def populateCashPredicted(fiscal_year, cash_amount):
+    cash_previous = Decimal(cash_amount)
+    for month in Month.objects.filter(fiscal_year=fiscal_year):
+        print month.month
+        print "cash previous: ", cash_previous
+
+        expense_month_projected = Decimal('0.00')
+        for expense in Expense.objects.filter(month=month):
+            expense_month_projected += expense.predicted_amount
+        income_month_projected = Decimal('0.00')
+        for income in Income.objects.filter(month=month):
+            income_month_projected += income.predicted_amount
+        cash = Cash.objects.get(month=month)
+        
+        print "cash predicted_amount: ", cash.predicted_amount
+        cash.predicted_amount = cash_previous - expense_month_projected + income_month_projected
+        print "new predicted_amount: ", cash.predicted_amount
+        cash.save()
+        print "post save predicted_amount: ", cash.predicted_amount
+        if cash.reconciled:
+            cash_previous = cash.actual_amount
+        else:
+            cash_previous = cash.predicted_amount
+
+
+def updateCashPredicted(business_unit):
+    fiscal_years = FiscalYear.objects.filter(business_unit=business_unit)
+    for fiscal_year in fiscal_years:
+        cash_previous = Decimal(fiscal_year.cash_amount)
+        for month in Month.objects.filter(fiscal_year=fiscal_year):
+            expense_month_projected = Decimal('0.00')
+            for expense in Expense.objects.filter(month=month):
+                expense_month_projected += expense.predicted_amount
+            income_month_projected = Decimal('0.00')
+            for income in Income.objects.filter(month=month):
+                income_month_projected += income.predicted_amount
+            cash = Cash.objects.get(month=month)
+            cash.predicted_amount = cash_previous - expense_month_projected + income_month_projected
+            cash.save()
+            if cash.reconciled:
+                cash_previous = cash.actual_amount
+            else:
+                cash_previous = cash.predicted_amount

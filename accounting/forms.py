@@ -31,8 +31,6 @@ class BusinessUnitUpdateForm(ModelForm):
 
 class FiscalYearCreateForm(ModelForm):
 
-    cash_amount = DecimalField(label='Cash Amount', initial=0, required=True)
-
     def __init__(self, *args, **kwargs):
         super(FiscalYearCreateForm, self).__init__(*args, **kwargs)
 
