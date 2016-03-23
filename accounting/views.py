@@ -159,8 +159,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
                 # compute cash values
                 for cash in Cash.objects.filter(month=month):
+                    if cash.reconciled:
+                        cash_month_actual += cash.actual_amount
                     cash_month_projected += cash.predicted_amount
-                    cash_month_actual += cash.actual_amount
                 
                 # add cash to lists for table
                 cmpr['values'].append(cash_month_projected)
@@ -788,6 +789,24 @@ class IncomeUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         response = super(IncomeUpdateView, self).form_valid(form)
+        updateCashPredicted(business_unit=business_unit)
+        return response
+
+
+class CashUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+    form_class = CashUpdateForm
+    model = Cash
+
+    def get_object(self):
+        return Cash.objects.get(pk=self.kwargs['cash'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:expenses', kwargs={'pk':self.kwargs['pk'], 'month': self.kwargs['month']})
+
+    def form_valid(self, form):
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        response = super(CashUpdateView, self).form_valid(form)
         updateCashPredicted(business_unit=business_unit)
         return response
 

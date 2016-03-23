@@ -57,7 +57,7 @@
                             <td>${{ month_data.cash.predicted_amount }}</td>
                             <td>${{ month_data.cash.actual_amount }}</td>
                             <td>
-                                <a class="btn btn-primary" href=#>Update</a>
+                                <a class="btn btn-primary" href={% url 'accounting:update_cash' pk=current.pk month=month_data.month.pk cash=month_data.cash.pk %}>Update</a>
                             </td>
                     </tr>
                 </tbody>

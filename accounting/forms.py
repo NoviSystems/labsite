@@ -228,3 +228,19 @@ class IncomeUpdateForm(ModelForm):
         exclude = [
             
         ]
+
+
+class CashUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(CashUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Cash
+        fields = '__all__'
+        exclude = [
+            'name',
+            'business_unit',
+            'month',
+            'predicted_amount',
+        ]

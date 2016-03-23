@@ -23,6 +23,7 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<income>\d+)/update_income/$', IncomeUpdateView.as_view(), name='update_income'),
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<income>\d+)/delete_income/$', IncomeDeleteView.as_view(), name='delete_income'),
 
+	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<cash>\d+)/update_cash/$', CashUpdateView.as_view(), name='update_cash'),
 
 	url(r'^(?P<pk>\d+)/contracts/$', ContractsView.as_view(), name='contracts'),
 
