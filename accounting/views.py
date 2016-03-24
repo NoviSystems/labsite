@@ -594,13 +594,13 @@ class PersonnelView(LoginRequiredMixin, TemplateView):
         context['current_month'] = current_month
 
 
-        personnel = Personnel.objects.all()
+        personnel = Personnel.objects.filter(business_unit=current)
         context['personnel'] = personnel
 
-        salary = Salary.objects.all()
+        salary = Salary.objects.filter(business_unit=current)
         context['salary'] = salary
 
-        part_time = PartTime.objects.all()
+        part_time = PartTime.objects.filter(business_unit=current)
         context['part_time'] = part_time
 
         return context
