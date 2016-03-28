@@ -93,7 +93,9 @@
                             <td>${{ expense.predicted_amount }}</td>
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_expense' pk=current.pk expense=expense.pk month=month_data.month.pk %}>Update</a>
+                                {% if expense.name != "Payroll" %}
                                 <a class="btn btn-primary" href={% url 'accounting:delete_expense' pk=current.pk expense=expense.pk month=month_data.month.pk %}>Delete</a>
+                                {% endif %}
                             </td>
                     </tr>
                     {% endfor %}
