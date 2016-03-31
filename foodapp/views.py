@@ -70,6 +70,7 @@ class OrderListView(ListView):
 
 
 class UserOrderView(OrderListView):
+
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(UserOrderView, self).dispatch(*args, **kwargs)
@@ -88,8 +89,7 @@ class UserOrderView(OrderListView):
 
 def last_month_view(request):
     now = datetime.date.today()
-    # FIX THIS BACK
-    last_month = (now.month-1)
+    last_month = (now.month - 1)
     year = now.year
     if now.month == 1:
         year = (now.year - 1)
@@ -124,7 +124,7 @@ class LeaderboardView(TemplateView):
             if item[0] not in mvp and item[1] == item_values[0][1]:
                 mvp += ", " + item[0]
 
-            if i > 0 and item_values[i][1] == item_values[i-1][1]:
+            if i > 0 and item_values[i][1] == item_values[i - 1][1]:
                 helper = helper - 1
 
             if len(leaderboard) < leaderboardMax:
@@ -262,7 +262,7 @@ class SuperMonthOrdersView(TemplateView):
                 if not user_used:
                     usernames[order] = order.user.username
                     if request.method == 'POST':
-                        form_id = 'id_'+order.user.username
+                        form_id = 'id_' + order.user.username
                         form = request.POST.get(form_id)
                         if form:
                             new_save = models.AmountPaid(amount=form, user=order.user, date=order.date)
@@ -293,12 +293,12 @@ class SuperMonthOrdersView(TemplateView):
         for item in costs:
             cost += item.cost
 
-        cost = float(cost)/0.9725
+        cost = float(cost) / 0.9725
         context["cost"] = ("%.2f" % cost)
 
         # Calculates cost per burrito
         if num_burritos:
-            cost_per_burrito = Decimal(cost/num_burritos).quantize(Decimal('.01'), rounding=ROUND_UP)
+            cost_per_burrito = Decimal(cost / num_burritos).quantize(Decimal('.01'), rounding=ROUND_UP)
         else:
             cost_per_burrito = 0
 
@@ -311,12 +311,12 @@ class SuperMonthOrdersView(TemplateView):
         for username in user_to_orders_dict:
             money_paid = Decimal(0)
             num_burritos = user_to_orders_dict[username]
-            money_owed = num_burritos*cost_per_burrito
+            money_owed = num_burritos * cost_per_burrito
             for paid in models.AmountPaid.objects.filter(date__month=month).filter(date__year=year):
                 if paid.user.username == username:
                     money_paid += paid.amount
-                    money_owed = (num_burritos*cost_per_burrito) - money_paid
-            user_to_orders_dict[username] = (num_burritos, num_burritos*cost_per_burrito, money_owed, money_paid)
+                    money_owed = (num_burritos * cost_per_burrito) - money_paid
+            user_to_orders_dict[username] = (num_burritos, num_burritos * cost_per_burrito, money_owed, money_paid)
 
         context["user_to_orders_dict"] = user_to_orders_dict
         return context
