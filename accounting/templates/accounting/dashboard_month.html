@@ -26,16 +26,17 @@
 		    			<table class="table">
 			                <thead>
 			                    <tr>
-			                        <th>Date</th>
-			                        {% for month in months_names %}
+			                        
+			                        {% for month in months_names|slice:"1:5"  %}
 			                        <th>{{ month }}</th>
+
 			                        {% endfor %}
 			                    </tr>
 			                </thead>
 			                <tbody>
-			                    {% for data in dashboard_data %}
+			                    {% for data in dashboard_data|slice:":1" %}
 			                    <tr>
-			                        {% for value in data.values %}
+			                        {% for value in data.values|slice:":4" %}
 			                            <td>${{ value }}</td>
 			                        {% endfor %}
 			                    </tr>
