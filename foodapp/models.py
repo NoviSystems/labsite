@@ -3,8 +3,15 @@ from django.contrib.auth.models import User
 import datetime
 
 
+class StripeCustomer(models.Model):
+    user = models.OneToOneField(User, null=False, blank=False)
+    # should only need 18 characters, but using double just in case something changes in the future
+    customer_id = models.CharField(max_length=36, null=True, blank=True)
+
+
 class Item(models.Model):
     name = models.CharField(max_length=56)
+    cost = models.DecimalField(default=0.0, max_digits=6, decimal_places=2)
     description = models.CharField(max_length=256)
     once_a_day = models.BooleanField(default=False)
 
@@ -20,6 +27,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, related_name='orders')
     date = models.DateField(default=datetime.date.today)
     item = models.ForeignKey(Item)
+    invoiced = models.BooleanField(default=False)
     QUANTITY_CHOICES = (
         (1, "one"),
         (2, "two"),

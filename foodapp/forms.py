@@ -7,7 +7,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = models.Order
-        exclude = ['date']
+        exclude = ('date', 'invoiced')
         widgets = {
             'user': forms.HiddenInput(),
         }
