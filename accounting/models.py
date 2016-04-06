@@ -4,7 +4,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from calendar import monthrange
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -130,10 +131,24 @@ class Payroll(models.Model):
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createItemsForFiscalYear")
 def createItemsForFiscalYear(sender, instance, **kwargs):
-    start_month = instance.start_month
-    number_of_months = instance.number_of_months
+    start_month = instance.start_date
+    end_month= instance.end_date
+    number_of_months = monthdelta(start_month, end_month)
     for i in range(number_of_months):
         Month.objects.create(fiscal_year=instance, month=date(start_month.year, start_month.month + i, start_month.day), projected_values=0.00, actual_values=0.00)
     months = Month.objects.filter(fiscal_year=instance.pk)
     for month in months:
         Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
+
+
+# calculate month duration
+def monthdelta(d1, d2):
+    delta = 0
+    while True:
+        mdays = monthrange(d1.year, d1.month)[1]
+        d1 += timedelta(days=mdays)
+        if d1 <= d2:
+            delta += 1
+        else:
+            break
+    return delta
