@@ -4,7 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from datetime import date
+from datetime import date, datetime
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -18,8 +18,8 @@ class BusinessUnit(models.Model):
 
 class FiscalYear(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
-    start_month = models.DateField()
-    number_of_months = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField(default=datetime.now, blank=True)
     cash_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
 

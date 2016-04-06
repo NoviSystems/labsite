@@ -9,7 +9,8 @@ urlpatterns = [
 	url(r'^(?P<business_unit>\d+)/delete_business_unit/$', BusinessUnitDeleteView.as_view(), name='delete_business_unit'),
 
 	url(r'^(?P<pk>\d+)/dashboard/$', DashboardView.as_view(), name='dashboard'),
-	url(r'^(?P<pk>\d+)/dashboard/(?P<month>\d+)/$', DashboardMonthView.as_view(), name='dashboard_month'),
+	url(r'^(?P<pk>\d+)/dashboard/(?P<fiscal_year>\d+)/$', DashboardView.as_view(), name='dashboard'),
+	url(r'^(?P<pk>\d+)/dashboard/(?P<fiscal_year>\d+)/(?P<month>\d+)/$', DashboardMonthView.as_view(), name='dashboard_month'),
 
 	url(r'^(?P<pk>\d+)/dashboard/create_fiscal_year/$', FiscalYearCreateView.as_view(), name='create_fiscal_year'),
 	url(r'^(?P<pk>\d+)/dashboard/(?P<fiscal_year>\d+)/update_fiscal_year/$', FiscalYearUpdateView.as_view(), name='update_fiscal_year'),
@@ -46,7 +47,4 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/personnel/create_part_time/$', PartTimeCreateView.as_view(), name='create_part_time'),
 	url(r'^(?P<pk>\d+)/personnel/(?P<part_time>\d+)/update_part_time/$', PartTimeUpdateView.as_view(), name='update_part_time'),
 	url(r'^(?P<pk>\d+)/personnel/(?P<part_time>\d+)/delete_part_time/$', PartTimeDeleteView.as_view(), name='delete_part_time'),
-
-
-
 ]

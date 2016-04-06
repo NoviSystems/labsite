@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from forms import *
 from decimal import *
 import datetime 
+from datetime import timedelta
 import json
 from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
@@ -17,6 +18,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data()
+        # Get business units associated with user
         business_units = BusinessUnit.objects.filter(user=self.request.user)
         context['business_units'] = business_units
         return context

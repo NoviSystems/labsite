@@ -38,7 +38,8 @@ class FiscalYearCreateForm(ModelForm):
         model = FiscalYear
         fields = '__all__'
         exclude = [
-            'business_unit'
+            'business_unit',
+            'cash_amount'
         ]
 
 
