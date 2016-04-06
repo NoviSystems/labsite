@@ -59,6 +59,9 @@ class HomeView(CreateView):
         return context
 
 
+class StripeView(TemplateView):
+  template_name='foodapp/stripe.html'
+
 class OrderListView(ListView):
     model = models.Order
     context_object_name = 'orders'
