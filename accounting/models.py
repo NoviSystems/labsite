@@ -138,14 +138,14 @@ def createItemsForFiscalYear(sender, instance, **kwargs):
     month = start_month.month
     year = start_month.year
     day = start_month.day
-    for i in range(number_of_months):
+    for i in range(number_of_months+1):
         if month == 12:
             year = end_month.year
             month = 1
+        elif i == 0:
+            month = month
         else:
             month = month + 1
-        print "Month: ", month
-        print "I: ", i
         Month.objects.create(fiscal_year=instance, month=date(year, month, day), projected_values=0.00, actual_values=0.00)
     months = Month.objects.filter(fiscal_year=instance.pk)
     for month in months:
