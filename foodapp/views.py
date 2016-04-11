@@ -12,6 +12,9 @@ from django.shortcuts import redirect
 from django.db.models import Sum
 from django.core.exceptions import ObjectDoesNotExist
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+
 from foodapp import forms, models
 from models import StripeCustomer
 
@@ -63,7 +66,7 @@ class HomeView(CreateView):
         return context
 
 
-class StripeCreateView(TemplateView):
+class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
   """TemplateView for StripeCreateView
 
   Create a Stripe value associated to the user

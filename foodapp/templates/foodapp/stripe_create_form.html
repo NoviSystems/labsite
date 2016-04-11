@@ -1,92 +1,86 @@
 {% extends 'foodapp/base.html' %}
-{% load staticfiles %}
-{% csrf_token %}
+{% load staticfiles %}1
 
-{% block content %}8`
-    <!-- Stripe.js -->
-    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+{% block content %}
+<!-- Stripe.js -->
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        // This identifies your website in the createToken call below
-        Stripe.setPublishableKey('pk_test_TVs12KB8KSKNEZQbPtD0oJfM');
+    // This identifies your website in the createToken call below
+    Stripe.setPublishableKey('pk_test_TVs12KB8KSKNEZQbPtD0oJfM');
 
-        var stripeResponseHandler = function(status, response) {
-          var $form = $('#payment-form');
-          if (response.error) {
-            // Show the errors on the form
-            $form.find('.payment-errors').text(response.error.message);
-            $form.find('button').prop('disabled', false);
-          } else {
-            // token contains id, last4, and card type
-            var token = response.id;
-            // Insert the token into the form so it gets submitted to the server
-            $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-            // and re-submit
-            $form.get(0).submit();
-          }
-        };
-        jQuery(function($) {
-          $('#payment-form').submit(function(e) {
-                 // Test to ensure Javascript is being loaded on browser
-            console.log( "HELLO" );
-            var $form = $(this);
-            // Disable the submit button to prevent repeated clicks
-            $form.find('button').prop('disabled', true);
-            Stripe.card.createToken($form, stripeResponseHandler);
-            // Prevent the form from submitting with the default action
-            return false;
-          });
-        });
+    var stripeResponseHandler = function(status, response) {
+      var $form = $('#payment-form');
+      if (response.error) {
+        // Show the errors on the form
+        $form.find('.payment-errors').html("<div class=\"alert alert-danger\" style=\"text-align: center;\">" + response.error.message + "</div>");
+        $form.find('button').prop('disabled', false);
+      } else {
+        // token contains id, last4, and card type
+        var token = response.id;
+        // Insert the token into the form so it gets submitted to the server
+        $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+        // and re-submit
+        $form.get(0).submit();
+      }
+    };
+    jQuery(function($) {
+      $('#payment-form').submit(function(e) {
+        var $form = $(this);
+        // Disable the submit button to prevent repeated clicks
+        $form.find('button').prop('disabled', true);
+        Stripe.card.createToken($form, stripeResponseHandler);
+        // Prevent the form from submitting with the default action
+        return false;
+      });
+    });
 
-    </script>
+</script>
+
 <div class="container">
-        <div class="page-header">
-            <h1>Create Stripe ID</h1>
-        </div>
-        {% if stripe%}
-            <p class="lead">There is already a Stripe ID associated with this account.</p>
-            <p class="lead">If you would like to create a new one, please delete the existing Stripe ID.</p>
-            {% comment %}<a class="btn btn-responsive btn-primary" href={% url 'delete_stripe' %}>Delete Stripe ID</a>{% endcomment %}
-        {% else %}
-        <div class="row">
-                {% if form.errors %}
-                <div class="alert alert-danger"> {{ form.errors }} </div>
-                {% endif %}
-
-            <form method="POST" action={% url 'foodapp:stripe' %} id="payment-form">
-                {% csrf_token %}
-
-                <div class="form-row">
-                    <label>
-                        <span>Card Number</span>
-                        <input type="text" size="20" data-stripe="number"/>
-                    </label>
+  <div class="page-header">
+    <h1>Create Stripe ID</h1>
+  </div>
+    {% if stripe %}
+      <p class="lead">There is already a Stripe ID associated with this account.</p>
+      <p class="lead">If you would like to create a new one, please delete the existing Stripe ID.</p>
+      {% comment %}<a class="btn btn-responsive btn-primary" href={% url 'delete_stripe' %}>Delete Stripe ID</a>{% endcomment %}
+    {% else %}
+    <div class="container">
+      <form method="POST" id="payment-form" action={% url 'foodapp:stripe' %}>
+        {% csrf_token %}
+        <div class="col-xs-12 col-md-4 col-md-offset-4 payment-errors"></div>
+        <div class="col-xs-12 col-md-4 col-md-offset-4">
+          <div class="panel" style="background-color: #B9D1E1;">
+            <div class="panel-body">
+              <h4>{{ user }}</h4>
+              <div class="input-group" style="margin-bottom: 5px;">
+                <input type="text" class="form-control" placeholder="Credit Card Number" size="16" maxlength="16" data-stripe="number"/>
+                <span class="input-group-addon"><i class="fa fa-credit-card"></i></span>
+              </div>
+              <div class="row">
+                <div class="col-xs-4">
+                  <input type="text" class="form-control col-sm-2" placeholder="(MM)" maxlength="5" data-stripe="exp-month">
                 </div>
-
-                <div class="form-row">
-                    <label>
-                        <span>CVC</span>
-                        <input type="text" size="4" data-stripe="cvc"/>
-                    </label>
+                <div class="col-xs-4">
+                  <input type="text" class="form-control col-sm-2" placeholder="(YYYY)" maxlength="5" data-stripe="exp-year">
                 </div>
-
-                <div class="form-row">
-                    <label>
-                        <span>Exipration (MM/YYYY)</span>
-                        <input type="text" size="2" data-stripe="exp-month"/>
-                    </label>
-                    <span> / </span>
-                        <input type="text" size="4" data-stripe="exp-year"/>
+                <div class="col-xs-4">
+                  <input type="text" class="form-control col-sm-2" placeholder="CVC" data-stripe="cvc">
                 </div>
-
-                <button type="submit">Submit Payment</button>
-
-            </form>
-
-        </div>
-        {% endif %}
+                <div class="col-xs-4" style="text-align: right;">
+                  <!-- Have picture of whatever card they are using here -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="col-xs-12 cold-md-4 center-block btn btn-success btn-lg" type="submit">Add Card</button>
         </div>
 
-        {% endblock %}
-                                        
+      </form>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
