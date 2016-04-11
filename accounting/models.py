@@ -140,7 +140,7 @@ def createItemsForFiscalYear(sender, instance, **kwargs):
     day = start_month.day
     for i in range(number_of_months+1):
         if month == 12:
-            year = end_month.year
+            year = year + 1
             month = 1
         elif i == 0:
             month = month
