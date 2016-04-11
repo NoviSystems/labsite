@@ -7,7 +7,7 @@ app_name = 'foodapp'
 
 urlpatterns = [
     url(r'^$', views.HomeView.as_view(), name='home'),
-    url(r'^stripe/$', views.StripeView.as_view(), name='stripe'),
+    url(r'^stripe/$', views.StripeCreateView.as_view(), name='stripe'),
     url(r'^orders/$', views.OrderListView.as_view(), name='orders'),
     url(r'^orders/user/(?P<username>\w+)/$', views.UserOrderView.as_view(), name='user_orders'),
     url(r'^orders/last_month/$', views.last_month_view, name='last_month_view'),

@@ -1,4 +1,5 @@
 import datetime
+import stripe
 from decimal import Decimal, ROUND_UP
 
 from django.contrib.auth.decorators import login_required
@@ -9,8 +10,11 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
 from django.db.models import Sum
+from django.core.exceptions import ObjectDoesNotExist
 
 from foodapp import forms, models
+from models import StripeCustomer
+
 
 
 class HomeView(CreateView):
@@ -59,8 +63,54 @@ class HomeView(CreateView):
         return context
 
 
-class StripeView(TemplateView):
-  template_name='foodapp/stripe.html'
+class StripeCreateView(TemplateView):
+  """TemplateView for StripeCreateView
+
+  Create a Stripe value associated to the user
+  This function sends
+
+  Attributes:
+      success_message (str) = Message upon form valid
+      success_url (str) = Reverse to AccountSettingsView
+      template_name_suffix (str): Generic template to be rendered
+  """
+  success_message = 'Stripe added successfully!'
+  success_url = reverse_lazy('foodapp:home')
+  template_name = 'foodapp/stripe_create_form.html'
+
+  def get_context_data(self, **kwargs):
+      """
+      Insert objects into the context dictionary
+
+      Context Dictionary Amendments:
+          stripe: value used to display is the user already has associated Stripe data
+      """
+      context = super(StripeCreateView, self).get_context_data()
+      try:
+          StripeCustomer.objects.get(user=self.request.user)
+          stripe = True
+      except ObjectDoesNotExist:
+          stripe = False
+      context['stripe'] = stripe
+      return context
+
+  def post(self, request, *args, **kwargs):
+      """
+      Handles POST requests, instantiating a form instance with the passed
+      POST variables and then checked for validity.
+
+      Use the stripe.api_key and token returned from a users CC info to create a customer
+      Store the customer data as a Stripe object
+      """
+      stripe.api_key = "sk_test_9q95Oz5enXoLpgOcy3fiX4dF"
+      token = request.POST.get('stripeToken', False)
+      print token
+      customer = stripe.Customer.create(
+          source = token,
+      )
+      StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
+      return redirect(self.success_url, request)
+
 
 class OrderListView(ListView):
     model = models.Order

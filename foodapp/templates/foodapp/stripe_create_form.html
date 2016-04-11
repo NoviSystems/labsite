@@ -1,0 +1,92 @@
+{% extends 'foodapp/base.html' %}
+{% load staticfiles %}
+{% csrf_token %}
+
+{% block content %}8`
+    <!-- Stripe.js -->
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+
+    <script type="text/javascript">
+
+        // This identifies your website in the createToken call below
+        Stripe.setPublishableKey('pk_test_TVs12KB8KSKNEZQbPtD0oJfM');
+
+        var stripeResponseHandler = function(status, response) {
+          var $form = $('#payment-form');
+          if (response.error) {
+            // Show the errors on the form
+            $form.find('.payment-errors').text(response.error.message);
+            $form.find('button').prop('disabled', false);
+          } else {
+            // token contains id, last4, and card type
+            var token = response.id;
+            // Insert the token into the form so it gets submitted to the server
+            $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+            // and re-submit
+            $form.get(0).submit();
+          }
+        };
+        jQuery(function($) {
+          $('#payment-form').submit(function(e) {
+                 // Test to ensure Javascript is being loaded on browser
+            console.log( "HELLO" );
+            var $form = $(this);
+            // Disable the submit button to prevent repeated clicks
+            $form.find('button').prop('disabled', true);
+            Stripe.card.createToken($form, stripeResponseHandler);
+            // Prevent the form from submitting with the default action
+            return false;
+          });
+        });
+
+    </script>
+<div class="container">
+        <div class="page-header">
+            <h1>Create Stripe ID</h1>
+        </div>
+        {% if stripe%}
+            <p class="lead">There is already a Stripe ID associated with this account.</p>
+            <p class="lead">If you would like to create a new one, please delete the existing Stripe ID.</p>
+            {% comment %}<a class="btn btn-responsive btn-primary" href={% url 'delete_stripe' %}>Delete Stripe ID</a>{% endcomment %}
+        {% else %}
+        <div class="row">
+                {% if form.errors %}
+                <div class="alert alert-danger"> {{ form.errors }} </div>
+                {% endif %}
+
+            <form method="POST" action={% url 'foodapp:stripe' %} id="payment-form">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <label>
+                        <span>Card Number</span>
+                        <input type="text" size="20" data-stripe="number"/>
+                    </label>
+                </div>
+
+                <div class="form-row">
+                    <label>
+                        <span>CVC</span>
+                        <input type="text" size="4" data-stripe="cvc"/>
+                    </label>
+                </div>
+
+                <div class="form-row">
+                    <label>
+                        <span>Exipration (MM/YYYY)</span>
+                        <input type="text" size="2" data-stripe="exp-month"/>
+                    </label>
+                    <span> / </span>
+                        <input type="text" size="4" data-stripe="exp-year"/>
+                </div>
+
+                <button type="submit">Submit Payment</button>
+
+            </form>
+
+        </div>
+        {% endif %}
+        </div>
+
+        {% endblock %}
+                                        
