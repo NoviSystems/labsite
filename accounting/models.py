@@ -134,8 +134,19 @@ def createItemsForFiscalYear(sender, instance, **kwargs):
     start_month = instance.start_date
     end_month= instance.end_date
     number_of_months = monthdelta(start_month, end_month)
+
+    month = start_month.month
+    year = start_month.year
+    day = start_month.day
     for i in range(number_of_months):
-        Month.objects.create(fiscal_year=instance, month=date(start_month.year, start_month.month + i, start_month.day), projected_values=0.00, actual_values=0.00)
+        if month == 12:
+            year = end_month.year
+            month = 1
+        else:
+            month = month + 1
+        print "Month: ", month
+        print "I: ", i
+        Month.objects.create(fiscal_year=instance, month=date(year, month, day), projected_values=0.00, actual_values=0.00)
     months = Month.objects.filter(fiscal_year=instance.pk)
     for month in months:
         Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
