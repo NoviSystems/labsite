@@ -21,6 +21,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 from foodapp import forms, models
 from models import StripeCustomer
 
+stripe.api_key = settings.STRIPE_API_KEY
+
 
 class HomeView(CreateView):
     model = models.Order
@@ -70,7 +72,8 @@ class HomeView(CreateView):
 
 class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
 
-    """TemplateView for StripeCreateView
+    """
+    TemplateView for StripeCreateView
 
     Create a Stripe value associated to the user
     This function sends
@@ -80,17 +83,20 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         success_url (str) = Reverse to AccountSettingsView
         template_name_suffix (str): Generic template to be rendered
     """
+
     success_message = 'Stripe added successfully!'
     success_url = reverse_lazy('foodapp:home')
     template_name = 'foodapp/stripe_create_form.html'
 
     def get_context_data(self, **kwargs):
+
         """
         Insert objects into the context dictionary
 
         Context Dictionary Amendments:
             stripe: value used to display is the user already has associated Stripe data
         """
+
         context = super(StripeCreateView, self).get_context_data()
         try:
             StripeCustomer.objects.get(user=self.request.user)
@@ -101,6 +107,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+
         """
         Handles POST requests, instantiating a form instance with the passed
         POST variables and then checked for validity.
@@ -108,8 +115,9 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         Use the stripe.api_key and token returned from a users CC info to create a customer
         Store the customer data as a Stripe object
         """
-        stripe.api_key = settings.STRIPE_API_KEY
+
         token = request.POST.get('stripeToken', False)
+        #TODO delete this
         print token
         customer = stripe.Customer.create(
             source=token,
@@ -122,13 +130,19 @@ class StripeDeleteView(LoginRequiredMixin, DeleteView):
     model = models.StripeCustomer
     success_url = reverse_lazy('foodapp:stripe_card_view')
 
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def post(self, request, *args, **kwargs):
+        pass
+
 
 class StripeListView(LoginRequiredMixin, ListView):
     model = models.StripeCustomer
     template_name = 'foodapp/cards.html'
 
     def get_context_data(self, **kwargs):
-        context = super(StripeDetailView, self).get_context_data(**kwargs)
+        context = super(StripeListView, self).get_context_data(**kwargs)
         context['cards'] = StripeCustomer.objects.filter(user=self.request.user).values()
         return context
 
