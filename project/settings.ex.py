@@ -6,7 +6,6 @@ from celery.schedules import crontab
 
 SECRET_KEY = 'xz#=4k+4we__68ge_i6v_e5v^+km*p+j=+8qjcq(ox%qle!@k*'
 
-
 ALLOWED_HOSTS = ['*']
 
 DEBUG = True

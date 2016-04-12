@@ -4,3 +4,5 @@ GITHUB_USER = ''
 GITHUB_PASS = ''
 
 SENTRY_DSN = ''
+
+STRIPE_API_KEY = ''
