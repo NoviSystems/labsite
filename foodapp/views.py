@@ -20,7 +20,6 @@ from foodapp import forms, models
 from models import StripeCustomer
 
 
-
 class HomeView(CreateView):
     model = models.Order
     form_class = forms.OrderForm
@@ -68,57 +67,59 @@ class HomeView(CreateView):
 
 
 class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
-  """TemplateView for StripeCreateView
 
-  Create a Stripe value associated to the user
-  This function sends
+    """TemplateView for StripeCreateView
 
-  Attributes:
-      success_message (str) = Message upon form valid
-      success_url (str) = Reverse to AccountSettingsView
-      template_name_suffix (str): Generic template to be rendered
-  """
-  success_message = 'Stripe added successfully!'
-  success_url = reverse_lazy('foodapp:home')
-  template_name = 'foodapp/stripe_create_form.html'
+    Create a Stripe value associated to the user
+    This function sends
 
-  def get_context_data(self, **kwargs):
-      """
-      Insert objects into the context dictionary
+    Attributes:
+        success_message (str) = Message upon form valid
+        success_url (str) = Reverse to AccountSettingsView
+        template_name_suffix (str): Generic template to be rendered
+    """
+    success_message = 'Stripe added successfully!'
+    success_url = reverse_lazy('foodapp:home')
+    template_name = 'foodapp/stripe_create_form.html'
 
-      Context Dictionary Amendments:
-          stripe: value used to display is the user already has associated Stripe data
-      """
-      context = super(StripeCreateView, self).get_context_data()
-      try:
-          StripeCustomer.objects.get(user=self.request.user)
-          stripe = True
-      except ObjectDoesNotExist:
-          stripe = False
-      context['stripe'] = stripe
-      return context
+    def get_context_data(self, **kwargs):
+        """
+        Insert objects into the context dictionary
 
-  def post(self, request, *args, **kwargs):
-      """
-      Handles POST requests, instantiating a form instance with the passed
-      POST variables and then checked for validity.
+        Context Dictionary Amendments:
+            stripe: value used to display is the user already has associated Stripe data
+        """
+        context = super(StripeCreateView, self).get_context_data()
+        try:
+            StripeCustomer.objects.get(user=self.request.user)
+            stripe = True
+        except ObjectDoesNotExist:
+            stripe = False
+        context['stripe'] = stripe
+        return context
 
-      Use the stripe.api_key and token returned from a users CC info to create a customer
-      Store the customer data as a Stripe object
-      """
-      stripe.api_key = "sk_test_9q95Oz5enXoLpgOcy3fiX4dF"
-      token = request.POST.get('stripeToken', False)
-      print token
-      customer = stripe.Customer.create(
-          source = token,
-      )
-      StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
-      return redirect(self.success_url, request)
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST requests, instantiating a form instance with the passed
+        POST variables and then checked for validity.
+
+        Use the stripe.api_key and token returned from a users CC info to create a customer
+        Store the customer data as a Stripe object
+        """
+        stripe.api_key = "sk_test_9q95Oz5enXoLpgOcy3fiX4dF"
+        token = request.POST.get('stripeToken', False)
+        print token
+        customer = stripe.Customer.create(
+            source=token,
+        )
+        StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
+        return redirect(self.success_url, request)
 
 
 class StripeDeleteView(LoginRequiredMixin, DeleteView):
-  model = models.StripeCustomer
-  success_url = reverse_lazy('foodapp:stripe_card_view')
+    model = models.StripeCustomer
+    success_url = reverse_lazy('foodapp:stripe_card_view')
+
 
 class StripeListView(LoginRequiredMixin, ListView):
     model = models.StripeCustomer
