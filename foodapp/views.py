@@ -2,6 +2,8 @@ import datetime
 import stripe
 from decimal import Decimal, ROUND_UP
 
+from django.conf import settings
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
@@ -106,7 +108,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         Use the stripe.api_key and token returned from a users CC info to create a customer
         Store the customer data as a Stripe object
         """
-        stripe.api_key = "sk_test_9q95Oz5enXoLpgOcy3fiX4dF"
+        stripe.api_key = settings.STRIPE_API_KEY
         token = request.POST.get('stripeToken', False)
         print token
         customer = stripe.Customer.create(
