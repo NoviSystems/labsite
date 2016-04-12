@@ -1,5 +1,5 @@
 {% extends 'foodapp/base.html' %}
-{% load staticfiles %}1
+{% load staticfiles %}
 
 {% block content %}
 <!-- Stripe.js -->
@@ -45,10 +45,10 @@
     {% if stripe %}
       <p class="lead">There is already a Stripe ID associated with this account.</p>
       <p class="lead">If you would like to create a new one, please delete the existing Stripe ID.</p>
-      {% comment %}<a class="btn btn-responsive btn-primary" href={% url 'delete_stripe' %}>Delete Stripe ID</a>{% endcomment %}
+      <a class="btn btn-responsive btn-primary" href={% url 'foodapp:stripe_delete' %}>Delete Stripe ID</a>
     {% else %}
     <div class="container">
-      <form method="POST" id="payment-form" action={% url 'foodapp:stripe' %}>
+      <form method="POST" id="payment-form" action={% url 'foodapp:stripe_create' %}>
         {% csrf_token %}
         <div class="col-xs-12 col-md-4 col-md-offset-4 payment-errors"></div>
         <div class="col-xs-12 col-md-4 col-md-offset-4">

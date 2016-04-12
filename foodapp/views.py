@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.views.generic import CreateView, ListView, TemplateView
+from django.views.generic.edit import DeleteView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
@@ -113,6 +114,20 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
       )
       StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
       return redirect(self.success_url, request)
+
+
+class StripeDeleteView(LoginRequiredMixin, DeleteView):
+  model = models.StripeCustomer
+  success_url = reverse_lazy('foodapp:stripe_card_view')
+
+class StripeListView(LoginRequiredMixin, ListView):
+    model = models.StripeCustomer
+    template_name = 'foodapp/cards.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(StripeDetailView, self).get_context_data(**kwargs)
+        context['cards'] = StripeCustomer.objects.filter(user=self.request.user).values()
+        return context
 
 
 class OrderListView(ListView):
