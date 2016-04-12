@@ -7,10 +7,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = models.Order
-        exclude = ('date', 'invoiced')
-        widgets = {
-            'user': forms.HiddenInput(),
-        }
+        fields = ('item', 'quantity')
 
     def clean_item(self):
         item = self.cleaned_data['item']
