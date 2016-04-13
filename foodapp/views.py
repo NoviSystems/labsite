@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.views.generic import CreateView, ListView, TemplateView
-from django.views.generic.edit import DeleteView
+from django.views.generic.edit import DeleteView, UpdateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
@@ -84,7 +84,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         template_name_suffix (str): Generic template to be rendered
     """
 
-    success_message = 'Stripe added successfully!'
+    success_message = 'Stripe card added successfully!'
     success_url = reverse_lazy('foodapp:home')
     template_name = 'foodapp/stripe_create_form.html'
 
@@ -147,9 +147,18 @@ class StripeListView(LoginRequiredMixin, ListView):
         return context
 
 
-class StripeCardAddView(LoginRequiredMixin, CreateView):
-    template_name = ''
+class StripeCardUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('foodapp:stripe_card_list')
+
+    def get_context_data(self, **kwargs):
+        context = super(StripeCardUpdateView, self).get_context_data(**kwargs)
+        try:
+            StripeCustomer.objects.get(user=self.request.user)
+            stripe = True
+        except ObjectDoesNotExist:
+            stripe = False
+        context['stripe'] = stripe
+        return context
 
 
 class OrderListView(ListView):
