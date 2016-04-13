@@ -98,7 +98,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             # gets all months
             months = Month.objects.filter(fiscal_year=fiscal_year)
 
-
             # moves through all months
             for month in months:
 
@@ -107,18 +106,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     current_month = month
 
 
-        current_fiscal_year = current_month.fiscal_year
-
+        if 'fiscal_year' in kwargs:
+            current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
+        else:
+            current_fiscal_year = current_month.fiscal_year
 
         # moves through all fiscal years
 
             # gets all months
         months = Month.objects.filter(fiscal_year=current_fiscal_year)
 
-
         # moves through all months
         for month in months:
-
 
             # gets all month names
             months_names.append(month.month.strftime("%B"))
