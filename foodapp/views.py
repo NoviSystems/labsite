@@ -152,18 +152,14 @@ class StripeListView(LoginRequiredMixin, TemplateView):
         try:
             customer = StripeCustomer.objects.get(user=self.request.user).customer_id
         except ObjectDoesNotExist:
-            print "Daniel how do I redirect please"
             return context
         cards = stripe.Customer.retrieve(customer).sources.all(object='card')
-        print cards.get('data')
         # Needs to be way to read more than one card here. Refactor
         cardVals = []
-        print "Key: " + cards.get('data')[0]['last4'] + cards.get('data')[0]['id']
         for data in cards.get('data'):
             cardVals += [(data['id'],data['last4'])]
-        print cardVals
         context['cards'] = cardVals
-        return context;
+        return context
 
 class StripeCardUpdateView(LoginRequiredMixin, CreateView):
     template_name = ''
