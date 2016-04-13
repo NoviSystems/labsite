@@ -27,20 +27,20 @@
 			                <thead>
 			                    <tr>
 			                        
-			                        {% for month in months_names|slice:"1:5"  %}
-			                        <th>{{ month }}</th>
+			                        {% for month in months %}
+			                        	{% ifequal month month_data.month %}
 
+			                        		<th>{{ month.month }}</th>
+
+			                        	{% endifequal %}
 			                        {% endfor %}
 			                    </tr>
 			                </thead>
 			                <tbody>
-			                    {% for data in dashboard_data|slice:":1" %}
-			                    <tr>
-			                        {% for value in data.values|slice:":4" %}
-			                            <td>${{ value }}</td>
-			                        {% endfor %}
-			                    </tr>
-			                    {% endfor %}
+					            <tr>
+					                <td>Cash Actual: ${{ month_cma }}</td>
+					            </tr>
+
 			                </tbody>
 			            </table>
 		    		</div>

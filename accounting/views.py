@@ -113,7 +113,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # moves through all fiscal years
 
             # gets all months
-        months = Month.objects.filter(fiscal_year=current_fiscal_year)
+        months = list(Month.objects.filter(fiscal_year=current_fiscal_year))
 
 
         # moves through all months
@@ -205,6 +205,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # list of dashboard data
         dashboard_data = [ cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp ]
         
+        #context values for month view
+
+        context['cma'] = cma #cash month actual
+        context['cmpr'] = cmpr #cash month predicted
+        context['ima'] = ima # income month actual
+        context['imp'] = imp #income month predicted
+        context['ema'] = ema #expenses month actual
+        context['emp'] = emp #expenses month predicted
+        context['pma'] = pma #payroll month actual
+        context['pmp'] = pmp #payroll month predicted
+
+
         # Context totals for the Graph values
         context['current_fiscal_year'] = current_fiscal_year
         context['current_month'] = current_month
@@ -233,6 +245,17 @@ class DashboardMonthView(DashboardView):
             'month': Month.objects.get(pk=kwargs['month']),
         }
         context['month_data'] = month_data
+        index = context['months'].index(month_data['month'])
+
+        # calculate month_values per index
+        context['month_cma'] =context['cma']['values'][index]
+        context['month_cmpr'] =context['cmpr']['values'][index]
+        context['month_ima'] =context['ima']['values'][index]
+        context['month_imp'] =context['imp']['values'][index]
+        context['month_ema'] =context['ema']['values'][index]
+        context['month_emp'] =context['emp']['values'][index]
+        context['month_pmp'] =context['pma']['values'][index]
+
         return context
 
 
