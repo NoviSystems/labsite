@@ -20,14 +20,24 @@ Accounting
         </ul>
     </li>
     {% elif business_units|length == 1 %}
-        <li class="dropdown">
+    <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current.name }} <span class="caret"></span></a>
         <ul class="dropdown-menu">
             <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
         </ul>
     </li>
     {% endif %}
-    <li><a href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a></li>
-
+    {% if fiscal_years %}
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_fiscal_year }} <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            {% for fiscal_year in fiscal_years %}
+            <li><a href={% url 'accounting:dashboard' pk=current.pk fiscal_year=fiscal_year.pk %}>{{fiscal_year}}</a></li>
+            {% endfor %}
+            <li class="divider"></li>
+            <li><a href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a></li>
+        </ul>
+    </li>
+    {% endif %}
 </ul>
 {% endblock %}
