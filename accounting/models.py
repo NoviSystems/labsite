@@ -23,6 +23,9 @@ class FiscalYear(models.Model):
     end_date = models.DateField(default=datetime.now, blank=True)
     cash_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
+    def __str__(self):
+        return self.start_date.strftime("%b %Y") + " - " + self.end_date.strftime("%b %Y")
+
 
 class Month(models.Model):
     fiscal_year = models.ForeignKey(FiscalYear, default=None)

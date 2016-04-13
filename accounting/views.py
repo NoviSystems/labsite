@@ -199,13 +199,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             total_assets_month_actual = cash_month_actual + income_booked_actual
             tama['values'].append(total_assets_month_actual)
 
-        
-
-
         # list of dashboard data
         dashboard_data = [ cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp ]
         
         # Context totals for the Graph values
+        context['fiscal_years'] = fiscal_years
         context['current_fiscal_year'] = current_fiscal_year
         context['current_month'] = current_month
         context['months_names'] = months_names
