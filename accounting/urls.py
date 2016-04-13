@@ -16,6 +16,10 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/dashboard/(?P<fiscal_year>\d+)/update_fiscal_year/$', FiscalYearUpdateView.as_view(), name='update_fiscal_year'),
 	url(r'^(?P<pk>\d+)/dashboard/(?P<fiscal_year>\d+)/delete_fiscal_year/$', FiscalYearDeleteView.as_view(), name='delete_fiscal_year'),
 
+	url(r'^(?P<pk>\d+)/expenses/$', ExpensesView.as_view(), name='expenses'),
+	url(r'^(?P<pk>\d+)/expenses/(?P<fiscal_year>\d+)/(?P<month>\d+)/$', ExpensesView.as_view(), name='expenses'),
+	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/$', ExpensesView.as_view(), name='expenses'),
+
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/create_expense/$', ExpenseCreateView.as_view(), name='create_expense'),
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<expense>\d+)/update_expense/$', ExpenseUpdateView.as_view(), name='update_expense'),
 	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/(?P<expense>\d+)/delete_expense/$', ExpenseDeleteView.as_view(), name='delete_expense'),
@@ -35,8 +39,6 @@ urlpatterns = [
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/create_invoice/$', InvoiceCreateView.as_view(), name='create_invoice'),
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/udpate_invoice/$', InvoiceUpdateView.as_view(), name='udpate_invoice'),
 	url(r'^(?P<pk>\d+)/contracts/(?P<contract>\d+)/(?P<invoice>\d+)/delete_invoice/$', InvoiceDeleteView.as_view(), name='delete_invoice'),
-
-	url(r'^(?P<pk>\d+)/expenses/(?P<month>\d+)/$', ExpensesView.as_view(), name='expenses'),
 
 	url(r'^(?P<pk>\d+)/personnel/$', PersonnelView.as_view(), name='personnel'),
 

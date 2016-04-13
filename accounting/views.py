@@ -114,9 +114,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             else:
                 current_fiscal_year = current_month.fiscal_year
 
-            # moves through all fiscal years
-
-                # gets all months
+            # gets all months
             months = Month.objects.filter(fiscal_year=current_fiscal_year)
 
             # moves through all months
@@ -207,7 +205,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             # Context totals for the Graph values
             context['fiscal_years'] = fiscal_years
             context['current_fiscal_year'] = current_fiscal_year
-            context['current_month'] = current_month
             context['months_names'] = months_names
             context['months'] = months
             context['months_j'] = json.dumps(months_names)
@@ -215,6 +212,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
             context['dashboard_data'] = dashboard_data
 
+        context['current_month'] = current_month
         # Personnel and Contracts totals
         personnel = Personnel.objects.filter(business_unit=current)
         context['personnel'] = personnel
@@ -234,7 +232,6 @@ class DashboardMonthView(DashboardView):
         }
         context['month_data'] = month_data
         return context
-
 
 
 class ContractsView(LoginRequiredMixin, TemplateView):
@@ -284,33 +281,55 @@ class ExpensesView(LoginRequiredMixin, TemplateView):
         current = BusinessUnit.objects.get(pk=kwargs['pk'])
         context['current'] = current
         fiscal_years = FiscalYear.objects.filter(business_unit=current)
+        context['fiscal_years'] = fiscal_years
+
+        # Finding the current month
+        current_month = None
         now = datetime.datetime.now()
 
-        months_data = []
-        current_month = None
-        months = []
+        # moves through all fiscal years
         for fiscal_year in fiscal_years:
-            months.extend(Month.objects.filter(fiscal_year=fiscal_year))
+
+            # gets all months
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+
+            # moves through all months
             for month in months:
+
+                # gets current month
                 if month.month.month == now.month:
                     current_month = month
 
+        # if fiscal year is passed by url, get that year as the current fiscal year
+        # else get the value associated to the current month
+        if 'fiscal_year' in kwargs:
+            current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
+        else:
+            current_fiscal_year = current_month.fiscal_year
 
-        month = Month.objects.get(pk=kwargs['month'])
+        print current_fiscal_year
+        months = Month.objects.filter(fiscal_year=current_fiscal_year)
+        print "MONTHS: ", months
+
+        if 'month' in kwargs:
+            current_month = Month.objects.get(pk=kwargs['month'])
+        
+        month_data = []
         try:
-            cash = Cash.objects.get(month=month)
+            cash = Cash.objects.get(month=current_month)
         except ObjectDoesNotExist:
             cash = None
         month_data = {
-            'month': month,
-            'expenses': Expense.objects.filter(month=month),
-            'incomes':Income.objects.filter(month=month),
+            'month': current_month,
+            'expenses': Expense.objects.filter(month=current_month),
+            'incomes':Income.objects.filter(month=current_month),
             'cash': cash
         }
 
         context['months'] = months
         context['current_month'] = current_month
         context['month_data'] = month_data
+        context['current_fiscal_year'] = current_fiscal_year
         return context
 
 
