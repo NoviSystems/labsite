@@ -8,23 +8,29 @@
         {% if title %}
         <h3 class="panel-title">{{ title }}</h3>
         {% else %}
-        <h3 class="panel-title">{{user }}'s Stripe Card ID's</h3>
+        <h3 class="panel-title">{{ user }}'s Stripe Card ID's</h3>
         {% endif %}
     </div>
 
-    {% for card in cards %}
+    {% if card %}
     <table class="table table-striped">
         <tbody>
             <tr>
-            	<form method="POST" action={% url 'foodapp:stripe_delete' %} id="delete-form">
-            	{% csrf_token %}
                 <td style="font-size: 1.5em;">
-                	{{ card.customer_id }}
-                	<button class="btn btn-danger" style="float: right;">
+                {{ card }}
+             <form method="POST" action={% url 'foodapp:stripe_card_delete' card_id %} id="delete-form" style="margin-top: -30px;">
+            	    {% csrf_token %}
+		    	    <button class="btn btn-danger" style="float: right; margin-left: 5px;">
                 		<i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i>
-                	</button>
-                </td>
+                	</button>   	
                 </form>
+                <form method="POST" action={% url 'foodapp:stripe_card_update' %} id="delete-form" style="margin-top: -30px;">
+            	{% csrf_token %}
+                <button class="btn btn-primary" style="float: right;">
+                    Update Card
+                </button>           
+                </form>
+                </td> 
             </tr>
         </tbody>
 
@@ -33,11 +39,11 @@
         {% endif %}
 
     </table>
-    {% empty %}
+    {% else %}
     <div class="panel-body">
         <h4>No stripe cards associated with this account. Add one!</h4>
     </div>
-    {% endfor %}
+    {% endif %}
 </div>
 
 {% endblock content %}

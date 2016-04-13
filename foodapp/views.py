@@ -85,7 +85,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
     """
 
     success_message = 'Stripe added successfully!'
-    success_url = reverse_lazy('foodapp:home')
+    success_url = reverse_lazy('foodapp:stripe_card_list')
     template_name = 'foodapp/stripe_create_form.html'
 
     def get_context_data(self, **kwargs):
@@ -100,10 +100,10 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         context = super(StripeCreateView, self).get_context_data()
         try:
             StripeCustomer.objects.get(user=self.request.user)
-            stripe = True
+            customerExists = True
         except ObjectDoesNotExist:
-            stripe = False
-        context['stripe'] = stripe
+            customerExists = False
+        context['customerExists'] = customerExists
         return context
 
     def post(self, request, *args, **kwargs):
@@ -115,39 +115,58 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         Use the stripe.api_key and token returned from a users CC info to create a customer
         Store the customer data as a Stripe object
         """
-
+        customerExists = request.POST.get("customerExists")
         token = request.POST.get('stripeToken', False)
-        #TODO delete this
-        print token
-        customer = stripe.Customer.create(
-            source=token,
-        )
-        StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
-        return redirect(self.success_url, request)
+        # New Card
+        if customerExists:
+            customer_id = StripeCustomer.objects.get(user=self.request.user).customer_id
+            customer = stripe.Customer.retrieve(customer_id)
+            customer.sources.create(source=token)
+            return redirect(self.success_url, request)
+        # New Customer
+        else:
+            customer = stripe.Customer.create(source=token, )
+            StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
+            return redirect(self.success_url, request)
 
 
-class StripeDeleteView(LoginRequiredMixin, DeleteView):
+class StripeDeleteView(LoginRequiredMixin, TemplateView):
     model = models.StripeCustomer
     success_url = reverse_lazy('foodapp:stripe_card_list')
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  
         pass
 
     def post(self, request, *args, **kwargs):
-        pass
+        customer_id = StripeCustomer.objects.get(user=self.request.user).customer_id
+        customer = stripe.Customer.retrieve(customer_id)
+        customer.sources.retrieve(args[0]).delete()
+        return redirect(self.success_url, request)
 
 
-class StripeListView(LoginRequiredMixin, ListView):
-    model = models.StripeCustomer
+class StripeListView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/cards.html'
 
     def get_context_data(self, **kwargs):
         context = super(StripeListView, self).get_context_data(**kwargs)
-        context['cards'] = StripeCustomer.objects.filter(user=self.request.user).values()
+        try:
+            customer = StripeCustomer.objects.get(user=self.request.user).customer_id
+        except ObjectDoesNotExist:
+            print "Daniel how do I redirect please"
+            return context
+        cards = stripe.Customer.retrieve(customer).sources.all(object='card')
+        print cards
+        # Needs to be way to read more than one card here. Refactor
+        for data in cards.get('data'):
+            for key, value in data.items():
+                if key == 'last4':
+                    context['card'] = data[key]
+                elif key == 'id':
+                    context['card_id'] = data[key]
         return context
 
 
-class StripeCardAddView(LoginRequiredMixin, CreateView):
+class StripeCardUpdateView(LoginRequiredMixin, CreateView):
     template_name = ''
     success_url = reverse_lazy('foodapp:stripe_card_list')
 
