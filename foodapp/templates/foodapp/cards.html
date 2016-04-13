@@ -12,13 +12,14 @@
         {% endif %}
     </div>
 
-    {% if card %}
+    {% if cards %}
     <table class="table table-striped">
         <tbody>
+            {% for id, last4 in cards %}
             <tr>
                 <td style="font-size: 1.5em;">
-                {{ card }}
-             <form method="POST" action={% url 'foodapp:stripe_card_delete' card_id %} id="delete-form" style="margin-top: -30px;">
+                {{ last4 }}
+             <form method="POST" action={% url 'foodapp:stripe_card_delete' id %} id="delete-form" style="margin-top: -30px;">
             	    {% csrf_token %}
 		    	    <button class="btn btn-danger" style="float: right; margin-left: 5px;">
                 		<i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i>
@@ -32,6 +33,7 @@
                 </form>
                 </td> 
             </tr>
+            {% endfor %}
         </tbody>
 
         {% if error %}
