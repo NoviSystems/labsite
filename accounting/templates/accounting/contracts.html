@@ -94,7 +94,7 @@
 
             {% endfor %}
         {% else %}
-            <p class="lead">No contracts for this business unit.</p>
+            <h4>No contracts for this business unit.</h4>
         {% endif %}
             <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}>Create Contract</a>
         </div>

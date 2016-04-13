@@ -33,6 +33,8 @@ class Month(models.Model):
     projected_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     actual_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
 
+    def __str__(self):
+        return self.fiscal_year.business_unit.name + " " + self.month.strftime("%b %Y")
 
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
