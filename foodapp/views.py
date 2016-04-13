@@ -93,7 +93,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         """
         Insert objects into the context dictionary
 
-        Context Dictionary Amendments:
+        Context Dictionary Arguments:
             stripe: value used to display is the user already has associated Stripe data
         """
 
@@ -128,7 +128,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
 
 class StripeDeleteView(LoginRequiredMixin, DeleteView):
     model = models.StripeCustomer
-    success_url = reverse_lazy('foodapp:stripe_card_view')
+    success_url = reverse_lazy('foodapp:stripe_card_list')
 
     def get(self, request, *args, **kwargs):
         pass
@@ -145,6 +145,11 @@ class StripeListView(LoginRequiredMixin, ListView):
         context = super(StripeListView, self).get_context_data(**kwargs)
         context['cards'] = StripeCustomer.objects.filter(user=self.request.user).values()
         return context
+
+
+class StripeCardAddView(LoginRequiredMixin, CreateView):
+    template_name = ''
+    success_url = reverse_lazy('foodapp:stripe_card_list')
 
 
 class OrderListView(ListView):
