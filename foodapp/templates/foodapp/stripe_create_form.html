@@ -45,7 +45,6 @@
     </div>
     <div class="'container">
     <form method="POST" id="payment-form" action={% url 'foodapp:stripe_card_create' %}>
-    <input type="hidden" name="customerExists" value={{ customerExists }} />
     {% else %}
     <h1>Create Stripe Customer ID</h1>
     </div>

@@ -71,32 +71,11 @@ class HomeView(CreateView):
 
 
 class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
-
-    """
-    TemplateView for StripeCreateView
-
-    Create a Stripe value associated to the user
-    This function sends
-
-    Attributes:
-        success_message (str) = Message upon form valid
-        success_url (str) = Reverse to AccountSettingsView
-        template_name_suffix (str): Generic template to be rendered
-    """
-
     success_message = 'Stripe added successfully!'
     success_url = reverse_lazy('foodapp:stripe_card_list')
     template_name = 'foodapp/stripe_create_form.html'
 
     def get_context_data(self, **kwargs):
-
-        """
-        Insert objects into the context dictionary
-
-        Context Dictionary Arguments:
-            stripe: value used to display is the user already has associated Stripe data
-        """
-
         context = super(StripeCreateView, self).get_context_data()
         try:
             StripeCustomer.objects.get(user=self.request.user)
@@ -107,15 +86,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-
-        """
-        Handles POST requests, instantiating a form instance with the passed
-        POST variables and then checked for validity.
-
-        Use the stripe.api_key and token returned from a users CC info to create a customer
-        Store the customer data as a Stripe object
-        """
-        customerExists = request.POST.get("customerExists")
+        customerExists = True if StripeCustomer.objects.get(user=self.request.user) else False
         token = request.POST.get('stripeToken', False)
         # New Card
         if customerExists:
@@ -159,23 +130,7 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
         for data in cards.get('data'):
             cardVals += [(data['id'], data['last4'])]
         context['cards'] = cardVals
-        return context
-
-
-class StripeCardUpdateView(LoginRequiredMixin, CreateView):
-    template_name = ''
-    success_url = reverse_lazy('foodapp:stripe_card_list')
-
-    def get_context_data(self, **kwargs):
-        context = super(StripeCardUpdateView, self).get_context_data(**kwargs)
-        try:
-            StripeCustomer.objects.get(user=self.request.user)
-            stripe = True
-        except ObjectDoesNotExist:
-            stripe = False
-        context['stripe'] = stripe
-        return context
-
+        return context       
 
 class OrderListView(ListView):
     model = models.Order

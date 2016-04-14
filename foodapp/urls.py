@@ -10,7 +10,6 @@ urlpatterns = [
     url(r'^stripe/cards/$', views.StripeCardListView.as_view(), name='stripe_card_list'),
     url(r'^stripe/cards/create$', views.StripeCreateView.as_view(), name='stripe_card_create'),
     url(r'^stripe/cards/create$', views.StripeCreateView.as_view(), name='stripe_customer_create'),
-    url(r'^stripe/cards/update$', views.StripeCardUpdateView.as_view(), name='stripe_card_update'),
     url(r'^stripe/cards/delete/(\w+)/$', views.StripeCardDeleteView.as_view(), name='stripe_card_delete'),
     url(r'^orders/$', views.OrderListView.as_view(), name='orders'),
     url(r'^orders/user/(?P<username>\w+)/$', views.UserOrderView.as_view(), name='user_orders'),
