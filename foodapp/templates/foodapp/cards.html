@@ -26,12 +26,14 @@
                 		<i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i>
                 	</button>   	
                 </form>
+            {% if not primary %}
             <form method="POST" action={% url 'foodapp:stripe_card_update' id %} id="delete-form" style="margin-top: -30px;">
             	{% csrf_token %}
 		    	<button class="btn btn-info" style="float: right;">
                 	Set Primary <i class="fa fa-level-up" title="SetPrimary" aria-hidden="true"></i>
                 </button>   	
             </form>
+            {% endif %}
                 </td> 
             </tr>
             {% endfor %}
