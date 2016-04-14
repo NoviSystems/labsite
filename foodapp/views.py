@@ -57,6 +57,15 @@ class HomeView(CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
+
+        # stripe.InvoiceItem.create(
+        #     customer=,
+        #     amount=,
+        #     currency="usd",
+        #     description=
+        # )
+
+        # obj.invoiced = True
         obj.save()
 
         return HttpResponseRedirect(self.success_url)
