@@ -86,7 +86,11 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        customerExists = True if StripeCustomer.objects.get(user=self.request.user) else False
+        try:
+            StripeCustomer.objects.get(user=self.request.user)
+            customerExists = True
+        except ObjectDoesNotExist:
+            customerExists = False
         token = request.POST.get('stripeToken', False)
         # New Card
         if customerExists:
@@ -96,7 +100,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
             return redirect(self.success_url, request)
         # New Customer
         else:
-            customer = stripe.Customer.create(source=token, )
+            customer = stripe.Customer.create(source=token)
             StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
             return redirect(self.success_url, request)
 
@@ -114,6 +118,18 @@ class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
         customer.sources.retrieve(args[0]).delete()
         return redirect(self.success_url, request)
 
+class StripeCardUpdateView(LoginRequiredMixin, TemplateView):
+    success_url = reverse_lazy('foodapp:stripe_card_list')
+
+    def post(self, request, *args, **kwargs):
+        customer_id = StripeCustomer.objects.get(user=self.request.user).customer_id
+        customer = stripe.Customer.retrieve(customer_id)
+        newDefaultCard = customer.sources.retrieve(args[0])
+        customer.default_source = newDefaultCard.id
+        customer.save()
+        customer = stripe.Customer.retrieve(customer_id)
+        return redirect(self.success_url, request)
+
 
 class StripeCardListView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/cards.html'
@@ -122,13 +138,19 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
         context = super(StripeCardListView, self).get_context_data(**kwargs)
         try:
             customer = StripeCustomer.objects.get(user=self.request.user).customer_id
+            context['customerExists'] = True
         except ObjectDoesNotExist:
+            context['customerExists'] = False
             return context
         cards = stripe.Customer.retrieve(customer).sources.all(object='card')
+        defaultCard = stripe.Customer.retrieve(customer).default_source
         # Needs to be way to read more than one card here. Refactor
         cardVals = []
         for data in cards.get('data'):
-            cardVals += [(data['id'], data['last4'])]
+            if data['id'] == defaultCard:
+                cardVals += [(data['id'], data['last4'], True)]
+            else:
+                cardVals += [(data['id'], data['last4'], False)]
         context['cards'] = cardVals
         return context       
 

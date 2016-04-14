@@ -14,17 +14,24 @@
     
     <table class="table table-striped">
     <tbody>
+    {% if customerExists %}
     {% if cards %}
-        {% for id, last4 in cards %}
+        {% for id, last4, primary in cards %}
             <tr>
                 <td style="font-size: 1.5em;">
-                •••• {{ last4 }}
+                {% if primary %} PRIMARY: {% endif %}•••• {{ last4 }}
              <form method="POST" action={% url 'foodapp:stripe_card_delete' id %} id="delete-form" style="margin-top: -30px;">
             	    {% csrf_token %}
 		    	    <button class="btn btn-danger" style="float: right; margin-left: 5px;">
                 		<i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i>
                 	</button>   	
                 </form>
+            <form method="POST" action={% url 'foodapp:stripe_card_update' id %} id="delete-form" style="margin-top: -30px;">
+            	{% csrf_token %}
+		    	<button class="btn btn-info" style="float: right;">
+                	Set Primary <i class="fa fa-level-up" title="SetPrimary" aria-hidden="true"></i>
+                </button>   	
+            </form>
                 </td> 
             </tr>
             {% endfor %}
@@ -49,7 +56,25 @@
                 </div>
             </td>
         </tr>
-        </tbody>
+    {% else %}
+    <tr>
+        <td>
+            <h4>No Stripe Customer Associated with this account. Create one!</h4>
+        </td>
+    </tr>
+   <tr>
+        <td>
+            <div class="col-xs-12 col-centered" style="text-align: center;">
+                    <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                        Create Stripe Customer
+                        <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                    </button>
+                </a>
+            </div>
+        </td>
+    </tr> 
+    {% endif %}
+    </tbody>
     </table>
     </div>
 
