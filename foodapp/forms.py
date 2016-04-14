@@ -3,18 +3,27 @@ from foodapp import models
 import datetime
 
 
-class OrderForm(forms.ModelForm):
+class OrderBaseForm(forms.ModelForm):
 
     class Meta:
         model = models.Order
         fields = ('item', 'quantity')
 
+
+class OrderForm(OrderBaseForm):
+
+    def __init__(self, user, *args, **kwargs):
+        super(OrderBaseForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    class Meta(OrderBaseForm.Meta):
+        fields = OrderBaseForm.Meta.fields
+
     def clean_item(self):
         item = self.cleaned_data['item']
-        user = self.cleaned_data['user']
 
         if item.once_a_day and models.Order.objects.filter(
-            user=user,
+            user=self.user,
             date=datetime.date.today(),
             item=item
         ).exists():
@@ -27,4 +36,4 @@ class PaidForm(forms.ModelForm):
 
     class Meta:
         model = models.AmountPaid
-        exclude = ["user", "date"]
+        fields = ('amount',)

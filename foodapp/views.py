@@ -50,11 +50,25 @@ class HomeView(CreateView):
 
     def get_form_kwargs(self):
         form_kwargs = super(HomeView, self).get_form_kwargs()
-        if 'data' in form_kwargs:
-            data = form_kwargs['data'].copy()
-            data['user'] = self.request.user.pk
-            form_kwargs['data'] = data
+        form_kwargs['user'] = self.request.user
+
         return form_kwargs
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+
+        # stripe.InvoiceItem.create(
+        #     customer=,
+        #     amount=,
+        #     currency="usd",
+        #     description=
+        # )
+
+        # obj.invoiced = True
+        obj.save()
+
+        return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
