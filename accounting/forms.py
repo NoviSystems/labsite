@@ -76,7 +76,7 @@ class ContractUpdateForm(ModelForm):
         model = Contract
         fields = '__all__'
         exclude = [
-            
+            'business_unit'
         ]
 
 
