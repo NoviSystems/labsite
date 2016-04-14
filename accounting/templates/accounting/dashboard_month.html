@@ -60,7 +60,25 @@
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Expenses Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_ema }}</h4></div>
 						</div>
-						{{expense}}
+						 <div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                	{% for expense in expenses %}
+					                    <tr>
+					                        <th scope="row">+ {{expense.name}}</th>
+					                            <td><p>${{expense.predicted_amount}}</p></td>
+					                    </tr>
+					                    {% endfor %}
+					                </tbody>
+					            </table>
+							</div>
+						</div>
 		    		</div>
 		    		<!-- recievables tab -->
 		    		<div id="recievables" class="tab-pane ">
