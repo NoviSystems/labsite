@@ -275,6 +275,11 @@ class DashboardMonthView(DashboardView):
 
         # calculate month_values per index
         context['month_cma'] =context['cma']['values'][index]
+        context['month_cma_pre'] =context['cma']['values'][index-1]
+
+        context['expenses'] = Expense.objects.filter(month=kwargs['month'])
+        print context['expenses']
+
         context['month_cmpr'] =context['cmpr']['values'][index]
         context['month_ima'] =context['ima']['values'][index]
         context['month_imp'] =context['imp']['values'][index]
