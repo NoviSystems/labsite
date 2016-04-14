@@ -130,7 +130,7 @@ class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
             return redirect(self.success_url, request)
 
 
-class StripeDeleteView(LoginRequiredMixin, TemplateView):
+class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
     model = models.StripeCustomer
     success_url = reverse_lazy('foodapp:stripe_card_list')
 
@@ -144,11 +144,11 @@ class StripeDeleteView(LoginRequiredMixin, TemplateView):
         return redirect(self.success_url, request)
 
 
-class StripeListView(LoginRequiredMixin, TemplateView):
+class StripeCardListView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/cards.html'
 
     def get_context_data(self, **kwargs):
-        context = super(StripeListView, self).get_context_data(**kwargs)
+        context = super(StripeCardListView, self).get_context_data(**kwargs)
         try:
             customer = StripeCustomer.objects.get(user=self.request.user).customer_id
         except ObjectDoesNotExist:
