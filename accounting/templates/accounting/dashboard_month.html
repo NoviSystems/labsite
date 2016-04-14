@@ -8,138 +8,85 @@
 		<div id="workTab" class="tabbable">
 			<div class="col-xs-0 col-sm-3">
 	    			<ul class= "nav nav-stacked nav-tabs">
-			            <li class="active"><a data-toggle="tab" href="#cash_actual" aria-expanded="true">Cash Actual</a></li>
-			            <li><a data-toggle="tab" href="#cash_projected" aria-expanded="true">Cash Projected</a></li>
-			            <li><a data-toggle="tab" href="#expenses_actual" aria-expanded="true">Expenses Actual</a></li>
-			            <li><a data-toggle="tab" href="#expenses_projected" aria-expanded="true">Expenses Projected</a></li>
-			            <li><a data-toggle="tab" href="#recievables_actual" aria-expanded="true">Recievables Actual</a></li>
-			            <li><a data-toggle="tab" href="#recievables_projected" aria-expanded="true">Recievables Projected</a></li>
-			            <li><a data-toggle="tab" href="#payroll_actual" aria-expanded="true">Payroll Actual</a></li>
-			            <li><a data-toggle="tab" href="#payroll_projected" aria-expanded="true">Payroll Projected</a></li>
-			            <li><a data-toggle="tab" href="#assets_actual" aria-expanded="true">Assets Actual</a></li>
-			            <li><a data-toggle="tab" href="#assets_projected" aria-expanded="true">Assets Projected</a></li>
+			            <li class="active"><a data-toggle="tab" href="#cash" aria-expanded="true">Cash</a></li>
+			            <li><a data-toggle="tab" href="#expenses" aria-expanded="true">Expenses</a></li>
+			            <li><a data-toggle="tab" href="#recievables" aria-expanded="true">Recievables</a></li>
+			            <li><a data-toggle="tab" href="#payroll" aria-expanded="true">Payroll</a></li>
+			            <li><a data-toggle="tab" href="#assets" aria-expanded="true">Assets</a></li>
 			        </ul>	
 	 		</div>
 	 		<div class="col-xs-0 col-sm-9">
 		 		<div class= "tab-content" >
-		    		<div id="cash_actual" class="tab-pane active">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
+		 			<!-- cash tab -->
+		    		<div id="cash" class="tab-pane active">
 				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Cash Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_cmpr }}</h4></div>
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Cash Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_cma }}</h4></div>
 						</div>
-		    		</div>
-		    		<div id="cash_projected" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
-				        <div class = "row">
-			    			<div class="col-xs-0 col-sm-4"><h4><b>Cash Projected:</b></h4></div>
-							<div class="col-xs-0 col-sm-2"><h4>${{ month_cmpr }}</h4></div>
+						<br>
+						<div class="row">
+							<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                    <tr>
+					                        <th scope="row">+ Previous Month Cash</th>
+					                            <td>${{ month_cma_pre }}</td>
+					                    </tr>
+					                    <tr>
+					                        <th scope="row">+ Income Projected</th>
+					                            <td>${{ month_imp }}</td>
+					                    </tr>
+					                    <tr>
+					                        <th scope="row">- Expenses Projected</th>
+					                            <td>${{ month_emp }}</td>
+					                    </tr>
+					                </tbody>
+					            </table>
+				            </div>
 						</div>
 		    		</div>
-		    		<div id="expenses_actual" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
+		    		<!-- expenses tab -->
+		    		<div id="expenses" class="tab-pane ">
 				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Expenses Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_emp }}</h4></div>
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Expenses Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_ema }}</h4></div>
 						</div>
+						{{expense}}
 		    		</div>
-		    		<div id="expenses_projected" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
+		    		<!-- recievables tab -->
+		    		<div id="recievables" class="tab-pane ">
 				        <div class = "row">
-			    			<div class="col-xs-0 col-sm-4"><h4><b>Expenses Projected:</b></h4></div>
-							<div class="col-xs-0 col-sm-2"><h4>${{ month_emp }}</h4></div>
-						</div>
-		    		</div>
-		    		<div id="recievables_actual" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
-				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Recievables Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_imp }}</h4></div>
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Recievables Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_ima }}</h4></div>
 						</div>
 		    		</div>
-		    		<div id="recievables_projected" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
+		    		<!-- payroll tab -->
+		    		<div id="payroll" class="tab-pane ">
 				        <div class = "row">
-			    			<div class="col-xs-0 col-sm-4"><h4><b>Recievables Projected:</b></h4></div>
-							<div class="col-xs-0 col-sm-2"><h4>${{ month_imp }}</h4></div>
-						</div>
-		    		</div>
-		    		<div id="payroll_actual" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
-				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Payroll Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_pmp }}</h4></div>
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Payroll Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_pma }}</h4></div>
 						</div>
 		    		</div>
-		    		<div id="payroll_projected" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
+		    		<!-- assets tab -->
+		    		<div id="assets" class="tab-pane ">
 				        <div class = "row">
-			    			<div class="col-xs-0 col-sm-4"><h4><b>Payroll Projected:</b></h4></div>
-							<div class="col-xs-0 col-sm-2"><h4>${{ month_pmp }}</h4></div>
-						</div>
-		    		</div>
-		    		<div id="assets_actual" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
-				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Assets Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_tamp }}</h4></div>
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Assets Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_tama }}</h4></div>
-						</div>
-		    		</div>
-		    		<div id="assets_projected" class="tab-pane ">
-		    			<div class= "row">
-			    			<div class="col-xs-0 col-sm-6">
-			   					<h3>{{ month_data.month.month }}</h3>
-					            <hr>
-					        </div>
-				        </div>
-				        <div class = "row">
-			    			<div class="col-xs-0 col-sm-4"><h4><b>Assets Projected:</b></h4></div>
-							<div class="col-xs-0 col-sm-2"><h4>${{ month_tamp }}</h4></div>
 						</div>
 		    		</div>
 
