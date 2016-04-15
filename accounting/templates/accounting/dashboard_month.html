@@ -72,7 +72,7 @@
 					                	{% for expense in expenses %}
 					                    <tr>
 					                        <th scope="row">+ {{expense.name}}</th>
-					                            <td><p>${{expense.predicted_amount}}</p></td>
+					                            <td>${{expense.predicted_amount}}</td>
 					                    </tr>
 					                    {% endfor %}
 					                </tbody>
@@ -88,6 +88,25 @@
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Recievables Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_ima }}</h4></div>
 						</div>
+						<div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                	{% for income in income %}
+					                    <tr>
+					                        <th scope="row">+ {{income.name}}</th>
+					                            <td>${{imp}}</td>
+					                    </tr>
+					                    {% endfor %}
+					                </tbody>
+					            </table>
+							</div>
+						</div>
 		    		</div>
 		    		<!-- payroll tab -->
 		    		<div id="payroll" class="tab-pane ">
@@ -97,6 +116,25 @@
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Payroll Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_pma }}</h4></div>
 						</div>
+						<div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                	{% for payroll in payrolls %}
+					                    <tr>
+					                        <th scope="row">+ {{payroll.expense.name}}</th>
+					                            <td>${{payroll.expense.predicted_amount}}</td>
+					                    </tr>
+					                    {% endfor %}
+					                </tbody>
+					            </table>
+							</div>
+						</div>
 		    		</div>
 		    		<!-- assets tab -->
 		    		<div id="assets" class="tab-pane ">
@@ -105,6 +143,20 @@
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_tamp }}</h4></div>
 			    			<div class="col-xs-0 col-sm-4"><h4><b>Assets Actual:</b></h4></div>
 							<div class="col-xs-0 col-sm-2"><h4>${{ month_tama }}</h4></div>
+						</div>
+						<div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+
+					                </tbody>
+					            </table>
+							</div>
 						</div>
 		    		</div>
 
