@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView, View
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from models import *
@@ -24,28 +24,55 @@ class HomePageView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
+class SetUpMixin(object):
+
+    def dispatch(self, request, *args, **kwargs):
+        self.now = datetime.datetime.now()
+
+        # Get all business units for a user
+        self.business_units = BusinessUnit.objects.filter(user=self.request.user)
+
+        # Get the business unit the user is currently viewing
+        self.current = BusinessUnit.objects.get(pk=kwargs['pk'])
+
+        # Get the fical years associated for the business unit
+        self.fiscal_years = FiscalYear.objects.filter(business_unit=self.current)
+
+         # Finding the current month
+        now = datetime.datetime.now()
+        
+        # moves through all fiscal years
+        for fiscal_year in self.fiscal_years:
+            # gets all months
+            months = Month.objects.filter(fiscal_year=fiscal_year)
+            # moves through all months
+            for month in months:
+                # gets current month
+                if month.month.month == now.month:
+                    self.current_month = month
+
+        # if fiscal year is passed by url, get that year as the current fiscal year
+        # else get the value associated to the current month
+        if 'fiscal_year' in kwargs:
+            self.current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
+        else:
+            self.current_fiscal_year = self.current_month.fiscal_year
+
+        return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
+
+
+class DashboardView(LoginRequiredMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
 
-        # Get all business units for a user
-        business_units = BusinessUnit.objects.filter(user=self.request.user)
-        context['business_units'] = business_units
-
-        # Get the business unit the user is currently viewing
-        current = BusinessUnit.objects.get(pk=kwargs['pk'])
-        context['current'] = current
-
-        # Get the fical years associated for the business unit
-        fiscal_years = FiscalYear.objects.filter(business_unit=current)
-
-        if fiscal_years:
+        if self.fiscal_years:
 
             # Finding the current month
             current_month = None
-            now = datetime.datetime.now()
+            # now = datetime.datetime.now()
+            now = self.now
 
             cma = {
                 'title': 'Cash Month Actual',
@@ -95,7 +122,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             months = []
 
             # moves through all fiscal years
-            for fiscal_year in fiscal_years:
+            for fiscal_year in self.fiscal_years:
 
                 # gets all months
                 months = Month.objects.filter(fiscal_year=fiscal_year)
@@ -223,7 +250,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             dashboard_data = [ cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp ]
         
             # Context totals for the Graph values
-            context['fiscal_years'] = fiscal_years
+            context['current'] = self.current
+            context['fiscal_years'] = self.fiscal_years
             context['current_fiscal_year'] = current_fiscal_year
             context['months_names'] = months_names
             context['months'] = months
@@ -254,9 +282,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['current_fiscal_year'] = current_fiscal_year
         context['current_month'] = current_month
         # Personnel and Contracts totals
-        personnel = Personnel.objects.filter(business_unit=current)
+        personnel = Personnel.objects.filter(business_unit=self.current)
         context['personnel'] = personnel
-        contracts = Contract.objects.filter(business_unit=current)
+        contracts = Contract.objects.filter(business_unit=self.current)
         context['contracts'] = contracts
 
         return context
@@ -696,61 +724,26 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class PersonnelView(LoginRequiredMixin, TemplateView):
+class PersonnelView(LoginRequiredMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/personnel.html'
 
     def get_context_data(self, **kwargs):
         context = super(PersonnelView, self).get_context_data()
-        business_units = BusinessUnit.objects.filter(user=self.request.user)
-        context['business_units'] = business_units
-        current = BusinessUnit.objects.get(pk=kwargs['pk'])
-        context['current'] = current
+        context['business_units'] = self.business_units
+        context['current'] = self.current
+        context['fiscal_years'] = self.fiscal_years
 
-        fiscal_years = FiscalYear.objects.filter(business_unit=current)
-        context['fiscal_years'] = fiscal_years
+        context['current_fiscal_year'] = self.current_fiscal_year
 
-        # Finding the current month
-        current_month = None
-        now = datetime.datetime.now()
-        
-        # moves through all fiscal years
-        for fiscal_year in fiscal_years:
+        context['current_month'] = self.current_month
 
-            # gets all months
-            months = Month.objects.filter(fiscal_year=fiscal_year)
-
-            # moves through all months
-            for month in months:
-
-                # gets current month
-                if month.month.month == now.month:
-                    current_month = month
-
-        # if fiscal year is passed by url, get that year as the current fiscal year
-        # else get the value associated to the current month
-        if 'fiscal_year' in kwargs:
-            current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
-        else:
-            current_fiscal_year = current_month.fiscal_year
-        context['current_fiscal_year'] = current_fiscal_year
-
-        now = datetime.datetime.now()
-        current_month = None
-        for fiscal_year in fiscal_years:
-            months = Month.objects.filter(fiscal_year=fiscal_year)
-            for month in months:
-                if month.month.month == now.month:
-                    current_month = month
-        context['current_month'] = current_month
-
-
-        personnel = Personnel.objects.filter(business_unit=current)
+        personnel = Personnel.objects.filter(business_unit=self.current)
         context['personnel'] = personnel
 
-        salary = Salary.objects.filter(business_unit=current)
+        salary = Salary.objects.filter(business_unit=self.current)
         context['salary'] = salary
 
-        part_time = PartTime.objects.filter(business_unit=current)
+        part_time = PartTime.objects.filter(business_unit=self.current)
         context['part_time'] = part_time
 
         return context
