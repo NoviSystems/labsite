@@ -27,111 +27,88 @@
         <div class= "tab-content" >
             <div id="salary" class="tab-pane active">
                 </br>
+                {% if not salary %}
+                <h4>No part time personnel for this business unit.</h4>
+                {% endif %}
                 <a class="btn btn-primary" href={% url 'accounting:create_salary' pk=current.pk %}>Create Salary Employee</a>
 
                 <div class="row">
                     <div class="col-md-12">
-
-                        {% if salary %}
-        
-                            {% for salary in salary %}
-
-                            <div class="panel-heading" role="tab" id="headingOne">
-                                <h4 class="panel-title">
-                                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{salary.pk}}" aria-expanded="true" aria-controls="collapse{{salary.pk}}">
-                                        <p class="lead'"><h4>{{ salary.first_name }} {{ salary.last_name }} - {{ salary.position }}</h4></p><hr>
-                                    </a>
-                                </h4>
+                        {% for salary in salary %}
+                        </br>
+                        <div role="tab" id="headingOne">
+                            <div class="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{salary.pk}}" aria-expanded="true" aria-controls="collapse{{salary.pk}}">
+                                    <p class="lead'"><h4>{{ salary.first_name }} {{ salary.last_name }} - {{ salary.position }}</h4></p><hr>
+                                </a>
                             </div>
+                        </div>
 
-                            <div id="collapse{{salary.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{salary.pk}}">
-                                <div class="panel-body">
-                                    <div class="row">
-                                        <div class="col-md-3">  
-                                            <p>Position:</p>    
-                                            <p>ID:</p>                          
-                                            <p>Salary Type:</p> 
-                                            <p>Social Security:</p> 
-                                            <p>Fed Insurance:</p> 
-                                            <p>Retirement:</p> 
-                                            <p>Medical Insurance:</p>
-                                            <p>Staff Benefits:</p>
-                                            <p>Fringe:</p>                              
-                                        </div>
-                                        <div class="col-md-5">
-                                            <p>{{ salary.position }}</p>
-                                            <p>{{ salary.employee_id }}</p>
-                                            <p>{{ salary.salary_type }}</p>
-                                            <p>{{ salary.social_security_amount }}</p>
-                                            <p>{{ salary.fed_health_insurance_amount }}</p>
-                                            <p>{{ salary.retirement_amount }}</p>
-                                            <p>{{ salary.medical_insurance_amount }}</p>
-                                            <p>{{ salary.staff_benefits_amount }}</p>
-                                            <p>{{ salary.fringe_amount }}</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <h4>
-                                                <a class="btn btn-primary" href={% url 'accounting:update_salary' pk=current.pk salary=salary.pk %}>Update</a>
-                                                <a class="btn btn-primary" href={% url 'accounting:delete_salary' pk=current.pk salary=salary.pk %}>Delete</a>
-                                            </h4>
-                                        </div>
-                                    </div>
+                        <div id="collapse{{salary.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{salary.pk}}">
+                            <div class="row">
+                                <div class="col-md-4">  
+                                    <h5>Position:{{ salary.position }}</h5>
+                                    <h5>ID: {{ salary.employee_id }}</h5>                          
+                                    <h5>Salary Type:{{ salary.salary_type }}</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Social Security: {{ salary.social_security_amount }}</h5>
+                                    <h5>Fed Insurance: {{ salary.fed_health_insurance_amount }}</h5>
+                                    <h5>Retirement: {{ salary.retirement_amount }}</h5>
+                                    <h5>Medical Insurance: {{ salary.medical_insurance_amount }}</h5>
+                                    <h5>Staff Benefits: {{ salary.staff_benefits_amount }}</h5>
+                                    <h5>Fringe: {{ salary.fringe_amount }}</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4>
+                                        <a class="btn btn-primary" href={% url 'accounting:update_salary' pk=current.pk salary=salary.pk %}>Update</a>
+                                        <a class="btn btn-primary" href={% url 'accounting:delete_salary' pk=current.pk salary=salary.pk %}>Delete</a>
+                                    </h4>
                                 </div>
                             </div>
-                            {% endfor %}
-                        {% else %}
-                        <p class="lead">No salary personnel for this business unit.</p>
-                        {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+
             <div id="part-time" class="tab-pane ">
                 </br>
+                {% if not part_time %}
+                <h4>No part time personnel for this business unit.</h4>
+                {% endif %}
                 <a class="btn btn-primary" href={% url 'accounting:create_part_time' pk=current.pk  %}>Create Part Time Employee</a>
                 <div class="row">
                     <div class="col-md-12">
-
-                        {% if part_time %}
-
-                            {% for part_time in part_time %}
-                            <div class="panel-heading" role="tab" id="headingOne">
-                                <h4 class="panel-title">
-                                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{part_time.pk}}" aria-expanded="true" aria-controls="collapse{{part_time.pk}}">
-                                        <p class="lead'"><h4>{{ part_time.first_name }} {{ part_time.last_name }}- {{ part_time.position }}</h4></p><hr>
-                                    </a>
-                                </h4>
+                        {% for part_time in part_time %}
+                        </br>
+                        <div role="tab" id="headingOne">
+                            <div class="panel-title">
+                                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{part_time.pk}}" aria-expanded="true" aria-controls="collapse{{part_time.pk}}">
+                                    <p class="lead'"><h4>{{ part_time.first_name }} {{ part_time.last_name }} - {{ part_time.position }}</h4></p><hr>
+                                </a>
                             </div>
-                            <div id="collapse{{part_time.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{part_time.pk}}">
-
-                                <div class="panel-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <p>Position:</p> 
-                                            <p>ID:</p> 
-                                            <p>Type:</p> 
-                                            <p>Wage:</p> 
-                                            <p>Hours:</p> 
-                                        </div>
-                                        <div class="col-md-5">
-                                            <p>{{ part_time.position }}</p>
-                                            <p>{{ part_time.employee_id }}</p>
-                                            <p>{{ part_time.hourly_type }}</p>
-                                            <p>{{ part_time.hourly_amount }}</p>
-                                            <p>{{ part_time.hours_work }}</p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <h4>
-                                                <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk pk=current.pk %}>Update</a>
-                                                <a class="btn btn-primary" href={% url 'accounting:delete_part_time' part_time=part_time.pk  pk=current.pk %}>Delete</a>
-                                            </h4>
-                                        </div>
-                                    </div>
+                        </div>
+                        <div id="collapse{{part_time.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{part_time.pk}}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h5>Position: {{ part_time.position }}</5> 
+                                    <h5>ID: {{ part_time.employee_id }}</h5> 
+                                    <h5>Type: {{ part_time.hourly_type }}</h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Wage: ${{ part_time.hourly_amount }}</h5>
+                                    <h5>Hours: {{ part_time.hours_work }}</h5> 
+                                </div>
+                                <div class="col-md-4">
+                                    <h4>
+                                        <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk pk=current.pk %}>Update</a>
+                                        <a class="btn btn-primary" href={% url 'accounting:delete_part_time' part_time=part_time.pk  pk=current.pk %}>Delete</a>
+                                    </h4>
                                 </div>
                             </div>
-                            {% endfor %}
-                        {% else %}
-                        <p class="lead">No part time personnel for this business unit.</p>
-                        {% endif %}
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
