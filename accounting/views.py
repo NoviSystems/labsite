@@ -316,6 +316,46 @@ class DashboardMonthView(DashboardView):
         context['month_tama'] =context['tama']['values'][index]
         context['month_tamp'] =context['tamp']['values'][index]
 
+        salary = Salary.objects.filter(business_unit=self.current)
+        context['salary'] = salary
+
+        part_time = PartTime.objects.filter(business_unit=self.current)
+        context['part_time'] = part_time
+
+        # part time amounts
+        part_time_hours_total = 0
+        part_time_total = Decimal('0.00')
+
+        # salary amounts
+        social_security_total = Decimal('0.00')
+        fed_health_insurance_total = Decimal('0.00')
+        retirement_total = Decimal('0.00')
+        medical_insurance_total = Decimal('0.00')
+        staff_benefits_total = Decimal('0.00')
+        fringe_total = Decimal('0.00')
+
+        for part_time in PartTime.objects.filter(business_unit=self.current):
+            part_time_hours_total += part_time.hours_work
+            part_time_total += (part_time.hours_work * part_time.hourly_amount)
+
+        # find salary totals for each type
+        for salary in Salary.objects.filter(business_unit=self.current):
+            social_security_total += salary.social_security_amount
+            fed_health_insurance_total += salary.fed_health_insurance_amount
+            retirement_total += salary.retirement_amount
+            medical_insurance_total += salary.medical_insurance_amount
+            staff_benefits_total += salary.staff_benefits_amount
+            fringe_total += salary.fringe_amount
+
+        context['ssa'] = social_security_total
+        context['fhit'] = fed_health_insurance_total
+        context['rt'] = retirement_total
+        context['mit'] = medical_insurance_total
+        context['sbt'] = staff_benefits_total
+        context['ft'] = fringe_total
+
+        context['ptht'] = part_time_hours_total
+        context['ptt'] = part_time_total
 
         return context
 

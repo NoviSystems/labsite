@@ -121,16 +121,55 @@
 								<table class="table">
 					                <thead>
 					                    <tr>
-					                        <th><h4>Breakdown</h4></th>
+					                        <th><h4>Salary</h4></th>
 					                    </tr>
 					                </thead>
+
 					                <tbody>
-					                	{% for payroll in payrolls %}
+						                <tr>
+						                	<th scope="row">+ Social Security</th>
+						                            <td>${{ssa}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Federal Health Insurance</th>
+						                            <td>${{fhit}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Retirement</th>
+						                            <td>${{rt}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Medical Insurance</th>
+						                            <td>${{mit}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Staff Benefits</th>
+						                            <td>${{sbt}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Fringe</th>
+						                            <td>${{ft}}</td>
+						                </tr>
+					                </tbody>
+					            </table>
+							</div>
+							<div class="col-xs-0 col-sm-4">
+								<table class="table">
+					                <thead>
 					                    <tr>
-					                        <th scope="row">+ {{payroll.expense.name}}</th>
-					                            <td>${{payroll.expense.predicted_amount}}</td>
+					                        <th><h4>Part Time</h4></th>
 					                    </tr>
-					                    {% endfor %}
+					                </thead>
+
+					                <tbody>
+						                <tr>
+						                	<th scope="row">+ Total Hours</th>
+						                            <td>{{ptht}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Total Amount</th>
+						                            <td>${{ptt}}</td>
+						                </tr>
 					                </tbody>
 					            </table>
 							</div>
