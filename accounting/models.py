@@ -69,7 +69,7 @@ class Cash(LineItem):
 
 class Income(LineItem):
     name = models.CharField(max_length=50)
-    data_payable = models.DateField()
+    date_payable = models.DateField()
     date_payed = models.DateField(default=None, null=True)
 
 
