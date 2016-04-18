@@ -251,6 +251,7 @@ class DashboardView(LoginRequiredMixin, SetUpMixin, TemplateView):
         
             # Context totals for the Graph values
             context['current'] = self.current
+            context['business_units'] = self.business_units
             context['fiscal_years'] = self.fiscal_years
             context['current_fiscal_year'] = current_fiscal_year
             context['months_names'] = months_names
@@ -730,9 +731,7 @@ class PersonnelView(LoginRequiredMixin, SetUpMixin, TemplateView):
         context['business_units'] = self.business_units
         context['current'] = self.current
         context['fiscal_years'] = self.fiscal_years
-
         context['current_fiscal_year'] = self.current_fiscal_year
-
         context['current_month'] = self.current_month
 
         personnel = Personnel.objects.filter(business_unit=self.current)
