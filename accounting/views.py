@@ -307,6 +307,8 @@ class DashboardMonthView(DashboardView):
         context['month_cma_pre'] =context['cma']['values'][index-1]
 
         context['expenses'] = Expense.objects.filter(month=kwargs['month'])
+        context['payrolls'] = Payroll.objects.filter(month=kwargs['month'])
+
         print context['expenses']
 
         context['month_cmpr'] =context['cmpr']['values'][index]
