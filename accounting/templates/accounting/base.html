@@ -7,8 +7,9 @@ Accounting
 
 {% load staticfiles %}
 
-    <!-- Styling -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+{% block scripts %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+{% endblock %}
 
 
 {% block nav-links %}

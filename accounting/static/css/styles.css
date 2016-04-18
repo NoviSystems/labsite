@@ -1,19 +1,15 @@
 a {
-	hover: grey;
+    hover: grey;
 }
 
 p {
-	font-size:25px;
-	color: white boarder: black;
+    font-size:25px;
+    color: white boarder: black;
 }
 
-#custom{
-  width: 100%;
-  color: #555;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-h3{
-	color: red;
+#custom {
+    width: 100%;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
