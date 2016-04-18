@@ -74,7 +74,7 @@ class Income(LineItem):
 
 
 class Invoice(models.Model):
-    TRANSATION_STATE = {
+    TRANSITION_STATE = {
         ('INVOICED', "invoiced"),
         ('NOT_INVOICED', "not invoiced"),
         ('RECIEVED', "recieved"),
@@ -83,7 +83,7 @@ class Invoice(models.Model):
     contract = models.ForeignKey(Contract)
     number = models.IntegerField()
     date = models.DateField()
-    transation_state = models.CharField(max_length=15, choices=TRANSATION_STATE)
+    transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE)
     income = models.OneToOneField(Income)
 
 
