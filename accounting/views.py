@@ -600,7 +600,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
                     month = month,
                     predicted_amount = predicted_amount,
                     name = form.instance.contract.organization_name,
-                    data_payable = form.instance.date,
+                    date_payable = form.instance.date,
                 )
                 form.instance.income = income
             except:
@@ -667,13 +667,13 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
                 months = Month.objects.filter(fiscal_year=month.fiscal_year)
                 for m in months:
                     if m.month >= month.month:
-                        new_date_payable = date( m.month.year, m.month.month, form.instance.data_payable.day)
+                        new_date_payable = date( m.month.year, m.month.month, form.instance.date_payable.day)
                         Expense.objects.create(
                             business_unit = form.instance.business_unit,
                             month = m,
                             predicted_amount = form.instance.predicted_amount,
                             name = form.instance.name,
-                            data_payable = new_date_payable,
+                            date_payable = new_date_payable,
                         )
             return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'] )
         except KeyError:
@@ -884,7 +884,7 @@ class IncomeCreateView(LoginRequiredMixin, CreateView):
                             month = m,
                             predicted_amount = form.instance.predicted_amount,
                             name = form.instance.name,
-                            data_payable = form.instance.data_payable,
+                            date_payable = form.instance.date_payable,
                         )
             return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'] )
         except KeyError:
@@ -976,7 +976,7 @@ def updatePayroll(business_unit):
                     business_unit = business_unit,
                     month = month,
                     name = 'Payroll',
-                    data_payable = month.month
+                    date_payable = month.month
                 )
                 payroll = Payroll.objects.create(month=month, expense=expense)
             payroll.expense.predicted_amount = payroll_amount
