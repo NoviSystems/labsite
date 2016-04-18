@@ -55,6 +55,8 @@ class SetUpMixin(object):
         # else get the value associated to the current month
         if 'fiscal_year' in kwargs:
             self.current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
+        elif not self.fiscal_years:
+            self.current_fiscal_year = None
         else:
             self.current_fiscal_year = self.current_month.fiscal_year
 
@@ -68,7 +70,7 @@ class DashboardView(LoginRequiredMixin, SetUpMixin, TemplateView):
         context = super(DashboardView, self).get_context_data()
 
         if self.fiscal_years:
-
+            print "TEST"
             # Finding the current month
             current_month = None
             # now = datetime.datetime.now()
@@ -249,8 +251,19 @@ class DashboardView(LoginRequiredMixin, SetUpMixin, TemplateView):
             # list of dashboard data
             dashboard_data = [ cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp ]
         
+            #context values for month view
+            context['cma'] = cma #cash month actual
+            context['cmpr'] = cmpr #cash month predicted
+            context['ima'] = ima # income month actual
+            context['imp'] = imp #income month predicted
+            context['ema'] = ema #expenses month actual
+            context['emp'] = emp #expenses month predicted
+            context['pma'] = pma #payroll month actual
+            context['pmp'] = pmp #payroll month predicted
+            context['tama'] = tama #total assest month actual
+            context['tamp'] = tamp #total assets month predicted
+
             # Context totals for the Graph values
-            context['current'] = self.current
             context['business_units'] = self.business_units
             context['fiscal_years'] = self.fiscal_years
             context['current_fiscal_year'] = current_fiscal_year
@@ -260,28 +273,10 @@ class DashboardView(LoginRequiredMixin, SetUpMixin, TemplateView):
             context['predicted_totals'] = json.dumps( [float(value) for value in cmpr['values']] )
             context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
             context['dashboard_data'] = dashboard_data
+            # Context totals for the Graph values
+            context['current_month'] = current_month
 
-        # list of dashboard data
-        dashboard_data = [ cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp ]
-        
-        #context values for month view
-
-        context['cma'] = cma #cash month actual
-        context['cmpr'] = cmpr #cash month predicted
-        context['ima'] = ima # income month actual
-        context['imp'] = imp #income month predicted
-        context['ema'] = ema #expenses month actual
-        context['emp'] = emp #expenses month predicted
-        context['pma'] = pma #payroll month actual
-        context['pmp'] = pmp #payroll month predicted
-        context['tama'] = tama #total assest month actual
-        context['tamp'] = tamp #total assets month predicted
-
-
-
-        # Context totals for the Graph values
-        context['current_fiscal_year'] = current_fiscal_year
-        context['current_month'] = current_month
+        context['current'] = self.current
         # Personnel and Contracts totals
         personnel = Personnel.objects.filter(business_unit=self.current)
         context['personnel'] = personnel
