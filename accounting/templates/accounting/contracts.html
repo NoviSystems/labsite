@@ -76,7 +76,7 @@
                                 <tr>
                                     <th scope="row">{{ invoice.number }}</th>
                                         <td>{{ invoice.date }}</td>
-                                        <td>{{ invoice.transation_state }}</td>
+                                        <td>{{ invoice.transition_state }}</td>
                                         <td>{{ invoice.income.predicted_amount }}</td>
                                         <td>
                                             <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
