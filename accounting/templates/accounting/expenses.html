@@ -88,7 +88,7 @@
                     {% for expense in month_data.expenses %}
                     <tr>
                         <th scope="row">{{ expense.name }}</th>
-                            <td>{{ expense.data_payable }}</td>
+                            <td>{{ expense.date_payable }}</td>
                             <td>{{ expense.date_payed }}</td>
                             <td>${{ expense.predicted_amount }}</td>
                             <td>
