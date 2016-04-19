@@ -802,6 +802,7 @@ class SalaryCreateView(LoginRequiredMixin, CreateView):
         form.instance.business_unit = business_unit
         response = super(SalaryCreateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
         return response
 
 
