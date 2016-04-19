@@ -130,7 +130,7 @@
                     {% for income in month_data.incomes %}
                     <tr>
                         <th scope="row">{{ income.name }}</th>
-                            <td>{{ income.data_payable }}</td>
+                            <td>{{ income.date_payable }}</td>
                             <td>{{ income.date_payed }}</td>
                             <td>${{ income.predicted_amount }}</td>
                             <td>
