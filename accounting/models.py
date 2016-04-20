@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)
+    account_number = models.CharField(max_length=12)
     user = models.ManyToManyField(User)
 
     def __str__(self):
@@ -100,7 +101,7 @@ class Salary(Personnel):
         ('EPA', 'EPA'),
         ('SPA', 'SPA'),
     }
-    
+
     salary_type = models.CharField(max_length=3, choices=SALARY_TYPE)
     salary_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     social_security_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
