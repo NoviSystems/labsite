@@ -329,6 +329,7 @@ class DashboardMonthView(DashboardView):
         part_time_total = Decimal('0.00')
 
         # salary amounts
+        monthly_amount = Decimal('0.00')
         social_security_total = Decimal('0.00')
         fed_health_insurance_total = Decimal('0.00')
         retirement_total = Decimal('0.00')
@@ -342,6 +343,7 @@ class DashboardMonthView(DashboardView):
 
         # find salary totals for each type
         for salary in Salary.objects.filter(business_unit=self.current):
+            monthly_amount = ( salary.salary_amount / 12 )
             social_security_total += salary.social_security_amount
             fed_health_insurance_total += salary.fed_health_insurance_amount
             retirement_total += salary.retirement_amount
@@ -998,7 +1000,7 @@ def updatePayroll(business_unit):
     payroll_amount = Decimal('0.00')
     salary = Salary.objects.filter(business_unit=business_unit)
     for salary in salary:
-       payroll_amount += (salary.social_security_amount + salary.fed_health_insurance_amount + salary.retirement_amount + salary.medical_insurance_amount + salary.staff_benefits_amount + salary.fringe_amount)
+       payroll_amount += ( (salary.salary_amount / 12) + salary.social_security_amount + salary.fed_health_insurance_amount + salary.retirement_amount + salary.medical_insurance_amount + salary.staff_benefits_amount + salary.fringe_amount)
     part_time = PartTime.objects.filter(business_unit=business_unit)
     for part_time in part_time:
         payroll_amount += part_time.hourly_amount * part_time.hours_work
@@ -1029,9 +1031,6 @@ def updatePayroll(business_unit):
 def populateCashPredicted(fiscal_year, cash_amount):
     cash_previous = Decimal(cash_amount)
     for month in Month.objects.filter(fiscal_year=fiscal_year):
-        print month.month
-        print "cash previous: ", cash_previous
-
         expense_month_projected = Decimal('0.00')
         for expense in Expense.objects.filter(month=month):
             expense_month_projected += expense.predicted_amount
@@ -1040,11 +1039,8 @@ def populateCashPredicted(fiscal_year, cash_amount):
             income_month_projected += income.predicted_amount
         cash = Cash.objects.get(month=month)
         
-        print "cash predicted_amount: ", cash.predicted_amount
         cash.predicted_amount = cash_previous - expense_month_projected + income_month_projected
-        print "new predicted_amount: ", cash.predicted_amount
         cash.save()
-        print "post save predicted_amount: ", cash.predicted_amount
         if cash.reconciled:
             cash_previous = cash.actual_amount
         else:

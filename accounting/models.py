@@ -100,7 +100,9 @@ class Salary(Personnel):
         ('EPA', 'EPA'),
         ('SPA', 'SPA'),
     }
+    
     salary_type = models.CharField(max_length=3, choices=SALARY_TYPE)
+    salary_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     social_security_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     fed_health_insurance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     retirement_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
