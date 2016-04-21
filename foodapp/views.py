@@ -58,13 +58,14 @@ class HomeView(CreateView):
         obj = form.save(commit=False)
         obj.user = self.request.user
 
-        # stripe.InvoiceItem.create(
-        #     customer=,
+        stripe_cid = obj.user.stripecustomer.customer_id
+
+        # invoiceitem = stripe.InvoiceItem.create(
+        #     customer=stripe_cid,
         #     amount=obj.item.cost * obj.quantity,
         #     currency="usd",
-        #     description=
+        #     description=obj.item.description,
         # )
-        # obj.invoiced = True
 
         obj.save()
 
