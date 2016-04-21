@@ -168,6 +168,19 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
         context['cards'] = cardVals
         return context       
 
+class StripeOrderCreateView(LoginRequiredMixin, TemplateView):
+    template_name = 'foodapp/stripe_order_create.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(StripeOrderCreateView, self).get_context_data()
+        try:
+            StripeCustomer.objects.get(user=self.request.user)
+            customerExists = True
+        except ObjectDoesNotExist:
+            customerExists = False
+        context['customerExists'] = customerExists
+        return context
+
 class OrderListView(ListView):
     model = models.Order
     context_object_name = 'orders'
