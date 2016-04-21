@@ -27,7 +27,7 @@ class Order(models.Model):
     user = models.ForeignKey(User, related_name='orders')
     date = models.DateField(default=datetime.date.today)
     item = models.ForeignKey(Item)
-    invoiced = models.BooleanField(default=False)
+    invoice_item = models.CharField(max_length=36, null=True)
     QUANTITY_CHOICES = (
         (1, "one"),
         (2, "two"),

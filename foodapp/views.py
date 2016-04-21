@@ -60,12 +60,12 @@ class HomeView(CreateView):
 
         # stripe.InvoiceItem.create(
         #     customer=,
-        #     amount=,
+        #     amount=obj.item.cost * obj.quantity,
         #     currency="usd",
         #     description=
         # )
-
         # obj.invoiced = True
+
         obj.save()
 
         return HttpResponseRedirect(self.success_url)
@@ -166,7 +166,7 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
             else:
                 cardVals += [(data['id'], data['last4'], False)]
         context['cards'] = cardVals
-        return context       
+        return context
 
 class StripeOrderCreateView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/stripe_order_create.html'
