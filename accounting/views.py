@@ -44,9 +44,9 @@ class SetUpMixin(object):
         # moves through all fiscal years
         for fiscal_year in self.fiscal_years:
             # gets all months
-            months = Month.objects.filter(fiscal_year=fiscal_year)
+            self.months = Month.objects.filter(fiscal_year=fiscal_year)
             # moves through all months
-            for month in months:
+            for month in self.months:
                 # gets current month
                 if month.month.month == now.month:
                     self.current_month = month
@@ -364,54 +364,18 @@ class DashboardMonthView(DashboardView):
         return context
 
 
-class ContractsView(LoginRequiredMixin, TemplateView):
+class ContractsView(LoginRequiredMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/contracts.html'
 
     def get_context_data(self, **kwargs):
         context = super(ContractsView, self).get_context_data()
-        business_units = BusinessUnit.objects.filter(user=self.request.user)
-        context['business_units'] = business_units
-        current = BusinessUnit.objects.get(pk=kwargs['pk'])
-        context['current'] = current
+        context['business_units'] = self.business_units
+        context['current'] = self.current
+        context['fiscal_years'] = self.fiscal_years
+        context['current_month'] = self.current_month
+        context['current_fiscal_year'] = self.current_fiscal_year
 
-        fiscal_years = FiscalYear.objects.filter(business_unit=current)
-        context['fiscal_years'] = fiscal_years
-
-        # Finding the current month
-        current_month = None
-        now = datetime.datetime.now()
-
-        # moves through all fiscal years
-        for fiscal_year in fiscal_years:
-
-            # gets all months
-            months = Month.objects.filter(fiscal_year=fiscal_year)
-
-            # moves through all months
-            for month in months:
-
-                # gets current month
-                if month.month.month == now.month:
-                    current_month = month
-
-        # if fiscal year is passed by url, get that year as the current fiscal year
-        # else get the value associated to the current month
-        if 'fiscal_year' in kwargs:
-            current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
-        else:
-            current_fiscal_year = current_month.fiscal_year
-        context['current_fiscal_year'] = current_fiscal_year
-
-        now = datetime.datetime.now()
-        current_month = None
-        for fiscal_year in fiscal_years:
-            months = Month.objects.filter(fiscal_year=fiscal_year)
-            for month in months:
-                if month.month.month == now.month:
-                    current_month = month
-        context['current_month'] = current_month
-
-        contracts = Contract.objects.filter(business_unit=current)
+        contracts = Contract.objects.filter(business_unit=self.current)
         contract_invoices = []
         for contract in contracts:
             invoices = Invoice.objects.filter(contract=contract)
@@ -427,63 +391,31 @@ class ContractsView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ExpensesView(LoginRequiredMixin, TemplateView):
+class ExpensesView(LoginRequiredMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/expenses.html'
 
     def get_context_data(self, **kwargs):
         context = super(ExpensesView, self).get_context_data()
-        business_units = BusinessUnit.objects.filter(user=self.request.user)
-        context['business_units'] = business_units
-        current = BusinessUnit.objects.get(pk=kwargs['pk'])
-        context['current'] = current
-        fiscal_years = FiscalYear.objects.filter(business_unit=current)
-        context['fiscal_years'] = fiscal_years
+        context['business_units'] = self.business_units
+        context['current'] = self.current
+        context['fiscal_years'] = self.fiscal_years
+        context['current_month'] = self.current_month
+        context['current_fiscal_year'] = self.current_fiscal_year
+        context['months'] = self.months
 
-        # Finding the current month
-        current_month = None
-        now = datetime.datetime.now()
-
-        # moves through all fiscal years
-        for fiscal_year in fiscal_years:
-
-            # gets all months
-            months = Month.objects.filter(fiscal_year=fiscal_year)
-
-            # moves through all months
-            for month in months:
-
-                # gets current month
-                if month.month.month == now.month:
-                    current_month = month
-
-        # if fiscal year is passed by url, get that year as the current fiscal year
-        # else get the value associated to the current month
-        if 'fiscal_year' in kwargs:
-            current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
-        else:
-            current_fiscal_year = current_month.fiscal_year
-
-        months = Month.objects.filter(fiscal_year=current_fiscal_year)
-
-        if 'month' in kwargs:
-            current_month = Month.objects.get(pk=kwargs['month'])
-        
         month_data = []
         try:
-            cash = Cash.objects.get(month=current_month)
+            cash = Cash.objects.get(month=self.current_month)
         except ObjectDoesNotExist:
             cash = None
         month_data = {
-            'month': current_month,
-            'expenses': Expense.objects.filter(month=current_month),
-            'incomes':Income.objects.filter(month=current_month),
+            'month': self.current_month,
+            'expenses': Expense.objects.filter(month=self.current_month),
+            'incomes':Income.objects.filter(month=self.current_month),
             'cash': cash
         }
 
-        context['months'] = months
-        context['current_month'] = current_month
         context['month_data'] = month_data
-        context['current_fiscal_year'] = current_fiscal_year
         return context
 
 
