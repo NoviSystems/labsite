@@ -376,18 +376,31 @@ class ContractsView(LoginRequiredMixin, SetUpMixin, TemplateView):
         context['current_fiscal_year'] = self.current_fiscal_year
 
         contracts = Contract.objects.filter(business_unit=self.current)
-        contract_invoices = []
+        completed_contracts = []
+        active_contracts = []
         for contract in contracts:
-            invoices = Invoice.objects.filter(contract=contract)
-            contract_invoices.extend(
-            [
-                {
-                    'contract': contract,
-                    'invoices': invoices,
-                }
-            ]
-            )
-        context['contract_invoices'] = contract_invoices
+            if contract.contract_state == 'ACTIVE':
+                invoices = Invoice.objects.filter(contract=contract)
+                active_contracts.extend(
+                [
+                    {
+                        'contract': contract,
+                        'invoices': invoices,
+                    }
+                ]
+                )
+            elif contract.contract_state == 'COMPLETE':
+                invoices = Invoice.objects.filter(contract=contract)
+                completed_contracts.extend(
+                [
+                    {
+                        'contract': contract,
+                        'invoices': invoices,
+                    }
+                ]
+                )
+        context['active_contracts'] = active_contracts
+        context['completed_contracts'] = completed_contracts
         return context
 
 

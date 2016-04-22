@@ -24,10 +24,10 @@
     <div class="row">
         <div class="col-md-12">
 
-        {% if contract_invoices %}
+        {% if active_contracts %}
             <h3>Active Contracts</h3>
             <hr></hr>
-            {% for contract_invoice in contract_invoices %}
+            {% for contract_invoice in active_contracts %}
 
             <div role="tab" id="headingOne">
                 <div class="panel-title">
@@ -94,7 +94,77 @@
 
             {% endfor %}
         {% else %}
-            <h4>No contracts for this business unit.</h4>
+            <h4>No active contracts for this business unit.</h4>
+        {% endif %}
+        {% if completed_contracts %}
+            <h3>Completed Contracts</h3>
+            <hr></hr>
+            {% for contract_invoice in completed_contracts %}
+
+            <div role="tab" id="headingOne">
+                <div class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract_invoice.contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract_invoice.contract.pk}}">
+                        <h4 class="lead'">{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }}</h4><hr>
+                    </a>
+                </div>
+            </div>
+
+            <div id="collapse{{contract_invoice.contract.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{contract_invoice.contract.pk}}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h4>Total Amount: ${{contract_invoice.contract.amount }}</h4>
+                            <h5>Start Date: {{contract_invoice.contract.start_date}}</h5>
+                            <h5>Contract Type: {{contract_invoice.contract.contract_type }}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <h4>
+                                <a class="btn btn-primary" href={% url 'accounting:update_contract' pk=current.pk contract=contract_invoice.contract.pk %}>Update</a>
+                                <a class="btn btn-primary" href={% url 'accounting:delete_contract' pk=current.pk contract=contract_invoice.contract.pk %}>Delete</a>
+                            </h4>
+                        </div>
+                    </div>
+                    </br>
+                    <div class="row">
+                        {% if not contract_invoice.invoices %}
+                        <div class="col-md-12">
+                            <p>No invoices for this contract.</p>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-12">
+                            <a class="btn btn-primary" href={% url 'accounting:create_invoice' pk=current.pk contract=contract_invoice.contract.pk %}>Create Invoice</a>
+                        </div>
+                        {% if contract_invoice.invoices %}
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Invoice Date: </th>
+                                        <th>Status: </th>
+                                        <th>Amount: </th>
+                                        <th>Update/Delete</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                                {% for invoice in contract_invoice.invoices %}
+                                <tr>
+                                    <th scope="row">{{ invoice.number }}</th>
+                                        <td>{{ invoice.date }}</td>
+                                        <td>{{ invoice.transition_state }}</td>
+                                        <td>{{ invoice.income.predicted_amount }}</td>
+                                        <td>
+                                            <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
+                                            <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Delete</a>
+                                        </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% endif %}
+                    </div>
+                    </br>
+            </div>
+
+            {% endfor %}
         {% endif %}
         </div>
     </div>
