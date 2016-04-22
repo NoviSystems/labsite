@@ -37,6 +37,7 @@ class Month(models.Model):
     def __str__(self):
         return self.fiscal_year.business_unit.name + " " + self.month.strftime("%b %Y")
 
+
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
     month = models.ForeignKey(Month)
@@ -54,8 +55,9 @@ class Contract(models.Model):
         ('FIXED', "fixed" ),
         ('HOURLY', "hourly" ),
     }
-    
+
     business_unit = models.ForeignKey(BusinessUnit)
+    department = models.CharField(max_length=4, default='CSC')
     contract_number = models.IntegerField()
     organization_name = models.CharField(max_length=255)
     start_date = models.DateField()
@@ -82,7 +84,7 @@ class Invoice(models.Model):
     }
 
     contract = models.ForeignKey(Contract)
-    number = models.IntegerField()
+    number = models.CharField(max_length=20)
     date = models.DateField()
     transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE)
     income = models.OneToOneField(Income)
