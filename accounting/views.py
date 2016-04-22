@@ -11,7 +11,7 @@ from datetime import timedelta
 import json
 from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.db.models import Max
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'accounting/home.html'
@@ -586,7 +586,15 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = business_unit
+        max_contract_number = Contract.objects.filter(business_unit=business_unit).aggregate(Max('contract_number'))
+        print "TEST: ", max_contract_number
+        if max_contract_number['contract_number__max'] == None:
+            form.instance.contract_number = 1
+        else:
+            form.instance.contract_number = max_contract_number['contract_number__max'] + 1
+
         response = super(ContractCreateView, self).form_valid(form)
         return response
 

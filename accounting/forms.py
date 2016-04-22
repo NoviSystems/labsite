@@ -63,6 +63,8 @@ class ContractCreateForm(ModelForm):
         model = Contract
         fields = '__all__'
         exclude = [
+            'department',
+            'contract_number',
             'business_unit'
         ]
 
