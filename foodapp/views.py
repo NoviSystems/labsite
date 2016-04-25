@@ -60,13 +60,14 @@ class HomeView(CreateView):
 
         stripe_cid = obj.user.stripecustomer.customer_id
 
-        # invoiceitem = stripe.InvoiceItem.create(
-        #     customer=stripe_cid,
-        #     amount=obj.item.cost * obj.quantity,
-        #     currency="usd",
-        #     description=obj.item.description,
-        # )
-
+        obj.invoiceitem = stripe.InvoiceItem.create(
+             customer = stripe_cid,
+             # amount must be in cents
+             amount = (int(100 * obj.item.cost * obj.quantity)),
+             currency = "usd",
+             description = obj.item.name,
+             metadata = {"quantity": obj.quantity, "date": obj.date},
+         )
         obj.save()
 
         return HttpResponseRedirect(self.success_url)
@@ -169,18 +170,35 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
         context['cards'] = cardVals
         return context
 
-class StripeOrderCreateView(LoginRequiredMixin, TemplateView):
-    template_name = 'foodapp/stripe_order_create.html'
-
+class StripeCreateInvoiceView(TemplateView):
+    template_name = 'foodapp/stripe_create_invoice.html'
+    success_url = reverse_lazy('foodapp:home') 
     def get_context_data(self, **kwargs):
-        context = super(StripeOrderCreateView, self).get_context_data()
+        context = super(StripeCreateInvoiceView, self).get_context_data(**kwargs)
         try:
-            StripeCustomer.objects.get(user=self.request.user)
-            customerExists = True
+            customer = StripeCustomer.objects.get(user=self.request.user).customer_id
+            context['customerExists'] = True
         except ObjectDoesNotExist:
-            customerExists = False
-        context['customerExists'] = customerExists
+            context['customerExists'] = False
+            return context
+        all_invoice_items = stripe.InvoiceItem.all(customer=customer)
+        invoice_items = []
+        total_count = 0
+        total_cost = 0
+        for data in all_invoice_items.get('data'):
+            if data['invoice'] == None:
+                if data['currency'] == 'usd':
+                    invoice_items += [('$%.2f' % (data['amount']/100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
+                    total_count += int(data['metadata']['quantity'])
+                    total_cost += int(data['amount'])
+        context['invoice_items'] = invoice_items
+        context['total_cost'] = '$%.2f' % (total_cost/100.00)
+        context['total_count'] = total_count
         return context
+
+    def post(self, request, *args, **kwargs):
+        print("Create and charge invoice here")
+        return redirect(self.success_url, request)
 
 class OrderListView(ListView):
     model = models.Order

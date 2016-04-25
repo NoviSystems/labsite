@@ -1,0 +1,72 @@
+{% extends 'foodapp/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="panel panel-default" style="margin-top:35px;">
+    <div class="panel-heading">
+        {% if title %}
+        <h3 class="panel-title">{{ title }}</h3>
+        {% else %}
+        <h3 class="panel-title">{{ user }}'s Uninvoiced Items</h3>
+        {% endif %}
+    </div>
+    
+    <table class="table table-striped">
+    <tbody>
+    {% if customerExists %}
+    {% if invoice_items %}
+        {% for amount, description, quantity, pur_date in invoice_items %}
+            <tr>
+                <td style="font-size: 1.5em;">
+                    Purchased {{ quantity }} {{ description }} on {{ pur_date }} totaling {{ amount }}
+                </td>
+            </tr>
+        {% endfor %}
+            <tr>
+                <td style="font-size: 1.5em;">
+                   {{ total_count }} items purchased this week for a total of {{ total_cost }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <form method="POST" id="invoice-form" action={% url 'foodapp:stripe_invoice_create' %}>
+                        {% csrf_token %}
+                        <button class="btn btn-primary">Pay</button>
+                    </form>
+                </td>
+            </tr>
+                
+        {% if error %}
+        <h4 class="errorlist">{{ error }}</h4>
+        {% endif %}
+        {% else %}
+            <tr>
+            <td>
+            <h4>No orders this week!</h4>
+            </td>
+            </tr>
+        {% endif %}
+    {% else %}
+    <tr>
+        <td>
+            <h4>No Stripe Customer Associated with this account. Create one!</h4>
+        </td>
+    </tr>
+   <tr>
+        <td>
+            <div class="col-xs-12 col-centered" style="text-align: center;">
+                    <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                        Create Stripe Customer
+                        <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                    </button>
+                </a>
+            </div>
+        </td>
+    </tr> 
+    {% endif %}
+    </tbody>
+    </table>
+    </div>
+
+{% endblock content %}
