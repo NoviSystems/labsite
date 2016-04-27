@@ -82,7 +82,7 @@
                     <tbody>
                         {% for order in orders %}
                         <tr>
-                            <td>{{ order }} by {{ order.user }}</td>
+                            <td>{{ order.quantity}} {{ order.item.name }}{% if order.quantity > 1 %}s{% endif %} on {{ order.date }} by {{ order.user }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

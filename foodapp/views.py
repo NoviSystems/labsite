@@ -4,9 +4,9 @@ from decimal import Decimal, ROUND_UP
 
 from django.conf import settings
 
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import CreateView, ListView, TemplateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
@@ -14,24 +14,17 @@ from django.shortcuts import redirect
 from django.db.models import Sum
 from django.core.exceptions import ObjectDoesNotExist
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
-
 from foodapp import forms, models
 from models import StripeCustomer
 
 stripe.api_key = settings.STRIPE_API_KEY
 
 
-class HomeView(CreateView):
+class HomeView(LoginRequiredMixin, CreateView):
     model = models.Order
     form_class = forms.OrderForm
     success_url = reverse_lazy('foodapp:home')
     template_name = 'foodapp/home.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(HomeView, self).dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if 'riceOn' in request.POST:
@@ -57,10 +50,10 @@ class HomeView(CreateView):
         obj = form.save(commit=False)
         obj.user = self.request.user
 
-        stripe_cid = obj.user.stripecustomer.customer_id
+        customer_id = obj.user.stripecustomer.customer_id
 
         obj.invoiceitem = stripe.InvoiceItem.create(
-            customer=stripe_cid,
+            customer=customer_id,
             # amount must be in cents
             amount=(int(100 * obj.item.cost * obj.quantity)),
             currency="usd",
@@ -84,41 +77,28 @@ class HomeView(CreateView):
         context['rice_is_on'] = models.RiceCooker.objects.filter(is_on=True).exists()
         return context
 
-
-class StripeCreateView(LoginRequiredMixin, SuccessMessageMixin, TemplateView):
-    success_message = 'Stripe added successfully!'
+# Refactor into StripeCustomerCreateView and StripeCardCreateView
+class StripeCreateView(LoginRequiredMixin, TemplateView):
     success_url = reverse_lazy('foodapp:stripe_card_list')
     template_name = 'foodapp/stripe_create_form.html'
 
     def get_context_data(self, **kwargs):
         context = super(StripeCreateView, self).get_context_data()
-        try:
-            StripeCustomer.objects.get(user=self.request.user)
-            customerExists = True
-        except ObjectDoesNotExist:
-            customerExists = False
-        context['customerExists'] = customerExists
+        context['customerExists'] = True if getStripeCustomer(self.request.user) else False
         return context
 
     def post(self, request, *args, **kwargs):
-        try:
-            StripeCustomer.objects.get(user=self.request.user)
-            customerExists = True
-        except ObjectDoesNotExist:
-            customerExists = False
         token = request.POST.get('stripeToken', False)
         # New Card
-        if customerExists:
-            customer_id = StripeCustomer.objects.get(user=self.request.user).customer_id
-            customer = stripe.Customer.retrieve(customer_id)
-            customer.sources.create(source=token)
+        stripeCustomer = getStripeCustomer(self.request.user)
+        if stripeCustomer:
+            stripeCustomer.sources.create(source=token)
             return redirect(self.success_url, request)
         # New Customer
         else:
             customer = stripe.Customer.create(source=token)
             StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
             return redirect(self.success_url, request)
-
 
 class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
     model = models.StripeCustomer
@@ -127,9 +107,9 @@ class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         pass
 
+    #args[0] stripe card id to delete
     def post(self, request, *args, **kwargs):
-        customer_id = StripeCustomer.objects.get(user=self.request.user).customer_id
-        customer = stripe.Customer.retrieve(customer_id)
+        customer = getStripeCustomer(self.request.user)
         customer.sources.retrieve(args[0]).delete()
         return redirect(self.success_url, request)
 
@@ -137,13 +117,12 @@ class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
 class StripeCardUpdateView(LoginRequiredMixin, TemplateView):
     success_url = reverse_lazy('foodapp:stripe_card_list')
 
+    #args[0] stripe card id to update
     def post(self, request, *args, **kwargs):
-        customer_id = StripeCustomer.objects.get(user=self.request.user).customer_id
-        customer = stripe.Customer.retrieve(customer_id)
+        customer = getStripeCustomer(self.request.user)
         newDefaultCard = customer.sources.retrieve(args[0])
         customer.default_source = newDefaultCard.id
         customer.save()
-        customer = stripe.Customer.retrieve(customer_id)
         return redirect(self.success_url, request)
 
 
@@ -152,22 +131,18 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StripeCardListView, self).get_context_data(**kwargs)
-        try:
-            customer = StripeCustomer.objects.get(user=self.request.user).customer_id
-            context['customerExists'] = True
-        except ObjectDoesNotExist:
-            context['customerExists'] = False
-            return context
-        cards = stripe.Customer.retrieve(customer).sources.all(object='card')
-        defaultCard = stripe.Customer.retrieve(customer).default_source
-        # Needs to be way to read more than one card here. Refactor
-        cardVals = []
-        for data in cards.get('data'):
-            if data['id'] == defaultCard:
-                cardVals += [(data['id'], data['last4'], True)]
-            else:
-                cardVals += [(data['id'], data['last4'], False)]
-        context['cards'] = cardVals
+        stripeCustomer = getStripeCustomer(self.request.user)
+        if stripeCustomer:
+            cards = stripeCustomer.sources.all(object='card')
+            defaultCard = stripeCustomer.default_source
+            cardVals = []
+            for data in cards.get('data'):
+                if data['id'] == defaultCard:
+                    cardVals += [(data['id'], data['last4'], True)]
+                else:
+                    cardVals += [(data['id'], data['last4'], False)]
+            context['cards'] = cardVals
+        context['customerExists'] = True if stripeCustomer else False
         return context
 
 
@@ -177,25 +152,22 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StripeInvoiceCreateView, self).get_context_data(**kwargs)
-        try:
-            customer = StripeCustomer.objects.get(user=self.request.user).customer_id
-            context['customerExists'] = True
-        except ObjectDoesNotExist:
-            context['customerExists'] = False
-            return context
-        all_invoice_items = stripe.InvoiceItem.all(customer=customer)
-        invoice_items = []
-        total_count = 0
-        total_cost = 0
-        for data in all_invoice_items.get('data'):
-            if data['invoice'] is None:
-                if data['currency'] == 'usd':
-                    invoice_items += [('$%.2f' % (data['amount'] / 100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
-                    total_count += int(data['metadata']['quantity'])
-                    total_cost += int(data['amount'])
-        context['invoice_items'] = invoice_items
-        context['total_cost'] = '$%.2f' % (total_cost / 100.00)
-        context['total_count'] = total_count
+        stripeCustomer = getStripeCustomer(self.request.user)
+        if stripeCustomer:
+            all_invoice_items = stripe.InvoiceItem.all(customer=stripeCustomer)
+            invoice_items = []
+            total_count = 0
+            total_cost = 0
+            for data in all_invoice_items.get('data'):
+                if data['invoice'] is None:
+                    if data['currency'] == 'usd':
+                        invoice_items += [('$%.2f' % (data['amount'] / 100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
+                        total_count += int(data['metadata']['quantity'])
+                        total_cost += int(data['amount'])
+            context['invoice_items'] = invoice_items
+            context['total_cost'] = '$%.2f' % (total_cost / 100.00)
+            context['total_count'] = total_count
+        context['customerExists'] = True if stripeCustomer else False
         return context
 
     def post(self, request, *args, **kwargs):
@@ -226,23 +198,22 @@ class StripeInvoiceListView(LoginRequiredMixin, TemplateView):
         # context['cards'] = cardVals
         return context
 
+def getStripeCustomer(user):
+    try:
+        customer_id = user.stripecustomer.customer_id
+        customer = stripe.Customer.retrieve(customer_id)
+        return customer
+        #return {"customerExists": True, "id": StripeCustomer.objects.get(user=user).customer_id}
+    except ObjectDoesNotExist:
+        return None
+        #return {"customerExists": False, "id": None}
 
-class OrderListView(ListView):
+class OrderListView(LoginRequiredMixin, ListView):
     model = models.Order
     context_object_name = 'orders'
     template_name = 'foodapp/orders.html'
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(OrderListView, self).dispatch(*args, **kwargs)
-
-
 class UserOrderView(OrderListView):
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(UserOrderView, self).dispatch(*args, **kwargs)
-
     def get_queryset(self):
         username = self.kwargs.get('username', None)
 
@@ -271,12 +242,8 @@ def last_month_view(request):
     return redirect('foodapp:month_orders', year, last_month)
 
 
-class LeaderboardView(TemplateView):
+class LeaderboardView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/leader.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(LeaderboardView, self).dispatch(*args, **kwargs)
 
     def helper(self, leaderboard, items, leaderboardMax):
         helper = 1
@@ -352,12 +319,8 @@ class LeaderboardView(TemplateView):
         return context
 
 
-class MonthOrdersView(TemplateView):
+class MonthOrdersView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/month.html'
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(MonthOrdersView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(MonthOrdersView, self).get_context_data(**kwargs)
@@ -405,14 +368,10 @@ class MonthOrdersView(TemplateView):
         return context
 
 
-class SuperMonthOrdersView(TemplateView):
+class SuperMonthOrdersView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/super_month.html'
     form_class = forms.PaidForm
     object = models.AmountPaid
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(SuperMonthOrdersView, self).dispatch(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         success_url = reverse_lazy('foodapp:last_month_view')
