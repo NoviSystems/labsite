@@ -9,7 +9,7 @@ urlpatterns = [
 	url(r'^(?P<business_unit>\d+)/delete_business_unit/$', BusinessUnitDeleteView.as_view(), name='delete_business_unit'),
 
 	url(r'^(?P<pk>\d+)/revenue/$', RevenueView.as_view(), name='revenue'),
-
+	url(r'^(?P<pk>\d+)/revenue/(?P<invoice>\d+)/update_invoice/$', InvoiceUpdateView.as_view(), name='udpate_invoice'),
 
 	url(r'^(?P<pk>\d+)/dashboard/$', DashboardView.as_view(), name='dashboard'),
 	url(r'^(?P<pk>\d+)/dashboard/(?P<fiscal_year>\d+)/$', DashboardView.as_view(), name='dashboard'),
