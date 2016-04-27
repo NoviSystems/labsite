@@ -7,10 +7,10 @@
     </br>
     <ul class="nav nav-tabs">
         <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
-        <li class="active"><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
+        <li ><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
         <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
         <li><a href={% url 'accounting:personnel' pk=current.pk %}>Personnel</a></li>
-        <li><a href={% url 'accounting:revenue' pk=current.pk %}>Revenue</a></li>
+        <li class="active"><a href={% url 'accounting:revenue' pk=current.pk %}>Revenue</a></li>
         <li><a href="#">Prospects</a></li>
     </ul>
 
@@ -19,6 +19,7 @@
             </br>
             <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}>Create Contract</a>
             </br>
+            </br>
         </div>
     </div>
 
@@ -26,14 +27,12 @@
         <div class="col-md-12">
 
         {% if contract_invoices %}
-            <h3>Active Contracts</h3>
-            <hr></hr>
             {% for contract_invoice in contract_invoices %}
 
             <div role="tab" id="headingOne">
                 <div class="panel-title">
                     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract_invoice.contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract_invoice.contract.pk}}">
-                        <h4 class="lead'">{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }}</h4><hr>
+                        <h4 class="lead'">{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }} - {{contract_invoice.contract.contract_state }}</h4><hr>
                     </a>
                 </div>
             </div>

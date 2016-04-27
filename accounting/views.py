@@ -390,6 +390,31 @@ class ContractsView(LoginRequiredMixin, SetUpMixin, TemplateView):
         context['contract_invoices'] = contract_invoices
         return context
 
+class RevenueView(LoginRequiredMixin, SetUpMixin, TemplateView):
+    template_name = 'accounting/revenue.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(RevenueView, self).get_context_data()
+        context['business_units'] = self.business_units
+        context['current'] = self.current
+        context['fiscal_years'] = self.fiscal_years
+        context['current_month'] = self.current_month
+        context['current_fiscal_year'] = self.current_fiscal_year
+
+        contracts = Contract.objects.filter(business_unit=self.current)
+        contract_invoices = []
+        for contract in contracts:
+            invoices = Invoice.objects.filter(contract=contract)
+            contract_invoices.extend(
+            [
+                {
+                    'contract': contract,
+                    'invoices': invoices,
+                }
+            ]
+            )
+        context['contract_invoices'] = contract_invoices
+        return context
 
 class ExpensesView(LoginRequiredMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/expenses.html'
