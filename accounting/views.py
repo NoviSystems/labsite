@@ -414,19 +414,21 @@ class RevenueView(LoginRequiredMixin, SetUpMixin, TemplateView):
         context['current_month'] = self.current_month
         context['current_fiscal_year'] = self.current_fiscal_year
 
-        contracts = Contract.objects.filter(business_unit=self.current)
-        contract_invoices = []
-        for contract in contracts:
-            invoices = Invoice.objects.filter(contract=contract)
-            contract_invoices.extend(
-            [
-                {
-                    'contract': contract,
-                    'invoices': invoices,
-                }
-            ]
-            )
-        context['contract_invoices'] = contract_invoices
+        # contracts = Contract.objects.filter(business_unit=self.current)
+        # contract_invoices = []
+        # for contract in contracts:
+        #     invoices = Invoice.objects.filter(contract=contract)
+        #     contract_invoices.extend(
+        #     [
+        #         {
+        #             'contract': contract,
+        #             'invoices': invoices,
+        #         }
+        #     ]
+        #     )
+
+        invoices = Invoice.objects.filter(contract__business_unit=self.current)
+        context['invoices'] = invoices
         return context
 
 class ExpensesView(LoginRequiredMixin, SetUpMixin, TemplateView):
