@@ -7,12 +7,16 @@ app_name = 'foodapp'
 
 urlpatterns = [
     url(r'^$', views.HomeView.as_view(), name='home'),
+
     url(r'^stripe/cards/$', views.StripeCardListView.as_view(), name='stripe_card_list'),
     url(r'^stripe/cards/create$', views.StripeCreateView.as_view(), name='stripe_card_create'),
     url(r'^stripe/cards/create$', views.StripeCreateView.as_view(), name='stripe_customer_create'),
     url(r'^stripe/cards/delete/(\w+)/$', views.StripeCardDeleteView.as_view(), name='stripe_card_delete'),
     url(r'^stripe/cards/update/(\w+)/$', views.StripeCardUpdateView.as_view(), name='stripe_card_update'),
-    url(r'^stripe/invoice$', views.StripeCreateInvoiceView.as_view(), name='stripe_invoice_create'),
+
+    url(r'^stripe/invoices/$', views.StripeInvoiceListView.as_view(), name='stripe_invoice_list'),
+    url(r'^stripe/invoices/create$', views.StripeInvoiceCreateView.as_view(), name='stripe_invoice_create'),
+
     url(r'^orders/$', views.OrderListView.as_view(), name='orders'),
     url(r'^orders/user/(?P<username>\w+)/$', views.UserOrderView.as_view(), name='user_orders'),
     url(r'^orders/last_month/$', views.last_month_view, name='last_month_view'),

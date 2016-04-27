@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django.views.generic import CreateView, ListView, TemplateView
-from django.views.generic.edit import DeleteView, UpdateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
@@ -61,13 +60,13 @@ class HomeView(CreateView):
         stripe_cid = obj.user.stripecustomer.customer_id
 
         obj.invoiceitem = stripe.InvoiceItem.create(
-             customer = stripe_cid,
-             # amount must be in cents
-             amount = (int(100 * obj.item.cost * obj.quantity)),
-             currency = "usd",
-             description = obj.item.name,
-             metadata = {"quantity": obj.quantity, "date": obj.date},
-         )
+            customer=stripe_cid,
+            # amount must be in cents
+            amount=(int(100 * obj.item.cost * obj.quantity)),
+            currency="usd",
+            description=obj.item.name,
+            metadata={"quantity": obj.quantity, "date": obj.date},
+        )
         obj.save()
 
         return HttpResponseRedirect(self.success_url)
@@ -134,6 +133,7 @@ class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
         customer.sources.retrieve(args[0]).delete()
         return redirect(self.success_url, request)
 
+
 class StripeCardUpdateView(LoginRequiredMixin, TemplateView):
     success_url = reverse_lazy('foodapp:stripe_card_list')
 
@@ -170,11 +170,13 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
         context['cards'] = cardVals
         return context
 
-class StripeCreateInvoiceView(TemplateView):
+
+class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/stripe_create_invoice.html'
-    success_url = reverse_lazy('foodapp:home') 
+    success_url = reverse_lazy('foodapp:home')
+
     def get_context_data(self, **kwargs):
-        context = super(StripeCreateInvoiceView, self).get_context_data(**kwargs)
+        context = super(StripeInvoiceCreateView, self).get_context_data(**kwargs)
         try:
             customer = StripeCustomer.objects.get(user=self.request.user).customer_id
             context['customerExists'] = True
@@ -186,19 +188,44 @@ class StripeCreateInvoiceView(TemplateView):
         total_count = 0
         total_cost = 0
         for data in all_invoice_items.get('data'):
-            if data['invoice'] == None:
+            if data['invoice'] is None:
                 if data['currency'] == 'usd':
-                    invoice_items += [('$%.2f' % (data['amount']/100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
+                    invoice_items += [('$%.2f' % (data['amount'] / 100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
                     total_count += int(data['metadata']['quantity'])
                     total_cost += int(data['amount'])
         context['invoice_items'] = invoice_items
-        context['total_cost'] = '$%.2f' % (total_cost/100.00)
+        context['total_cost'] = '$%.2f' % (total_cost / 100.00)
         context['total_count'] = total_count
         return context
 
     def post(self, request, *args, **kwargs):
         print("Create and charge invoice here")
         return redirect(self.success_url, request)
+
+
+class StripeInvoiceListView(LoginRequiredMixin, TemplateView):
+    template_name = 'foodapp/stripe_list_invoices.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(StripeInvoiceListView, self).get_context_data(**kwargs)
+        # try:
+        #     customer = StripeCustomer.objects.get(user=self.request.user).customer_id
+        #     context['customerExists'] = True
+        # except ObjectDoesNotExist:
+        #     context['customerExists'] = False
+        #     return context
+        # cards = stripe.Customer.retrieve(customer).sources.all(object='card')
+        # defaultCard = stripe.Customer.retrieve(customer).default_source
+        # # Needs to be way to read more than one card here. Refactor
+        # cardVals = []
+        # for data in cards.get('data'):
+        #     if data['id'] == defaultCard:
+        #         cardVals += [(data['id'], data['last4'], True)]
+        #     else:
+        #         cardVals += [(data['id'], data['last4'], False)]
+        # context['cards'] = cardVals
+        return context
+
 
 class OrderListView(ListView):
     model = models.Order

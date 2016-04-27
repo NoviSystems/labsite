@@ -4,6 +4,7 @@ from datetime import datetime
 from celery import shared_task
 from django.conf import settings
 from django.core import mail
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template import Template, Context
 
 from foodapp.models import RiceCooker, StripeCustomer
@@ -15,20 +16,14 @@ stripe.api_key = settings.STRIPE_API_KEY
 
 notification_email_msg = Template("""
 This is your friendly reminder to submit payment for your
-recent Foodapp invoice {{ date }}. If
-you haven't done so already, you may use the following URL,
-but you must do so before it expires on {{ exp_date }}.
+recent Foodapp invoice for a total of {{ total }}.  Please
+navigate to the following link in order to view and pay this
+invoice.
 
-URL: {{ url }}
-""")
+{{ payment_url }}
 
-reminder_email_msg = Template("""
-This is your friendly reminder to submit payment for your
-recent Foodapp invoice {{ date }}. If
-you haven't done so already, you may use the following URL,
-but you must do so before it expires on {{ exp_date }}.
-
-URL: {{ url }}
+If you fail to pay this invoice, the items will be rolled into
+the next invoice.
 """)
 
 
@@ -60,44 +55,21 @@ def create_invoices():
 
     customers = StripeCustomer.objects.all()
 
-    for customer in customers:
-        invoice = stripe.Invoice.create(customer=customer.customer_id)
-
-        user = customer.user
-
-        if not invoice.closed:
-            subj = "[Foodapp] Automatic invoice payment notification"
-            from_email = settings.DEFAULT_FROM_EMAIL
-            recipients = [user.email]
-
-            msg = email_msg.render(Context())
-            # html_msg = html_email_msg.render(Context())
-
-            # email = mail.EmailMultiAlternatives(subj, msg, from_email, recipients)
-            # email.attach_alternative(html_msg, 'text/html')
-
-            email.connection = connection
-            email.send()
-
-
-@shared_task
-def send_invoice_reminder_emails():
-
     if settings.FOODAPP_SEND_INVOICE_REMINDERS:
-        connection = mail.get_connection(fail_silently=False)
-
-        customers = StripeCustomer.objects.all()
 
         for customer in customers:
-            invoice = stripe.Invioce.all(customer=customer.customer_id, limit=1)
+            invoice = stripe.Invoice.create(customer=customer.customer_id)
+
             user = customer.user
 
             if not invoice.closed:
-                subj = "[Foodapp] Automatic invoice payment reminder"
+                subj = "[Foodapp] Payment required - you have unpaid items on Foodapp"
                 from_email = settings.DEFAULT_FROM_EMAIL
                 recipients = [user.email]
 
-                msg = email_msg.render(Context())
+                msg = notification_email_msg.render(Context({"total": 0, "payment_url": ""}))
+                email = mail.EmailMessage(subj, msg, from_email, recipients)
+
                 # html_msg = html_email_msg.render(Context())
 
                 # email = mail.EmailMultiAlternatives(subj, msg, from_email, recipients)
@@ -105,4 +77,3 @@ def send_invoice_reminder_emails():
 
                 email.connection = connection
                 email.send()
-
