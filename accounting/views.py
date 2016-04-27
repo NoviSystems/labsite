@@ -628,7 +628,7 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         if max_invoice_number['number__max'] == None:
             form.instance.number = 1
         else:
-            form.instance.number = max_invoice_number['invoice_number__max'] + 1        
+            form.instance.number = max_invoice_number['number__max'] + 1        
         try:
             predicted_amount = self.request.POST['predicted_amount']
             income = None
