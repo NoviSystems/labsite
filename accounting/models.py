@@ -84,7 +84,7 @@ class Invoice(models.Model):
     }
 
     contract = models.ForeignKey(Contract)
-    number = models.CharField(max_length=20)
+    number = models.IntegerField()
     date = models.DateField()
     transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE)
     income = models.OneToOneField(Income)
