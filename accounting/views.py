@@ -442,14 +442,20 @@ class ExpensesView(LoginRequiredMixin, SetUpMixin, TemplateView):
         context['months'] = self.months
 
         month_data = []
+
+        if 'month' in self.kwargs:
+            display_month = Month.objects.get(pk=self.kwargs['month'])
+        else:
+            display_month = self.current_month
+
         try:
-            cash = Cash.objects.get(month=self.current_month)
+            cash = Cash.objects.get(month=display_month)
         except ObjectDoesNotExist:
             cash = None
         month_data = {
-            'month': self.current_month,
-            'expenses': Expense.objects.filter(month=self.current_month),
-            'incomes':Income.objects.filter(month=self.current_month),
+            'month': display_month,
+            'expenses': Expense.objects.filter(month=display_month),
+            'incomes':Income.objects.filter(month=display_month),
             'cash': cash
         }
 
