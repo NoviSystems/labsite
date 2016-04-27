@@ -16,12 +16,62 @@
 
 
     <div class="row">
-        
-
-        <br>
-        {% if invoices %}
+            {% if invoices %}
             {% for invoices in invoices %}
-                {% if invoices.transition_state == 'RECIEVED'%}
+                {% if invoices.transition_state == 'INVOICED'%}
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><h3>Invoiced:</h3></th>
+                                <th>Date: </th>
+                                <th>Status: </th>
+                                <th>Amount: </th>
+                                <th>Update/Delete</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
+                                <td>{{ invoices.date }}</td>
+                                <td>{{ invoices.transition_state }}</td>
+                                <td>{{ invoices.income.predicted_amount }}</td>
+                                <td>
+                                    <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endif %}
+                
+                    {% if invoices.transition_state == 'NOT_INVOICED'%}
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><h3>Not Invoiced:</h3></th>
+                                <th>Date: </th>
+                                <th>Status: </th>
+                                <th>Amount: </th>
+                                <th>Update/Delete</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
+                                <td>{{ invoices.date }}</td>
+                                <td>{{ invoices.transition_state }}</td>
+                                <td>{{ invoices.income.predicted_amount }}</td>
+                                <td>
+                                    <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endif %}
+                    {% if invoices.transition_state == 'RECIEVED'%}
 
                 <table class="table">
                         <thead>
@@ -49,61 +99,7 @@
                         </tbody>
                     </table>
                     {% endif %}
-
-                    <br>
-                    {% if invoices.transition_state == 'NOT_INVOICED'%}
-
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th><h3>Not Invoiced:</h3></th>
-                                <th>Date: </th>
-                                <th>Status: </th>
-                                <th>Amount: </th>
-                                <th>Update/Delete</th>
-                            </tr>
-                        </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
-                                <td>{{ invoices.date }}</td>
-                                <td>{{ invoices.transition_state }}</td>
-                                <td>{{ invoices.income.predicted_amount }}</td>
-                                <td>
-                                    <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
-                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% endif %}
-                    <br>
-                    {% if invoices.transition_state == 'INVOICED'%}
-
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th><h3>Invoiced:</h3></th>
-                                <th>Date: </th>
-                                <th>Status: </th>
-                                <th>Amount: </th>
-                                <th>Update/Delete</th>
-                            </tr>
-                        </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
-                                <td>{{ invoices.date }}</td>
-                                <td>{{ invoices.transition_state }}</td>
-                                <td>{{ invoices.income.predicted_amount }}</td>
-                                <td>
-                                    <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
-                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% endif %}
+                    
                     {% endfor %}
 
         {% else %}
