@@ -17,8 +17,6 @@
 
     <div class="row">
             {% if invoices %}
-            {% for invoices in invoices %}
-                {% if invoices.transition_state == 'INVOICED'%}
 
                     <table class="table">
                         <thead>
@@ -31,6 +29,8 @@
                             </tr>
                         </thead>
                     <tbody>
+                    {% for invoices in invoices %}
+                        {% if invoices.transition_state == 'INVOICED'%}
                         <tr>
                             <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
                                 <td>{{ invoices.date }}</td>
@@ -41,11 +41,13 @@
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
                             </tr>
+                            {% endif %}
+                        {% endfor %}
                         </tbody>
+                        
                     </table>
-                    {% endif %}
+                    
                 
-                    {% if invoices.transition_state == 'NOT_INVOICED'%}
 
                     <table class="table">
                         <thead>
@@ -58,6 +60,9 @@
                             </tr>
                         </thead>
                     <tbody>
+                        {% for invoices in invoices %}
+                            {% if invoices.transition_state == 'NOT_INVOICED'%}
+
                         <tr>
                             <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
                                 <td>{{ invoices.date }}</td>
@@ -68,10 +73,11 @@
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
                             </tr>
+                            {% endif %}
+                            {% endfor %}
                         </tbody>
                     </table>
-                    {% endif %}
-                    {% if invoices.transition_state == 'RECIEVED'%}
+                    
 
                     <table class="table">
                         <thead>
@@ -84,7 +90,9 @@
                             </tr>
                         </thead>
                     <tbody>
-                        
+                        {% for invoices in invoices %}
+                        {% if invoices.transition_state == 'RECIEVED'%}
+
                         <tr>
                             <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
                                 <td>{{ invoices.date }}</td>
@@ -95,12 +103,11 @@
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
                         </tr>
-                        
+                        {% endif %}
+                        {% endfor %}
                         </tbody>
                     </table>
-                    {% endif %}
                     
-                    {% endfor %}
 
         {% else %}
             <h4>No Invoices for this business unit.</h4>
