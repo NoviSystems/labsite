@@ -126,6 +126,8 @@ class InvoiceCreateForm(ModelForm):
         model = Invoice
         fields = '__all__'
         exclude = [
+            'transition_state',
+            'number',
             'actual_amount',
             'reconciled',
             'month',
@@ -143,6 +145,7 @@ class InvoiceUpdateForm(ModelForm):
         model = Invoice
         fields = '__all__'
         exclude = [
+            'number',
             'contract'
         ]
 

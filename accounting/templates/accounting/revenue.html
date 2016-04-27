@@ -18,8 +18,6 @@
         <div class="col-md-12">
             </br>
             <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}>Create Contract</a>
-            </br>
-            </br>
         </div>
     </div>
 
@@ -94,7 +92,7 @@
 
             {% endfor %}
         {% else %}
-            <h4>No contracts for this business unit.</h4>
+            <h4>No active contracts for this business unit.</h4>
         {% endif %}
         </div>
     </div>

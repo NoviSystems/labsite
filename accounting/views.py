@@ -559,7 +559,6 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         form.instance.business_unit = business_unit
         max_contract_number = Contract.objects.filter(business_unit=business_unit).aggregate(Max('contract_number'))
-        print "TEST: ", max_contract_number
         if max_contract_number['contract_number__max'] == None:
             form.instance.contract_number = 1
         else:
@@ -609,10 +608,19 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('accounting:contracts', kwargs={ 'pk':self.kwargs['pk'] } )
 
     def form_valid(self, form):
+        contract = Contract.objects.get(pk=self.kwargs['contract'])
+
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
         month = Month.objects.get(fiscal_year__business_unit=business_unit, month__month=form.instance.date.month)
         form.instance.month = month
-        form.instance.contract = Contract.objects.get(pk=self.kwargs['contract'])
+        form.instance.contract = contract
+        form.instance.transition_state = 'NOT_INVOICED'
+
+        max_invoice_number = Invoice.objects.filter(contract=contract).aggregate(Max('number'))
+        if max_invoice_number['number__max'] == None:
+            form.instance.number = 1
+        else:
+            form.instance.number = max_invoice_number['invoice_number__max'] + 1        
         try:
             predicted_amount = self.request.POST['predicted_amount']
             income = None
