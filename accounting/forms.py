@@ -116,25 +116,16 @@ class ExpenseUpdateForm(ModelForm):
 
 class InvoiceCreateForm(ModelForm):
 
-    predicted_amount = DecimalField(label='Predicted Amount', initial=0, required=True)
-
-
     def __init__(self, *args, **kwargs):
         super(InvoiceCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = Invoice
-        fields = '__all__'
-        exclude = [
-            'transition_state',
-            'number',
-            'actual_amount',
-            'reconciled',
-            'month',
-            'contract',
-            'income'
+        fields = [
+            'predicted_amount',
+            'date_payable'
         ]
-
+        
 
 class InvoiceUpdateForm(ModelForm):
 

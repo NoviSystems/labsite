@@ -76,7 +76,7 @@ class Income(LineItem):
     date_payed = models.DateField(default=None, null=True)
 
 
-class Invoice(models.Model):
+class Invoice(Income):
     TRANSITION_STATE = {
         ('INVOICED', "invoiced"),
         ('NOT_INVOICED', "not invoiced"),
@@ -85,9 +85,7 @@ class Invoice(models.Model):
 
     contract = models.ForeignKey(Contract)
     number = models.IntegerField()
-    date = models.DateField()
     transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE)
-    income = models.OneToOneField(Income)
 
 
 class Personnel(models.Model):

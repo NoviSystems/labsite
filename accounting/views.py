@@ -381,6 +381,7 @@ class ContractsView(LoginRequiredMixin, SetUpMixin, TemplateView):
         for contract in contracts:
             if contract.contract_state == 'ACTIVE':
                 invoices = Invoice.objects.filter(contract=contract)
+                print invoices
                 active_contracts.extend(
                 [
                     {
@@ -617,34 +618,22 @@ class InvoiceCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         contract = Contract.objects.get(pk=self.kwargs['contract'])
-
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
-        month = Month.objects.get(fiscal_year__business_unit=business_unit, month__month=form.instance.date.month)
-        form.instance.month = month
         form.instance.contract = contract
-        form.instance.transition_state = 'NOT_INVOICED'
-
         max_invoice_number = Invoice.objects.filter(contract=contract).aggregate(Max('number'))
         if max_invoice_number['number__max'] == None:
             form.instance.number = 1
         else:
-            form.instance.number = max_invoice_number['number__max'] + 1        
-        try:
-            predicted_amount = self.request.POST['predicted_amount']
-            income = None
-            try:
-                income = Income.objects.create(
-                    business_unit = business_unit,
-                    month = month,
-                    predicted_amount = predicted_amount,
-                    name = form.instance.contract.organization_name,
-                    date_payable = form.instance.date,
-                )
-                form.instance.income = income
-            except:
-                print "Could Not Create Income Object For Invoice"
-        except KeyError:
-            print "No Predicted Amount In Post Request"
+            form.instance.number = max_invoice_number['number__max'] + 1
+        form.instance.transition_state = 'NOT_INVOICED'
+
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = business_unit
+        month = Month.objects.get(fiscal_year__business_unit=business_unit, month__month=form.instance.date_payable.month)
+        form.instance.month = month
+        contract_number = str(form.instance.contract.contract_number)
+        contract_number = contract_number.zfill(4)
+        form.instance.name = form.instance.contract.department + contract_number + '-' + str(form.instance.number)
+
         response = super(InvoiceCreateView, self).form_valid(form)
         updateCashPredicted(business_unit=business_unit)
         return response

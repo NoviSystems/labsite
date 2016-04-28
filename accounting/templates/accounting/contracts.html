@@ -77,7 +77,7 @@
                                 {% for invoice in contract_invoice.invoices %}
                                 <tr>
                                     <th scope="row">{{ invoice.number }}</th>
-                                        <td>{{ invoice.date }}</td>
+                                        <td>{{ invoice.date_payable }}</td>
                                         <td>{{ invoice.transition_state }}</td>
                                         <td>{{ invoice.income.predicted_amount }}</td>
                                         <td>
@@ -149,7 +149,7 @@
                                 {% for invoice in contract_invoice.invoices %}
                                 <tr>
                                     <th scope="row">{{ invoice.number }}</th>
-                                        <td>{{ invoice.date }}</td>
+                                        <td>{{ invoice.date_payable }}</td>
                                         <td>{{ invoice.transition_state }}</td>
                                         <td>{{ invoice.income.predicted_amount }}</td>
                                         <td>
