@@ -167,11 +167,19 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
             context['invoice_items'] = invoice_items
             context['total_cost'] = '$%.2f' % (total_cost / 100.00)
             context['total_count'] = total_count
+            invoices = []
+            all_invoices = stripe.Invoice.all(customer=stripeCustomer)
+            for data in all_invoices.get('data'):
+                invoices += [(datetime.datetime.fromtimestamp(int(data['date'])).strftime('%Y-%m-%d %H:%M:%S'))]
+            context['invoices'] = invoices
         context['customerExists'] = True if stripeCustomer else False
         return context
 
     def post(self, request, *args, **kwargs):
-        print("Create and charge invoice here")
+        customer = getStripeCustomer(self.request.user)
+        stripe.Invoice.create(
+            customer=self.request.user.stripecustomer.customer_id,
+        )
         return redirect(self.success_url, request)
 
 
@@ -203,10 +211,8 @@ def getStripeCustomer(user):
         customer_id = user.stripecustomer.customer_id
         customer = stripe.Customer.retrieve(customer_id)
         return customer
-        #return {"customerExists": True, "id": StripeCustomer.objects.get(user=user).customer_id}
     except ObjectDoesNotExist:
         return None
-        #return {"customerExists": False, "id": None}
 
 class OrderListView(LoginRequiredMixin, ListView):
     model = models.Order
