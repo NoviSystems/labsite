@@ -160,10 +160,9 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
             total_cost = 0
             for data in all_invoice_items.get('data'):
                 if data['invoice'] is None:
-                    if data['currency'] == 'usd':
-                        invoice_items += [('$%.2f' % (data['amount'] / 100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
-                        total_count += int(data['metadata']['quantity'])
-                        total_cost += int(data['amount'])
+                    invoice_items += [('$%.2f' % (data['amount'] / 100.00), data['description'], data['metadata']['quantity'], data['metadata']['date'])]
+                    total_count += int(data['metadata']['quantity'])
+                    total_cost += int(data['amount'])
             context['invoice_items'] = invoice_items
             context['total_cost'] = '$%.2f' % (total_cost / 100.00)
             context['total_count'] = total_count
@@ -188,7 +187,10 @@ class StripeInvoiceListView(LoginRequiredMixin, TemplateView):
             invoices = []
             all_invoices = stripe.Invoice.all(customer=stripeCustomer)
             for data in all_invoices.get('data'):
-                invoices += [(data['id'], datetime.datetime.fromtimestamp(int(data['date'])).strftime('%Y-%m-%d %H:%M:%S'))]
+                items = []
+                for item in data['lines']:
+                    items += [(item['description'], item['metadata']['date'], item['metadata']['quantity'], '$%.2f' % (item['amount'] / 100.00))]
+                invoices += [(data['id'], datetime.datetime.fromtimestamp(int(data['date'])).strftime('%Y-%m-%d %H:%M:%S'), items)]
             context['invoices'] = invoices
         context['customerExists'] = True if stripeCustomer else False
         return context

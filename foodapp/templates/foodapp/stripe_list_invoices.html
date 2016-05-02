@@ -16,14 +16,16 @@
     <tbody>
     {% if customerExists %}
     {% if invoices %}
-        {% for id, invoice_date in invoices %}
+        {% for id, invoice_date, items in invoices %}
             <div class="list-group-item accordion-toggle">
                 <a href="#{{ id }}" data-toggle="collapse">
                     {{ invoice_date }}
                 </a>
                 <div class="list-group collapse out" id="{{ id }}">
                     <li class="list-group-item">
-                        <p>Test</p>
+                        {% for description, item_date, quantity, amount in items %}
+                            <p>{{ quantity }} {{ description }} on {{ item_date }} costing {{ amount }}</p>
+                        {% endfor %}
                 </div>
             </div>
         {% endfor %} 
