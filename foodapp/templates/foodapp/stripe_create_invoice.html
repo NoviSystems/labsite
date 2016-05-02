@@ -47,25 +47,7 @@
         </td>
         </tr>
     {% endif %}
-    {% if invoices %}
-         {% for id in invoices %}
-            <tr>
-                <td style="font-size: 1.5em;">
-                    {{ id }}
-                </td>
-            </tr>
-        {% endfor %} 
-        {% if error %}
-        <h4 class="errorlist">{{ error }}</h4>
-        {% endif %}       
     {% else %}
-        <tr>
-        <td>
-        <h4>No previous invoices!</h4>
-        </td>
-        </tr>
-    {% endif %}
-   {% else %}
     <tr>
         <td>
             <h4>No Stripe Customer Associated with this account. Create one!</h4>

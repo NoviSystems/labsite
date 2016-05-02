@@ -167,11 +167,6 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
             context['invoice_items'] = invoice_items
             context['total_cost'] = '$%.2f' % (total_cost / 100.00)
             context['total_count'] = total_count
-            invoices = []
-            all_invoices = stripe.Invoice.all(customer=stripeCustomer)
-            for data in all_invoices.get('data'):
-                invoices += [(datetime.datetime.fromtimestamp(int(data['date'])).strftime('%Y-%m-%d %H:%M:%S'))]
-            context['invoices'] = invoices
         context['customerExists'] = True if stripeCustomer else False
         return context
 
@@ -188,22 +183,14 @@ class StripeInvoiceListView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StripeInvoiceListView, self).get_context_data(**kwargs)
-        # try:
-        #     customer = StripeCustomer.objects.get(user=self.request.user).customer_id
-        #     context['customerExists'] = True
-        # except ObjectDoesNotExist:
-        #     context['customerExists'] = False
-        #     return context
-        # cards = stripe.Customer.retrieve(customer).sources.all(object='card')
-        # defaultCard = stripe.Customer.retrieve(customer).default_source
-        # # Needs to be way to read more than one card here. Refactor
-        # cardVals = []
-        # for data in cards.get('data'):
-        #     if data['id'] == defaultCard:
-        #         cardVals += [(data['id'], data['last4'], True)]
-        #     else:
-        #         cardVals += [(data['id'], data['last4'], False)]
-        # context['cards'] = cardVals
+        stripeCustomer = getStripeCustomer(self.request.user)
+        if stripeCustomer:
+            invoices = []
+            all_invoices = stripe.Invoice.all(customer=stripeCustomer)
+            for data in all_invoices.get('data'):
+                invoices += [(data['id'], datetime.datetime.fromtimestamp(int(data['date'])).strftime('%Y-%m-%d %H:%M:%S'))]
+            context['invoices'] = invoices
+        context['customerExists'] = True if stripeCustomer else False
         return context
 
 def getStripeCustomer(user):
