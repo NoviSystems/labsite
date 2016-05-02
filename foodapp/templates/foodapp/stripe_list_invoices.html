@@ -6,59 +6,63 @@
 <div class="panel panel-default" style="margin-top:35px;">
     <div class="panel-heading">
         {% if title %}
-        <h3 class="panel-title">{{ title }}</h3>
+            <h3 class="panel-title">{{ title }}</h3>
         {% else %}
-        <h3 class="panel-title">{{ user }}'s Previous Invoices</h3>
+            <h3 class="panel-title">{{ user }}'s Previous Invoices</h3>
         {% endif %}
     </div>
     
-    <table class="table table-striped">
-    <tbody>
-    {% if customerExists %}
-    {% if invoices %}
-        {% for id, invoice_date, items in invoices %}
-            <div class="list-group-item accordion-toggle">
-                <a href="#{{ id }}" data-toggle="collapse">
-                    {{ invoice_date }}
-                </a>
+   {% if customerExists %}
+        {% if invoices %}
+            {% for id, invoice_date, paid, items in invoices %}
+                <a class="list-group-item" href="#{{ id }}" data-toggle="collapse">{{ id }}</a>
                 <div class="list-group collapse out" id="{{ id }}">
                     <li class="list-group-item">
                         {% for description, item_date, quantity, amount in items %}
-                            <p>{{ quantity }} {{ description }} on {{ item_date }} costing {{ amount }}</p>
+                            <p>{{ quantity }} {{ description }}{% if quantity > 1 %}s{% endif %} on {{ item_date }} costing {{ amount }}</p>
                         {% endfor %}
+                    </li>
                 </div>
-            </div>
-        {% endfor %} 
+            {% endfor %}
         {% if error %}
         <h4 class="errorlist">{{ error }}</h4>
         {% endif %}       
+    
     {% else %}
-        <tr>
-        <td>
-        <h4>No previous invoices!</h4>
-        </td>
-        </tr>
+        <table class="table table-striped">
+            <tbody> 
+                <tr>
+                    <td>
+                        <h4>No previous invoices!</h4>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     {% endif %}
-   {% else %}
-    <tr>
-        <td>
-            <h4>No Stripe Customer Associated with this account. Create one!</h4>
-        </td>
-    </tr>
-   <tr>
-        <td>
-            <div class="col-xs-12 col-centered" style="text-align: center;">
-                    <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
-                        Create Stripe Customer
-                        <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
-                    </button>
-                </a>
-            </div>
-        </td>
-    </tr> 
+    
+    {% else %}
+        <table class="table table-striped">
+            <tbody> 
+                <tr>
+                    <td>
+                        <h4>No Stripe Customer Associated with this account. Create one!</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="col-xs-12 col-centered" style="text-align: center;">
+                            <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                                Create Stripe Customer
+                                <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                                </button>
+                            </a>
+                        </div>
+                    </td>
+                </tr> 
+            </tbody>
+        </table>
     {% endif %}
-    </tbody>
-    </table>
-    </div>
+
+</div>
 
 {% endblock content %}
