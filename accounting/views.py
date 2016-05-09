@@ -60,6 +60,18 @@ class SetUpMixin(object):
         else:
             self.current_fiscal_year = self.current_month.fiscal_year
 
+        # Notification System Population
+        self.notifications = []
+        # Get all line items associated with a business unit
+        lineItems = LineItem.objects.filter(business_unit=self.current)
+        # Loop through each line item
+        # for lineItem in lineItems:
+        #     # If the line item's date payable is in the past to the current date
+        #     # And the date payed has not been entered
+        #     # And it has not been reconciled
+        #     # Add to the list of notifications
+        #     # if lineItem.date_payable 
+
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
 
@@ -69,11 +81,11 @@ class DashboardView(LoginRequiredMixin, SetUpMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
 
+        context['notifications'] = self.notifications
+
         if self.fiscal_years:
-            print "TEST"
             # Finding the current month
             current_month = None
-            # now = datetime.datetime.now()
             now = self.now
 
             cma = {
