@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'itng.registration.templates',
     'worklog',
     'foodapp',
+    'accounting',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -193,6 +194,14 @@ LABSITE_APPS = [
         'color': '#D9534F',
         'font_image': 'fa-flask',
         'url': reverse_lazy('worklog:home'),
+        'new_tab': 'false',
+    },
+    {
+        'app_name': 'accounting',
+        'display_name': "Accounting",
+        'color': '#F0AD4E',
+        'font_image': 'fa-line-chart',
+        'url': reverse_lazy('accounting:home'),
         'new_tab': 'false',
     },
     {
