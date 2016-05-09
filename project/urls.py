@@ -19,4 +19,5 @@ urlpatterns = [
     # App urls
     url(r'^lunch/', include('foodapp.urls', namespace='foodapp', app_name='foodapp')),
     url(r'^worklog/', include('worklog.urls', namespace='worklog', app_name='worklog')),
+    url(r'^accounting/', include('accounting.urls', namespace='accounting', app_name='accounting')),
 ]
