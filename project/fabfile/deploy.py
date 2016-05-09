@@ -121,14 +121,14 @@ def rollback(depth=9):
 @pipeline.once
 @pipeline.requires(backup)
 @user.masquerade('labuser')
-def application(labsite=None, foodapp=None, worklog=None):
+def application(labsite=None, foodapp=None, worklog=None, accounting=None):
     """
     Deploys the application code.
     """
     branches = env.git_branches
 
     # set branch defaults and local overrides
-    for repo in ['labsite', 'foodapp', 'worklog']:
+    for repo in ['labsite', 'foodapp', 'worklog', 'accounting']:
         branches.setdefault(repo, 'master')
 
         if locals()[repo] is not None:
@@ -145,6 +145,7 @@ def application(labsite=None, foodapp=None, worklog=None):
         require.python.packages([
             'git+git://github.com/ITNG/foodapp.git@%(foodapp)s' % branches,
             'git+git://github.com/ITNG/worklog.git@%(worklog)s' % branches,
+            'git+git://github.com/ITNG/accounting.git@%(accounting)s' % branches,
         ], upgrade=True)
 
         require.python.requirements('labsite/requirements.txt', upgrade=True)
@@ -237,12 +238,13 @@ def database():
 
 
 @task(default=True)
-def process(labsite='master', foodapp='master', worklog='master'):
+def process(labsite='master', foodapp='master', worklog='master', accounting='master'):
     env.roles = ['application']
     env.git_branches = {
         'labsite': labsite,
         'foodapp': foodapp,
         'worklog': worklog,
+        'accounting': accounting,
     }
 
     pipeline.process(
