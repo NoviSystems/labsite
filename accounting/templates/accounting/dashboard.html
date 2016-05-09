@@ -1,0 +1,117 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+
+
+{% block content %}
+{% if current_month %}
+    </br>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
+        <li><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
+        <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
+        <li><a href={% url 'accounting:personnel' pk=current.pk %}>Personnel</a></li>
+        <li><a href={% url 'accounting:revenue' pk=current.pk %}>Revenue</a></li>
+        <li><a href="#">Prospects</a></li>
+    </ul>
+    </br>
+
+<script src={% static 'js/highcharts.js' %}></script>
+<div id="container" style="width:100%; height:400px;"></div>
+<script>
+$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Cash Values for Months'
+        },
+        xAxis: {
+            categories: {{ months_j | safe }}
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Predicted',
+            data: {{ predicted_totals | safe }}
+        }, {
+            name: 'Actual',
+            data: {{ actual_totals | safe }}
+        }]
+    });
+});
+</script>
+
+{% if not personnel %}
+    <div class="row">
+        <div class="col-md-12">
+        <h4>No personnel for this business unit.
+            <a class="btn btn-primary" href={% url 'accounting:personnel' pk=current.pk %}> Create Personnel</a>
+        </h4>
+        </div>
+    </div>
+{% endif %}
+
+{% if not contracts %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4>No contracts for this business unit.
+                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+            </h4>
+        </div>
+    </div>
+{% endif %}
+
+<hr>
+
+<div class="dropdown">
+    <h3 class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+        {% if month_data %}
+            {{ month_data.month.month }}
+        {% else %}
+            Fiscal Year Values
+        {% endif %}
+    <span class="caret"></span></h3>
+    <ul class="dropdown-menu">
+        <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Fiscal Year Values</a></li>
+        {% for month in months %}
+            <li><a href={% url 'accounting:dashboard_month' pk=current.pk fiscal_year=month.fiscal_year.pk month=month.pk %}>{{ month.month }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% block breakdown %}
+    <div class="container">
+        <div class="row">
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        {% for month in months_names %}
+                        <th>{{ month }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in dashboard_data %}
+                    <tr>
+                        <th scope="row">{{ data.title }}</th>
+                        {% for value in data.values %}
+                            <td>${{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+{% else %}
+<h4>Create fiscal year to generate data</h4>
+<a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
+{% endif %}
+
+{% endblock %}
