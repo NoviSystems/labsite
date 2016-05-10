@@ -12,6 +12,7 @@ import json
 from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
+from django.http import HttpResponse, HttpResponseRedirect
 
 
 """Mixin for ensuring user has access to a page
@@ -21,22 +22,19 @@ has the correct permissions. The permissions value is then
 passed 
 
 Attributes:
-    LoginRequiredMixin: ensure that a user is authenticated
-    object: overall Python object needed to implement class
+    permission_level: what permission an authenticated user holds
 """
 class PermissionsMixin(LoginRequiredMixin, object):
+    permission_level = None
+
     def dispatch(self, request, *args, **kwargs):
         """
         Method that accepts a request argument plus arguments, and returns a HTTP response.
-
-        Objects Added To Self:
-            permission_level: what permission an authenticated user holds
         """
-        # try to get the 
         try:
-            permission_level = AccountingUser.objects.get(user=self.request.user).permission
+            self.permission_level = AccountingUser.objects.get(user=self.request.user).permission
         except ObjectDoesNotExist:
-            permission_level = None
+            self.permission_level = None
         return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
 
 
@@ -48,6 +46,7 @@ class HomePageView(PermissionsMixin, TemplateView):
         # Get business units associated with user
         business_units = BusinessUnit.objects.filter(user=self.request.user)
         context['business_units'] = business_units
+        context['permission_level'] = self.permission_level
         return context
 
 
