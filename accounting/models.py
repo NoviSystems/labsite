@@ -9,6 +9,16 @@ from calendar import monthrange
 from django.core.exceptions import ObjectDoesNotExist
 
 
+class AccountingUser(models.Model):
+    PERMISSION_STATE = {
+        ('ADMIN', "admin" ),
+        ('MANAGER', "manager" ),
+        ('VIEWER', "viewer"),
+    }
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    permission = models.CharField(max_length=12, choices=PERMISSION_STATE)
+
+
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)
     account_number = models.CharField(max_length=12)
