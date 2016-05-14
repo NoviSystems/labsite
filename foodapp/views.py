@@ -78,6 +78,8 @@ class HomeView(LoginRequiredMixin, CreateView):
         return context
 
 # Refactor into StripeCustomerCreateView and StripeCardCreateView
+
+
 class StripeCreateView(LoginRequiredMixin, TemplateView):
     success_url = reverse_lazy('foodapp:stripe_card_list')
     template_name = 'foodapp/stripe_create_form.html'
@@ -99,6 +101,7 @@ class StripeCreateView(LoginRequiredMixin, TemplateView):
             customer = stripe.Customer.create(source=token)
             StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
             return redirect(self.success_url, request)
+
 
 class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
     model = models.StripeCustomer
@@ -165,7 +168,7 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
                          data['description'],
                          int(data['metadata']['quantity']),
                          data['metadata']['date']
-                        )]
+                         )]
                     total_count += int(data['metadata']['quantity'])
                     total_cost += int(data['amount'])
             context['invoice_items'] = invoice_items
@@ -199,16 +202,17 @@ class StripeInvoiceListView(LoginRequiredMixin, TemplateView):
                          item['metadata']['date'],
                          int(item['metadata']['quantity']),
                          '$%.2f' % (item['amount'] / 100.00),
-                        )]
+                         )]
                 invoices += [
                     (data['id'],
                      datetime.datetime.fromtimestamp(int(data['date'])).strftime('%Y-%m-%d %H:%M:%S'),
                      data['paid'],
                      items
-                    )]
+                     )]
             context['invoices'] = invoices
         context['customerExists'] = True if stripeCustomer else False
         return context
+
 
 def getStripeCustomer(user):
     try:
@@ -218,12 +222,15 @@ def getStripeCustomer(user):
     except ObjectDoesNotExist:
         return None
 
+
 class OrderListView(LoginRequiredMixin, ListView):
     model = models.Order
     context_object_name = 'orders'
     template_name = 'foodapp/orders.html'
 
+
 class UserOrderView(OrderListView):
+
     def get_queryset(self):
         username = self.kwargs.get('username', None)
 
