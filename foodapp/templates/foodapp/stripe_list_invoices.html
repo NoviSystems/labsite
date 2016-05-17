@@ -11,8 +11,8 @@
             <h3 class="panel-title">{{ user }}'s Previous Invoices</h3>
         {% endif %}
     </div>
-    
-   {% if customerExists %}
+
+   {% if customer_exists %}
         {% if invoices %}
             {% for id, invoice_date, paid, items in invoices %}
                 <a class="list-group-item" href="#{{ id }}" data-toggle="collapse">{{ id }}</a>
@@ -26,11 +26,11 @@
             {% endfor %}
         {% if error %}
         <h4 class="errorlist">{{ error }}</h4>
-        {% endif %}       
-    
+        {% endif %}
+
     {% else %}
         <table class="table table-striped">
-            <tbody> 
+            <tbody>
                 <tr>
                     <td>
                         <h4>No previous invoices!</h4>
@@ -39,10 +39,10 @@
             </tbody>
         </table>
     {% endif %}
-    
+
     {% else %}
         <table class="table table-striped">
-            <tbody> 
+            <tbody>
                 <tr>
                     <td>
                         <h4>No Stripe Customer Associated with this account. Create one!</h4>
@@ -58,7 +58,7 @@
                             </a>
                         </div>
                     </td>
-                </tr> 
+                </tr>
             </tbody>
         </table>
     {% endif %}

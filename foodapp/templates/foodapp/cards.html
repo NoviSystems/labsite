@@ -11,10 +11,10 @@
         <h3 class="panel-title">{{ user }}'s Stripe Card ID's</h3>
         {% endif %}
     </div>
-    
+
     <table class="table table-striped">
     <tbody>
-    {% if customerExists %}
+    {% if customer_exists %}
     {% if cards %}
         {% for id, last4, primary in cards %}
             <tr>
@@ -24,17 +24,17 @@
             	    {% csrf_token %}
 		    	    <button class="btn btn-danger" style="float: right; margin-left: 5px;">
                 		<i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i>
-                	</button>   	
+                	</button>
                 </form>
             {% if not primary %}
             <form method="POST" action={% url 'foodapp:stripe_card_update' id %} id="delete-form" style="margin-top: -30px;">
             	{% csrf_token %}
 		    	<button class="btn btn-info" style="float: right;">
                 	Set Primary <i class="fa fa-level-up" title="SetPrimary" aria-hidden="true"></i>
-                </button>   	
+                </button>
             </form>
             {% endif %}
-                </td> 
+                </td>
             </tr>
             {% endfor %}
         {% if error %}
@@ -74,7 +74,7 @@
                 </a>
             </div>
         </td>
-    </tr> 
+    </tr>
     {% endif %}
     </tbody>
     </table>

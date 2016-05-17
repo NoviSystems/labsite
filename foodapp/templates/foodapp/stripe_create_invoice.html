@@ -14,7 +14,7 @@
 
     <table class="table table-striped">
     <tbody>
-    {% if customerExists %}
+    {% if customer_exists %}
         {% if invoice_items %}
             {% for amount, description, quantity, pur_date in invoice_items %}
                 <tr>

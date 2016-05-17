@@ -8,7 +8,7 @@
 <script type="text/javascript">
 
     // This identifies your website in the createToken call below
-    Stripe.setPublishableKey('pk_test_TVs12KB8KSKNEZQbPtD0oJfM');
+    Stripe.setPublishableKey('{{ stripe_api_publishable_key }}');
 
     var stripeResponseHandler = function(status, response) {
       var $form = $('#payment-form');
@@ -40,7 +40,7 @@
 
 <div class="container">
   <div class="page-header">
-    {% if customerExists %}
+    {% if customer_exists %}
       <h1>Add Card to Stripe</h1>
     </div>
     <div class="'container">
@@ -49,7 +49,7 @@
     <h1>Create Stripe Customer ID</h1>
     </div>
     <div class="container">
-    <form method="POST" id="payment-form" action={% url 'foodapp:stripe_customer_create' %}> 
+    <form method="POST" id="payment-form" action={% url 'foodapp:stripe_customer_create' %}>
     {% endif %}
         {% csrf_token %}
         <div class="col-xs-12 col-md-4 col-md-offset-4 payment-errors"></div>

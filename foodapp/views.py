@@ -17,7 +17,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from foodapp import forms, models
 from models import StripeCustomer
 
-stripe.api_key = settings.STRIPE_API_KEY
+stripe.api_key = settings.STRIPE_API_SECRET_KEY
 
 
 class HomeView(LoginRequiredMixin, CreateView):
@@ -86,7 +86,8 @@ class StripeCreateView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StripeCreateView, self).get_context_data()
-        context['customerExists'] = True if getStripeCustomer(self.request.user) else False
+        context['customer_exists'] = True if getStripeCustomer(self.request.user) else False
+        context['stripe_api_publishable_key'] = settings.STRIPE_API_PUBLISHABLE_KEY
         return context
 
     def post(self, request, *args, **kwargs):
@@ -145,7 +146,7 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
                 else:
                     cardVals += [(data['id'], data['last4'], False)]
             context['cards'] = cardVals
-        context['customerExists'] = True if stripeCustomer else False
+        context['customer_exists'] = True if stripeCustomer else False
         return context
 
 
@@ -156,6 +157,7 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StripeInvoiceCreateView, self).get_context_data(**kwargs)
         stripeCustomer = getStripeCustomer(self.request.user)
+
         if stripeCustomer:
             all_invoice_items = stripe.InvoiceItem.all(customer=stripeCustomer)
             invoice_items = []
@@ -174,11 +176,12 @@ class StripeInvoiceCreateView(LoginRequiredMixin, TemplateView):
             context['invoice_items'] = invoice_items
             context['total_cost'] = '$%.2f' % (total_cost / 100.00)
             context['total_count'] = total_count
-        context['customerExists'] = True if stripeCustomer else False
+
+        context['customer_exists'] = True if stripeCustomer else False
         return context
 
     def post(self, request, *args, **kwargs):
-        customer = getStripeCustomer(self.request.user)
+        # customer = getStripeCustomer(self.request.user)
         stripe.Invoice.create(
             customer=self.request.user.stripecustomer.customer_id,
         )
@@ -210,7 +213,7 @@ class StripeInvoiceListView(LoginRequiredMixin, TemplateView):
                      items
                      )]
             context['invoices'] = invoices
-        context['customerExists'] = True if stripeCustomer else False
+        context['customer_exists'] = True if stripeCustomer else False
         return context
 
 
