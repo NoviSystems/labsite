@@ -18,24 +18,24 @@
         {% if invoice_items %}
             {% for amount, description, quantity, pur_date in invoice_items %}
                 <tr>
-                    <td style="font-size: 1.5em;">
-                        Purchased {{ quantity }} {{ description }} on {{ pur_date }} totaling {{ amount }}
+                    <td>
+                        <p>Purchased {{ quantity }} {{ description }} on {{ pur_date }} totaling {{ amount }}</p>
                     </td>
                 </tr>
             {% endfor %}
-                <tr>
-                    <td style="font-size: 1.5em;">
-                       {{ total_count }} items purchased this week for a total of {{ total_cost }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <form method="POST" id="invoice-form" action={% url 'foodapp:stripe_invoice_create' %}>
-                            {% csrf_token %}
-                            <button class="btn btn-primary">Pay</button>
-                        </form>
-                    </td>
-                </tr>
+            <tr>
+                <td>
+                   <p style="font-size: 1.5em">Total: {{ total_count }} items purchased, for a total of {{ total_cost }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <form method="POST" id="invoice-form" action="{% url 'foodapp:stripe_invoice_create' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-primary">Pay Up!</button>
+                    </form>
+                </td>
+            </tr>
 
             {% if error %}
             <h4 class="errorlist">{{ error }}</h4>
