@@ -14,16 +14,22 @@
 
    {% if customer_exists %}
         {% if invoices %}
-            {% for id, invoice_date, paid, items in invoices %}
-                <a class="list-group-item" href="#{{ id }}" data-toggle="collapse">{{ id }}</a>
-                <div class="list-group collapse out" id="{{ id }}">
-                    <li class="list-group-item">
+            <div class="list-group" id="repos">
+                {% for id, invoice_date, paid, items, total in invoices %}
+                    <h4>
+                        <a class="list-group-item accordion-toggle" href="#{{ id }}" data-toggle="collapse">{{ invoice_date|date:"l, M d Y" }}:&nbsp;&nbsp;<strong>{{ total }}</strong></a>
+                    </h4>
+
+                    <div class="list-group collapse out" id="{{ id }}">
                         {% for description, item_date, quantity, amount in items %}
-                            <p>{{ quantity }} {{ description }}{% if quantity > 1 %}s{% endif %} on {{ item_date }} costing {{ amount }}</p>
+                            <li class="list-group-item">
+                                <p>{{ quantity }} {{ description }}{% if quantity > 1 %}s{% endif %} on {{ item_date }} costing {{ amount }}</p>
+                            </li>
                         {% endfor %}
-                    </li>
-                </div>
-            {% endfor %}
+                        </li>
+                    </div>
+                {% endfor %}
+            </div>
         {% if error %}
         <h4 class="errorlist">{{ error }}</h4>
         {% endif %}
