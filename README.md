@@ -1,2 +1,2 @@
 # accounting
-Web application to track expenses, income, contracts, invocing, and prospects for ITNG business units.
+Web application to track expenses, income, contracts, invoicing, and prospects for ITNG business units.
