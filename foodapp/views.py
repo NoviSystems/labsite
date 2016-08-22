@@ -93,9 +93,9 @@ class StripeCreateView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         token = request.POST.get('stripeToken', False)
         # New Card
-        stripeCustomer = get_stripe_customer(self.request.user)
-        if stripeCustomer:
-            stripeCustomer.sources.create(source=token)
+        stripe_customer = get_stripe_customer(self.request.user)
+        if stripe_customer:
+            stripe_customer.sources.create(source=token)
             return redirect(self.success_url, request)
         # New Customer
         else:
@@ -107,9 +107,6 @@ class StripeCreateView(LoginRequiredMixin, TemplateView):
 class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
     model = models.StripeCustomer
     success_url = reverse_lazy('foodapp:stripe_card_list')
-
-    def get(self, request, *args, **kwargs):
-        pass
 
     #args[0] stripe card id to delete
     def post(self, request, *args, **kwargs):
@@ -162,48 +159,10 @@ class StripeInvoiceView(LoginRequiredMixin, TemplateView):
 
         if stripe_customer:
             ### Create ###
-            all_invoice_items = stripe.InvoiceItem.all(customer=stripe_customer, invoice=None)
-            invoice_items = []
-            total_count = 0
-            total_cost = 0
-
-            for data in all_invoice_items.get('data'):
-                if data['invoice'] is None:
-                    invoice_items += [
-                        ('$%.2f' % (data['amount'] / 100.00),
-                         data['description'],
-                         int(data['metadata']['quantity']),
-                         data['metadata']['date']
-                         )]
-                    total_count += int(data['metadata']['quantity'])
-                    total_cost += int(data['amount'])
-            context['invoice_items'] = invoice_items
-            context['total_cost'] = '$%.2f' % (total_cost / 100.00)
-            context['total_count'] = total_count
+            context.update(_get_uninvoiced_items_dict(stripe_customer))
 
             ### List ###
-            invoices = []
-            all_invoices = stripe.Invoice.all(customer=stripe_customer)
-            for data in all_invoices.get('data'):
-                items = []
-                for item in data['lines']:
-                    items += [
-                        (item['description'],
-                         item['metadata']['date'],
-                         int(item['metadata']['quantity']),
-                         '$%.2f' % (item['amount'] / 100.00),
-                         )]
-
-                invoice_total = '$%.2f' % (sum([item['amount'] for item in data['lines']]) / 100.00)
-
-                invoices.append([
-                    data['id'],
-                    datetime.datetime.fromtimestamp(int(data['date'])),
-                    data['paid'],
-                    items,
-                    invoice_total
-                ])
-            context['invoices'] = invoices
+            context['invoices'] = _get_invoices_list(stripe_customer)
 
         return context
 
@@ -212,6 +171,53 @@ class StripeInvoiceView(LoginRequiredMixin, TemplateView):
         stripe.Invoice.create(customer=self.request.user.stripecustomer.customer_id)
         return redirect(self.success_url, request)
 
+
+def _get_uninvoiced_items_dict(stripe_customer):
+    all_invoice_items = stripe.InvoiceItem.all(customer=stripe_customer, invoice=None)
+    invoice_items = []
+    total_count = 0
+    total_cost = 0
+
+    for data in all_invoice_items.get('data'):
+        if data['invoice'] is None:
+            invoice_items += [
+                ('$%.2f' % (data['amount'] / 100.00),
+                    data['description'],
+                    int(data['metadata']['quantity']),
+                    data['metadata']['date']
+                    )]
+            total_count += int(data['metadata']['quantity'])
+            total_cost += int(data['amount'])
+
+    return {
+        'invoice_items': invoice_items,
+        'total_cost': '$%.2f' % (total_cost / 100.00),
+        'total_count': total_count,
+    }
+
+def _get_invoices_list(stripe_customer):
+    invoices = []
+    all_invoices = stripe.Invoice.all(customer=stripe_customer)
+    for data in all_invoices.get('data'):
+        items = []
+        for item in data['lines']:
+            items += [
+                (item['description'],
+                    item['metadata']['date'],
+                    int(item['metadata']['quantity']),
+                    '$%.2f' % (item['amount'] / 100.00),
+                    )]
+
+        invoice_total = '$%.2f' % (sum([item['amount'] for item in data['lines']]) / 100.00)
+
+        invoices.append([
+            data['id'],
+            datetime.datetime.fromtimestamp(int(data['date'])),
+            data['paid'],
+            items,
+            invoice_total
+        ])
+    return invoices
 
 def get_stripe_customer(user):
     try:
@@ -226,6 +232,32 @@ class OrderListView(LoginRequiredMixin, ListView):
     model = models.Order
     context_object_name = 'orders'
     template_name = 'foodapp/orders.html'
+
+
+
+class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
+    template_name = 'foodapp/super_invoice_view.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SuperStripeInvoiceView, self).get_context_data(**kwargs)
+        users = models.User.objects.filter(is_active=True)
+        customer_dict = {user: get_stripe_customer(user) for user in users}
+        invoices_dict = {}
+
+        for user, stripe_customer in customer_dict.items():
+            invoices = stripe.Invoice.all(customer=stripe_customer)
+
+            if stripe_customer is None:
+                invoices_dict[user] = None
+            else:
+                invoices_dict[user] = (
+                    stripe_customer is not None,  # user_exists
+                    _get_uninvoiced_items_dict(stripe_customer)['total_cost'],  # amount_owed
+                    stripe.Invoice.all(customer=stripe_customer, paid=False) is not None  # unpaid_invoices
+                )
+
+        context['invoices_dict'] = invoices_dict
+        return context
 
 
 class UserOrderView(OrderListView):

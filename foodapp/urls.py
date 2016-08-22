@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^stripe/cards/update/(\w+)/$', views.StripeCardUpdateView.as_view(), name='stripe_card_update'),
 
     url(r'^stripe/invoices/$', views.StripeInvoiceView.as_view(), name='stripe_invoices'),
+    url(r'^stripe/invoices/super/', views.SuperStripeInvoiceView.as_view(), name='super_invoices'),
 
     url(r'^orders/$', views.OrderListView.as_view(), name='orders'),
     url(r'^orders/user/(?P<username>\w+)/$', views.UserOrderView.as_view(), name='user_orders'),
