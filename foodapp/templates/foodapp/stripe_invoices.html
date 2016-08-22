@@ -3,12 +3,13 @@
 
 {% block content %}
 
+<!-- Create New Invoice -->
 <div class="panel panel-default" style="margin-top:35px;">
     <div class="panel-heading">
         {% if title %}
-        <h3 class="panel-title">{{ title }}</h3>
+        <h3 class="panel-title" style="font-size: 2em">{{ title }}</h3>
         {% else %}
-        <h3 class="panel-title">{{ user }}'s Uninvoiced Items</h3>
+        <h3 class="panel-title" style="font-size: 2em">Uninvoiced Items</h3>
         {% endif %}
     </div>
 
@@ -19,13 +20,13 @@
                 {% for amount, description, quantity, pur_date in invoice_items %}
                     <tr>
                         <td>
-                            <p>Purchased {{ quantity }} {{ description }} on {{ pur_date }} totaling {{ amount }}</p>
+                            <p>Purchased {{ quantity }} {{ description }} on {{ pur_date }} for {{ amount }}</p>
                         </td>
                     </tr>
                 {% endfor %}
                 <tr>
                     <td>
-                       <p style="font-size: 1.5em">Total: {{ total_count }} items purchased, for a total of {{ total_cost }}</p>
+                       <p style="font-size: 1.5em">{{ total_count }} items purchased, for a total of {{ total_cost }}</p>
                     </td>
                 </tr>
                 <tr>
@@ -69,31 +70,32 @@
     </table>
 </div>
 
+<!-- List Invoices -->
 <div class="panel panel-default" style="margin-top:35px;">
     <div class="panel-heading">
         {% if title %}
-            <h3 class="panel-title">{{ title }}</h3>
+            <h3 class="panel-title" style="font-size: 2em">{{ title }}</h3>
         {% else %}
-            <h3 class="panel-title">{{ user }}'s Previous Invoices</h3>
+            <h3 class="panel-title" style="font-size: 2em">Previous Invoices</h3>
         {% endif %}
     </div>
 
    {% if customer_exists %}
         {% if invoices %}
-            <div class="list-group" id="repos">
+            <div class="list-group" id="invoices">
                 {% for id, invoice_date, paid, items, total in invoices %}
                     <h4>
                         <a class="list-group-item accordion-toggle" href="#{{ id }}" data-toggle="collapse">{{ invoice_date|date:"l, M d Y" }}:&nbsp;&nbsp;<strong>{{ total }}</strong></a>
                     </h4>
 
-                    <div class="list-group collapse out" id="{{ id }}">
+                    <ul class="list-group collapse out" id="{{ id }}">
                         {% for description, item_date, quantity, amount in items %}
                             <li class="list-group-item">
                                 <p>{{ quantity }} {{ description }}{% if quantity > 1 %}s{% endif %} on {{ item_date }} costing {{ amount }}</p>
                             </li>
                         {% endfor %}
                         </li>
-                    </div>
+                    </ul>
                 {% endfor %}
             </div>
         {% if error %}
