@@ -86,14 +86,14 @@ class StripeCreateView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StripeCreateView, self).get_context_data()
-        context['customer_exists'] = True if getStripeCustomer(self.request.user) else False
+        context['customer_exists'] = True if get_stripe_customer(self.request.user) else False
         context['stripe_api_publishable_key'] = settings.STRIPE_API_PUBLISHABLE_KEY
         return context
 
     def post(self, request, *args, **kwargs):
         token = request.POST.get('stripeToken', False)
         # New Card
-        stripeCustomer = getStripeCustomer(self.request.user)
+        stripeCustomer = get_stripe_customer(self.request.user)
         if stripeCustomer:
             stripeCustomer.sources.create(source=token)
             return redirect(self.success_url, request)
@@ -113,7 +113,7 @@ class StripeCardDeleteView(LoginRequiredMixin, TemplateView):
 
     #args[0] stripe card id to delete
     def post(self, request, *args, **kwargs):
-        customer = getStripeCustomer(self.request.user)
+        customer = get_stripe_customer(self.request.user)
         customer.sources.retrieve(args[0]).delete()
         return redirect(self.success_url, request)
 
@@ -123,7 +123,7 @@ class StripeCardUpdateView(LoginRequiredMixin, TemplateView):
 
     #args[0] stripe card id to update
     def post(self, request, *args, **kwargs):
-        customer = getStripeCustomer(self.request.user)
+        customer = get_stripe_customer(self.request.user)
         newDefaultCard = customer.sources.retrieve(args[0])
         customer.default_source = newDefaultCard.id
         customer.save()
@@ -135,10 +135,10 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StripeCardListView, self).get_context_data(**kwargs)
-        stripeCustomer = getStripeCustomer(self.request.user)
-        if stripeCustomer:
-            cards = stripeCustomer.sources.all(object='card')
-            defaultCard = stripeCustomer.default_source
+        stripe_customer = get_stripe_customer(self.request.user)
+        if stripe_customer:
+            cards = stripe_customer.sources.all(object='card')
+            defaultCard = stripe_customer.default_source
             cardVals = []
             for data in cards.get('data'):
                 if data['id'] == defaultCard:
@@ -146,16 +146,17 @@ class StripeCardListView(LoginRequiredMixin, TemplateView):
                 else:
                     cardVals += [(data['id'], data['last4'], False)]
             context['cards'] = cardVals
-        context['customer_exists'] = True if stripeCustomer else False
+        context['customer_exists'] = True if stripe_customer else False
         return context
 
 
 class StripeInvoiceView(LoginRequiredMixin, TemplateView):
+    success_url = reverse_lazy('foodapp:stripe_invoices')
     template_name = 'foodapp/stripe_invoices.html'
 
     def get_context_data(self, **kwargs):
         context = super(StripeInvoiceView, self).get_context_data(**kwargs)
-        stripe_customer = getStripeCustomer(self.request.user)
+        stripe_customer = get_stripe_customer(self.request.user)
 
         context['customer_exists'] = True if stripe_customer else False
 
@@ -207,12 +208,12 @@ class StripeInvoiceView(LoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # customer = getStripeCustomer(self.request.user)
+        # customer = get_stripe_customer(self.request.user)
         stripe.Invoice.create(customer=self.request.user.stripecustomer.customer_id)
         return redirect(self.success_url, request)
 
 
-def getStripeCustomer(user):
+def get_stripe_customer(user):
     try:
         customer_id = user.stripecustomer.customer_id
         customer = stripe.Customer.retrieve(customer_id)
