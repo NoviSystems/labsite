@@ -234,7 +234,6 @@ class OrderListView(LoginRequiredMixin, ListView):
     template_name = 'foodapp/orders.html'
 
 
-
 class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
     template_name = 'foodapp/super_invoice_view.html'
 
@@ -253,7 +252,7 @@ class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
                 invoices_dict[user] = (
                     stripe_customer is not None,  # user_exists
                     _get_uninvoiced_items_dict(stripe_customer)['total_cost'],  # amount_owed
-                    stripe.Invoice.all(customer=stripe_customer, paid=False) is not None  # unpaid_invoices
+                    bool(list(stripe.Invoice.all(customer=stripe_customer, paid=False)))  # unpaid_invoices
                 )
 
         context['invoices_dict'] = invoices_dict
