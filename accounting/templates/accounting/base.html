@@ -1,59 +1,58 @@
 {% extends "base.html" %}
 
 {% block title %}
-Accounting 
+    Accounting 
 {% endblock %}
 
 
 {% load staticfiles %}
 
 {% block scripts %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
 {% endblock %}
 
 
 {% block nav-links-left %}
-<ul class="nav navbar-nav">
-    {% if business_units|length > 1 %}
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current.name }} <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-            {% for buisness_unit in business_units %}
-            <li><a href={% url 'accounting:dashboard' pk=buisness_unit.pk %}>{{buisness_unit.name}}</a></li>
-            {% endfor %}
-            <li class="divider"></li>
-            <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
-        </ul>
-    </li>
-    {% elif business_units|length == 1 %}
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current.name }} <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-            <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
-        </ul>
-    </li>
-    {% endif %}
-    {% if fiscal_years %}
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_fiscal_year }} <span class="caret"></span></a>
-        <ul class="dropdown-menu">
-            {% for fiscal_year in fiscal_years %}
-            <li><a href={% url 'accounting:dashboard' pk=current.pk fiscal_year=fiscal_year.pk %}>{{fiscal_year}}</a></li>
-            {% endfor %}
-            <li class="divider"></li>
-            <li><a href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a></li>
-        </ul>
-    </li>
-    {% endif %}
-</ul>
+    <ul class="nav navbar-nav">
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current.name|default:"Select Business" }} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    {% for business_unit in business_units %}
+                        {% if business_unit.name != current.name %}
+                            <li><a href={% url 'accounting:dashboard' pk=business_unit.pk %}>{{ business_unit.name }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    <!-- I'm way too tired to figure out the django-template way to put all of this in one big if statement. Feel free to laugh at me when you read this -->
+                    {% if business_units|length == 1 and not current.name %}<li class="divider"></li>{% endif %}
+                    {% if business_units|length > 1 %}<li class="divider"></li>{% endif %}
+                    <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
+                </ul>
+            </li>
+    
+        {% if fiscal_years %}
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_fiscal_year }} <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    {% for fiscal_year in fiscal_years %}
+                        <li><a href={% url 'accounting:dashboard' pk=current.pk fiscal_year=fiscal_year.pk %}>{{fiscal_year}}</a></li>
+                    {% endfor %}
+                    <li class="divider"></li>
+                    <li><a href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a></li>
+                </ul>
+            </li>
+        {% endif %}
+    </ul>
 {% endblock %}
+
 {% block nav-links-right %}
-<li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="badge">{{ notifications|length }}<span class="caret"></span></a>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="badge">{{ notifications|length }} <span class="caret"></span></a>
         <ul class="dropdown-menu">
-        {% for notification in notifications %}
-            <li><a href="#">Notification</a></li>
-        {% endfor %}
+            {% for notification in notifications %}
+                <li><a href="#">Notification</a></li>
+            {% empty %}
+                <li><a>No Notifications</a></li>
+            {% endfor %}
         </ul>
     </li>
 {% endblock %}

@@ -1,38 +1,42 @@
 {% extends "accounting/base.html" %}
+
 {% load staticfiles %}
-{% block nav-links %}
-{% endblock %}
+
+{% block nav-links %}{% endblock %}
 
 {% block content %}
 
-{% if business_units %}
+<div class="panel panel-default" style="margin-top: 35px;">
+    <table class="table table-striped" style="font-size: 1.5em;">
+        <tbody>
+        {% for business_unit in business_units %}
+            <tr>
+                <td>
+                    <a href={% url 'accounting:dashboard' pk=business_unit.pk %}>{{ business_unit.name }} (Account {{ business_unit.account_number }})</a>
+                    <a class="btn btn-danger"  style="float: right; margin-left: 5px;" href={% url 'accounting:delete_business_unit' business_unit=business_unit.pk %}>Delete</a>
+                    <a class="btn btn-primary" style="float: right; margin-left: 5px;" href={% url 'accounting:update_business_unit' business_unit=business_unit.pk %}>Update</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td>
+                    <div class="col-xs-12 col-centered" style="text-align: center;">
+                        <h3>You currently are not associated with any buisness units.</h3>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+            <tr>
+                <td>
+                    <div class="col-xs-12 col-centered" style="text-align: center;">
+                        <a class="btn btn-primary" href={% url 'accounting:create_business_unit' %}>
+                            Create New Buisness Unit <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table> 
+</div>
 
-{% for business_unit in business_units %}
-
-    <div class= "row">
-        <div class="col-md-4">
-            <h4>
-                <a href={% url 'accounting:dashboard' pk=business_unit.pk %}>{{business_unit.name}}</a>
-            </h4>
-        </div>
-        <div class="col-md-8">
-            <h4>
-                <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=business_unit.pk %}>Update</a>
-                <a class="btn btn-primary" href={% url 'accounting:delete_business_unit' business_unit=business_unit.pk %}>Delete</a>
-            </h4>
-        </div>
-    </div>
-
-{% endfor %}
-{% else %}
-
-    <div class= "row">
-        <div class="col-md-12">
-            <h3> You currently are not associated with any buisness units. </h3>
-        </div>
-    </div>
-
-
-{% endif %}
-    <a class="btn btn-primary" href={% url 'accounting:create_business_unit' %}>Create New Buisness Unit</a>
 {% endblock %}
