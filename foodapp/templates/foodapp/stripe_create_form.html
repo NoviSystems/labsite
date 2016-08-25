@@ -46,7 +46,7 @@
     <div class="'container">
     <form method="POST" id="payment-form" action={% url 'foodapp:stripe_card_create' %}>
     {% else %}
-    <h1>Create Stripe Customer ID</h1>
+    <h1 style="text-align:center;">Create Stripe Customer ID</h1>
     </div>
     <div class="container">
     <form method="POST" id="payment-form" action={% url 'foodapp:stripe_customer_create' %}>

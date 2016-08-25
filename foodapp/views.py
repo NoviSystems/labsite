@@ -100,7 +100,8 @@ class StripeCreateView(LoginRequiredMixin, TemplateView):
         # New Customer
         else:
             customer = stripe.Customer.create(source=token)
-            StripeCustomer.objects.create(user=self.request.user, customer_id=customer.id)
+            StripeCustomer.objects.update_or_create(user=self.request.user,
+                                                    defaults={'customer_id': customer.id})
             return redirect(self.success_url, request)
 
 
@@ -121,8 +122,8 @@ class StripeCardUpdateView(LoginRequiredMixin, TemplateView):
     #args[0] stripe card id to update
     def post(self, request, *args, **kwargs):
         customer = get_stripe_customer(self.request.user)
-        newDefaultCard = customer.sources.retrieve(args[0])
-        customer.default_source = newDefaultCard.id
+        new_default_card = customer.sources.retrieve(args[0])
+        customer.default_source = new_default_card.id
         customer.save()
         return redirect(self.success_url, request)
 
@@ -185,7 +186,7 @@ def _get_uninvoiced_items_dict(stripe_customer):
                     data['description'],
                     int(data['metadata']['quantity']),
                     data['metadata']['date']
-                    )]
+                 )]
             total_count += int(data['metadata']['quantity'])
             total_cost += int(data['amount'])
 
@@ -194,6 +195,7 @@ def _get_uninvoiced_items_dict(stripe_customer):
         'total_cost': '$%.2f' % (total_cost / 100.00),
         'total_count': total_count,
     }
+
 
 def _get_invoices_list(stripe_customer):
     invoices = []
@@ -206,7 +208,7 @@ def _get_invoices_list(stripe_customer):
                     item['metadata']['date'],
                     int(item['metadata']['quantity']),
                     '$%.2f' % (item['amount'] / 100.00),
-                    )]
+                 )]
 
         invoice_total = '$%.2f' % (sum([item['amount'] for item in data['lines']]) / 100.00)
 
@@ -219,11 +221,14 @@ def _get_invoices_list(stripe_customer):
         ])
     return invoices
 
+
 def get_stripe_customer(user):
     try:
         customer_id = user.stripecustomer.customer_id
         customer = stripe.Customer.retrieve(customer_id)
         return customer
+    except stripe.InvalidRequestError:
+        return None
     except ObjectDoesNotExist:
         return None
 
