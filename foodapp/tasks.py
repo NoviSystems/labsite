@@ -7,7 +7,7 @@ from django.template import Template, Context
 
 from foodapp.models import RiceCooker, StripeCustomer
 
-stripe.api_key = settings.STRIPE_API_KEY
+stripe.api_key = settings.STRIPE_API_SECRET_KEY
 
 
 notification_email_msg = Template("""
@@ -23,20 +23,6 @@ the next invoice.
 """)
 
 
-# html_email_msg = Template("""
-# <html>
-#     <body>
-#         <br /> This is your friendly reminder to submit a work log for {{ date }}. If
-#         <br /> you haven't done so already, you may use the following URL,
-#         <br /> but you must do so before it expires on {{ exp_date }}.
-#         <p>
-#         URL: {{ url }}
-#         </p>
-#     </body>
-# <html>
-# """)
-
-
 @shared_task
 def reset_rice_cooker():
     cookers = RiceCooker.objects.all()
@@ -46,18 +32,20 @@ def reset_rice_cooker():
 
 
 @shared_task
-def create_invoices():
-    connection = mail.get_connection(fail_silently=False)
-
-    customers = StripeCustomer.objects.all()
-
+def send_invoice_notifications():
     if settings.FOODAPP_SEND_INVOICE_REMINDERS:
+        connection = mail.get_connection(fail_silently=False)
+        customers = StripeCustomer.objects.all()
+
         for customer in customers:
             # Calculate total cost
-            all_invoice_items = stripe.InvoiceItem.all(customer=customer.customer_id)
-
+            all_invoice_items = stripe.InvoiceItem.all(customer=customer, invoice=None).get('data')
             total_cost = 0
-            for data in all_invoice_items.get('data'):
+
+            if len(all_invoice_items) == 0:
+                continue
+
+            for data in all_invoice_items:
                 if data['invoice'] is None:
                     total_cost += int(data['amount'])
 
@@ -72,10 +60,5 @@ def create_invoices():
             msg = notification_email_msg.render(Context({"total_cost": total_cost}))
             email = mail.EmailMessage(subj, msg, from_email, recipients)
 
-            # html_msg = html_email_msg.render(Context())
-            # email = mail.EmailMultiAlternatives(subj, msg, from_email, recipients)
-            # email.attach_alternative(html_msg, 'text/html')
-
             email.connection = connection
             email.send()
-
