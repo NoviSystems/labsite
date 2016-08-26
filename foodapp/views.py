@@ -174,7 +174,7 @@ class StripeInvoiceView(LoginRequiredMixin, TemplateView):
 
 
 def _get_uninvoiced_items_dict(stripe_customer):
-    all_invoice_items = stripe.InvoiceItem.all(customer=stripe_customer, invoice=None)
+    all_invoice_items = stripe.InvoiceItem.all(customer=stripe_customer)
     invoice_items = []
     total_count = 0
     total_cost = 0
