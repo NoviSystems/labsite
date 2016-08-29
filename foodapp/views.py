@@ -247,9 +247,14 @@ class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
         users = models.User.objects.filter(is_active=True)
         customer_dict = {user: get_stripe_customer(user) for user in users}
         invoices_dict = {}
+        payment_error = False
 
         for user, stripe_customer in customer_dict.items():
-            invoices = stripe.Invoice.all(customer=stripe_customer)
+            invoices = stripe.Invoice.list(customer=stripe_customer).get('data')
+            if len(invoices) > 0:
+                last_invoice = invoices.pop(0)
+                payment_error = not last_invoice.paid and \
+                    last_invoice.attempted and not last_invoice.forgiven
 
             if stripe_customer is None:
                 invoices_dict[user] = None
@@ -257,7 +262,8 @@ class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
                 invoices_dict[user] = (
                     stripe_customer is not None,  # user_exists
                     _get_uninvoiced_items_dict(stripe_customer)['total_cost'],  # amount_owed
-                    bool(list(stripe.Invoice.all(customer=stripe_customer, paid=False)))  # unpaid_invoices
+                    bool(list(stripe.Invoice.all(customer=stripe_customer, paid=False))),  # unpaid_invoices
+                    payment_error,
                 )
 
         context['invoices_dict'] = invoices_dict

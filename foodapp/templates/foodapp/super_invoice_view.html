@@ -13,6 +13,7 @@
                 <th>Username</th>
                 <th>Total Owed (uninvoiced)</th>
                 <th>Unpaid Invoices</th>
+                <th>Payment Errors</th>
             </tr>
         </thead>
         <tbody>
@@ -22,7 +23,9 @@
                     {% if invoices.0 %}
                         <td>{{ invoices.1 }}</td>
                         <td><strong>{% if invoices.2 %}<span class='text-danger'>Yes</span>{% else %}<span class='text-success'>No</span>{% endif %}</td>
+                        <td><strong>{% if invoices.3 %}<span class='text-danger'>Yes</span>{% else %}<span class='text-success'>No</span>{% endif %}</td>
                     {% else %}
+                        <td>--</td>
                         <td>--</td>
                         <td>--</td>
                     {% endif %}
