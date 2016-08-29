@@ -8,8 +8,18 @@
 {% block nav-links %}
 <ul class="nav navbar-nav">
     <li><a href="{% url 'foodapp:home' %}">Place Order <i class="fa fa-cutlery"></i></a></li>
-    <li><a href="{% url 'foodapp:user_orders' username=user %}">My Order History <i class="fa fa-book"></i></a></li>
-    <li><a href="{% url 'foodapp:last_month_view' %}">Last Month's Orders <i class="fa fa-calendar"></i></a></li>
+    <li><a class="dropdown-toggle" type="button"href="#order_history" data-toggle="dropdown">Order History<i class="fa fa-book"></i> <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'foodapp:user_orders' username=user %}">My Order History</a></li>
+            <li><a href="{% url 'foodapp:last_month_view' %}">Last Month's Orders</a></li>
+        </ul>
+    </li>
+    <li><a class="dropdown-toggle" type="button"href="#billing" data-toggle="dropdown">Billing <i class="fa fa-credit-card"></i> <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'foodapp:stripe_invoices' %}">Invoices</a></li>
+            <li><a href="{% url 'foodapp:stripe_card_list' %}">Card Management</a></li>
+        </ul>
+    </li>
     <li><a href="{% url 'foodapp:leaderboard' %}">Leaderboards <i class="glyphicon glyphicon-star-empty"></i></a></li>
 </ul>
 {% endblock %}
