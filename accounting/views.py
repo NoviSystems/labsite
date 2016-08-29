@@ -13,6 +13,8 @@ from django.shortcuts import redirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Max
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import Http404
 
 
 """Mixin for ensuring user has access to a page
@@ -25,17 +27,40 @@ Attributes:
     permission_level: what permission an authenticated user holds
 """
 class PermissionsMixin(LoginRequiredMixin, object):
-    permission_level = None
 
     def dispatch(self, request, *args, **kwargs):
         """
         Method that accepts a request argument plus arguments, and returns a HTTP response.
         """
-        try:
-            self.permission_level = AccountingUser.objects.get(user=self.request.user).permission
-        except ObjectDoesNotExist:
-            self.permission_level = None
+        if self.request.user.is_authenticated():
+            try:
+                self.permission_levels = AccountingUser.objects.filter(user=self.request.user)
+                self.business_units = []
+                for perm in self.permission_levels:
+                    self.business_units.append(perm.business_unit)
+                print self.business_units
+            except ObjectDoesNotExist:
+                self.permission_levels = None
+        else:
+             self.permission_levels = None
+
         return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
+
+
+class AdminMixin(PermissionsMixin, UserPassesTestMixin):
+    def test_func(self):
+        # try:
+        #     if self.request.user.is_superuser:
+        #         permission_level = 'ADMIN'
+        #     else:''
+        #         raise Http404("Incorrect Permissions")
+        # except ObjectDoesNotExist:
+        #     raise Http404("Incorrect Permissions")
+        try:
+            if self.request.user.is_authenticated:
+                print "CAT1"
+        except ObjectDoesNotExist:
+            raise Http404()
 
 
 class HomePageView(PermissionsMixin, TemplateView):
@@ -44,19 +69,15 @@ class HomePageView(PermissionsMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data()
         # Get business units associated with user
-        business_units = BusinessUnit.objects.filter(user=self.request.user)
-        context['business_units'] = business_units
-        context['permission_level'] = self.permission_level
+        context['business_units'] = self.business_units
         return context
 
 
 class SetUpMixin(object):
 
     def dispatch(self, request, *args, **kwargs):
-        self.now = datetime.datetime.now()
 
-        # Get all business units for a user
-        self.business_units = BusinessUnit.objects.filter(user=self.request.user)
+        print "CAT2"
 
         # Get the business unit the user is currently viewing
         self.current = BusinessUnit.objects.get(pk=kwargs['pk'])
@@ -67,15 +88,13 @@ class SetUpMixin(object):
          # Finding the current month
         now = datetime.datetime.now()
         
-        # moves through all fiscal years
         for fiscal_year in self.fiscal_years:
-            # gets all months
             self.months = Month.objects.filter(fiscal_year=fiscal_year)
-            # moves through all months
             for month in self.months:
-                # gets current month
                 if month.month.month == now.month:
                     self.current_month = month
+
+        self.now = now
 
         # if fiscal year is passed by url, get that year as the current fiscal year
         # else get the value associated to the current month
@@ -98,10 +117,12 @@ class SetUpMixin(object):
         #     # Add to the list of notifications
         #     # if lineItem.date_payable 
 
+        print "CAT3"
+
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
 
-class DashboardView(PermissionsMixin, SetUpMixin, TemplateView):
+class DashboardView(AdminMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
     def get_context_data(self, **kwargs):
