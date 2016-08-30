@@ -17,58 +17,38 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import Http404
 
 
-"""Mixin for ensuring user has access to a page
-
-Ensure a user is authenticated, then ensure that the user
-has the correct permissions. The permissions value is then
-passed 
-
-Attributes:
-    permission_level: what permission an authenticated user holds
-"""
 class PermissionsMixin(LoginRequiredMixin, object):
 
     def dispatch(self, request, *args, **kwargs):
-        """
-        Method that accepts a request argument plus arguments, and returns a HTTP response.
-        """
         if self.request.user.is_authenticated():
             try:
                 self.permission_levels = AccountingUser.objects.filter(user=self.request.user)
                 self.business_units = []
                 for perm in self.permission_levels:
                     self.business_units.append(perm.business_unit)
-                print self.business_units
             except ObjectDoesNotExist:
                 self.permission_levels = None
         else:
              self.permission_levels = None
-
         return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
 
 
 class AdminMixin(PermissionsMixin, UserPassesTestMixin):
-    def test_func(self):
-        # try:
-        #     if self.request.user.is_superuser:
-        #         permission_level = 'ADMIN'
-        #     else:''
-        #         raise Http404("Incorrect Permissions")
-        # except ObjectDoesNotExist:
-        #     raise Http404("Incorrect Permissions")
-        try:
-            if self.request.user.is_authenticated:
-                print "CAT1"
-        except ObjectDoesNotExist:
-            raise Http404()
 
+    def test_func(self):
+         try:
+             if self.request.user.is_superuser:
+                 return True
+             else:
+                 raise Http404("Incorrect Permissions")
+         except ObjectDoesNotExist:
+             raise Http404("Incorrect Permissions")
 
 class HomePageView(PermissionsMixin, TemplateView):
     template_name = 'accounting/home.html'
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data()
-        # Get business units associated with user
         context['business_units'] = self.business_units
         return context
 
@@ -76,18 +56,9 @@ class HomePageView(PermissionsMixin, TemplateView):
 class SetUpMixin(object):
 
     def dispatch(self, request, *args, **kwargs):
-
-        print "CAT2"
-
-        # Get the business unit the user is currently viewing
         self.current = BusinessUnit.objects.get(pk=kwargs['pk'])
-
-        # Get the fical years associated for the business unit
         self.fiscal_years = FiscalYear.objects.filter(business_unit=self.current)
-
-         # Finding the current month
-        now = datetime.datetime.now()
-        
+        now = datetime.datetime.now() 
         for fiscal_year in self.fiscal_years:
             self.months = Month.objects.filter(fiscal_year=fiscal_year)
             for month in self.months:
@@ -100,10 +71,10 @@ class SetUpMixin(object):
         # else get the value associated to the current month
         if 'fiscal_year' in kwargs:
             self.current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
-        elif not self.fiscal_years:
-            self.current_fiscal_year = None
-        else:
+        elif self.fiscal_years:
             self.current_fiscal_year = self.current_month.fiscal_year
+        else:
+            self.current_fiscal_year = None
 
         # Notification System Population
         self.notifications = []
@@ -116,8 +87,6 @@ class SetUpMixin(object):
         #     # And it has not been reconciled
         #     # Add to the list of notifications
         #     # if lineItem.date_payable 
-
-        print "CAT3"
 
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
