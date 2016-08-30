@@ -28,29 +28,10 @@ class PermissionsMixin(LoginRequiredMixin, object):
                     self.business_units.append(perm.business_unit)
             except ObjectDoesNotExist:
                 self.permission_levels = None
+                self.business_units = None
         else:
              self.permission_levels = None
         return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
-
-
-class AdminMixin(PermissionsMixin, UserPassesTestMixin):
-
-    def test_func(self):
-         try:
-             if self.request.user.is_superuser:
-                 return True
-             else:
-                 raise Http404("Incorrect Permissions")
-         except ObjectDoesNotExist:
-             raise Http404("Incorrect Permissions")
-
-class HomePageView(PermissionsMixin, TemplateView):
-    template_name = 'accounting/home.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(HomePageView, self).get_context_data()
-        context['business_units'] = self.business_units
-        return context
 
 
 class SetUpMixin(object):
@@ -91,7 +72,48 @@ class SetUpMixin(object):
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
 
-class DashboardView(AdminMixin, SetUpMixin, TemplateView):
+class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
+
+    def test_func(self):
+        try:
+            bu_permission =  AccountingUser.objects.get(user=self.request.user, business_unit=self.current).permission
+            if self.request.user.is_superuser:
+                return True
+            elif bu_permission == 'MANAGER':
+                return True
+            elif bu_permission == 'VIEWER':
+                return True
+            else:
+                raise Http404()
+        except ObjectDoesNotExist:
+                raise Http404()
+
+
+class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
+
+    def test_func(self):
+        try:
+            bu_permission =  AccountingUser.objects.get(user=self.request.user, business_unit=self.current).permission
+            if self.request.user.is_superuser:
+                return True
+            elif bu_permission == 'MANAGER':
+                return True
+            else:
+                raise Http404()
+        except ObjectDoesNotExist:
+                raise Http404()
+
+
+class HomePageView(PermissionsMixin, TemplateView):
+    template_name = 'accounting/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(HomePageView, self).get_context_data()
+        context['business_units'] = self.business_units
+        return context
+
+
+class DashboardView(ViewerMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -392,7 +414,7 @@ class DashboardMonthView(DashboardView):
         return context
 
 
-class ContractsView(PermissionsMixin, SetUpMixin, TemplateView):
+class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/contracts.html'
 
     def get_context_data(self, **kwargs):
@@ -432,7 +454,8 @@ class ContractsView(PermissionsMixin, SetUpMixin, TemplateView):
         context['completed_contracts'] = completed_contracts
         return context
 
-class RevenueView(PermissionsMixin, SetUpMixin, TemplateView):
+
+class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/revenue.html'
 
     def get_context_data(self, **kwargs):
@@ -460,7 +483,8 @@ class RevenueView(PermissionsMixin, SetUpMixin, TemplateView):
         context['invoices'] = invoices
         return context
 
-class ExpensesView(PermissionsMixin, SetUpMixin, TemplateView):
+
+class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/expenses.html'
 
     def get_context_data(self, **kwargs):
@@ -494,21 +518,22 @@ class ExpensesView(PermissionsMixin, SetUpMixin, TemplateView):
         return context
 
 
-class BusinessUnitCreateView(PermissionsMixin, CreateView):
+class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
     template_name = 'accounting/businessunit_create_form.html'
     form_class = BusinessUnitCreateForm
     model = BusinessUnit
 
     def get_success_url(self):
-	   return reverse_lazy('accounting:home')
+        return reverse_lazy('accounting:home')
 
     def form_valid(self, form):
-	response = super(BusinessUnitCreateView, self).form_valid(form)
-	form.instance.user.add(self.request.user)
-	return response
+        response = super(BusinessUnitCreateView, self).form_valid(form)
+        form.instance.user.add(self.request.user)
+        AccountingUser.objects.create(user=self.request.user, business_unit=form.instance, permission='ADMIN')
+        return response
 
 
-class BusinessUnitDeleteView(PermissionsMixin, DeleteView):
+class BusinessUnitDeleteView(ManagerMixin, DeleteView):
     model = BusinessUnit
     template_name_suffix = '_delete_form'
 
@@ -519,7 +544,7 @@ class BusinessUnitDeleteView(PermissionsMixin, DeleteView):
         return reverse_lazy('accounting:home')
 
 
-class BusinessUnitUpdateView(PermissionsMixin, UpdateView):
+class BusinessUnitUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = BusinessUnitUpdateForm
     model = BusinessUnit
@@ -535,7 +560,7 @@ class BusinessUnitUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class FiscalYearCreateView(PermissionsMixin, CreateView):
+class FiscalYearCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/fiscalyear_create_form.html'
     model = FiscalYear
     form_class = FiscalYearCreateForm
@@ -553,7 +578,7 @@ class FiscalYearCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class FiscalYearDeleteView(PermissionsMixin, DeleteView):
+class FiscalYearDeleteView(ManagerMixin, DeleteView):
     model = FiscalYear
     template_name_suffix = '_delete_form'
 
@@ -564,7 +589,7 @@ class FiscalYearDeleteView(PermissionsMixin, DeleteView):
         return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
 
 
-class FiscalYearUpdateView(PermissionsMixin, UpdateView):
+class FiscalYearUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = FiscalYearUpdateForm
     model = FiscalYear
@@ -580,7 +605,7 @@ class FiscalYearUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class ContractCreateView(PermissionsMixin, CreateView):
+class ContractCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/contract_create_form.html'
     model = Contract
     form_class = ContractCreateForm
@@ -605,7 +630,7 @@ class ContractCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class ContractDeleteView(PermissionsMixin, DeleteView):
+class ContractDeleteView(ManagerMixin, DeleteView):
     model = Contract
     template_name_suffix = '_delete_form'
 
@@ -616,7 +641,7 @@ class ContractDeleteView(PermissionsMixin, DeleteView):
         return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
 
 
-class ContractUpdateView(PermissionsMixin, UpdateView):
+class ContractUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = ContractUpdateForm
     model = Contract
@@ -632,7 +657,7 @@ class ContractUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class InvoiceCreateView(PermissionsMixin, CreateView):
+class InvoiceCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/invoice_create_form.html'
     model = Invoice
     form_class = InvoiceCreateForm
@@ -667,7 +692,7 @@ class InvoiceCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class InvoiceDeleteView(PermissionsMixin, DeleteView):
+class InvoiceDeleteView(ManagerMixin, DeleteView):
     model = Invoice
     template_name_suffix = '_delete_form'
 
@@ -684,7 +709,7 @@ class InvoiceDeleteView(PermissionsMixin, DeleteView):
         return response
 
 
-class InvoiceUpdateView(PermissionsMixin, UpdateView):
+class InvoiceUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = InvoiceUpdateForm
     model = Invoice
@@ -702,7 +727,7 @@ class InvoiceUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class ExpenseCreateView(PermissionsMixin, CreateView):
+class ExpenseCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/expense_create_form.html'
     model = Expense
     form_class = ExpenseCreateForm
@@ -740,7 +765,7 @@ class ExpenseCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class ExpenseDeleteView(PermissionsMixin, DeleteView):
+class ExpenseDeleteView(ManagerMixin, DeleteView):
     model = Expense
     template_name_suffix = '_delete_form'
 
@@ -757,7 +782,7 @@ class ExpenseDeleteView(PermissionsMixin, DeleteView):
         return response
 
 
-class ExpenseUpdateView(PermissionsMixin, UpdateView):
+class ExpenseUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = ExpenseUpdateForm
     model = Expense
@@ -775,7 +800,7 @@ class ExpenseUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class PersonnelView(PermissionsMixin, SetUpMixin, TemplateView):
+class PersonnelView(ViewerMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/personnel.html'
 
     def get_context_data(self, **kwargs):
@@ -798,7 +823,7 @@ class PersonnelView(PermissionsMixin, SetUpMixin, TemplateView):
         return context
 
 
-class SalaryCreateView(PermissionsMixin, CreateView):
+class SalaryCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/salary_create_form.html'
     model = Salary
     form_class = SalaryCreateForm
@@ -819,7 +844,7 @@ class SalaryCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class SalaryDeleteView(PermissionsMixin, DeleteView):
+class SalaryDeleteView(ManagerMixin, DeleteView):
     model = Salary
     template_name_suffix = '_delete_form'
 
@@ -837,7 +862,7 @@ class SalaryDeleteView(PermissionsMixin, DeleteView):
         return response
 
 
-class SalaryUpdateView(PermissionsMixin, UpdateView):
+class SalaryUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = SalaryUpdateForm
     model = Salary
@@ -856,7 +881,7 @@ class SalaryUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class PartTimeCreateView(PermissionsMixin, CreateView):
+class PartTimeCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/part_time_create_form.html'
     model = PartTime
     form_class = PartTimeCreateForm
@@ -878,7 +903,7 @@ class PartTimeCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class PartTimeDeleteView(PermissionsMixin, DeleteView):
+class PartTimeDeleteView(ManagerMixin, DeleteView):
     model = PartTime
     template_name = 'accounting/part_time_delete_form.html'
 
@@ -896,7 +921,7 @@ class PartTimeDeleteView(PermissionsMixin, DeleteView):
         return response
 
 
-class PartTimeUpdateView(PermissionsMixin, UpdateView):
+class PartTimeUpdateView(ManagerMixin, UpdateView):
     template_name = 'accounting/part_time_update_form.html'
     form_class = PartTimeUpdateForm
     model = PartTime
@@ -915,7 +940,7 @@ class PartTimeUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class IncomeCreateView(PermissionsMixin, CreateView):
+class IncomeCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/income_create_form.html'
     model = Income
     form_class = IncomeCreateForm
@@ -951,7 +976,7 @@ class IncomeCreateView(PermissionsMixin, CreateView):
         return response
 
 
-class IncomeDeleteView(PermissionsMixin, DeleteView):
+class IncomeDeleteView(ManagerMixin, DeleteView):
     model = Income
     template_name_suffix = '_delete_form'
 
@@ -968,7 +993,7 @@ class IncomeDeleteView(PermissionsMixin, DeleteView):
         return response
 
 
-class IncomeUpdateView(PermissionsMixin, UpdateView):
+class IncomeUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = IncomeUpdateForm
     model = Income
@@ -986,7 +1011,7 @@ class IncomeUpdateView(PermissionsMixin, UpdateView):
         return response
 
 
-class CashUpdateView(PermissionsMixin, UpdateView):
+class CashUpdateView(ManagerMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = CashUpdateForm
     model = Cash
