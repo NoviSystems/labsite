@@ -37,7 +37,7 @@ class PermissionsMixin(LoginRequiredMixin, object):
 class SetUpMixin(object):
 
     def dispatch(self, request, *args, **kwargs):
-        self.current = BusinessUnit.objects.get(pk=kwargs['pk'])
+        self.current = BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.fiscal_years = FiscalYear.objects.filter(business_unit=self.current)
         now = datetime.datetime.now() 
         for fiscal_year in self.fiscal_years:
@@ -578,7 +578,7 @@ class FiscalYearCreateView(ManagerMixin, CreateView):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         response = super(FiscalYearCreateView, self).form_valid(form)
         fiscal_year = form.instance
@@ -595,7 +595,7 @@ class FiscalYearDeleteView(ManagerMixin, DeleteView):
         return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:dashboard', kwargs={'business_unit': self.kwargs["business_unit"]})
 
 
 class FiscalYearUpdateView(ManagerMixin, UpdateView):
@@ -627,7 +627,7 @@ class ContractCreateView(ManagerMixin, CreateView):
         return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         max_contract_number = Contract.objects.filter(business_unit=business_unit).aggregate(Max('contract_number'))
         if max_contract_number['contract_number__max'] == None:
@@ -647,7 +647,7 @@ class ContractDeleteView(ManagerMixin, DeleteView):
         return Contract.objects.get(pk=self.kwargs['contract'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs["business_unit"]})
 
 
 class ContractUpdateView(ManagerMixin, UpdateView):
@@ -659,7 +659,7 @@ class ContractUpdateView(ManagerMixin, UpdateView):
         return Contract.objects.get(pk=self.kwargs['contract'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def form_valid(self, form):
         response = super(ContractUpdateView, self).form_valid(form)
@@ -676,7 +676,7 @@ class InvoiceCreateView(ManagerMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={ 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:contracts', kwargs={ 'business_unit':self.kwargs['business_unit'] } )
 
     def form_valid(self, form):
         contract = Contract.objects.get(pk=self.kwargs['contract'])
@@ -688,7 +688,7 @@ class InvoiceCreateView(ManagerMixin, CreateView):
             form.instance.number = max_invoice_number['number__max'] + 1
         form.instance.transition_state = 'NOT_INVOICED'
 
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         month = Month.objects.get(fiscal_year__business_unit=business_unit, month__month=form.instance.date_payable.month)
         form.instance.month = month
@@ -709,11 +709,11 @@ class InvoiceDeleteView(ManagerMixin, DeleteView):
         return Invoice.objects.get(pk=self.kwargs['invoice'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def delete(self, request, *args, **kwargs):
         response = super(InvoiceDeleteView, self).delete(request, *args, **kwargs)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -727,11 +727,11 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
         return Invoice.objects.get(pk=self.kwargs['invoice'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:contracts', kwargs= { 'business_unit':self.kwargs['business_unit'] } )
 
     def form_valid(self, form):
         response = super(InvoiceUpdateView, self).form_valid(form)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -746,10 +746,10 @@ class ExpenseCreateView(ManagerMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs= { 'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
+        return reverse_lazy('accounting:expenses', kwargs= { 'business_unit':self.kwargs['business_unit'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         month = Month.objects.get(pk=self.kwargs['month'])
         try:
             if self.request.POST['reocurring']:
@@ -769,7 +769,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
             print "Exception thrown"
             form.instance.month = month
         response = super(ExpenseCreateView, self).form_valid(form)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -786,7 +786,7 @@ class ExpenseDeleteView(ManagerMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         response = super(ExpenseDeleteView, self).delete(request, *args, **kwargs)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -800,11 +800,11 @@ class ExpenseUpdateView(ManagerMixin, UpdateView):
         return Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs= {'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
+        return reverse_lazy('accounting:expenses', kwargs= {'business_unit':self.kwargs['business_unit'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
         response = super(ExpenseUpdateView, self).form_valid(form)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -842,10 +842,10 @@ class SalaryCreateView(ManagerMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:personnel', kwargs= { 'business_unit':self.kwargs['business_unit'] } )
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         response = super(SalaryCreateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
@@ -861,11 +861,11 @@ class SalaryDeleteView(ManagerMixin, DeleteView):
         return Salary.objects.get(pk=self.kwargs['salary'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def delete(self, request, *args, **kwargs):
         response = super(SalaryDeleteView, self).delete(request, *args, **kwargs)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
@@ -880,10 +880,10 @@ class SalaryUpdateView(ManagerMixin, UpdateView):
         return Salary.objects.get(pk=self.kwargs['salary'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         response = super(SalaryUpdateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
@@ -900,10 +900,10 @@ class PartTimeCreateView(ManagerMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:personnel', kwargs= { 'business_unit':self.kwargs['business_unit'] } )
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         form.instance.hours_work = 20
         response = super(PartTimeCreateView, self).form_valid(form)
@@ -920,11 +920,11 @@ class PartTimeDeleteView(ManagerMixin, DeleteView):
         return PartTime.objects.get(pk=self.kwargs['part_time'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs={'pk': self.kwargs["pk"]})
+        return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def delete(self, request, *args, **kwargs):
         response = super(PartTimeDeleteView, self).delete(request, *args, **kwargs)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
@@ -939,10 +939,10 @@ class PartTimeUpdateView(ManagerMixin, UpdateView):
         return PartTime.objects.get(pk=self.kwargs['part_time'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:personnel', kwargs= { 'pk':self.kwargs['pk'] } )
+        return reverse_lazy('accounting:personnel', kwargs= { 'business_unit':self.kwargs['business_unit'] } )
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         response = super(PartTimeUpdateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
@@ -959,10 +959,10 @@ class IncomeCreateView(ManagerMixin, CreateView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs= { 'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
+        return reverse_lazy('accounting:expenses', kwargs= { 'business_unit':self.kwargs['business_unit'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         month = Month.objects.get(pk=self.kwargs['month'])
         try:
             if self.request.POST['reocurring']:
@@ -976,7 +976,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
                             name = form.instance.name,
                             date_payable = form.instance.date_payable,
                         )
-            return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'] )
+            return redirect('accounting:expenses', business_unit=self.kwargs['business_unit'], month=self.kwargs['month'] )
         except KeyError:
             print "Exception thrown"
             form.instance.month = month
@@ -993,11 +993,11 @@ class IncomeDeleteView(ManagerMixin, DeleteView):
         return Income.objects.get(pk=self.kwargs['income'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'pk': self.kwargs["pk"], 'month': self.kwargs['month']})
+        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs["business_unit"], 'month': self.kwargs['month']})
 
     def delete(self, request, *args, **kwargs):
         response = super(IncomeDeleteView, self).delete(request, *args, **kwargs)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -1011,10 +1011,10 @@ class IncomeUpdateView(ManagerMixin, UpdateView):
         return Income.objects.get(pk=self.kwargs['income'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs= {'pk':self.kwargs['pk'], 'month': self.kwargs['month']} )
+        return reverse_lazy('accounting:expenses', kwargs= {'business_unit':self.kwargs['business_unit'], 'month': self.kwargs['month']} )
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         response = super(IncomeUpdateView, self).form_valid(form)
         updateCashPredicted(business_unit=business_unit)
         return response
@@ -1029,10 +1029,10 @@ class CashUpdateView(ManagerMixin, UpdateView):
         return Cash.objects.get(pk=self.kwargs['cash'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'pk':self.kwargs['pk'], 'month': self.kwargs['month']})
+        return reverse_lazy('accounting:expenses', kwargs={'business_unit':self.kwargs['business_unit'], 'month': self.kwargs['month']})
 
     def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['pk'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         response = super(CashUpdateView, self).form_valid(form)
         updateCashPredicted(business_unit=business_unit)
         return response

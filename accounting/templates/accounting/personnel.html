@@ -8,11 +8,11 @@
 
     </br>
     <ul class="nav nav-tabs">
-        <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
-        <li><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
-        <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
-        <li class="active"><a href={% url 'accounting:personnel' pk=current.pk %}>Personnel</a></li>
-        <li><a href={% url 'accounting:revenue' pk=current.pk %}>Revenue</a></li>
+        <li><a href={% url 'accounting:dashboard' business_unit=current.pk %}>Dashboard</a></li>
+        <li><a href={% url 'accounting:contracts' business_unit=current.pk %}>Contracts</a></li>
+        <li><a href={% url 'accounting:expenses' business_unit=current.pk %}>Expenses</a></li>
+        <li class="active"><a href={% url 'accounting:personnel' business_unit=current.pk %}>Personnel</a></li>
+        <li><a href={% url 'accounting:revenue' business_unit=current.pk %}>Revenue</a></li>
 
         <li><a href="#">Prospects</a></li>
     </ul>
@@ -33,7 +33,7 @@
                 <h4>No part time personnel for this business unit.</h4>
                 {% endif %}
                 {% if not is_viewer %}
-                    <a class="btn btn-primary" href={% url 'accounting:create_salary' pk=current.pk %}>Create Salary Employee</a>
+                    <a class="btn btn-primary" href={% url 'accounting:create_salary' business_unit=current.pk %}>Create Salary Employee</a>
                 {% endif %}
                 <div class="row">
                     <div class="col-md-12">
@@ -65,8 +65,8 @@
                                 <div class="col-md-4">
                                     {% if not is_viewer %}
                                     <h4>
-                                        <a class="btn btn-primary" href={% url 'accounting:update_salary' pk=current.pk salary=salary.pk %}>Update</a>
-                                        <a class="btn btn-primary" href={% url 'accounting:delete_salary' pk=current.pk salary=salary.pk %}>Delete</a>
+                                        <a class="btn btn-primary" href={% url 'accounting:update_salary' business_unit=current.pk salary=salary.pk %}>Update</a>
+                                        <a class="btn btn-primary" href={% url 'accounting:delete_salary' business_unit=current.pk salary=salary.pk %}>Delete</a>
                                     </h4>
                                     {% endif %}
                                 </div>
@@ -83,7 +83,7 @@
                 <h4>No part time personnel for this business unit.</h4>
                 {% endif %}
                 {% if not is_viewer %}
-                    <a class="btn btn-primary" href={% url 'accounting:create_part_time' pk=current.pk  %}>Create Part Time Employee</a>
+                    <a class="btn btn-primary" href={% url 'accounting:create_part_time' business_unit=current.pk  %}>Create Part Time Employee</a>
                 {% endif %}
                 <div class="row">
                     <div class="col-md-12">
@@ -110,8 +110,8 @@
                                 <div class="col-md-4">
                                     {% if not is_viewer %}
                                     <h4>
-                                        <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk pk=current.pk %}>Update</a>
-                                        <a class="btn btn-primary" href={% url 'accounting:delete_part_time' part_time=part_time.pk  pk=current.pk %}>Delete</a>
+                                        <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk business_unit=current.pk %}>Update</a>
+                                        <a class="btn btn-primary" href={% url 'accounting:delete_part_time' part_time=part_time.pk  business_unit=current.pk %}>Delete</a>
                                     </h4>
                                     {% endif %}
                                 </div>

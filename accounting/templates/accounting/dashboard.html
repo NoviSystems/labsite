@@ -7,11 +7,11 @@
 {% if current_month %}
     </br>
     <ul class="nav nav-tabs">
-        <li class="active"><a href={% url 'accounting:dashboard' pk=current.pk %}>Dashboard</a></li>
-        <li><a href={% url 'accounting:contracts' pk=current.pk %}>Contracts</a></li>
-        <li><a href={% url 'accounting:expenses' pk=current.pk %}>Expenses</a></li>
-        <li><a href={% url 'accounting:personnel' pk=current.pk %}>Personnel</a></li>
-        <li><a href={% url 'accounting:revenue' pk=current.pk %}>Revenue</a></li>
+        <li class="active"><a href={% url 'accounting:dashboard' business_unit=current.pk %}>Dashboard</a></li>
+        <li><a href={% url 'accounting:contracts' business_unit=current.pk %}>Contracts</a></li>
+        <li><a href={% url 'accounting:expenses' business_unit=current.pk %}>Expenses</a></li>
+        <li><a href={% url 'accounting:personnel' business_unit=current.pk %}>Personnel</a></li>
+        <li><a href={% url 'accounting:revenue' business_unit=current.pk %}>Revenue</a></li>
         <li><a href="#">Prospects</a></li>
     </ul>
     </br>
@@ -49,7 +49,7 @@ $(function () {
         <div class="col-md-12">
         <h4>No personnel for this business unit.
             {% if not is_viewer %}
-                <a class="btn btn-primary" href={% url 'accounting:personnel' pk=current.pk %}> Create Personnel</a>
+                <a class="btn btn-primary" href={% url 'accounting:personnel' business_unit=current.pk %}> Create Personnel</a>
             {% endif %}
         </h4>
         </div>
@@ -61,7 +61,7 @@ $(function () {
         <div class="col-md-12">
             <h4>No contracts for this business unit.
                 {% if not is_viewer %}
-                    <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+                    <a class="btn btn-primary" href={% url 'accounting:create_contract' business_unit=current.pk %}> Create Contract</a>
                 {% endif %}
             </h4>
         </div>
@@ -79,9 +79,9 @@ $(function () {
         {% endif %}
     <span class="caret"></span></h3>
     <ul class="dropdown-menu">
-        <li><a href={% url 'accounting:dashboard' pk=current.pk %}>Fiscal Year Values</a></li>
+        <li><a href={% url 'accounting:dashboard' business_unit=current.pk %}>Fiscal Year Values</a></li>
         {% for month in months %}
-            <li><a href={% url 'accounting:dashboard_month' pk=current.pk fiscal_year=month.fiscal_year.pk month=month.pk %}>{{ month.month }}</a></li>
+            <li><a href={% url 'accounting:dashboard_month' business_unit=current.pk fiscal_year=month.fiscal_year.pk month=month.pk %}>{{ month.month }}</a></li>
         {% endfor %}
     </ul>
 </div>
@@ -116,7 +116,7 @@ $(function () {
 {% else %}
 <h4>Create fiscal year to generate data</h4>
     {% if not is_viewer %}
-    <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
+    <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' business_unit=current.pk %}>Create Fiscal Year</a>
     {% endif %}
 {% endif %}
 

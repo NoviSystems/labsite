@@ -19,7 +19,7 @@
                 <ul class="dropdown-menu">
                     {% for business_unit in business_units %}
                         {% if business_unit.name != current.name %}
-                            <li><a href={% url 'accounting:dashboard' pk=business_unit.pk %}>{{ business_unit.name }}</a></li>
+                            <li><a href={% url 'accounting:dashboard' business_unit=business_unit.pk %}>{{ business_unit.name }}</a></li>
                         {% endif %}
                     {% endfor %}
                     <!-- I'm way too tired to figure out the django-template way to put all of this in one big if statement. Feel free to laugh at me when you read this -->
@@ -34,12 +34,12 @@
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_fiscal_year }} <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                     {% for fiscal_year in fiscal_years %}
-                        <li><a href={% url 'accounting:dashboard' pk=current.pk fiscal_year=fiscal_year.pk %}>{{fiscal_year}}</a></li>
+                        <li><a href={% url 'accounting:dashboard' business_unit=current.pk fiscal_year=fiscal_year.pk %}>{{fiscal_year}}</a></li>
                     {% endfor %}
 
                     {% if not is_viewer %}
                         <li class="divider"></li>
-                        <li><a href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a></li>
+                        <li><a href={% url 'accounting:create_fiscal_year' business_unit=current.pk %}>Create Fiscal Year</a></li>
                     {% endif %}
                 </ul>
             </li>

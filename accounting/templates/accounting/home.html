@@ -12,7 +12,7 @@
         {% for business_unit in business_units %}
             <tr>
                 <td>
-                    <a href={% url 'accounting:dashboard' pk=business_unit.pk %}>{{ business_unit.name }} (Account {{ business_unit.account_number }})</a>
+                    <a href={% url 'accounting:dashboard' business_unit=business_unit.pk %}>{{ business_unit.name }} (Account {{ business_unit.account_number }})</a>
                     <a class="btn btn-danger"  style="float: right; margin-left: 5px;" href={% url 'accounting:delete_business_unit' business_unit=business_unit.pk %}>Delete</a>
                     <a class="btn btn-primary" style="float: right; margin-left: 5px;" href={% url 'accounting:update_business_unit' business_unit=business_unit.pk %}>Update</a>
                 </td>
