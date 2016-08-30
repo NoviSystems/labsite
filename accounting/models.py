@@ -25,7 +25,7 @@ class AccountingUser(models.Model):
         ('VIEWER', "viewer"),
     }
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    business_unit = models.OneToOneField(BusinessUnit, on_delete=models.CASCADE)
+    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     permission = models.CharField(max_length=12, choices=PERMISSION_STATE)
 
 
