@@ -37,7 +37,9 @@
             </div>
             <div class="col-md-9">
                 {% if not month_data.cash %}
+                    {% if not is_viewer %}
                     <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=month_data.month.pk %}>Create Cash</a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -57,9 +59,11 @@
                         <th scope="row">{{ month_data.cash.name }}</th>
                             <td>${{ month_data.cash.predicted_amount }}</td>
                             <td>${{ month_data.cash.actual_amount }}</td>
+                            {% if not is_viewer %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_cash' pk=current.pk month=month_data.month.pk cash=month_data.cash.pk %}>Update</a>
                             </td>
+                            {% endif %}
                     </tr>
                 </tbody>
             </table>
@@ -70,7 +74,9 @@
                     <h4>Expenses</h4>
             </div>
             <div class="col-md-9">
-                    <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=month_data.month.pk %}>Create Expense</a>
+                    {% if not is_viewer %}
+                        <a class="btn btn-primary" href={% url 'accounting:create_expense' pk=current.pk month=month_data.month.pk %}>Create Expense</a>
+                    {% endif %}
             </div>
         </div>
         <div class="row">
@@ -92,12 +98,14 @@
                             <td>{{ expense.date_payable }}</td>
                             <td>{{ expense.date_payed }}</td>
                             <td>${{ expense.predicted_amount }}</td>
+                            {% if not is_viewer %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_expense' pk=current.pk expense=expense.pk month=month_data.month.pk %}>Update</a>
                                 {% if expense.name != "Payroll" %}
                                 <a class="btn btn-primary" href={% url 'accounting:delete_expense' pk=current.pk expense=expense.pk month=month_data.month.pk %}>Delete</a>
                                 {% endif %}
                             </td>
+                            {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -111,7 +119,9 @@
                     <h4>Income</h4>
             </div>
             <div class="col-md-9">
-                <a class="btn btn-primary" href={% url 'accounting:create_income' pk=current.pk month=month_data.month.pk %}>Create Income</a>
+                {% if not is_viewer %}
+                    <a class="btn btn-primary" href={% url 'accounting:create_income' pk=current.pk month=month_data.month.pk %}>Create Income</a>
+                {% endif %}
             </div>
         </div>
         <div class="row">
@@ -134,10 +144,12 @@
                             <td>{{ income.date_payable }}</td>
                             <td>{{ income.date_payed }}</td>
                             <td>${{ income.predicted_amount }}</td>
+                            {% if not is_viewer %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_income' pk=current.pk income=income.pk month=month_data.month.pk %}>Update</a>
                                 <a class="btn btn-primary" href={% url 'accounting:delete_income' pk=current.pk income=income.pk month=month_data.month.pk %}>Delete</a>
                             </td>
+                            {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

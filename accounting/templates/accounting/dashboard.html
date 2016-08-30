@@ -48,7 +48,9 @@ $(function () {
     <div class="row">
         <div class="col-md-12">
         <h4>No personnel for this business unit.
-            <a class="btn btn-primary" href={% url 'accounting:personnel' pk=current.pk %}> Create Personnel</a>
+            {% if not is_viewer %}
+                <a class="btn btn-primary" href={% url 'accounting:personnel' pk=current.pk %}> Create Personnel</a>
+            {% endif %}
         </h4>
         </div>
     </div>
@@ -58,7 +60,9 @@ $(function () {
     <div class="row">
         <div class="col-md-12">
             <h4>No contracts for this business unit.
-                <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+                {% if not is_viewer %}
+                    <a class="btn btn-primary" href={% url 'accounting:create_contract' pk=current.pk %}> Create Contract</a>
+                {% endif %}
             </h4>
         </div>
     </div>
@@ -111,7 +115,9 @@ $(function () {
 {% endblock %}
 {% else %}
 <h4>Create fiscal year to generate data</h4>
-<a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
+    {% if not is_viewer %}
+    <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' pk=current.pk %}>Create Fiscal Year</a>
+    {% endif %}
 {% endif %}
 
 {% endblock %}

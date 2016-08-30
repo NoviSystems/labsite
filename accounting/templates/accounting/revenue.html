@@ -36,10 +36,12 @@
                                 <td>{{ invoices.date }}</td>
                                 <td>{{ invoices.transition_state }}</td>
                                 <td>{{ invoices.income.predicted_amount }}</td>
+                                {% if not is_viewer %}
                                 <td>
                                     <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
+                                {% endif %}
                             </tr>
                             {% endif %}
                         {% endfor %}
@@ -68,14 +70,16 @@
                                 <td>{{ invoices.date }}</td>
                                 <td>{{ invoices.transition_state }}</td>
                                 <td>{{ invoices.income.predicted_amount }}</td>
+                                {% if not is_viewer %}
                                 <td>
                                     <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
+                                {% endif %}
                             </tr>
                             {% endif %}
-                            {% endfor %}
-                        </tbody>
+                        {% endfor %}
+                    </tbody>
                     </table>
                     
 
@@ -98,10 +102,12 @@
                                 <td>{{ invoices.date }}</td>
                                 <td>{{ invoices.transition_state }}</td>
                                 <td>{{ invoices.income.predicted_amount }}</td>
+                                {% if not is_viewer %}
                                 <td>
                                     <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
                                     <a class="btn btn-primary" href={% url 'accounting:delete_invoice' pk=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
+                                {% endif %}
                         </tr>
                         {% endif %}
                         {% endfor %}
