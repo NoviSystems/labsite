@@ -37,29 +37,35 @@
                     {% endif %}
                 </div>
                 <div class="panel-body">
-                    <form class="form" id="order_form" method="post" target="">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        {% if not field.is_hidden %}
-                        <label for="id_{{ field.name }}">{{ field.label }}</label>
+                    {% if not customer_exists %}
+                        <a href={% url 'foodapp:stripe_card_create' %} >
+                            <button class="btn btn-primary">Create Stripe Customer</button>
+                        </a>
+                    {% else %}
+                        <form class="form" id="order_form" method="post" target="">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            {% if not field.is_hidden %}
+                            <label for="id_{{ field.name }}">{{ field.label }}</label>
+                            {% endif %}
+                            {{ field }}
+                        {% endfor %}
+                        {% if form.errors %}
+                            <ul>
+                            {% for field in form %} {% if field.errors %}
+                                <li class="errorlist">{{ field.label }}: {{ field.errors|first }}</li>
+                            {% endif %} {% endfor %}
+                            </ul>
+                        {% else %}
+                            <br><br>
                         {% endif %}
-                        {{ field }}
-                    {% endfor %}
-                    {% if form.errors %}
-                        <ul>
-                        {% for field in form %} {% if field.errors %}
-                            <li class="errorlist">{{ field.label }}: {{ field.errors|first }}</li>
-                        {% endif %} {% endfor %}
-                        </ul>
-                    {% else %}
-                        <br><br>
+                        {% if rice_is_on %}
+                            <h4>Rice is Cooking!</h4>
+                        {% else %}
+                            <button class="btn btn-primary" type="submit" value="Place Order">Place Order</button>
+                        {% endif %}
+                        </form>
                     {% endif %}
-                    {% if rice_is_on %}
-                        <h4>Rice is Cooking!</h4>
-                    {% else %}
-                        <button class="btn btn-primary" type="submit" value="Place Order">Place Order</button>
-                    {% endif %}
-                    </form>
                 </div>
             </div>
         </div>

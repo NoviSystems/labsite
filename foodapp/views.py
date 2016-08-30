@@ -75,6 +75,7 @@ class HomeView(LoginRequiredMixin, CreateView):
         context['orders'] = orders
         context['rice_quantity'] = (orders.filter(item__description__icontains='rice').aggregate(Sum('quantity'))['quantity__sum'] or 0) * .5
         context['rice_is_on'] = models.RiceCooker.objects.filter(is_on=True).exists()
+        context['customer_exists'] = True if get_stripe_customer(self.request.user) else False
         return context
 
 # Refactor into StripeCustomerCreateView and StripeCardCreateView
