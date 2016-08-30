@@ -268,10 +268,13 @@ class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
             if stripe_customer is None:
                 invoices_dict[user] = None
             else:
+                invoices = stripe.Invoice.all(customer=stripe_customer).get('data')
+                unpaid_invoices = len([invoice for invoice in invoices if not invoice.paid]) > 0
+
                 invoices_dict[user] = (
                     stripe_customer is not None,  # user_exists
                     _get_uninvoiced_items_dict(stripe_customer)['total_cost'],  # amount_owed
-                    bool(list(stripe.Invoice.all(customer=stripe_customer, paid=False))),  # unpaid_invoices
+                    unpaid_invoices,  # unpaid_invoices
                     _has_payment_error(stripe_customer),
                 )
 
