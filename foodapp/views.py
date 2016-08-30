@@ -200,8 +200,9 @@ def _get_uninvoiced_items_dict(stripe_customer):
 
 def _get_invoices_list(stripe_customer):
     invoices = []
-    all_invoices = stripe.Invoice.all(customer=stripe_customer)
-    for data in all_invoices.get('data'):
+    all_invoices = stripe.Invoice.all(customer=stripe_customer).get('data')
+
+    for data in all_invoices:
         items = []
         for item in data['lines']:
             items += [
@@ -238,12 +239,12 @@ def _has_payment_error(stripe_customer):
     """ Determines if the stripe customer has an unresolved stripe invoice payment error
     """
     payment_error = False
-    invoices = stripe.Invoice.list(customer=stripe_customer).get('data')
+    invoices = stripe.Invoice.all(customer=stripe_customer).get('data')
 
-    if len(invoices) > 0:
-        last_invoice = invoices.pop(0)
-        payment_error = not last_invoice.paid and \
-            last_invoice.attempted and not last_invoice.forgiven
+    for invoice in invoices:
+        payment_error = not invoice.paid and \
+            invoice.attempted and not invoice.forgiven \
+            or payment_error
 
     return payment_error
 
