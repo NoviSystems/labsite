@@ -20,7 +20,6 @@ class BusinessUnit(models.Model):
 
 class AccountingUser(models.Model):
     PERMISSION_STATE = {
-        ('ADMIN', "admin"),
         ('MANAGER', "manager"),
         ('VIEWER', "viewer"),
     }
