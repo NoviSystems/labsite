@@ -71,6 +71,14 @@ class SetUpMixin(object):
 
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(SetUpMixin, self).get_context_data(*args, **kwargs)
+        try:
+            context['is_viewer'] = self.is_viewer
+        except AttributeError:
+            context['is_viewer'] = False
+        return context
+
 
 class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
@@ -82,6 +90,7 @@ class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
             elif bu_permission == 'MANAGER':
                 return True
             elif bu_permission == 'VIEWER':
+                self.is_viewer = True
                 return True
             else:
                 raise Http404()
