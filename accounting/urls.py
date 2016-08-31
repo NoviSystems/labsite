@@ -54,7 +54,7 @@ urlpatterns = [
 	url(r'^(?P<business_unit>\d+)/personnel/(?P<part_time>\d+)/delete_part_time/$', PartTimeDeleteView.as_view(), name='delete_part_time'),
 
 	url(r'^(?P<business_unit>\d+)/settings/$', SettingsPageView.as_view(), name='settings'),
-	url(r'^(?P<business_unit>\d+)/settings/create_accounting_user/$', AccountingUserCreateView.as_view(), name='create_accounting_user'),
-	url(r'^(?P<business_unit>\d+)/settings/(?P<accounting_user>\d+)/update_accounting_user/$', AccountingUserUpdateView.as_view(), name='update_accounting_user'),
-	url(r'^(?P<business_unit>\d+)/settings/(?P<accounting_user>\d+)/delete_accounting_user/$', AccountingUserDeleteView.as_view(), name='delete_accounting_user'),
+	url(r'^(?P<business_unit>\d+)/settings/permissions/create_accounting_user/$', AccountingUserCreateView.as_view(), name='create_accounting_user'),
+	url(r'^(?P<business_unit>\d+)/settings/permissions/(?P<accounting_user>\d+)/update_accounting_user/$', AccountingUserUpdateView.as_view(), name='update_accounting_user'),
+	url(r'^(?P<business_unit>\d+)/settings/permissions/(?P<accounting_user>\d+)/delete_accounting_user/$', AccountingUserDeleteView.as_view(), name='delete_accounting_user'),
 ]

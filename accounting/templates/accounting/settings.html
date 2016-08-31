@@ -18,4 +18,27 @@
     </ul>
     </br>
 
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="col-md-2">
+                <ul class="nav nav-pills nav-stacked nav-tabs">
+                    <li role="presentation" class="active"><a data-toggle="tab" href="#general" aria-expanded="true">General</a></li>
+                    <li role="presentation"><a data-toggle="tab" href="#permissions" aria-expanded="true">Permissions</a></li>
+                </ul>
+            </div>
+
+            <div class="tab-content">
+                <div id="general" class="tab-pane active">
+
+                    <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current.pk %}>Update</a>
+                    <a class="btn btn-danger" href={% url 'accounting:delete_business_unit' business_unit=current.pk %}>Delete {{current.name}}</a>
+
+                </div>
+                <div id="permissions" class="tab-pane">
+                    <h1>DOGS</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
