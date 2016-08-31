@@ -13,6 +13,9 @@
         <li><a href={% url 'accounting:personnel' business_unit=current.pk %}>Personnel</a></li>
         <li><a href={% url 'accounting:revenue' business_unit=current.pk %}>Revenue</a></li>
         <li><a href="#">Prospects</a></li>
+        {% if not is_viewer %}
+        <li><a href={% url 'accounting:settings' business_unit=current.pk %}>Settings</a></li>
+        {% endif %}
     </ul>
     </br>
 

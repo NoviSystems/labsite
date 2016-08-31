@@ -242,3 +242,27 @@ class CashUpdateForm(ModelForm):
             'month',
             'predicted_amount',
         ]
+
+
+class AccountingUserCreateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(AccountingUserCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = AccountingUser
+        fields = '__all__'
+        exclude = [
+        ]
+
+
+class AccountingUserUpdateForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(AccountingUserUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = AccountingUser
+        fields = '__all__'
+        exclude = [
+        ]

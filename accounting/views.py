@@ -527,6 +527,20 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
         return context
 
 
+class SettingsPageView(ManagerMixin, TemplateView):
+    template_name = 'accounting/settings.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SettingsPageView, self).get_context_data()
+        context['business_units'] = self.business_units
+        context['current'] = self.current
+        context['fiscal_years'] = self.fiscal_years
+        context['current_month'] = self.current_month
+        context['current_fiscal_year'] = self.current_fiscal_year
+
+        return context
+
+
 class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
     template_name = 'accounting/businessunit_create_form.html'
     form_class = BusinessUnitCreateForm
@@ -1035,6 +1049,59 @@ class CashUpdateView(ManagerMixin, UpdateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         response = super(CashUpdateView, self).form_valid(form)
         updateCashPredicted(business_unit=business_unit)
+        return response
+
+
+class AccountingUserCreateView(ManagerMixin, CreateView):
+    template_name = 'accounting/accounting_user_create_form.html'
+    model = AccountingUser
+    form_class = AccountingUserCreateForm
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(AccountingUserCreateView, self).get_context_data()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:settings', kwargs= {'business_unit':self.kwargs['business_unit'] } )
+
+    def form_valid(self, form):
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+        form.instance.business_unit = business_unit
+        form.instance.hours_work = 20
+        response = super(PartTimeCreateView, self).form_valid(form)
+        updatePayroll(business_unit=business_unit)
+        updateCashPredicted(business_unit=business_unit)
+        return response
+
+
+class AccountingUserDeleteView(ManagerMixin, DeleteView):
+    model = AccountingUser
+    template_name = 'accounting/accounting_user_delete_form.html'
+
+    def get_object(self):
+        return AccountingUser.objects.get(pk=self.kwargs['accounting_user'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:setttings', kwargs={'business_unit': self.kwargs["business_unit"]})
+
+    def delete(self, request, *args, **kwargs):
+        response = super(AccountingUserDeleteView, self).delete(request, *args, **kwargs)
+        return response
+
+
+class AccountingUserUpdateView(ManagerMixin, UpdateView):
+    template_name = 'accounting/accounting_user_update_form.html'
+    form_class = AccountingUserUpdateForm
+    model = AccountingUser
+
+    def get_object(self):
+        return AccountingUser.objects.get(pk=self.kwargs['accounting_user'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:settings', kwargs= {'business_unit':self.kwargs['business_unit'] } )
+
+    def form_valid(self, form):
+        response = super(AccountingUserUpdateView, self).form_valid(form)
         return response
 
 
