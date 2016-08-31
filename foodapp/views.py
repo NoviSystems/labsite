@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_UP
 from django.conf import settings
 
 from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views.generic import CreateView, ListView, TemplateView
 from django.http import HttpResponseRedirect
@@ -256,8 +256,12 @@ class OrderListView(LoginRequiredMixin, ListView):
     template_name = 'foodapp/orders.html'
 
 
-class SuperStripeInvoiceView(LoginRequiredMixin, TemplateView):
+class SuperStripeInvoiceView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'foodapp/super_invoice_view.html'
+    raise_exception = True
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
         context = super(SuperStripeInvoiceView, self).get_context_data(**kwargs)
