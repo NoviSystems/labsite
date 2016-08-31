@@ -532,6 +532,16 @@ class SettingsPageView(ManagerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SettingsPageView, self).get_context_data()
+        users = AccountingUser.objects.filter(business_unit=self.current)
+        viewers = []
+        managers = []
+        for user in users:
+            if user.permission == 'VIEWER':
+                viewers.append(user)
+            elif user.permission == 'MANAGER':
+                managers.append(user)
+        context['viewers'] = viewers
+        context['managers'] = managers
         context['business_units'] = self.business_units
         context['current'] = self.current
         context['fiscal_years'] = self.fiscal_years
@@ -552,7 +562,7 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         response = super(BusinessUnitCreateView, self).form_valid(form)
         form.instance.user.add(self.request.user)
-        AccountingUser.objects.create(user=self.request.user, business_unit=form.instance, permission='ADMIN')
+        AccountingUser.objects.create(user=self.request.user, business_unit=form.instance, permission='MANAGER')
         return response
 
 
@@ -1068,7 +1078,7 @@ class AccountingUserCreateView(ManagerMixin, CreateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         form.instance.hours_work = 20
-        response = super(PartTimeCreateView, self).form_valid(form)
+        response = super(AccountingUserCreateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
@@ -1082,7 +1092,7 @@ class AccountingUserDeleteView(ManagerMixin, DeleteView):
         return AccountingUser.objects.get(pk=self.kwargs['accounting_user'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:setttings', kwargs={'business_unit': self.kwargs["business_unit"]})
+        return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def delete(self, request, *args, **kwargs):
         response = super(AccountingUserDeleteView, self).delete(request, *args, **kwargs)

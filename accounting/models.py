@@ -27,6 +27,9 @@ class AccountingUser(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     permission = models.CharField(max_length=12, choices=PERMISSION_STATE)
 
+    def __str__(self):
+        return self.user.username + ' with ' + self.permission + ' for ' + self.business_unit.name
+
 
 class FiscalYear(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)

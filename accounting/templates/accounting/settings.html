@@ -26,16 +26,31 @@
                     <li role="presentation"><a data-toggle="tab" href="#permissions" aria-expanded="true">Permissions</a></li>
                 </ul>
             </div>
-
-            <div class="tab-content">
-                <div id="general" class="tab-pane active">
-
-                    <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current.pk %}>Update</a>
-                    <a class="btn btn-danger" href={% url 'accounting:delete_business_unit' business_unit=current.pk %}>Delete {{current.name}}</a>
-
-                </div>
-                <div id="permissions" class="tab-pane">
-                    <h1>DOGS</h1>
+            <div class="col-md-10">
+                <div class="tab-content">
+                    <div id="general" class="tab-pane active">
+                        <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current.pk %}>Update</a>
+                        <a class="btn btn-danger" href={% url 'accounting:delete_business_unit' business_unit=current.pk %}>Delete {{current.name}}</a>
+                    </div>
+                    <div id="permissions" class="tab-pane">
+                        <h1>Managers</h1>
+                        <ul>
+                            {% for manager in managers %}
+                            <li>{{ manager.user.username }}
+                                <a href={% url 'accounting:update_accounting_user' business_unit=current.pk accounting_user=manager.pk %}>Update</a>
+                                <a href={% url 'accounting:delete_accounting_user' business_unit=current.pk accounting_user=manager.pk %}>Delete</a></li>
+                            {% endfor %}
+                        </ul>
+                        <h1>Viewers</h1>
+                        <ul>
+                            {% for viewer in viewers %}
+                            <li>{{ viewer.user.username }}
+                                <a href={% url 'accounting:update_accounting_user' business_unit=current.pk accounting_user=viewer.pk %}>Update</a>
+                                <a href={% url 'accounting:delete_accounting_user' business_unit=current.pk accounting_user=viewer.pk %}>Delete</a></li>
+                            {% endfor %}
+                        </ul>
+                        <a class="btn btn-primary" href={% url 'accounting:create_accounting_user' business_unit=current.pk %}>Create User</a>
+                    </div>
                 </div>
             </div>
         </div>
