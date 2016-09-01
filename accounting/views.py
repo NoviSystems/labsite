@@ -573,10 +573,6 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('accounting:home')
 
-    def form_valid(self, form):
-        response = super(BusinessUnitUpdateView, self).form_valid(form)
-        return response
-
 
 class FiscalYearCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/fiscalyear_create_form.html'
@@ -618,19 +614,11 @@ class FiscalYearUpdateView(ManagerMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
 
-    def form_valid(self, form):
-        response = super(FiscalYearUpdateView, self).form_valid(form)
-        return response
-
 
 class ContractCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/contract_create_form.html'
     model = Contract
     form_class = ContractCreateForm
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(ContractCreateView, self).get_context_data()
-        return context
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
@@ -670,19 +658,11 @@ class ContractUpdateView(ManagerMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs["business_unit"]})
 
-    def form_valid(self, form):
-        response = super(ContractUpdateView, self).form_valid(form)
-        return response
-
 
 class InvoiceCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/invoice_create_form.html'
     model = Invoice
     form_class = InvoiceCreateForm
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(InvoiceCreateView, self).get_context_data()
-        return context
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -749,10 +729,6 @@ class ExpenseCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/expense_create_form.html'
     model = Expense
     form_class = ExpenseCreateForm
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(ExpenseCreateView, self).get_context_data()
-        return context
 
     def get_success_url(self):
         return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit'], 'month': self.kwargs['month']})
@@ -845,10 +821,6 @@ class SalaryCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/salary_create_form.html'
     model = Salary
     form_class = SalaryCreateForm
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(SalaryCreateView, self).get_context_data()
-        return context
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -1052,10 +1024,6 @@ class AccountingUserCreateView(ManagerMixin, CreateView):
     model = AccountingUser
     form_class = AccountingUserCreateForm
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(AccountingUserCreateView, self).get_context_data()
-        return context
-
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
@@ -1079,10 +1047,6 @@ class AccountingUserDeleteView(ManagerMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs["business_unit"]})
 
-    def delete(self, request, *args, **kwargs):
-        response = super(AccountingUserDeleteView, self).delete(request, *args, **kwargs)
-        return response
-
 
 class AccountingUserUpdateView(ManagerMixin, UpdateView):
     template_name = 'accounting/accounting_user_update_form.html'
@@ -1094,10 +1058,6 @@ class AccountingUserUpdateView(ManagerMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def form_valid(self, form):
-        response = super(AccountingUserUpdateView, self).form_valid(form)
-        return response
 
 
 def updatePayroll(business_unit):
