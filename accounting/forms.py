@@ -1,4 +1,5 @@
-from django.forms import ModelForm, BooleanField
+from django.forms import ModelForm, EmailField, TextInput, Select, BooleanField, DecimalField
+from django.contrib.auth.models import User
 from models import *
 
 
@@ -11,7 +12,7 @@ class BusinessUnitCreateForm(ModelForm):
         model = BusinessUnit
         fields = '__all__'
         exclude = [
-            'user'
+        	'user'
         ]
 
 
@@ -24,7 +25,7 @@ class BusinessUnitUpdateForm(ModelForm):
         model = BusinessUnit
         fields = '__all__'
         exclude = [
-            'user'
+        	'user'
         ]
 
 
@@ -52,7 +53,6 @@ class FiscalYearUpdateForm(ModelForm):
         exclude = [
             'business_unit'
         ]
-
 
 class ContractCreateForm(ModelForm):
 
@@ -114,7 +114,6 @@ class ExpenseUpdateForm(ModelForm):
             'month'
         ]
 
-
 class InvoiceCreateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -126,7 +125,7 @@ class InvoiceCreateForm(ModelForm):
             'predicted_amount',
             'date_payable'
         ]
-
+        
 
 class InvoiceUpdateForm(ModelForm):
 
@@ -225,7 +224,7 @@ class IncomeUpdateForm(ModelForm):
         model = Income
         fields = '__all__'
         exclude = [
-
+            
         ]
 
 
