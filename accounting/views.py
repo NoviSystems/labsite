@@ -69,6 +69,13 @@ class SetUpMixin(object):
 
     def get_context_data(self, *args, **kwargs):
         context = super(SetUpMixin, self).get_context_data(*args, **kwargs)
+
+        context['current'] = self.current
+        context['current_month'] = self.current_month
+        context['current_fiscal_year'] = self.current_fiscal_year
+
+        context['fiscal_years'] = self.fiscal_years
+
         try:
             context['is_viewer'] = self.is_viewer
         except AttributeError:
@@ -303,7 +310,7 @@ class DashboardView(ViewerMixin, SetUpMixin, TemplateView):
             # context values for month view
             context['cma'] = cma    # cash month actual
             context['cmpr'] = cmpr  # cash month predicted
-            context['ima'] = ima    #  income month actual
+            context['ima'] = ima    # income month actual
             context['imp'] = imp    # income month predicted
             context['ema'] = ema    # expenses month actual
             context['emp'] = emp    # expenses month predicted
@@ -314,18 +321,13 @@ class DashboardView(ViewerMixin, SetUpMixin, TemplateView):
 
             # Context totals for the Graph values
             context['business_units'] = self.business_units
-            context['fiscal_years'] = self.fiscal_years
-            context['current_fiscal_year'] = current_fiscal_year
             context['months_names'] = months_names
             context['months'] = months
             context['months_j'] = json.dumps(months_names)
             context['predicted_totals'] = json.dumps([float(value) for value in cmpr['values']])
             context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
             context['dashboard_data'] = dashboard_data
-            # Context totals for the Graph values
-            context['current_month'] = current_month
 
-        context['current'] = self.current
         # Personnel and Contracts totals
         personnel = Personnel.objects.filter(business_unit=self.current)
         context['personnel'] = personnel
@@ -418,11 +420,6 @@ class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ContractsView, self).get_context_data()
         context['business_units'] = self.business_units
-        context['current'] = self.current
-        context['fiscal_years'] = self.fiscal_years
-        context['current_month'] = self.current_month
-        context['current_fiscal_year'] = self.current_fiscal_year
-
         contracts = Contract.objects.filter(business_unit=self.current)
         completed_contracts = []
         active_contracts = []
@@ -455,10 +452,6 @@ class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(RevenueView, self).get_context_data()
         context['business_units'] = self.business_units
-        context['current'] = self.current
-        context['fiscal_years'] = self.fiscal_years
-        context['current_month'] = self.current_month
-        context['current_fiscal_year'] = self.current_fiscal_year
 
         # contracts = Contract.objects.filter(business_unit=self.current)
         # contract_invoices = []
@@ -484,10 +477,6 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ExpensesView, self).get_context_data()
         context['business_units'] = self.business_units
-        context['current'] = self.current
-        context['fiscal_years'] = self.fiscal_years
-        context['current_month'] = self.current_month
-        context['current_fiscal_year'] = self.current_fiscal_year
         context['months'] = self.months
 
         month_data = []
@@ -528,10 +517,6 @@ class SettingsPageView(ManagerMixin, TemplateView):
         context['viewers'] = viewers
         context['managers'] = managers
         context['business_units'] = self.business_units
-        context['current'] = self.current
-        context['fiscal_years'] = self.fiscal_years
-        context['current_month'] = self.current_month
-        context['current_fiscal_year'] = self.current_fiscal_year
 
         return context
 
@@ -800,10 +785,6 @@ class PersonnelView(ViewerMixin, SetUpMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PersonnelView, self).get_context_data()
         context['business_units'] = self.business_units
-        context['current'] = self.current
-        context['fiscal_years'] = self.fiscal_years
-        context['current_fiscal_year'] = self.current_fiscal_year
-        context['current_month'] = self.current_month
 
         personnel = Personnel.objects.filter(business_unit=self.current)
         context['personnel'] = personnel
