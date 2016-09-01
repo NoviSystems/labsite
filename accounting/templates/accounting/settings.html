@@ -4,19 +4,7 @@
 
 {% block content %}
 
-    </br>
-    <ul class="nav nav-tabs">
-        <li><a href={% url 'accounting:dashboard' business_unit=current.pk %}>Dashboard</a></li>
-        <li><a href={% url 'accounting:contracts' business_unit=current.pk %}>Contracts</a></li>
-        <li><a href={% url 'accounting:expenses' business_unit=current.pk %}>Expenses</a></li>
-        <li><a href={% url 'accounting:personnel' business_unit=current.pk %}>Personnel</a></li>
-        <li><a href={% url 'accounting:revenue' business_unit=current.pk %}>Revenue</a></li>
-        <li><a href="#">Prospects</a></li>
-        {% if not is_viewer %}
-        <li class="active"><a href={% url 'accounting:settings' business_unit=current.pk %}>Settings</a></li>
-        {% endif %}
-    </ul>
-    </br>
+    {% include "accounting/nav_tabs.html" with active="settings" %}
 
     <div class="container-fluid">
         <div class="row-fluid">

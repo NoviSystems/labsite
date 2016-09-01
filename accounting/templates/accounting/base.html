@@ -22,7 +22,6 @@
                             <li><a href={% url 'accounting:dashboard' business_unit=business_unit.pk %}>{{ business_unit.name }}</a></li>
                         {% endif %}
                     {% endfor %}
-                    <!-- I'm way too tired to figure out the django-template way to put all of this in one big if statement. Feel free to laugh at me when you read this -->
                     {% if business_units|length == 1 and not current.name %}<li class="divider"></li>{% endif %}
                     {% if business_units|length > 1 %}<li class="divider"></li>{% endif %}
                     <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
