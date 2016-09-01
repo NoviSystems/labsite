@@ -1,20 +1,16 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView, View
+import json
+import datetime
+
+from django.shortcuts import redirect
+from django.db.models import Max
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView, View
+
 from models import *
-from django.contrib.auth.models import User
 from forms import *
 from decimal import *
-import datetime
-from datetime import timedelta
-import json
-from django.shortcuts import redirect
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Max
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import Http404
 
 
 class PermissionsMixin(LoginRequiredMixin, object):
