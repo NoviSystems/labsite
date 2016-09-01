@@ -1,12 +1,10 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 from datetime import date, datetime, timedelta
 from calendar import monthrange
-from django.core.exceptions import ObjectDoesNotExist
+
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 
 
 class BusinessUnit(models.Model):
@@ -61,12 +59,12 @@ class LineItem(models.Model):
 
 class Contract(models.Model):
     CONTRACT_STATE = {
-        ('ACTIVE', "active" ),
-        ('COMPLETE', "complete" ),
+        ('ACTIVE', "active"),
+        ('COMPLETE', "complete"),
     }
     CONTRACT_TYPE = {
-        ('FIXED', "fixed" ),
-        ('HOURLY', "hourly" ),
+        ('FIXED', "fixed"),
+        ('HOURLY', "hourly"),
     }
 
     business_unit = models.ForeignKey(BusinessUnit)
@@ -77,7 +75,7 @@ class Contract(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
-    
+
 
 class Cash(LineItem):
     name = models.CharField(max_length=50)
@@ -144,7 +142,7 @@ class Expense(LineItem):
 class Payroll(models.Model):
     month = models.OneToOneField(Month)
     expense = models.OneToOneField(Expense)
-    
+
     def delete(self, *args, **kwargs):
         self.expense.delete()
         return super(self.__class__, self).delete(*args, **kwargs)
@@ -153,13 +151,13 @@ class Payroll(models.Model):
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createItemsForFiscalYear")
 def createItemsForFiscalYear(sender, instance, **kwargs):
     start_month = instance.start_date
-    end_month= instance.end_date
+    end_month = instance.end_date
     number_of_months = monthdelta(start_month, end_month)
 
     month = start_month.month
     year = start_month.year
     day = start_month.day
-    for i in range(number_of_months+1):
+    for i in range(number_of_months + 1):
         if month == 12:
             year = year + 1
             month = 1
