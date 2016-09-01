@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta
 from calendar import monthrange
 from django.core.exceptions import ObjectDoesNotExist
 
+__all__ = ['BusinessUnit', 'AccountingUser', 'FiscalYear', 'Month', 'LineItem', 'Contract', 'Cash', 'Income', 'Invoice', 'Personnel', 'Salary', 'PartTime', 'Expense', 'Payroll']
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)

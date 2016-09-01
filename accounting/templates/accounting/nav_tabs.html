@@ -7,7 +7,7 @@
     <li {% if active == "revenue" %}class="active"{% endif %}><a href={% url 'accounting:revenue' business_unit=current.pk %}>Revenue</a></li>
     <li {% if active == "prospects" %}class="active"{% endif %}><a href="">Prospects</a></li>
     {% if not is_viewer %}
-    <li {% if active == "settings" %}class="active"{% endif %}><a href={% url 'accounting:settings' business_unit=current.pk %}>Settings</a></li>
+        <li {% if active == "settings" %}class="active"{% endif %}><a href={% url 'accounting:settings' business_unit=current.pk %}>Settings</a></li>
     {% endif %}
 </ul>
 </br>
