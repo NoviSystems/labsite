@@ -118,7 +118,7 @@ class HomePageView(PermissionsMixin, TemplateView):
         return context
 
 
-class DashboardView(ViewerMixin, SetUpMixin, TemplateView):
+class DashboardView(ViewerMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -460,19 +460,6 @@ class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
         context['current_month'] = self.current_month
         context['current_fiscal_year'] = self.current_fiscal_year
 
-        # contracts = Contract.objects.filter(business_unit=self.current)
-        # contract_invoices = []
-        # for contract in contracts:
-        #     invoices = Invoice.objects.filter(contract=contract)
-        #     contract_invoices.extend(
-        #     [
-        #         {
-        #             'contract': contract,
-        #             'invoices': invoices,
-        #         }
-        #     ]
-        #     )
-
         invoices = Invoice.objects.filter(contract__business_unit=self.current)
         context['invoices'] = invoices
         return context
@@ -794,7 +781,7 @@ class ExpenseUpdateView(ManagerMixin, UpdateView):
         return response
 
 
-class PersonnelView(ViewerMixin, SetUpMixin, TemplateView):
+class PersonnelView(ViewerMixin, TemplateView):
     template_name = 'accounting/personnel.html'
 
     def get_context_data(self, **kwargs):
