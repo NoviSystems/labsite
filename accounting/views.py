@@ -29,6 +29,11 @@ class PermissionsMixin(LoginRequiredMixin, object):
             self.permission_levels = None
         return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(PermissionsMixin, self).get_context_data(*args, **kwargs)
+        context['business_units'] = self.business_units
+        return context
+
 
 class SetUpMixin(object):
 
