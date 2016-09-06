@@ -46,7 +46,7 @@
                             <a class="btn btn-primary" href={% url 'accounting:create_accounting_user' business_unit=current.pk %}>Create New User Permissions</a>
 
                             <h3>Managers</h3>
-
+                            <hr>
                             <ul class="list-group">
                                 {% for manager in managers %}
                                 <li class="list-group-item">
@@ -57,7 +57,7 @@
                             </ul>
 
                             <h3>Viewers</h3>
-
+                            <hr>
                             <ul class="list-group">
                                 {% for viewer in viewers %}
                                 <li class="list-group-item">

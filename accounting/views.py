@@ -6,6 +6,7 @@ from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import Http404
 from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView, View
 
 from models import *
