@@ -564,7 +564,7 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
         return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:home')
+        return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs["business_unit"]})
 
 
 class FiscalYearCreateView(ManagerMixin, CreateView):
