@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 
 from django.shortcuts import redirect
 from django.db.models import Max
@@ -41,7 +41,7 @@ class SetUpMixin(object):
     def dispatch(self, request, *args, **kwargs):
         self.current = BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.fiscal_years = FiscalYear.objects.filter(business_unit=self.current)
-        now = datetime.datetime.now()
+        now = datetime.now()
         for fiscal_year in self.fiscal_years:
             self.months = Month.objects.filter(fiscal_year=fiscal_year)
             for month in self.months:
@@ -726,27 +726,38 @@ class ExpenseCreateView(ManagerMixin, CreateView):
         return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit'], 'month': self.kwargs['month']})
 
     def form_valid(self, form):
-        form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+        form.instance.business_unit = business_unit
         month = Month.objects.get(pk=self.kwargs['month'])
+
         try:
             if self.request.POST['reocurring']:
                 months = Month.objects.filter(fiscal_year=month.fiscal_year)
                 for m in months:
                     if m.month >= month.month:
-                        new_date_payable = date(m.month.year, m.month.month, form.instance.date_payable.day)
-                        Expense.objects.create(
+                        new_date_payable = datetime(m.month.year, m.month.month, form.instance.date_payable.day)
+                        expense = Expense(
                             business_unit=form.instance.business_unit,
                             month=m,
                             predicted_amount=form.instance.predicted_amount,
                             name=form.instance.name,
                             date_payable=new_date_payable,
                         )
+                        if new_date_payable < self.now:
+                            expense.date_payed = new_date_payable
+                            expense.actual_amount = form.instance.predicted_amount
+                        expense.save()
             return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'])
         except KeyError:
             print "Exception thrown"
             form.instance.month = month
+        
+        date_payable = datetime.strptime(self.request.POST['date_payable'], '%m/%d/%Y')
+        if date_payable < self.now:
+            form.instance.date_payed = date_payable
+            form.instance.actual_amount = self.request.POST['predicted_amount']
+
         response = super(ExpenseCreateView, self).form_valid(form)
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updateCashPredicted(business_unit=business_unit)
         return response
 
@@ -759,7 +770,7 @@ class ExpenseDeleteView(ManagerMixin, DeleteView):
         return Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'pk': self.kwargs["pk"], 'month': self.kwargs['month']})
+        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs["business_unit"], 'month': self.kwargs['month']})
 
     def delete(self, request, *args, **kwargs):
         response = super(ExpenseDeleteView, self).delete(request, *args, **kwargs)

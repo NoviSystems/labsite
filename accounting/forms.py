@@ -99,6 +99,9 @@ class ExpenseCreateForm(ModelForm):
             'date_payed',
             'business_unit',
         ]
+        help_texts = {
+            'date_payable': 'If this is today or a previous date, it will be entered as already payed',
+        }
 
 
 class ExpenseUpdateForm(ModelForm):

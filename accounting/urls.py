@@ -41,7 +41,7 @@ urlpatterns = [
     # Expense Forms
     url(r'^business_unit/(?P<business_unit>\d+)/(?P<month>\d+)/expenses/create/$', ExpenseCreateView.as_view(), name='create_expense'),
     url(r'^business_unit/(?P<business_unit>\d+)/(?P<month>\d+)/expenses/(?P<expense>\d+)/update/$', ExpenseUpdateView.as_view(), name='update_expense'),
-    url(r'^business_unit/(?P<business_unit>\d+)(?P<month>\d+)//expenses/(?P<expense>\d+)/delete/$', ExpenseDeleteView.as_view(), name='delete_expense'),
+    url(r'^business_unit/(?P<business_unit>\d+)/(?P<month>\d+)/expenses/(?P<expense>\d+)/delete/$', ExpenseDeleteView.as_view(), name='delete_expense'),
 
     # Income Forms
     url(r'^business_unit/(?P<business_unit>\d+)/(?P<month>\d+)/income/create/$', IncomeCreateView.as_view(), name='create_income'),
