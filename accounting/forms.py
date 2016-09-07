@@ -266,4 +266,5 @@ class AccountingUserUpdateForm(ModelForm):
         model = AccountingUser
         fields = '__all__'
         exclude = [
+            'user'
         ]
