@@ -539,7 +539,6 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         response = super(BusinessUnitCreateView, self).form_valid(form)
-        form.instance.user.add(self.request.user)
         AccountingUser.objects.create(user=self.request.user, business_unit=form.instance, permission='MANAGER')
         return response
 
