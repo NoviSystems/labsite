@@ -1037,6 +1037,13 @@ class AccountingUserDeleteView(ManagerMixin, DeleteView):
     def get_object(self):
         return AccountingUser.objects.get(pk=self.kwargs['accounting_user'])
 
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.permission == 'MANAGER' and AccountingUser.objects.filter(permission='MANAGER', business_unit=self.object.business_unit).count() == 1:
+            raise Http404()
+        else:
+            return super(AccountingUserDeleteView, self).delete(request, *args, **kwargs)
+
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs["business_unit"]})
 
