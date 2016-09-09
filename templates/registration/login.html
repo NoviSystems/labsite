@@ -1,28 +1,23 @@
 {% extends "base.html" %}
-
 {% block title %}Login{% endblock %}
 {% block content %}
-<div class="panel panel-default col-sm-6 col-sm-offset-3" style="margin-top: 45px;">
-    <div class="panel-body">
-        {% if form.errors %}
-        <div class="alert alert-danger">Your username and password didn't match. Please try again.</div>
-        {% endif %}
-
-        <form class="form" method="post" action="{% url 'login' %}">{% csrf_token %}
-
-            <div class="form-group">
-                <label>Username</label>
-                <input class="form-control" type="text" id="id_username" name="username" placeholder="Username">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input class="form-control" type="password" id="id_password" name="password" placeholder="Password">
-                <p class="help-block">be sure to enter your password properly!</p>
-            </div>
-
-            <button class="btn btn-primary" type="submit">Login!</button>
-            <a href="{% url 'password_reset' %}" style="margin-left: 20px">Reset Password</a>
-        </form>
+    <div class="panel panel-default col-sm-6 col-sm-offset-3">
+        <div class="panel-body">
+            {% if form.errors %}
+                <div class="alert alert-danger">Your username and password didn't match. Please try again.</div>
+            {% endif %}
+            <form class="form" method="post" action="{% url 'login' %}">{% csrf_token %}
+                <div class="form-group">
+                    <label>Username</label>
+                    <input class="form-control" type="text" id="id_username" name="username" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input class="form-control" type="password" id="id_password" name="password" placeholder="Password">
+                </div>
+                <button class="btn btn-primary" type="submit">Login</button>
+                <a href="{% url 'password_reset' %}" style="margin-left: 20px">Reset Password</a>
+            </form>
+        </div>
     </div>
-</div>
 {% endblock %}

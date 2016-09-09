@@ -1,6 +1,4 @@
-
 from django.conf import settings
-
 
 def navbar_context(request):
     return {

@@ -226,6 +226,6 @@ LABSITE_APPS = [
         'color': '#428BCA',
         'font_image': 'fa-clock-o',
         'url': 'https://kaba.oit.ncsu.edu/WebTimeClock/main/index.jsp?actionEvent=cmd://startdialog',
-        'new_tab': 'true',  # Opens in new tab
+        'new_tab': 'true',
     }
 ]
