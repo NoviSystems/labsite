@@ -74,8 +74,8 @@ urlpatterns = [
     url(r'^business_unit/(?P<business_unit>\d+)/part_time/(?P<part_time>\d+)/update/$', PartTimeUpdateView.as_view(), name='update_part_time'),
     url(r'^business_unit/(?P<business_unit>\d+)/part_time/(?P<part_time>\d+)/delete/$', PartTimeDeleteView.as_view(), name='delete_part_time'),
 
-    # AccountingUser Forms
-    url(r'^business_unit/(?P<business_unit>\d+)/accounting_user/create/$', AccountingUserCreateView.as_view(), name='create_accounting_user'),
-    url(r'^business_unit/(?P<business_unit>\d+)/accounting_user/(?P<accounting_user>\d+)/update/$', AccountingUserUpdateView.as_view(), name='update_accounting_user'),
-    url(r'^business_unit/(?P<business_unit>\d+)/accounting_user/(?P<accounting_user>\d+)/delete/$', AccountingUserDeleteView.as_view(), name='delete_accounting_user'),
+    # User Team Role Forms
+    url(r'^business_unit/(?P<business_unit>\d+)/user_team_role/create/$', UserTeamRoleCreateView.as_view(), name='create_user_team_role'),
+    url(r'^business_unit/(?P<business_unit>\d+)/user_team_role/(?P<user_team_role>\d+)/update/$', UserTeamRoleUpdateView.as_view(), name='update_user_team_role'),
+    url(r'^business_unit/(?P<business_unit>\d+)/user_team_role/(?P<user_team_role>\d+)/delete/$', UserTeamRoleDeleteView.as_view(), name='delete_user_team_role'),
 ]

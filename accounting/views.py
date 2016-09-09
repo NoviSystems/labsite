@@ -19,15 +19,15 @@ class PermissionsMixin(LoginRequiredMixin, object):
     def dispatch(self, request, *args, **kwargs):
         if self.request.user.is_authenticated():
             try:
-                self.permission_levels = AccountingUser.objects.filter(user=self.request.user)
+                self.team_roles = UserTeamRole.objects.filter(user=self.request.user)
                 self.business_units = []
-                for perm in self.permission_levels:
-                    self.business_units.append(perm.business_unit)
+                for team_role in self.team_roles:
+                    self.business_units.append(team_role.business_unit)
             except ObjectDoesNotExist:
-                self.permission_levels = None
+                self.team_roles = None
                 self.business_units = None
         else:
-            self.permission_levels = None
+            self.team_roles = None
         return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
@@ -86,12 +86,12 @@ class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
-            bu_permission = AccountingUser.objects.get(user=self.request.user, business_unit=self.current).permission
+            bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current).role
             if self.request.user.is_superuser:
                 return True
-            elif bu_permission == 'MANAGER':
+            elif bu_role == 'MANAGER':
                 return True
-            elif bu_permission == 'VIEWER':
+            elif bu_role == 'VIEWER':
                 self.is_viewer = True
                 return True
             else:
@@ -104,10 +104,10 @@ class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
-            bu_permission = AccountingUser.objects.get(user=self.request.user, business_unit=self.current).permission
+            bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current).role
             if self.request.user.is_superuser:
                 return True
-            elif bu_permission == 'MANAGER':
+            elif bu_role == 'MANAGER':
                 return True
             else:
                 raise Http404()
@@ -510,13 +510,13 @@ class SettingsPageView(ManagerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SettingsPageView, self).get_context_data()
-        users = AccountingUser.objects.filter(business_unit=self.current)
+        users = UserTeamRole.objects.filter(business_unit=self.current)
         viewers = []
         managers = []
         for user in users:
-            if user.permission == 'VIEWER':
+            if user.role == 'VIEWER':
                 viewers.append(user)
-            elif user.permission == 'MANAGER':
+            elif user.role == 'MANAGER':
                 managers.append(user)
         context['viewers'] = viewers
         context['managers'] = managers
@@ -539,7 +539,7 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         response = super(BusinessUnitCreateView, self).form_valid(form)
-        AccountingUser.objects.create(user=self.request.user, business_unit=form.instance, permission='MANAGER')
+        UserTeamRole.objects.create(user=self.request.user, business_unit=form.instance, role='MANAGER')
         return response
 
 
@@ -1022,10 +1022,10 @@ class CashUpdateView(ManagerMixin, UpdateView):
         return response
 
 
-class AccountingUserCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/accounting_user_create_form.html'
-    model = AccountingUser
-    form_class = AccountingUserCreateForm
+class UserTeamRoleCreateView(ManagerMixin, CreateView):
+    template_name = 'accounting/user_team_role_create_form.html'
+    model = UserTeamRole
+    form_class = UserTeamRoleCreateForm
 
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -1034,37 +1034,37 @@ class AccountingUserCreateView(ManagerMixin, CreateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         form.instance.hours_work = 20
-        response = super(AccountingUserCreateView, self).form_valid(form)
+        response = super(UserTeamRoleCreateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
 
 
-class AccountingUserDeleteView(ManagerMixin, DeleteView):
-    model = AccountingUser
-    template_name = 'accounting/accounting_user_delete_form.html'
+class UserTeamRoleDeleteView(ManagerMixin, DeleteView):
+    model = UserTeamRole
+    template_name = 'accounting/user_team_role_delete_form.html'
 
     def get_object(self):
-        return AccountingUser.objects.get(pk=self.kwargs['accounting_user'])
+        return UserTeamRole.objects.get(pk=self.kwargs['user_team_role'])
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.permission == 'MANAGER' and AccountingUser.objects.filter(permission='MANAGER', business_unit=self.object.business_unit).count() == 1:
+        if self.object.role == 'MANAGER' and UserTeamRole.objects.filter(role='MANAGER', business_unit=self.object.business_unit).count() == 1:
             raise Http404()
         else:
-            return super(AccountingUserDeleteView, self).delete(request, *args, **kwargs)
+            return super(UserTeamRoleDeleteView, self).delete(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs["business_unit"]})
 
 
-class AccountingUserUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/accounting_user_update_form.html'
-    form_class = AccountingUserUpdateForm
-    model = AccountingUser
+class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
+    template_name = 'accounting/user_team_role_update_form.html'
+    form_class = UserTeamRoleUpdateForm
+    model = UserTeamRole
 
     def get_object(self):
-        return AccountingUser.objects.get(pk=self.kwargs['accounting_user'])
+        return UserTeamRole.objects.get(pk=self.kwargs['user_team_role'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})

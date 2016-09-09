@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-__all__ = ['BusinessUnit', 'AccountingUser', 'FiscalYear', 'Month', 'LineItem', 'Contract', 'Cash', 'Income', 'Invoice', 'Personnel', 'Salary', 'PartTime', 'Expense', 'Payroll']
+__all__ = ['BusinessUnit', 'UserTeamRole', 'FiscalYear', 'Month', 'LineItem', 'Contract', 'Cash', 'Income', 'Invoice', 'Personnel', 'Salary', 'PartTime', 'Expense', 'Payroll']
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)
@@ -16,20 +16,20 @@ class BusinessUnit(models.Model):
         return self.name
 
 
-class AccountingUser(models.Model):
-    PERMISSION_STATE = {
+class UserTeamRole(models.Model):
+    ROLE_STATE = {
         ('MANAGER', "manager"),
         ('VIEWER', "viewer"),
     }
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
-    permission = models.CharField(max_length=12, choices=PERMISSION_STATE)
+    role = models.CharField(max_length=12, choices=ROLE_STATE)
 
     class Meta:
-        unique_together = ['user', 'business_unit', 'permission']
+        unique_together = ['user', 'business_unit', 'role']
 
     def __str__(self):
-        return self.user.username + ' with ' + self.permission + ' for ' + self.business_unit.name
+        return self.user.username + ' is a ' + self.role + ' of ' + self.business_unit.name
 
 
 class FiscalYear(models.Model):

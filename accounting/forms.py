@@ -248,25 +248,25 @@ class CashUpdateForm(ModelForm):
         ]
 
 
-class AccountingUserCreateForm(ModelForm):
+class UserTeamRoleCreateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(AccountingUserCreateForm, self).__init__(*args, **kwargs)
+        super(UserTeamRoleCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = AccountingUser
+        model = UserTeamRole
         fields = '__all__'
         exclude = [
         ]
 
 
-class AccountingUserUpdateForm(ModelForm):
+class UserTeamRoleUpdateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(AccountingUserUpdateForm, self).__init__(*args, **kwargs)
+        super(UserTeamRoleUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = AccountingUser
+        model = UserTeamRole
         fields = '__all__'
         exclude = [
             'user'
