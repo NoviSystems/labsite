@@ -257,6 +257,7 @@ class UserTeamRoleCreateForm(ModelForm):
         model = UserTeamRole
         fields = '__all__'
         exclude = [
+            'business_unit',
         ]
 
 
@@ -269,5 +270,6 @@ class UserTeamRoleUpdateForm(ModelForm):
         model = UserTeamRole
         fields = '__all__'
         exclude = [
-            'user'
+            'user',
+            'business_unit',
         ]
