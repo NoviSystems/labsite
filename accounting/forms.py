@@ -1,3 +1,4 @@
+from __future__ import print_function
 from django.forms import ModelForm, BooleanField
 from models import *
 
@@ -9,7 +10,7 @@ class BaseForm(ModelForm):
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'placeholder': getattr(self.instance, field),
+                'placeholder': self.instance._meta.get_field(field).verbose_name,
                 'class': 'form-control',
             })
 
