@@ -2,6 +2,18 @@ from django.forms import ModelForm, BooleanField
 from models import *
 
 
+class BaseForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(BaseForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'placeholder': getattr(self.instance, field),
+                'class': 'form-control',
+            })
+
+
 class BusinessUnitCreateForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -54,7 +66,7 @@ class FiscalYearUpdateForm(ModelForm):
         ]
 
 
-class ContractCreateForm(ModelForm):
+class ContractCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ContractCreateForm, self).__init__(*args, **kwargs)
