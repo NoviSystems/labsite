@@ -26,7 +26,7 @@ class UserTeamRole(models.Model):
     role = models.CharField(max_length=12, choices=ROLE_STATE)
 
     class Meta:
-        unique_together = ['user', 'business_unit', 'role']
+        unique_together = ['user', 'business_unit']
 
     def __str__(self):
         return self.user.username + ' is a ' + self.role + ' of ' + self.business_unit.name
