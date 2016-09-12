@@ -1034,10 +1034,14 @@ class UserTeamRoleCreateView(ManagerMixin, CreateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         form.instance.hours_work = 20
-        response = super(UserTeamRoleCreateView, self).form_valid(form)
-        updatePayroll(business_unit=business_unit)
-        updateCashPredicted(business_unit=business_unit)
-        return response
+        try:
+            response = super(UserTeamRoleCreateView, self).form_valid(form)
+            updatePayroll(business_unit=business_unit)
+            updateCashPredicted(business_unit=business_unit)
+            return response
+        except:
+            form.add_error(None, "This user already has a role in this team.")
+            return self.form_invalid(form)
 
 
 class UserTeamRoleDeleteView(ManagerMixin, DeleteView):
