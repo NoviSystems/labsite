@@ -718,7 +718,7 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
 
 
 class ExpenseCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/expense_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = Expense
     form_class = ExpenseCreateForm
 
@@ -934,7 +934,7 @@ class PartTimeUpdateView(ManagerMixin, UpdateView):
 
 
 class IncomeCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/income_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = Income
     form_class = IncomeCreateForm
 
