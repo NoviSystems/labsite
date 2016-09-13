@@ -1,5 +1,6 @@
 from __future__ import print_function
 from django.forms import ModelForm, BooleanField
+from django.core.exceptions import FieldDoesNotExist
 from models import *
 
 
@@ -9,8 +10,13 @@ class BaseForm(ModelForm):
         super(BaseForm, self).__init__(*args, **kwargs)
 
         for field in self.fields:
+            try:
+                placeholder = self.instance._meta.get_field(field).verbose_name
+            except FieldDoesNotExist:
+                placeholder = ''
+
             self.fields[field].widget.attrs.update({
-                'placeholder': self.instance._meta.get_field(field).verbose_name,
+                'placeholder': placeholder,
                 'class': 'form-control',
             })
 
@@ -95,7 +101,7 @@ class ContractUpdateForm(BaseForm, ModelForm):
         ]
 
 
-class ExpenseCreateForm(ModelForm):
+class ExpenseCreateForm(BaseForm, ModelForm):
 
     reocurring = BooleanField(label='Reocurring', initial=False, required=False)
 
@@ -212,7 +218,7 @@ class PartTimeUpdateForm(BaseForm, ModelForm):
         ]
 
 
-class IncomeCreateForm(ModelForm):
+class IncomeCreateForm(BaseForm, ModelForm):
 
     reocurring = BooleanField(label='Reocurring', initial=False, required=False)
 
