@@ -530,7 +530,7 @@ class SettingsPageView(ManagerMixin, TemplateView):
 
 
 class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'accounting/businessunit_create_form.html'
+    template_name = 'accounting/base_form.html'
     form_class = BusinessUnitCreateForm
     model = BusinessUnit
 
@@ -555,7 +555,7 @@ class BusinessUnitDeleteView(ManagerMixin, DeleteView):
 
 
 class BusinessUnitUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = BusinessUnitUpdateForm
     model = BusinessUnit
 
@@ -596,7 +596,7 @@ class FiscalYearDeleteView(ManagerMixin, DeleteView):
 
 
 class FiscalYearUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = FiscalYearUpdateForm
     model = FiscalYear
 
@@ -608,7 +608,7 @@ class FiscalYearUpdateView(ManagerMixin, UpdateView):
 
 
 class ContractCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/contract_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = Contract
     form_class = ContractCreateForm
 
@@ -640,7 +640,7 @@ class ContractDeleteView(ManagerMixin, DeleteView):
 
 
 class ContractUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = ContractUpdateForm
     model = Contract
 
@@ -652,7 +652,7 @@ class ContractUpdateView(ManagerMixin, UpdateView):
 
 
 class InvoiceCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/invoice_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = Invoice
     form_class = InvoiceCreateForm
 
@@ -700,7 +700,7 @@ class InvoiceDeleteView(ManagerMixin, DeleteView):
 
 
 class InvoiceUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = InvoiceUpdateForm
     model = Invoice
 
@@ -780,7 +780,7 @@ class ExpenseDeleteView(ManagerMixin, DeleteView):
 
 
 class ExpenseUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = ExpenseUpdateForm
     model = Expense
 
@@ -821,7 +821,7 @@ class PersonnelView(ViewerMixin, TemplateView):
 
 
 class SalaryCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/salary_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = Salary
     form_class = SalaryCreateForm
 
@@ -856,7 +856,7 @@ class SalaryDeleteView(ManagerMixin, DeleteView):
 
 
 class SalaryUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = SalaryUpdateForm
     model = Salary
 
@@ -875,7 +875,7 @@ class SalaryUpdateView(ManagerMixin, UpdateView):
 
 
 class PartTimeCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/part_time_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = PartTime
     form_class = PartTimeCreateForm
 
@@ -915,7 +915,7 @@ class PartTimeDeleteView(ManagerMixin, DeleteView):
 
 
 class PartTimeUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/part_time_update_form.html'
+    template_name = 'accounting/base_form.html'
     form_class = PartTimeUpdateForm
     model = PartTime
 
@@ -987,7 +987,7 @@ class IncomeDeleteView(ManagerMixin, DeleteView):
 
 
 class IncomeUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_form.html'
     form_class = IncomeUpdateForm
     model = Income
 
@@ -1023,7 +1023,7 @@ class CashUpdateView(ManagerMixin, UpdateView):
 
 
 class UserTeamRoleCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/user_team_role_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = UserTeamRole
     form_class = UserTeamRoleCreateForm
 
@@ -1063,7 +1063,7 @@ class UserTeamRoleDeleteView(ManagerMixin, DeleteView):
 
 
 class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/user_team_role_update_form.html'
+    template_name = 'accounting/base_form.html'
     form_class = UserTeamRoleUpdateForm
     model = UserTeamRole
 
