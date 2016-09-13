@@ -15,7 +15,7 @@ class BaseForm(ModelForm):
             })
 
 
-class BusinessUnitCreateForm(ModelForm):
+class BusinessUnitCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(BusinessUnitCreateForm, self).__init__(*args, **kwargs)
@@ -28,7 +28,7 @@ class BusinessUnitCreateForm(ModelForm):
         ]
 
 
-class BusinessUnitUpdateForm(ModelForm):
+class BusinessUnitUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(BusinessUnitUpdateForm, self).__init__(*args, **kwargs)
@@ -41,7 +41,7 @@ class BusinessUnitUpdateForm(ModelForm):
         ]
 
 
-class FiscalYearCreateForm(ModelForm):
+class FiscalYearCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FiscalYearCreateForm, self).__init__(*args, **kwargs)
@@ -54,7 +54,7 @@ class FiscalYearCreateForm(ModelForm):
         ]
 
 
-class FiscalYearUpdateForm(ModelForm):
+class FiscalYearUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FiscalYearUpdateForm, self).__init__(*args, **kwargs)
@@ -82,7 +82,7 @@ class ContractCreateForm(BaseForm, ModelForm):
         ]
 
 
-class ContractUpdateForm(ModelForm):
+class ContractUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ContractUpdateForm, self).__init__(*args, **kwargs)
@@ -117,7 +117,7 @@ class ExpenseCreateForm(ModelForm):
         }
 
 
-class ExpenseUpdateForm(ModelForm):
+class ExpenseUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ExpenseUpdateForm, self).__init__(*args, **kwargs)
@@ -131,7 +131,7 @@ class ExpenseUpdateForm(ModelForm):
         ]
 
 
-class InvoiceCreateForm(ModelForm):
+class InvoiceCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(InvoiceCreateForm, self).__init__(*args, **kwargs)
@@ -144,7 +144,7 @@ class InvoiceCreateForm(ModelForm):
         ]
 
 
-class InvoiceUpdateForm(ModelForm):
+class InvoiceUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(InvoiceUpdateForm, self).__init__(*args, **kwargs)
@@ -158,7 +158,7 @@ class InvoiceUpdateForm(ModelForm):
         ]
 
 
-class SalaryCreateForm(ModelForm):
+class SalaryCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SalaryCreateForm, self).__init__(*args, **kwargs)
@@ -171,7 +171,7 @@ class SalaryCreateForm(ModelForm):
         ]
 
 
-class SalaryUpdateForm(ModelForm):
+class SalaryUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SalaryUpdateForm, self).__init__(*args, **kwargs)
@@ -184,7 +184,7 @@ class SalaryUpdateForm(ModelForm):
         ]
 
 
-class PartTimeCreateForm(ModelForm):
+class PartTimeCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PartTimeCreateForm, self).__init__(*args, **kwargs)
@@ -198,7 +198,7 @@ class PartTimeCreateForm(ModelForm):
         ]
 
 
-class PartTimeUpdateForm(ModelForm):
+class PartTimeUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PartTimeUpdateForm, self).__init__(*args, **kwargs)
@@ -232,7 +232,7 @@ class IncomeCreateForm(ModelForm):
         ]
 
 
-class IncomeUpdateForm(ModelForm):
+class IncomeUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(IncomeUpdateForm, self).__init__(*args, **kwargs)
@@ -245,7 +245,7 @@ class IncomeUpdateForm(ModelForm):
         ]
 
 
-class CashUpdateForm(ModelForm):
+class CashUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CashUpdateForm, self).__init__(*args, **kwargs)
@@ -261,7 +261,7 @@ class CashUpdateForm(ModelForm):
         ]
 
 
-class UserTeamRoleCreateForm(ModelForm):
+class UserTeamRoleCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(UserTeamRoleCreateForm, self).__init__(*args, **kwargs)
@@ -274,7 +274,7 @@ class UserTeamRoleCreateForm(ModelForm):
         ]
 
 
-class UserTeamRoleUpdateForm(ModelForm):
+class UserTeamRoleUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(UserTeamRoleUpdateForm, self).__init__(*args, **kwargs)
