@@ -24,6 +24,8 @@
             <hr></hr>
             {% for contract_invoice in active_contracts %}
 
+            <div class="model-display">
+
             <div role="tab" id="headingOne">
                 <div class="panel-title">
                     <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract_invoice.contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract_invoice.contract.pk}}">
@@ -93,6 +95,8 @@
                     </br>
             </div>
 
+            </div>
+
             {% endfor %}
         {% else %}
             <h4>No active contracts for this business unit.</h4>
@@ -101,6 +105,8 @@
             <h3>Completed Contracts</h3>
             <hr></hr>
             {% for contract_invoice in completed_contracts %}
+
+            <div class="model-display">
 
             <div role="tab" id="headingOne">
                 <div class="panel-title">
@@ -169,6 +175,8 @@
                             {% endif %}
                     </div>
                     </br>
+            </div>
+
             </div>
 
             {% endfor %}

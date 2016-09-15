@@ -34,10 +34,11 @@ $(document).ready(function(){
 				csrfmiddlewaretoken: csrftoken,
 			},
 			success: function() {
-				$(event.target).parent().parent().remove();
+				$(event.target).closest(".model-display").remove();
+				console.log('success');
 			},
 			error: function() {
-				alert('Could not delete.');
+				alert('Could not delete object.');
 			},
 			complete: function(){
 				// alert('ajax complete');

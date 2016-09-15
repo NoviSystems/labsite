@@ -25,7 +25,7 @@
                     <div class="col-md-12">
                         {% for salary in salary %}
                         </br>
-                        <div role="tab" id="headingOne">
+                        <div class="model-display" role="tab" id="headingOne">
                             <div class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{salary.pk}}" aria-expanded="true" aria-controls="collapse{{salary.pk}}">
                                     <p class="lead'"><h4>{{ salary.first_name }} {{ salary.last_name }} - {{ salary.position }}</h4></p><hr>
@@ -75,7 +75,7 @@
                     <div class="col-md-12">
                         {% for part_time in part_time %}
                         </br>
-                        <div role="tab" id="headingOne">
+                        <div class="model-display" role="tab" id="headingOne">
                             <div class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{part_time.pk}}" aria-expanded="true" aria-controls="collapse{{part_time.pk}}">
                                     <p class="lead'"><h4>{{ part_time.first_name }} {{ part_time.last_name }} - {{ part_time.position }}</h4></p><hr>

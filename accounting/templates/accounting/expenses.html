@@ -82,7 +82,7 @@
                 </thead>
                 <tbody>
                     {% for expense in month_data.expenses %}
-                    <tr>
+                    <tr class="model-display">
                         <th scope="row">{{ expense.name }}</th>
                             <td>{{ expense.date_payable }}</td>
                             <td>{{ expense.date_payed }}</td>
@@ -128,7 +128,7 @@
                 </thead>
                 <tbody>
                     {% for income in month_data.incomes %}
-                    <tr>
+                    <tr class="model-display">
                         <th scope="row">{{ income.name }}</th>
                             <td>{{ income.date_payable }}</td>
                             <td>{{ income.date_payed }}</td>
