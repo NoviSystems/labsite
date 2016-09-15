@@ -42,8 +42,8 @@
                         <div class="col-md-8">
                             {% if not is_viewer %}
                             <h4>
-                                <a class="btn btn-primary" href={% url 'accounting:update_contract' business_unit=current.pk contract=contract_invoice.contract.pk %}>Update</a>
-                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_contract' business_unit=current.pk contract=contract_invoice.contract.pk %}>Delete</a>
+                                <a class="btn btn-primary" href={% url 'accounting:update_contract' business_unit=current.pk contract=contract_invoice.contract.pk %}>Update Contract</a>
+                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_contract' business_unit=current.pk contract=contract_invoice.contract.pk %}>Delete Contract</a>
                             </h4>
                             {% endif %}
                         </div>

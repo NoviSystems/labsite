@@ -1,4 +1,7 @@
 $(document).ready(function(){
+	console.log('delete initialized');
+
+	var url = window.location.href;
 
 	function getCookie(name) {
 	    var cookieValue = null;
@@ -30,12 +33,13 @@ $(document).ready(function(){
 				csrfmiddlewaretoken: csrftoken,
 			},
 			success: function(data){
-				window.location.reload();			
+				console.log('success');
 			},
 			failure: function(data){
-				console.log('shit broke');
+				console.log('failure to delete');
 			},
 		});
-		window.location.reload();
+		
+		window.location.href = url;
 	});
 });

@@ -70,7 +70,7 @@ class Contract(models.Model):
         ('HOURLY', "hourly"),
     }
 
-    business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
+    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
     department = models.CharField(max_length=4, default='CSC', verbose_name='Department')
     contract_number = models.IntegerField(verbose_name='Contract Number')
     organization_name = models.CharField(max_length=255, verbose_name='Organization Name')
@@ -97,7 +97,7 @@ class Invoice(Income):
         ('RECIEVED', "recieved"),
     }
 
-    contract = models.ForeignKey(Contract, verbose_name='Contract')
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, verbose_name='Contract')
     number = models.IntegerField(verbose_name='Number')
     transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE, verbose_name='Transition State')
 
