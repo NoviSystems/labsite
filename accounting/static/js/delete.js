@@ -2,6 +2,7 @@ $(document).ready(function(){
 	console.log('delete initialized');
 
 	var url = window.location.href;
+	console.log(url);
 
 	function getCookie(name) {
 	    var cookieValue = null;
@@ -21,25 +22,26 @@ $(document).ready(function(){
 	var csrftoken = getCookie('csrftoken');
 
 	$(".btn-delete").click(function(event) {
-		event.preventDefault();
 
+		event.preventDefault();
+		
 		console.log('delete clicked: ' + this.href);
 
 		$.ajax({
 			type: 'POST',
 			url: this.href,
-			dataType: 'json',
 			data: {
 				csrfmiddlewaretoken: csrftoken,
 			},
-			success: function(data){
-				console.log('success');
+			success: function() {
+				$(event.target).parent().parent().remove();
 			},
-			failure: function(data){
-				console.log('failure to delete');
+			error: function() {
+				alert('Could not delete.');
+			},
+			complete: function(){
+				// alert('ajax complete');
 			},
 		});
-		
-		window.location.href = url;
 	});
 });
