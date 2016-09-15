@@ -1,5 +1,4 @@
 $(document).ready(function(){
-	console.log('delete initialized');
 
 	function getCookie(name) {
 	    var cookieValue = null;
@@ -17,8 +16,6 @@ $(document).ready(function(){
 	    return cookieValue;
 	}
 	var csrftoken = getCookie('csrftoken');
-
-	console.log(csrftoken);
 
 	$(".btn-delete").click(function(event) {
 		event.preventDefault();
@@ -39,7 +36,6 @@ $(document).ready(function(){
 				console.log('shit broke');
 			},
 		});
-		console.log('complete');
 		window.location.reload();
 	});
 });
