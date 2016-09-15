@@ -522,7 +522,7 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
 
 class BusinessUnitDeleteView(ManagerMixin, DeleteView):
     model = BusinessUnit
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -563,7 +563,7 @@ class FiscalYearCreateView(ManagerMixin, CreateView):
 
 class FiscalYearDeleteView(ManagerMixin, DeleteView):
     model = FiscalYear
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
@@ -607,7 +607,7 @@ class ContractCreateView(ManagerMixin, CreateView):
 
 class ContractDeleteView(ManagerMixin, DeleteView):
     model = Contract
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return Contract.objects.get(pk=self.kwargs['contract'])
@@ -661,7 +661,7 @@ class InvoiceCreateView(ManagerMixin, CreateView):
 
 class InvoiceDeleteView(ManagerMixin, DeleteView):
     model = Invoice
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return Invoice.objects.get(pk=self.kwargs['invoice'])
@@ -741,7 +741,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
 
 class ExpenseDeleteView(ManagerMixin, DeleteView):
     model = Expense
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return Expense.objects.get(pk=self.kwargs['expense'])
@@ -811,7 +811,7 @@ class SalaryCreateView(ManagerMixin, CreateView):
 
 class SalaryDeleteView(ManagerMixin, DeleteView):
     model = Salary
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return Salary.objects.get(pk=self.kwargs['salary'])
@@ -870,7 +870,7 @@ class PartTimeCreateView(ManagerMixin, CreateView):
 
 class PartTimeDeleteView(ManagerMixin, DeleteView):
     model = PartTime
-    template_name = 'accounting/part_time_delete_form.html'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return PartTime.objects.get(pk=self.kwargs['part_time'])
@@ -943,7 +943,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
 
 class IncomeDeleteView(ManagerMixin, DeleteView):
     model = Income
-    template_name_suffix = '_delete_form'
+    template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
         return Income.objects.get(pk=self.kwargs['income'])

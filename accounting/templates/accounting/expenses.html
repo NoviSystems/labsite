@@ -91,7 +91,7 @@
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_expense' business_unit=current.pk expense=expense.pk month=month_data.month.pk %}>Update</a>
                                 {% if expense.name != "Payroll" %}
-                                <a class="btn btn-primary" href={% url 'accounting:delete_expense' business_unit=current.pk expense=expense.pk month=month_data.month.pk %}>Delete</a>
+                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_expense' business_unit=current.pk expense=expense.pk month=month_data.month.pk %}>Delete</a>
                                 {% endif %}
                             </td>
                             {% endif %}
@@ -136,7 +136,7 @@
                             {% if not is_viewer %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_income' business_unit=current.pk income=income.pk month=month_data.month.pk %}>Update</a>
-                                <a class="btn btn-primary" href={% url 'accounting:delete_income' business_unit=current.pk income=income.pk month=month_data.month.pk %}>Delete</a>
+                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_income' business_unit=current.pk income=income.pk month=month_data.month.pk %}>Delete</a>
                             </td>
                             {% endif %}
                     </tr>
