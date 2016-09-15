@@ -578,7 +578,7 @@ class FiscalYearUpdateView(ManagerMixin, UpdateView):
     model = FiscalYear
 
     def get_object(self):
-        return FiscalYear.objects.get(fiscal_year=self.kwargs['fiscal_year'])
+        return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
@@ -977,7 +977,7 @@ class IncomeUpdateView(ManagerMixin, UpdateView):
 
 
 class CashUpdateView(ManagerMixin, UpdateView):
-    template_name_suffix = '_update_form'
+    template_name = 'accounting/base_delete_form.html'
     form_class = CashUpdateForm
     model = Cash
 
