@@ -41,9 +41,12 @@ class SetUpMixin(object):
     def dispatch(self, request, *args, **kwargs):
         self.current = BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.fiscal_years = FiscalYear.objects.filter(business_unit=self.current)
+        self.current_month = None
+        self.months = None
         now = datetime.now()
         for fiscal_year in self.fiscal_years:
             self.months = Month.objects.filter(fiscal_year=fiscal_year)
+            print self.months
             for month in self.months:
                 if month.month.month == now.month:
                     self.current_month = month
