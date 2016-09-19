@@ -116,7 +116,6 @@ class ExpenseCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ExpenseCreateForm, self).__init__(*args, **kwargs)
-        self.fields['date_paid'].required = False
 
     class Meta:
         model = Expense
