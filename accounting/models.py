@@ -12,7 +12,7 @@ class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
     account_number = models.CharField(max_length=12, verbose_name='Account Number')
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
 
@@ -28,7 +28,7 @@ class UserTeamRole(models.Model):
     class Meta:
         unique_together = ['user', 'business_unit']
 
-    def __str__(self):
+    def __unicode__(self):
         return self.user.username + ' is a ' + self.role + ' of ' + self.business_unit.name
 
 
@@ -38,7 +38,7 @@ class FiscalYear(models.Model):
     end_date = models.DateField(verbose_name='End Date')
     cash_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Cash Amount')
 
-    def __str__(self):
+    def __unicode__(self):
         return self.start_date.strftime("%b %Y") + " - " + self.end_date.strftime("%b %Y")
 
 
@@ -48,7 +48,7 @@ class Month(models.Model):
     projected_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Projected Values')
     actual_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Values')
 
-    def __str__(self):
+    def __unicode__(self):
         return self.fiscal_year.business_unit.name + " " + self.month.strftime("%b %Y")
 
 
