@@ -49,7 +49,10 @@ $(function () {
     <ul class="dropdown-menu">
         <li><a href={% url 'accounting:dashboard' business_unit=current.pk %}>Fiscal Year Values</a></li>
         {% for month in months %}
-            <li class="text-right"><a href={% url 'accounting:dashboard_month' business_unit=current.pk fiscal_year=month.fiscal_year.pk month=month.pk %}>{{ month.month | date:"F Y" }}</a></li>
+            <li class="text-right"><a href={% url 'accounting:dashboard_month' business_unit=current.pk fiscal_year=month.fiscal_year.pk month=month.pk %}>{{ month.month|date:"F Y" }}</a></li>
+            {% if month.month|date:"F" == "December" and not forloop.last %}
+                <li class="divider"></li>
+            {% endif %}
         {% endfor %}
     </ul>
 </div>
