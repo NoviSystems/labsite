@@ -94,6 +94,7 @@ class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
+            print 'Hi from Viewer'
             bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current).role
             if self.request.user.is_superuser:
                 return True
@@ -116,6 +117,19 @@ class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
             if self.request.user.is_superuser:
                 return True
             elif bu_role == 'MANAGER':
+                return True
+            else:
+                raise Http404()
+        except ObjectDoesNotExist:
+            raise Http404()
+
+
+class FiscalYearExistMixin(SetUpMixin, UserPassesTestMixin):
+
+    def test_func(self):
+        try:
+            print 'Hi: ' + self.fiscal_years
+            if not self.fiscal_years:
                 return True
             else:
                 raise Http404()
@@ -579,7 +593,7 @@ class ContractUpdateView(ManagerMixin, UpdateView):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs["business_unit"]})
 
 
-class InvoiceCreateView(ManagerMixin, CreateView):
+class InvoiceCreateView(ManagerMixin, FiscalYearExistMixin, CreateView):
     template_name = 'accounting/base_form.html'
     model = Invoice
     form_class = InvoiceCreateForm

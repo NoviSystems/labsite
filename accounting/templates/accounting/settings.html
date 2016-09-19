@@ -34,7 +34,11 @@
                                 <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current.pk %}>Update</a>
                             </p>
                             <p>
-                                <a class="btn btn-danger btn-delete" href={% url 'accounting:delete_business_unit' business_unit=current.pk %}>Delete {{current.name}}</a>
+
+                                <form action="{% url 'accounting:delete_business_unit' business_unit=current.pk %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type="submit">Delete {{current.name}}</button>
+                                </form>
                             </p>
                           </div>
                         </div>
