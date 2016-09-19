@@ -50,7 +50,8 @@ class SetUpMixin(object):
             for month in self.months:
                 if month.month.month == now.month:
                     self.current_month = month
-
+        if not self.current_month:
+            self.current_month = self.months[0]
         self.now = now
 
         # if fiscal year is passed by url, get that year as the current fiscal year
@@ -137,14 +138,7 @@ class DashboardView(ViewerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
-
-        context['notifications'] = self.notifications
-
         if self.fiscal_years:
-            # Finding the current month
-            current_month = None
-            now = self.now
-
             cma = {
                 'title': 'Cash Month Actual',
                 'values': []
@@ -186,48 +180,10 @@ class DashboardView(ViewerMixin, TemplateView):
                 'values': []
             }
 
-            # Month names used on graph and table
             months_names = []
-
-            # Computes totals for the whole fiscal year
-            months = []
-
-            # moves through all fiscal years
-            for fiscal_year in self.fiscal_years:
-
-                # gets all months
-                months = Month.objects.filter(fiscal_year=fiscal_year)
-
-                # moves through all months
-                for month in months:
-
-                    # gets current month
-                    if month.month.month == now.month:
-                        current_month = month
-
-            # if fiscal year is passed by url, get that year as the current fiscal year
-            # else get the value associated to the current month
-            if 'fiscal_year' in kwargs:
-                current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
-            else:
-                current_fiscal_year = self.current_fiscal_year
 
             # moves through all months
             for month in self.months:
-
-                # gets current month
-                if month.month.month == now.month:
-                    current_month = month
-
-            current_fiscal_year = current_month.fiscal_year
-
-            # moves through all fiscal years
-
-            # gets all months
-            months = list(Month.objects.filter(fiscal_year=current_fiscal_year))
-
-            # moves through all months
-            for month in months:
 
                 # gets all month names
                 months_names.append(month.month.strftime("%B"))
@@ -324,22 +280,11 @@ class DashboardView(ViewerMixin, TemplateView):
             context['tamp'] = tamp  # total assets month predicted
 
             # Context totals for the Graph values
-            context['fiscal_years'] = self.fiscal_years
-            context['current_fiscal_year'] = current_fiscal_year
-            context['months_names'] = months_names
-            context['months'] = months
             context['months_j'] = json.dumps(months_names)
             context['predicted_totals'] = json.dumps([float(value) for value in cmpr['values']])
             context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
+            context['months_names'] = months_names
             context['dashboard_data'] = dashboard_data
-            # Context totals for the Graph values
-            context['current_month'] = current_month
-
-        # Personnel and Contracts totals
-        personnel = Personnel.objects.filter(business_unit=self.current)
-        context['personnel'] = personnel
-        contracts = Contract.objects.filter(business_unit=self.current)
-        context['contracts'] = contracts
 
         return context
 
@@ -353,7 +298,8 @@ class DashboardMonthView(DashboardView):
             'month': Month.objects.get(pk=kwargs['month']),
         }
         context['month_data'] = month_data
-        index = context['months'].index(month_data['month'])
+
+        index = list(context['months']).index(month_data['month'])
 
         # calculate month_values per index
         context['month_cma'] = context['cma']['values'][index]
@@ -362,12 +308,9 @@ class DashboardMonthView(DashboardView):
         context['expenses'] = Expense.objects.filter(month=kwargs['month'])
         context['payrolls'] = Payroll.objects.filter(month=kwargs['month'])
 
-        print context['expenses']
-
         context['month_cmpr'] = context['cmpr']['values'][index]
         context['month_ima'] = context['ima']['values'][index]
         context['month_imp'] = context['imp']['values'][index]
-        print context['month_imp']
         context['month_ema'] = context['ema']['values'][index]
         context['month_emp'] = context['emp']['values'][index]
         context['month_pmp'] = context['pmp']['values'][index]

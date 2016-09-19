@@ -36,30 +36,6 @@ $(function () {
 });
 </script>
 
-{% if not personnel %}
-    <div class="row">
-        <div class="col-md-12">
-        <h4>No personnel for this business unit.
-            {% if not is_viewer %}
-                <a class="btn btn-primary" href={% url 'accounting:personnel' business_unit=current.pk %}> Create Personnel</a>
-            {% endif %}
-        </h4>
-        </div>
-    </div>
-{% endif %}
-
-{% if not contracts %}
-    <div class="row">
-        <div class="col-md-12">
-            <h4>No contracts for this business unit.
-                {% if not is_viewer %}
-                    <a class="btn btn-primary" href={% url 'accounting:create_contract' business_unit=current.pk %}> Create Contract</a>
-                {% endif %}
-            </h4>
-        </div>
-    </div>
-{% endif %}
-
 <hr>
 
 <div class="dropdown">
