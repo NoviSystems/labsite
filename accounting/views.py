@@ -547,12 +547,19 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
 
 
 class FiscalYearCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/fiscalyear_create_form.html'
+    template_name = 'accounting/base_form.html'
     model = FiscalYear
     form_class = FiscalYearCreateForm
 
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
+
+    def get_initial(self):
+        initial = super(FiscalYearCreateView, self).get_initial()
+        previous_fiscal_year = FiscalYear.objects.filter(business_unit=self.kwargs['business_unit']).order_by('end_date').last()
+        if previous_fiscal_year:
+            initial['cash_amount'] = previous_fiscal_year.cash_amount
+        return initial
 
     def form_valid(self, form):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])

@@ -1,4 +1,3 @@
-from __future__ import print_function
 from django.forms import ModelForm, BooleanField
 from django.core.exceptions import FieldDoesNotExist
 from models import *
@@ -58,6 +57,9 @@ class FiscalYearCreateForm(BaseForm, ModelForm):
         exclude = [
             'business_unit',
         ]
+        help_texts = {
+            'cash_amount': 'Current cash amount for Business Unit.',
+        }
 
 
 class FiscalYearUpdateForm(BaseForm, ModelForm):
