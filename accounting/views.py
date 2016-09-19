@@ -46,7 +46,6 @@ class SetUpMixin(object):
         now = datetime.now()
         for fiscal_year in self.fiscal_years:
             self.months = Month.objects.filter(fiscal_year=fiscal_year)
-            print self.months
             for month in self.months:
                 if month.month.month == now.month:
                     self.current_month = month
@@ -376,7 +375,6 @@ class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
         for contract in contracts:
             if contract.contract_state == 'ACTIVE':
                 invoices = Invoice.objects.filter(contract=contract)
-                print invoices
                 active_contracts.extend([
                     {
                         'contract': contract,
@@ -679,7 +677,6 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                         expense.save()
             return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'])
         except KeyError:
-            print "Exception thrown"
             form.instance.month = month
         
         date_payable = datetime.strptime(self.request.POST['date_payable'], '%m/%d/%Y')
@@ -887,7 +884,6 @@ class IncomeCreateView(ManagerMixin, CreateView):
                         )
             return redirect('accounting:expenses', business_unit=self.kwargs['business_unit'], month=self.kwargs['month'])
         except KeyError:
-            print "Exception thrown"
             form.instance.month = month
         response = super(IncomeCreateView, self).form_valid(form)
 
