@@ -50,7 +50,7 @@ class SetUpMixin(object):
             for month in self.months:
                 if month.month.month == now.month:
                     self.current_month = month
-        if not self.current_month:
+        if self.fiscal_years and not self.current_month:
             self.current_month = self.months[0]
         self.now = now
 
