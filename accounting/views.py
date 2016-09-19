@@ -940,7 +940,7 @@ class IncomeUpdateView(ManagerMixin, UpdateView):
 
 
 class CashUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/base_delete_form.html'
+    template_name = 'accounting/base_form.html'
     form_class = CashUpdateForm
     model = Cash
 

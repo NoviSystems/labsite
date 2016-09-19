@@ -69,8 +69,8 @@ $(function () {
                 </thead>
                 <tbody>
                     {% for data in dashboard_data %}
-                    <tr>
-                        <th scope="row">{{ data.title }}</th>
+                    <tr class="text-right">
+                        <th class="text-right" scope="row">{{ data.title }}</th>
                         {% for value in data.values %}
                             <td>${{ value }}</td>
                         {% endfor %}
