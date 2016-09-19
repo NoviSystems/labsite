@@ -613,7 +613,13 @@ class InvoiceCreateView(ManagerMixin, FiscalYearExistMixin, CreateView):
 
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
-        month = Month.objects.get(fiscal_year__business_unit=business_unit, month__month=form.instance.date_payable.month)
+
+        date_payable = form.instance.date_payable
+        for fiscal_year in self.fiscal_years:
+            if fiscal_year.start_date < date_payable < fiscal_year.end_date:
+                break
+
+        month = Month.objects.get(fiscal_year=fiscal_year, month__month=form.instance.date_payable.month)
         form.instance.month = month
         contract_number = str(form.instance.contract.contract_number)
         contract_number = contract_number.zfill(4)
