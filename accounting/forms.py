@@ -1,4 +1,4 @@
-from django.forms import ModelForm, BooleanField
+from django.forms import ModelForm, BooleanField, ValidationError
 from django.core.exceptions import FieldDoesNotExist
 from models import *
 
@@ -50,6 +50,13 @@ class FiscalYearCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FiscalYearCreateForm, self).__init__(*args, **kwargs)
+
+    def clean_end_date(self):
+        start_date = self.cleaned_data['start_date']
+        end_date = self.cleaned_data['end_date']
+        if end_date < start_date:
+            raise ValidationError('The End Date must be after the Start Date')
+        return end_date 
 
     class Meta:
         model = FiscalYear
