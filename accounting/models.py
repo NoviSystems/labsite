@@ -34,8 +34,8 @@ class UserTeamRole(models.Model):
 
 class FiscalYear(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    start_date = models.DateField(verbose_name='Start Date')
-    end_date = models.DateField(default=datetime.now, blank=True, verbose_name='End Date')
+    start_date = models.DateField(default=datetime.now, verbose_name='Start Date')
+    end_date = models.DateField(verbose_name='End Date')
     cash_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Cash Amount')
 
     def __str__(self):
@@ -62,12 +62,12 @@ class LineItem(models.Model):
 
 class Contract(models.Model):
     CONTRACT_STATE = {
-        ('ACTIVE', "active"),
-        ('COMPLETE', "complete"),
+        ('ACTIVE', "Active"),
+        ('COMPLETE', "Complete"),
     }
     CONTRACT_TYPE = {
-        ('FIXED', "fixed"),
-        ('HOURLY', "hourly"),
+        ('FIXED', "Fixed"),
+        ('HOURLY', "Hourly"),
     }
 
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
@@ -87,14 +87,14 @@ class Cash(LineItem):
 class Income(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
-    date_payed = models.DateField(default=None, null=True, verbose_name='Date Payed')
+    date_paid = models.DateField(default=None, null=True, verbose_name='Date Paid')
 
 
 class Invoice(Income):
     TRANSITION_STATE = {
-        ('INVOICED', "invoiced"),
-        ('NOT_INVOICED', "not invoiced"),
-        ('RECIEVED', "recieved"),
+        ('INVOICED', "Invoiced"),
+        ('NOT_INVOICED', "Not Invoiced"),
+        ('RECIEVED', "Recieved"),
     }
 
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, verbose_name='Contract')
@@ -119,8 +119,8 @@ class Salary(Personnel):
     salary_type = models.CharField(max_length=3, choices=SALARY_TYPE, verbose_name='Salary Type')
     salary_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Salary')
     social_security_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Social Security Amount')
-    fed_health_insurance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Federal health Insurance Amount')
-    retirement_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='retirement_amount')
+    fed_health_insurance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Federal Health Insurance Amount')
+    retirement_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Retirement Amount')
     medical_insurance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Medical Insurance Amount')
     staff_benefits_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Staff Benefits Amount')
     fringe_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Fringe Amount')
@@ -128,8 +128,8 @@ class Salary(Personnel):
 
 class PartTime(Personnel):
     HOURLY_TYPE = {
-        ('STUDENT', 'student'),
-        ('NON_STUDENT', 'non student')
+        ('STUDENT', 'Student'),
+        ('NON_STUDENT', 'Non-Student')
     }
     hourly_type = models.CharField(max_length=12, choices=HOURLY_TYPE, verbose_name='Hourly Type')
     hourly_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Hourly Amount')

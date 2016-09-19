@@ -69,7 +69,7 @@ class SetUpMixin(object):
         # Loop through each line item
         # for lineItem in lineItems:
         #     # If the line item's date payable is in the past to the current date
-        #     # And the date payed has not been entered
+        #     # And the date paid has not been entered
         #     # And it has not been reconciled
         #     # Add to the list of notifications
         #     # if lineItem.date_payable
@@ -731,7 +731,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                             date_payable=new_date_payable,
                         )
                         if new_date_payable < self.now:
-                            expense.date_payed = new_date_payable
+                            expense.date_paid = new_date_payable
                             expense.actual_amount = form.instance.predicted_amount
                         expense.save()
             return redirect('accounting:expenses', pk=self.kwargs['pk'], month=self.kwargs['month'])
@@ -741,7 +741,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
         
         date_payable = datetime.strptime(self.request.POST['date_payable'], '%m/%d/%Y')
         if date_payable < self.now:
-            form.instance.date_payed = date_payable
+            form.instance.date_paid = date_payable
             form.instance.actual_amount = self.request.POST['predicted_amount']
 
         response = super(ExpenseCreateView, self).form_valid(form)

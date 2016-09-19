@@ -118,11 +118,11 @@ class ExpenseCreateForm(BaseForm, ModelForm):
             'actual_amount',
             'reconciled',
             'month',
-            'date_payed',
+            'date_paid',
             'business_unit',
         ]
         help_texts = {
-            'date_payable': 'If this is today or a previous date, it will be entered as already payed',
+            'date_payable': 'If this is today or a previous date, it will be entered as already paid',
         }
 
 
@@ -235,7 +235,7 @@ class IncomeCreateForm(BaseForm, ModelForm):
             'actual_amount',
             'reconciled',
             'month',
-            'date_payed',
+            'date_paid',
             'business_unit',
 
         ]

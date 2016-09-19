@@ -85,7 +85,7 @@
                     <tr class="model-display">
                         <th scope="row">{{ expense.name }}</th>
                             <td>{{ expense.date_payable }}</td>
-                            <td>{{ expense.date_payed }}</td>
+                            <td>{{ expense.date_paid }}</td>
                             <td>${{ expense.predicted_amount }}</td>
                             {% if not is_viewer %}
                             <td>
@@ -131,7 +131,7 @@
                     <tr class="model-display">
                         <th scope="row">{{ income.name }}</th>
                             <td>{{ income.date_payable }}</td>
-                            <td>{{ income.date_payed }}</td>
+                            <td>{{ income.date_paid }}</td>
                             <td>${{ income.predicted_amount }}</td>
                             {% if not is_viewer %}
                             <td>
