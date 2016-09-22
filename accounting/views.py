@@ -685,7 +685,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
         month = Month.objects.get(pk=self.kwargs['month'])
 
         try:
-            if self.request.POST['reocurring']:
+            if self.request.POST['recurring']:
                 months = Month.objects.filter(fiscal_year=month.fiscal_year)
                 for m in months:
                     if m.month >= month.month:
@@ -897,7 +897,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
         form.instance.business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         month = Month.objects.get(pk=self.kwargs['month'])
         try:
-            if self.request.POST['reocurring']:
+            if self.request.POST['recurring']:
                 months = Month.objects.filter(fiscal_year=month.fiscal_year)
                 for m in months:
                     if m.month >= month.month:

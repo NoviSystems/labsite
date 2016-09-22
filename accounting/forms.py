@@ -112,7 +112,7 @@ class ContractUpdateForm(BaseForm, ModelForm):
 
 class ExpenseCreateForm(BaseForm, ModelForm):
 
-    reocurring = BooleanField(label='Reocurring', initial=False, required=False)
+    recurring = BooleanField(label='recurring', initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         super(ExpenseCreateForm, self).__init__(*args, **kwargs)
@@ -231,7 +231,7 @@ class PartTimeUpdateForm(BaseForm, ModelForm):
 
 class IncomeCreateForm(BaseForm, ModelForm):
 
-    reocurring = BooleanField(label='Reocurring', initial=False, required=False)
+    recurring = BooleanField(label='recurring', initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         super(IncomeCreateForm, self).__init__(*args, **kwargs)
