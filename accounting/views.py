@@ -45,7 +45,7 @@ class SetUpMixin(object):
         self.months = None
         now = datetime.now()
         for fiscal_year in self.fiscal_years:
-            self.months = Month.objects.filter(fiscal_year=fiscal_year)
+            self.months = Month.objects.filter(fiscal_year=fiscal_year).order_by('month')
             for month in self.months:
                 if month.month.month == now.month:
                     self.current_month = month
