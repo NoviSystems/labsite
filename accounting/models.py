@@ -59,6 +59,23 @@ class LineItem(models.Model):
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Amount')
     reconciled = models.BooleanField(default=False, verbose_name='Reconciled')
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        if cls._deferred:
+            instance = cls(**zip(field_names, values))
+        else:
+            instance = cls(*values)
+        instance._state.adding = False
+        instance._state.db = db
+        instance._loaded_values = dict(zip(field_names, values))
+        return instance
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding and (
+                self.actual_amount != self._loaded_values['actual_amount']):
+            self.reconciled = True
+        super(LineItem, self).save(*args, **kwargs)
+
 
 class Contract(models.Model):
     CONTRACT_STATE = {
@@ -173,6 +190,7 @@ def createItemsForFiscalYear(sender, instance, **kwargs):
         months = Month.objects.filter(fiscal_year=instance.pk)
         for month in months:
             Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
+
 
 # calculate month duration
 def monthdelta(d1, d2):

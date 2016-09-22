@@ -1079,7 +1079,6 @@ def updateCashPredicted(business_unit):
     fiscal_years = FiscalYear.objects.filter(business_unit=business_unit)
     for fiscal_year in fiscal_years:
         cash_previous = Decimal(fiscal_year.cash_amount)
-        print 'Cash Previous: ' + str(cash_previous)
         for month in Month.objects.filter(fiscal_year=fiscal_year):
             expense_month_projected = Decimal('0.00')
             for expense in Expense.objects.filter(month=month):

@@ -142,7 +142,8 @@ class ExpenseUpdateForm(BaseForm, ModelForm):
         fields = '__all__'
         exclude = [
             'business_unit',
-            'month'
+            'month',
+            'reconciled',
         ]
 
 
@@ -155,7 +156,7 @@ class InvoiceCreateForm(BaseForm, ModelForm):
         model = Invoice
         fields = [
             'predicted_amount',
-            'date_payable'
+            'date_payable',
         ]
 
 
@@ -169,7 +170,8 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
         fields = '__all__'
         exclude = [
             'number',
-            'contract'
+            'contract',
+            'reconciled',
         ]
 
 
@@ -243,7 +245,6 @@ class IncomeCreateForm(BaseForm, ModelForm):
             'month',
             'date_paid',
             'business_unit',
-
         ]
 
 
@@ -256,7 +257,7 @@ class IncomeUpdateForm(BaseForm, ModelForm):
         model = Income
         fields = '__all__'
         exclude = [
-
+            'reconciled',
         ]
 
 
@@ -273,6 +274,7 @@ class CashUpdateForm(BaseForm, ModelForm):
             'business_unit',
             'month',
             'predicted_amount',
+            'reconciled',
         ]
 
 
