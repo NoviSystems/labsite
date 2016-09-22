@@ -153,26 +153,26 @@ class Payroll(models.Model):
 
 @receiver(post_save, sender=FiscalYear, dispatch_uid="createItemsForFiscalYear")
 def createItemsForFiscalYear(sender, instance, **kwargs):
-    start_month = instance.start_date
-    end_month = instance.end_date
-    number_of_months = monthdelta(start_month, end_month)
+    if not Cash.objects.filter(month__fiscal_year=instance).exists():
+        start_month = instance.start_date
+        end_month = instance.end_date
+        number_of_months = monthdelta(start_month, end_month)
 
-    month = start_month.month
-    year = start_month.year
-    day = start_month.day
-    for i in range(number_of_months + 1):
-        if month == 12:
-            year = year + 1
-            month = 1
-        elif i == 0:
-            month = month
-        else:
-            month = month + 1
-        Month.objects.create(fiscal_year=instance, month=date(year, month, day), projected_values=0.00, actual_values=0.00)
-    months = Month.objects.filter(fiscal_year=instance.pk)
-    for month in months:
-        Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
-
+        month = start_month.month
+        year = start_month.year
+        day = start_month.day
+        for i in range(number_of_months + 1):
+            if month == 12:
+                year = year + 1
+                month = 1
+            elif i == 0:
+                month = month
+            else:
+                month = month + 1
+            Month.objects.create(fiscal_year=instance, month=date(year, month, day), projected_values=0.00, actual_values=0.00)
+        months = Month.objects.filter(fiscal_year=instance.pk)
+        for month in months:
+            Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
 
 # calculate month duration
 def monthdelta(d1, d2):

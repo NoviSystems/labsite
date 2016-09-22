@@ -548,6 +548,12 @@ class FiscalYearUpdateView(ManagerMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
 
+    def form_valid(self, form):
+        response = super(FiscalYearUpdateView, self).form_valid(form)
+        updateCashPredicted(business_unit=self.current)
+        return response
+
+
 
 class ContractCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/base_form.html'
@@ -1073,6 +1079,7 @@ def updateCashPredicted(business_unit):
     fiscal_years = FiscalYear.objects.filter(business_unit=business_unit)
     for fiscal_year in fiscal_years:
         cash_previous = Decimal(fiscal_year.cash_amount)
+        print 'Cash Previous: ' + str(cash_previous)
         for month in Month.objects.filter(fiscal_year=fiscal_year):
             expense_month_projected = Decimal('0.00')
             for expense in Expense.objects.filter(month=month):

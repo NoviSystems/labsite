@@ -66,8 +66,8 @@
                                 
                                 {{fiscal_year}} - 
 
-<!--                                 <a href={% url 'accounting:update_fiscal_year' business_unit=current.pk fiscal_year=fiscal_year.pk %}>Update</a> | 
- -->                                
+                                <a href={% url 'accounting:update_fiscal_year' business_unit=current.pk fiscal_year=fiscal_year.pk %}>Update</a> | 
+                                
                                 <a class="btn-delete" href={% url 'accounting:delete_fiscal_year' business_unit=current.pk fiscal_year=fiscal_year.pk %}>Delete</a></li>
 
                             {% endfor %}
