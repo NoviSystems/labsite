@@ -19,6 +19,11 @@ class BaseForm(ModelForm):
                 'class': 'form-control',
             })
 
+            if 'date' in self.fields[field].label.lower():
+                self.fields[field].widget.attrs.update({
+                    'class': 'form-control datepicker',
+                })
+
 
 class BusinessUnitCreateForm(BaseForm, ModelForm):
 

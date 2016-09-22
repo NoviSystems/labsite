@@ -8,12 +8,15 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}" />
+<script src="{% static 'js/datepicker.js' %}"></script>
+
 
 <div class="panel panel-default">
   <div class="panel-body">
       <h3 class="form-header">{% if object %} Update {% else %} Create {% endif %} {{ form.instance | get_form_model_name }}</h3>
-
         <form class="form" method="POST" action="">
                 {% csrf_token %}
                 {% for field in form %}
