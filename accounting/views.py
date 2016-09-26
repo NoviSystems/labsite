@@ -94,7 +94,6 @@ class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
-            print 'Hi from Viewer'
             bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current).role
             if self.request.user.is_superuser:
                 return True
@@ -128,7 +127,6 @@ class FiscalYearExistMixin(SetUpMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
-            print 'Hi: ' + self.fiscal_years
             if not self.fiscal_years:
                 return True
             else:
@@ -252,14 +250,10 @@ class DashboardView(ViewerMixin, TemplateView):
                         cash_month_actual += cash.actual_amount
                     cash_month_projected += cash.predicted_amount
 
-                print cash_month_actual
-                print cash_month_projected
-
                 # add cash to lists for table
                 cmpr['values'].append(cash_month_projected)
                 cma['values'].append(cash_month_actual)
-                print cmpr['values']
-                print cma['values']
+
                 # income booked variables
                 income_booked_projected = Decimal('0.00')
 
