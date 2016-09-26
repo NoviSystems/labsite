@@ -75,14 +75,14 @@
                                 </thead>
                             <tbody>
                                 {% for invoice in contract_invoice.invoices %}
-                                <tr>
+                                <tr class="model-display">
                                     <th scope="row">{{ invoice.number }}</th>
                                         <td>{{ invoice.date_payable }}</td>
                                         <td>{{ invoice.transition_state }}</td>
                                         <td>{{ invoice.income.predicted_amount }}</td>
                                         {% if not is_viewer %}
                                         <td>
-                                                <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' business_unit=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
+                                                <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
                                                 <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Delete</a>
                                         </td>
                                         {% endif %}
@@ -157,14 +157,14 @@
                                 </thead>
                             <tbody>
                                 {% for invoice in contract_invoice.invoices %}
-                                <tr>
+                                <tr class="model-display">
                                     <th scope="row">{{ invoice.number }}</th>
                                         <td>{{ invoice.date_payable }}</td>
                                         <td>{{ invoice.transition_state }}</td>
                                         <td>{{ invoice.income.predicted_amount }}</td>
                                         {% if not is_viewer %}
                                         <td>
-                                            <a class="btn btn-primary" href={% url 'accounting:udpate_invoice' business_unit=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
+                                            <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
                                             <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Delete</a>
                                         </td>
                                         {% endif %}

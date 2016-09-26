@@ -90,7 +90,7 @@ class Contract(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
     department = models.CharField(max_length=4, default='CSC', verbose_name='Department')
     contract_number = models.IntegerField(verbose_name='Contract Number')
-    organization_name = models.CharField(max_length=255, verbose_name='Organization Name')
+    organization_name = models.CharField(max_length=255, verbose_name='Contract Name')
     start_date = models.DateField(verbose_name='Start Date')
     amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Amount')
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE, verbose_name='Contract State')
@@ -104,7 +104,7 @@ class Cash(LineItem):
 class Income(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
-    date_paid = models.DateField(default=None, null=True, verbose_name='Date Paid')
+    date_paid = models.DateField(default=None, null=True, blank=True, verbose_name='Date Paid')
 
 
 class Invoice(Income):
@@ -156,7 +156,7 @@ class PartTime(Personnel):
 class Expense(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
-    date_paid = models.DateField(default=None, null=True, verbose_name='Date Paid')
+    date_paid = models.DateField(default=None, null=True, blank=True, verbose_name='Date Paid')
 
 
 class Payroll(models.Model):

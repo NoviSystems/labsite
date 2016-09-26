@@ -51,9 +51,6 @@ urlpatterns = [
     # Cash Forms
     url(r'^(?P<business_unit>\d+)/(?P<month>\d+)/cash/(?P<cash>\d+)/update/$', CashUpdateView.as_view(), name='update_cash'),
 
-    # Invoice Forms
-    url(r'^business_unit/(?P<business_unit>\d+)/invoice/(?P<invoice>\d+)/update/$', InvoiceUpdateView.as_view(), name='udpate_invoice'),
-
     # Contracts Forms
     url(r'^business_unit/(?P<business_unit>\d+)/contracts/create/$', ContractCreateView.as_view(), name='create_contract'),
     url(r'^business_unit/(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/update/$', ContractUpdateView.as_view(), name='update_contract'),
@@ -61,7 +58,7 @@ urlpatterns = [
 
     # Invoice Forms
     url(r'^business_unit/(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/create/$', InvoiceCreateView.as_view(), name='create_invoice'),
-    url(r'^business_unit/(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/(?P<invoice>\d+)/update/$', InvoiceUpdateView.as_view(), name='udpate_invoice'),
+    url(r'^business_unit/(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/(?P<invoice>\d+)/update/$', InvoiceUpdateView.as_view(), name='update_invoice'),
     url(r'^business_unit/(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/(?P<invoice>\d+)/delete/$', InvoiceDeleteView.as_view(), name='delete_invoice'),
 
     # Salary Forms
