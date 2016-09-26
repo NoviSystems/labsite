@@ -193,13 +193,8 @@ class DashboardView(ViewerMixin, TemplateView):
                 'values': []
             }
 
-            months_names = []
-
             # moves through all months
             for month in self.months:
-
-                # gets all month names
-                months_names.append(month.month.strftime("%B"))
 
                 # payroll variables
                 payroll_month_actual = Decimal('0.00')
@@ -257,10 +252,14 @@ class DashboardView(ViewerMixin, TemplateView):
                         cash_month_actual += cash.actual_amount
                     cash_month_projected += cash.predicted_amount
 
+                print cash_month_actual
+                print cash_month_projected
+
                 # add cash to lists for table
                 cmpr['values'].append(cash_month_projected)
                 cma['values'].append(cash_month_actual)
-
+                print cmpr['values']
+                print cma['values']
                 # income booked variables
                 income_booked_projected = Decimal('0.00')
 
@@ -293,10 +292,9 @@ class DashboardView(ViewerMixin, TemplateView):
             context['tamp'] = tamp  # total assets month predicted
 
             # Context totals for the Graph values
-            context['months_j'] = json.dumps(months_names)
+            context['months_names'] = json.dumps([month.month.strftime("%B") for month in self.months])
             context['predicted_totals'] = json.dumps([float(value) for value in cmpr['values']])
             context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
-            context['months_names'] = months_names
             context['dashboard_data'] = dashboard_data
 
         return context
@@ -686,7 +684,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
 
         try:
             if self.request.POST['recurring']:
-                months = Month.objects.filter(fiscal_year=month.fiscal_year)
+                months = Month.objects.filter(fiscal_year=month.fiscal_year).order_by('month')
                 for m in months:
                     if m.month >= month.month:
                         new_date_payable = datetime(m.month.year, m.month.month, form.instance.date_payable.day)
@@ -898,7 +896,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
         month = Month.objects.get(pk=self.kwargs['month'])
         try:
             if self.request.POST['recurring']:
-                months = Month.objects.filter(fiscal_year=month.fiscal_year)
+                months = Month.objects.filter(fiscal_year=month.fiscal_year).order_by('month')
                 for m in months:
                     if m.month >= month.month:
                         Income.objects.create(
@@ -1039,7 +1037,7 @@ def updatePayroll(business_unit):
     # update its predicted value with the total
     fiscal_years = FiscalYear.objects.filter(business_unit=business_unit)
     for fiscal_year in fiscal_years:
-        months = Month.objects.filter(fiscal_year=fiscal_year)
+        months = Month.objects.filter(fiscal_year=fiscal_year).order_by('month')
         for month in months:
             payroll = None
             try:
@@ -1058,7 +1056,7 @@ def updatePayroll(business_unit):
 
 def populateCashPredicted(fiscal_year, cash_amount):
     cash_previous = Decimal(cash_amount)
-    for month in Month.objects.filter(fiscal_year=fiscal_year):
+    for month in Month.objects.filter(fiscal_year=fiscal_year).order_by('month'):
         expense_month_projected = Decimal('0.00')
         for expense in Expense.objects.filter(month=month):
             expense_month_projected += expense.predicted_amount
@@ -1079,7 +1077,7 @@ def updateCashPredicted(business_unit):
     fiscal_years = FiscalYear.objects.filter(business_unit=business_unit)
     for fiscal_year in fiscal_years:
         cash_previous = Decimal(fiscal_year.cash_amount)
-        for month in Month.objects.filter(fiscal_year=fiscal_year):
+        for month in Month.objects.filter(fiscal_year=fiscal_year).order_by('month'):
             expense_month_projected = Decimal('0.00')
             for expense in Expense.objects.filter(month=month):
                 expense_month_projected += expense.predicted_amount
