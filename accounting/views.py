@@ -380,7 +380,7 @@ class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
         active_contracts = []
         for contract in contracts:
             if contract.contract_state == 'ACTIVE':
-                invoices = Invoice.objects.filter(contract=contract)
+                invoices = Invoice.objects.filter(contract=contract).order_by('date_payable')
                 active_contracts.extend([
                     {
                         'contract': contract,
