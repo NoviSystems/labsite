@@ -37,43 +37,9 @@ class PermissionsMixin(LoginRequiredMixin, object):
 
 
 class SetUpMixin(object):
-
     def dispatch(self, request, *args, **kwargs):
         self.current = BusinessUnit.objects.get(pk=kwargs['business_unit'])
-        self.fiscal_years = FiscalYear.objects.filter(business_unit=self.current)
-        self.current_month = None
-        self.months = None
-        now = datetime.now()
-        for fiscal_year in self.fiscal_years:
-            self.months = Month.objects.filter(fiscal_year=fiscal_year).order_by('month')
-            for month in self.months:
-                if month.month.month == now.month:
-                    self.current_month = month
-        if self.fiscal_years and not self.current_month:
-            self.current_month = self.months[0]
-        self.now = now
-
-        # if fiscal year is passed by url, get that year as the current fiscal year
-        # else get the value associated to the current month
-        if 'fiscal_year' in kwargs:
-            self.current_fiscal_year = FiscalYear.objects.get(pk=kwargs['fiscal_year'])
-        elif self.fiscal_years:
-            self.current_fiscal_year = self.current_month.fiscal_year
-        else:
-            self.current_fiscal_year = None
-
-        # Notification System Population
-        self.notifications = []
-        # Get all line items associated with a business unit
-        lineItems = LineItem.objects.filter(business_unit=self.current)
-        # Loop through each line item
-        # for lineItem in lineItems:
-        #     # If the line item's date payable is in the past to the current date
-        #     # And the date paid has not been entered
-        #     # And it has not been reconciled
-        #     # Add to the list of notifications
-        #     # if lineItem.date_payable
-
+        self.now = datetime.now()
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
@@ -116,18 +82,6 @@ class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
             if self.request.user.is_superuser:
                 return True
             elif bu_role == 'MANAGER':
-                return True
-            else:
-                raise Http404()
-        except ObjectDoesNotExist:
-            raise Http404()
-
-
-class FiscalYearExistMixin(SetUpMixin, UserPassesTestMixin):
-
-    def test_func(self):
-        try:
-            if not self.fiscal_years:
                 return True
             else:
                 raise Http404()
@@ -323,8 +277,8 @@ class DashboardMonthView(DashboardView):
         context['month_tama'] = context['tama']['values'][index]
         context['month_tamp'] = context['tamp']['values'][index]
 
-        salary = Salary.objects.filter(business_unit=self.current)
-        context['salary'] = salary
+        full_time = FullTime.objects.filter(business_unit=self.current)
+        context['full_time'] = full_time
 
         part_time = PartTime.objects.filter(business_unit=self.current)
         context['part_time'] = part_time
@@ -333,7 +287,7 @@ class DashboardMonthView(DashboardView):
         part_time_hours_total = 0
         part_time_total = Decimal('0.00')
 
-        # salary amounts
+        # full time amounts
         monthly_amount = Decimal('0.00')
         social_security_total = Decimal('0.00')
         fed_health_insurance_total = Decimal('0.00')
@@ -346,15 +300,15 @@ class DashboardMonthView(DashboardView):
             part_time_hours_total += part_time.hours_work
             part_time_total += (part_time.hours_work * part_time.hourly_amount)
 
-        # find salary totals for each type
-        for salary in Salary.objects.filter(business_unit=self.current):
-            monthly_amount = (salary.salary_amount / 12)
-            social_security_total += salary.social_security_amount
-            fed_health_insurance_total += salary.fed_health_insurance_amount
-            retirement_total += salary.retirement_amount
-            medical_insurance_total += salary.medical_insurance_amount
-            staff_benefits_total += salary.staff_benefits_amount
-            fringe_total += salary.fringe_amount
+        # find full time totals for each type
+        for full_time in FullTime.objects.filter(business_unit=self.current):
+            monthly_amount = (full_time.salary_amount / 12)
+            social_security_total += full_time.social_security_amount
+            fed_health_insurance_total += full_time.fed_health_insurance_amount
+            retirement_total += full_time.retirement_amount
+            medical_insurance_total += full_time.medical_insurance_amount
+            staff_benefits_total += full_time.staff_benefits_amount
+            fringe_total += full_time.fringe_amount
 
         context['ssa'] = social_security_total
         context['fhit'] = fed_health_insurance_total
@@ -491,60 +445,6 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs["business_unit"]})
-
-
-class FiscalYearCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/base_form.html'
-    model = FiscalYear
-    form_class = FiscalYearCreateForm
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
-
-    def get_initial(self):
-        initial = super(FiscalYearCreateView, self).get_initial()
-        previous_fiscal_year = FiscalYear.objects.filter(business_unit=self.kwargs['business_unit']).order_by('end_date').last()
-        if previous_fiscal_year:
-            initial['cash_amount'] = previous_fiscal_year.cash_amount
-        return initial
-
-    def form_valid(self, form):
-        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
-        response = super(FiscalYearCreateView, self).form_valid(form)
-        fiscal_year = form.instance
-        cash_amount = form.instance.cash_amount
-        populateCashPredicted(fiscal_year=fiscal_year, cash_amount=cash_amount)
-        return response
-
-
-class FiscalYearDeleteView(ManagerMixin, DeleteView):
-    model = FiscalYear
-    template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs={'business_unit': self.kwargs["business_unit"]})
-
-
-class FiscalYearUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/base_form.html'
-    form_class = FiscalYearUpdateForm
-    model = FiscalYear
-
-    def get_object(self):
-        return FiscalYear.objects.get(pk=self.kwargs['fiscal_year'])
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:dashboard', kwargs=self.kwargs)
-
-    def form_valid(self, form):
-        response = super(FiscalYearUpdateView, self).form_valid(form)
-        updateCashPredicted(business_unit=self.current)
-        return response
-
 
 
 class ContractCreateView(ManagerMixin, CreateView):
@@ -751,8 +651,8 @@ class PersonnelView(ViewerMixin, TemplateView):
         personnel = Personnel.objects.filter(business_unit=self.current)
         context['personnel'] = personnel
 
-        salary = Salary.objects.filter(business_unit=self.current)
-        context['salary'] = salary
+        full_time = FullTime.objects.filter(business_unit=self.current)
+        context['full_time'] = full_time
 
         part_time = PartTime.objects.filter(business_unit=self.current)
         context['part_time'] = part_time
@@ -760,10 +660,10 @@ class PersonnelView(ViewerMixin, TemplateView):
         return context
 
 
-class SalaryCreateView(ManagerMixin, CreateView):
+class FullTimeCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/base_form.html'
-    model = Salary
-    form_class = SalaryCreateForm
+    model = FullTime
+    form_class = FullTimeCreateForm
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -771,44 +671,44 @@ class SalaryCreateView(ManagerMixin, CreateView):
     def form_valid(self, form):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
-        response = super(SalaryCreateView, self).form_valid(form)
+        response = super(FullTimeCreateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
 
 
-class SalaryDeleteView(ManagerMixin, DeleteView):
-    model = Salary
+class FullTimeDeleteView(ManagerMixin, DeleteView):
+    model = FullTime
     template_name = 'accounting/base_delete_form.html'
 
     def get_object(self):
-        return Salary.objects.get(pk=self.kwargs['salary'])
+        return FullTime.objects.get(pk=self.kwargs['full_time'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def delete(self, request, *args, **kwargs):
-        response = super(SalaryDeleteView, self).delete(request, *args, **kwargs)
+        response = super(FullTimeDeleteView, self).delete(request, *args, **kwargs)
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
 
 
-class SalaryUpdateView(ManagerMixin, UpdateView):
+class FullTimeUpdateView(ManagerMixin, UpdateView):
     template_name = 'accounting/base_form.html'
-    form_class = SalaryUpdateForm
-    model = Salary
+    form_class = FullTimeUpdateForm
+    model = FullTime
 
     def get_object(self):
-        return Salary.objects.get(pk=self.kwargs['salary'])
+        return FUllTime.objects.get(pk=self.kwargs['full_time'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs["business_unit"]})
 
     def form_valid(self, form):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        response = super(SalaryUpdateView, self).form_valid(form)
+        response = super(FullTimeUpdateView, self).form_valid(form)
         updatePayroll(business_unit=business_unit)
         updateCashPredicted(business_unit=business_unit)
         return response
@@ -1015,12 +915,12 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
 
 def updatePayroll(business_unit):
     # for personnel in business unit
-    # total up salary
+    # total up full time
     # total up part time
     payroll_amount = Decimal('0.00')
-    salary = Salary.objects.filter(business_unit=business_unit)
-    for salary in salary:
-        payroll_amount += ((salary.salary_amount / 12) + salary.social_security_amount + salary.fed_health_insurance_amount + salary.retirement_amount + salary.medical_insurance_amount + salary.staff_benefits_amount + salary.fringe_amount)
+    full_time = FullTime.objects.filter(business_unit=business_unit)
+    for employee in full_time:
+        payroll_amount += ((employee.salary_amount / 12) + employee.social_security_amount + employee.fed_health_insurance_amount + employee.retirement_amount + employee.medical_insurance_amount + employee.staff_benefits_amount + employee.fringe_amount)
     part_time = PartTime.objects.filter(business_unit=business_unit)
     for part_time in part_time:
         payroll_amount += part_time.hourly_amount * part_time.hours_work

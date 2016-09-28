@@ -1,6 +1,13 @@
 from django.forms import ModelForm, BooleanField, ValidationError
 from django.core.exceptions import FieldDoesNotExist
+
 from models import *
+
+__all__ = ['BusinessUnitCreateForm', 'BusinessUnitUpdateForm', 'ContractCreateForm', 'ContractUpdateForm',
+           'ExpenseCreateForm', 'ExpenseUpdateForm', 'InvoiceCreateForm', 'InvoiceUpdateForm',
+           'FullTimeCreateForm', 'FullTimeUpdateForm', 'PartTimeCreateForm', 'PartTimeUpdateForm',
+           'IncomeCreateForm', 'IncomeUpdateForm', 'CashUpdateForm',
+           'UserTeamRoleCreateForm', 'UserTeamRoleUpdateForm']
 
 
 class BaseForm(ModelForm):
@@ -48,42 +55,6 @@ class BusinessUnitUpdateForm(BaseForm, ModelForm):
         fields = '__all__'
         exclude = [
             'user'
-        ]
-
-
-class FiscalYearCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(FiscalYearCreateForm, self).__init__(*args, **kwargs)
-
-    def clean_end_date(self):
-        start_date = self.cleaned_data['start_date']
-        end_date = self.cleaned_data['end_date']
-        if end_date < start_date:
-            raise ValidationError('The End Date must be after the Start Date')
-        return end_date 
-
-    class Meta:
-        model = FiscalYear
-        fields = '__all__'
-        exclude = [
-            'business_unit',
-        ]
-        help_texts = {
-            'cash_amount': 'Current cash amount for Business Unit.',
-        }
-
-
-class FiscalYearUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(FiscalYearUpdateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = FiscalYear
-        fields = '__all__'
-        exclude = [
-            'business_unit'
         ]
 
 
@@ -180,26 +151,26 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
         ]
 
 
-class SalaryCreateForm(BaseForm, ModelForm):
+class FullTimeCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(SalaryCreateForm, self).__init__(*args, **kwargs)
+        super(FullTimeCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Salary
+        model = FullTime
         fields = '__all__'
         exclude = [
             'business_unit'
         ]
 
 
-class SalaryUpdateForm(BaseForm, ModelForm):
+class FullTimeUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(SalaryUpdateForm, self).__init__(*args, **kwargs)
+        super(FullTimeUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Salary
+        model = FullTime
         fields = '__all__'
         exclude = [
             'business_unit'

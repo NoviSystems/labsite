@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-__all__ = ['BusinessUnit', 'UserTeamRole', 'FiscalYear', 'Month', 'LineItem', 'Contract', 'Cash', 'Income', 'Invoice', 'Personnel', 'Salary', 'PartTime', 'Expense', 'Payroll']
+__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Cash', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense', 'Payroll']
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
@@ -32,29 +32,9 @@ class UserTeamRole(models.Model):
         return self.user.username + ' is a ' + self.role + ' of ' + self.business_unit.name
 
 
-class FiscalYear(models.Model):
-    business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    start_date = models.DateField(default=datetime.now, verbose_name='Start Date')
-    end_date = models.DateField(verbose_name='End Date')
-    cash_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Cash Amount')
-
-    def __unicode__(self):
-        return self.start_date.strftime("%b %Y") + " - " + self.end_date.strftime("%b %Y")
-
-
-class Month(models.Model):
-    fiscal_year = models.ForeignKey(FiscalYear, default=None, verbose_name='Fiscal Year')
-    month = models.DateField(verbose_name='Month')
-    projected_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Projected Values')
-    actual_values = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Values')
-
-    def __unicode__(self):
-        return self.fiscal_year.business_unit.name + " " + self.month.strftime("%b %Y")
-
-
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    month = models.ForeignKey(Month, verbose_name='Month')
+    date_for = models.DateField(default=None, verbose_name="Date For")
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Predicted Amount')
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Amount')
     reconciled = models.BooleanField(default=False, verbose_name='Reconciled')
@@ -127,12 +107,11 @@ class Personnel(models.Model):
     position = models.CharField(max_length=50, verbose_name='Position')
 
 
-class Salary(Personnel):
+class FullTime(Personnel):
     SALARY_TYPE = {
         ('EPA', 'EPA'),
         ('SPA', 'SPA'),
     }
-
     salary_type = models.CharField(max_length=3, choices=SALARY_TYPE, verbose_name='Salary Type')
     salary_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Salary')
     social_security_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Social Security Amount')
@@ -160,36 +139,12 @@ class Expense(LineItem):
 
 
 class Payroll(models.Model):
-    month = models.OneToOneField(Month, verbose_name='Payroll')
+    date_for = models.DateField(default=None, verbose_name="Date For")
     expense = models.OneToOneField(Expense, verbose_name='Expense')
 
     def delete(self, *args, **kwargs):
         self.expense.delete()
         return super(self.__class__, self).delete(*args, **kwargs)
-
-
-@receiver(post_save, sender=FiscalYear, dispatch_uid="createItemsForFiscalYear")
-def createItemsForFiscalYear(sender, instance, **kwargs):
-    if not Cash.objects.filter(month__fiscal_year=instance).exists():
-        start_month = instance.start_date
-        end_month = instance.end_date
-        number_of_months = monthdelta(start_month, end_month)
-
-        month = start_month.month
-        year = start_month.year
-        day = start_month.day
-        for i in range(number_of_months + 1):
-            if month == 12:
-                year = year + 1
-                month = 1
-            elif i == 0:
-                month = month
-            else:
-                month = month + 1
-            Month.objects.create(fiscal_year=instance, month=date(year, month, day), projected_values=0.00, actual_values=0.00)
-        months = Month.objects.filter(fiscal_year=instance.pk)
-        for month in months:
-            Cash.objects.create(month=month, business_unit=instance.business_unit, name="Cash")
 
 
 # calculate month duration
