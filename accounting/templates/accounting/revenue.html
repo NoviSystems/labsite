@@ -29,8 +29,8 @@
                                 <td>{{ invoices.income.predicted_amount }}</td>
                                 {% if not is_viewer %}
                                 <td>
-                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
-                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
                                 {% endif %}
                             </tr>
@@ -63,8 +63,8 @@
                                 <td>{{ invoices.income.predicted_amount }}</td>
                                 {% if not is_viewer %}
                                 <td>
-                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
-                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
                                 {% endif %}
                             </tr>
@@ -95,8 +95,8 @@
                                 <td>{{ invoices.income.predicted_amount }}</td>
                                 {% if not is_viewer %}
                                 <td>
-                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
-                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
                                 </td>
                                 {% endif %}
                         </tr>

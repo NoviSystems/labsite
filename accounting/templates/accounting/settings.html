@@ -11,7 +11,6 @@
             <div class="col-md-2">
                 <ul class="nav nav-pills nav-stacked nav-tabs">
                     <li role="presentation" class="active"><a data-toggle="tab" href="#general" aria-expanded="true">General</a></li>
-                    <li role="presentation"><a data-toggle="tab" href="#fiscal-years" aria-expanded="true">Fiscal Years</a></li>
                     <li role="presentation"><a data-toggle="tab" href="#user-roles" aria-expanded="true">Team Roles</a></li>
                 </ul>
             </div>
@@ -27,17 +26,17 @@
                           </div>
                           <div class="panel-body">
 
-                            <h4>Name: {{ current.name }}</h4>
-                            <h4>Account Number: {{ current.account_number }}</h4>
+                            <h4>Name: {{ current_business_unit.name }}</h4>
+                            <h4>Account Number: {{ current_business_unit.account_number }}</h4>
                             <br>
                             <p>
-                                <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current.pk %}>Update</a>
+                                <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current_business_unit.pk %}>Update</a>
                             </p>
                             <p>
 
-                                <form action="{% url 'accounting:delete_business_unit' business_unit=current.pk %}" method="post">
+                                <form action="{% url 'accounting:delete_business_unit' business_unit=current_business_unit.pk %}" method="post">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete {{current.name}}</button>
+                                    <button class="btn btn-danger" type="submit">Delete {{ current_business_unit.name }}</button>
                                 </form>
                             </p>
                           </div>
@@ -46,38 +45,6 @@
                     </div>
                     <!-- End General -->
 
-                    <!-- Fiscal Years -->
-                    <div id="fiscal-years" class="tab-pane">
-
-                        <div class="panel panel-default">
-                          <div class="panel-heading">
-                            <h3 class="panel-title">Fiscal Years</h3>
-                          </div>
-                          <div class="panel-body">
-
-                            {% if not fiscal_years %}
-                            <h4>Create fiscal year to generate data</h4>
-                            <a class="btn btn-primary" href={% url 'accounting:create_fiscal_year' business_unit=current.pk %}>Create Fiscal Year</a>
-                            {% endif %}
-
-                            <ul class="list-group">
-                            {% for fiscal_year in fiscal_years %}
-                                <li class="list-group-item model-display">
-                                
-                                {{fiscal_year}} - 
-
-                                <a href={% url 'accounting:update_fiscal_year' business_unit=current.pk fiscal_year=fiscal_year.pk %}>Update</a> | 
-                                
-                                <a class="btn-delete" href={% url 'accounting:delete_fiscal_year' business_unit=current.pk fiscal_year=fiscal_year.pk %}>Delete</a></li>
-
-                            {% endfor %}
-                            </ul>
-                          </div>
-                        </div>
-
-                    </div>
-                    <!-- End Fiscal Years -->
-
                     <!-- Team Roles -->
                     <div id="user-roles" class="tab-pane">
                         <div class="panel panel-default">
@@ -85,7 +52,7 @@
                             <h3 class="panel-title">Team Role</h3>
                           </div>
                           <div class="panel-body">
-                            <a class="btn btn-primary" href={% url 'accounting:create_user_team_role' business_unit=current.pk %}>Create New User Team Role</a>
+                            <a class="btn btn-primary" href={% url 'accounting:create_user_team_role' business_unit=current_business_unit.pk %}>Create New User Team Role</a>
 
                             <h3>Managers</h3>
                             <hr>
@@ -93,8 +60,8 @@
                                 {% for manager in managers %}
                                 <li class="list-group-item model-display">
                                     {{ manager.user.username }} - 
-                                    <a href={% url 'accounting:update_user_team_role' business_unit=current.pk user_team_role=manager.pk %}>Update</a> | 
-                                    <a href={% url 'accounting:delete_user_team_role' business_unit=current.pk user_team_role=manager.pk %}>Delete</a></li>
+                                    <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Update</a> | 
+                                    <a href={% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Delete</a></li>
                                 {% endfor %}
                             </ul>
 
@@ -104,8 +71,8 @@
                                 {% for viewer in viewers %}
                                 <li class="list-group-item model-display">
                                     {{ viewer.user.username }} - 
-                                    <a href={% url 'accounting:update_user_team_role' business_unit=current.pk user_team_role=viewer.pk %}>Update</a> | 
-                                    <a class="btn-delete" href={% url 'accounting:delete_user_team_role' business_unit=current.pk user_team_role=viewer.pk %}>Delete</a></li>
+                                    <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Update</a> | 
+                                    <a class="btn-delete" href={% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Delete</a></li>
                                 {% endfor %}
                             </ul>
                         </div>

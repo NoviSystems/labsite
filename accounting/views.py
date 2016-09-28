@@ -7,11 +7,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
-from django.views.generic import TemplateView, FormView, CreateView, UpdateView, DeleteView, View
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 
 from models import *
 from forms import *
-from decimal import *
+from decimal import Decimal
 
 
 class PermissionsMixin(LoginRequiredMixin, object):
@@ -38,7 +38,7 @@ class PermissionsMixin(LoginRequiredMixin, object):
 
 class SetUpMixin(object):
     def dispatch(self, request, *args, **kwargs):
-        self.current = BusinessUnit.objects.get(pk=kwargs['business_unit'])
+        self.current_business_unit = BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.now = datetime.now()
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
@@ -48,11 +48,7 @@ class SetUpMixin(object):
             context['is_viewer'] = self.is_viewer
         except AttributeError:
             context['is_viewer'] = False
-        context['current'] = self.current
-        context['fiscal_years'] = self.fiscal_years
-        context['current_month'] = self.current_month
-        context['current_fiscal_year'] = self.current_fiscal_year
-        context['months'] = self.months
+        context['current_business_unit'] = self.current_business_unit
         return context
 
 
@@ -60,7 +56,7 @@ class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
-            bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current).role
+            bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current_business_unit).role
             if self.request.user.is_superuser:
                 return True
             elif bu_role == 'MANAGER':
@@ -78,7 +74,7 @@ class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
 
     def test_func(self):
         try:
-            bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current).role
+            bu_role = UserTeamRole.objects.get(user=self.request.user, business_unit=self.current_business_unit).role
             if self.request.user.is_superuser:
                 return True
             elif bu_role == 'MANAGER':
@@ -103,152 +99,77 @@ class DashboardView(ViewerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
-        if self.fiscal_years:
-            cma = {
-                'title': 'Cash Month Actual',
-                'values': []
-            }
-            cmpr = {
-                'title': 'Cash Month Projected',
-                'values': []
-            }
-            ema = {
-                'title': 'Expenses Month Actual',
-                'values': []
-            }
-            emp = {
-                'title': 'Expenses Month Projected',
-                'values': []
-            }
-            ima = {
-                'title': 'Receivables Month Actual',
-                'values': []
-            }
-            imp = {
-                'title': 'Receivables Month Projected',
-                'values': []
-            }
-            pma = {
-                'title': 'Payroll Month Actual',
-                'values': []
-            }
-            pmp = {
-                'title': 'Payroll Month Projected',
-                'values': []
-            }
-            tama = {
-                'title': 'Total Assets Projected',
-                'values': []
-            }
-            tamp = {
-                'title': 'Total Assets Actual',
-                'values': []
-            }
+        cma = { 'title': 'Cash Month Actual', 'values': [] }
+        cmpr = { 'title': 'Cash Month Projected', 'values': [] }
+        ema = { 'title': 'Expenses Month Actual', 'values': [] }
+        emp = { 'title': 'Expenses Month Projected', 'values': [] }
+        ima = { 'title': 'Receivables Month Actual', 'values': [] }
+        imp = { 'title': 'Receivables Month Projected', 'values': [] }
+        pma = { 'title': 'Payroll Month Actual', 'values': [] }
+        pmp = { 'title': 'Payroll Month Projected', 'values': [] }
+        tama = { 'title': 'Total Assets Projected', 'values': [] }
+        tamp = { 'title': 'Total Assets Actual', 'values': [] }
 
-            # moves through all months
-            for month in self.months:
+        payroll_month_actual = Decimal('0.00')
+        payroll_month_projected = Decimal('0.00') 
+        for payroll in Payroll.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
+            if payroll.expense.reconciled:
+                payroll_month_actual += payroll.expense.actual_amount
+            payroll_month_projected += payroll.expense.predicted_amount
+        pma['values'].append(payroll_month_actual)
+        pmp['values'].append(payroll_month_projected)
 
-                # payroll variables
-                payroll_month_actual = Decimal('0.00')
-                payroll_month_projected = Decimal('0.00')
+        expenses_month_actual = Decimal('0.00')
+        expense_month_projected = Decimal('0.00')
+        for expense in Expense.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
+            if expense.reconciled:
+                expenses_month_actual += expense.actual_amount
+            expense_month_projected += expense.predicted_amount
+        expenses_month_actual -= payroll_month_actual
+        expense_month_projected -= payroll_month_projected
+        ema['values'].append(expenses_month_actual)
+        emp['values'].append(expense_month_projected)
 
-                # add up payroll expenses for the month
-                for payroll in Payroll.objects.filter(month=month):
-                    if payroll.expense.reconciled:
-                        payroll_month_actual += payroll.expense.actual_amount
-                    payroll_month_projected += payroll.expense.predicted_amount
+        income_month_actual = Decimal('0.00')
+        income_month_projected = Decimal('0.00')
+        for income in Income.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
+            if income.reconciled:
+                income_month_actual += income.actual_amount
+            income_month_projected += income.predicted_amount
+        ima['values'].append(income_month_actual)
+        imp['values'].append(income_month_projected)
 
-                # adds payroll values to month lists for table
-                pma['values'].append(payroll_month_actual)
-                pmp['values'].append(payroll_month_projected)
+        cash_month_actual = Decimal('0.00')
+        cash_month_projected = Decimal('0.00')
+        for cash in Cash.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
+            if cash.reconciled:
+                cash_month_actual += cash.actual_amount
+            cash_month_projected += cash.predicted_amount
+        cmpr['values'].append(cash_month_projected)
+        cma['values'].append(cash_month_actual)
 
-                # expenses variables
-                expenses_month_actual = Decimal('0.00')
-                expense_month_projected = Decimal('0.00')
+        income_booked_projected = Decimal('0.00')
+        for value in imp['values']:
+            income_booked_projected += value
+        total_assets_month_projected = cash_month_projected + income_booked_projected
+        tamp['values'].append(total_assets_month_projected)
 
-                # add up all expense values
-                for expense in Expense.objects.filter(month=month):
-                    if expense.reconciled:
-                        expenses_month_actual += expense.actual_amount
-                    expense_month_projected += expense.predicted_amount
+        income_booked_actual = Decimal('0.00')
+        for value in ima['values']:
+            income_booked_actual += value
+        total_assets_month_actual = cash_month_actual + income_booked_actual
+        tama['values'].append(total_assets_month_actual)
 
-                # subtract payroll values to get plain expense
-                expenses_month_actual -= payroll_month_actual
-                expense_month_projected -= payroll_month_projected
-
-                # all the expenses to lists for table
-                ema['values'].append(expenses_month_actual)
-                emp['values'].append(expense_month_projected)
-
-                # income variables
-                income_month_actual = Decimal('0.00')
-                income_month_projected = Decimal('0.00')
-
-                # add up all income values
-                for income in Income.objects.filter(month=month):
-                    if income.reconciled:
-                        income_month_actual += income.actual_amount
-                    income_month_projected += income.predicted_amount
-
-                # add income to lists for table
-                ima['values'].append(income_month_actual)
-                imp['values'].append(income_month_projected)
-
-                # cash variables
-                cash_month_actual = Decimal('0.00')
-                cash_month_projected = Decimal('0.00')
-
-                # compute cash values
-                for cash in Cash.objects.filter(month=month):
-                    if cash.reconciled:
-                        cash_month_actual += cash.actual_amount
-                    cash_month_projected += cash.predicted_amount
-
-                # add cash to lists for table
-                cmpr['values'].append(cash_month_projected)
-                cma['values'].append(cash_month_actual)
-
-                # income booked variables
-                income_booked_projected = Decimal('0.00')
-
-                # compute income booked projected
-                for value in imp['values']:
-                    income_booked_projected += value
-                total_assets_month_projected = cash_month_projected + income_booked_projected
-                tamp['values'].append(total_assets_month_projected)
-
-                # computer income booked actual
-                income_booked_actual = Decimal('0.00')
-                for value in ima['values']:
-                    income_booked_actual += value
-                total_assets_month_actual = cash_month_actual + income_booked_actual
-                tama['values'].append(total_assets_month_actual)
-
-            # list of dashboard data
-            dashboard_data = [cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp]
-
-            # context values for month view
-            context['cma'] = cma    # cash month actual
-            context['cmpr'] = cmpr  # cash month predicted
-            context['ima'] = ima    #  income month actual
-            context['imp'] = imp    # income month predicted
-            context['ema'] = ema    # expenses month actual
-            context['emp'] = emp    # expenses month predicted
-            context['pma'] = pma    # payroll month actual
-            context['pmp'] = pmp    # payroll month predicted
-            context['tama'] = tama  # total assest month actual
-            context['tamp'] = tamp  # total assets month predicted
-
-            # Context totals for the Graph values
-            context['months_names'] = json.dumps([month.month.strftime("%B") for month in self.months])
-            context['predicted_totals'] = json.dumps([float(value) for value in cmpr['values']])
-            context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
-            context['dashboard_data'] = dashboard_data
+        dashboard_data = [cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp]
+        #context['months_names'] = json.dumps([date.strftime("%B") for month in self.months])
+        context['predicted_totals'] = json.dumps([float(value) for value in cmpr['values']])
+        context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
+        context['dashboard_data'] = dashboard_data
 
         return context
 
 
-class DashboardMonthView(DashboardView):
+'''class DashboardMonthView(DashboardView):
     template_name = 'accounting/dashboard_month.html'
 
     def get_context_data(self, **kwargs):
@@ -277,10 +198,10 @@ class DashboardMonthView(DashboardView):
         context['month_tama'] = context['tama']['values'][index]
         context['month_tamp'] = context['tamp']['values'][index]
 
-        full_time = FullTime.objects.filter(business_unit=self.current)
+        full_time = FullTime.objects.filter(business_unit=self.current_business_unit)
         context['full_time'] = full_time
 
-        part_time = PartTime.objects.filter(business_unit=self.current)
+        part_time = PartTime.objects.filter(business_unit=self.current_business_unit)
         context['part_time'] = part_time
 
         # part time amounts
@@ -296,12 +217,12 @@ class DashboardMonthView(DashboardView):
         staff_benefits_total = Decimal('0.00')
         fringe_total = Decimal('0.00')
 
-        for part_time in PartTime.objects.filter(business_unit=self.current):
+        for part_time in PartTime.objects.filter(business_unit=self.current_business_unit):
             part_time_hours_total += part_time.hours_work
             part_time_total += (part_time.hours_work * part_time.hourly_amount)
 
         # find full time totals for each type
-        for full_time in FullTime.objects.filter(business_unit=self.current):
+        for full_time in FullTime.objects.filter(business_unit=self.current_business_unit):
             monthly_amount = (full_time.salary_amount / 12)
             social_security_total += full_time.social_security_amount
             fed_health_insurance_total += full_time.fed_health_insurance_amount
@@ -321,15 +242,14 @@ class DashboardMonthView(DashboardView):
         context['ptt'] = part_time_total
 
         return context
-
+'''
 
 class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
     template_name = 'accounting/contracts.html'
 
     def get_context_data(self, **kwargs):
         context = super(ContractsView, self).get_context_data()
-
-        contracts = Contract.objects.filter(business_unit=self.current)
+        contracts = Contract.objects.filter(business_unit=self.current_business_unit)
         completed_contracts = []
         active_contracts = []
         for contract in contracts:
@@ -359,7 +279,7 @@ class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(RevenueView, self).get_context_data()
-        invoices = Invoice.objects.filter(contract__business_unit=self.current)
+        invoices = Invoice.objects.filter(contract__business_unit=self.current_business_unit)
         context['invoices'] = invoices
         return context
 
@@ -370,7 +290,7 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ExpensesView, self).get_context_data()
 
-        month_data = []
+        ''' month_data = []
 
         if 'month' in self.kwargs:
             display_month = Month.objects.get(pk=self.kwargs['month'])
@@ -388,7 +308,7 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
             'cash': cash
         }
 
-        context['month_data'] = month_data
+        context['month_data'] = month_data'''
         return context
 
 
@@ -397,26 +317,19 @@ class SettingsPageView(ManagerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SettingsPageView, self).get_context_data()
-        users = UserTeamRole.objects.filter(business_unit=self.current)
-        viewers = []
-        managers = []
-        for user in users:
-            if user.role == 'VIEWER':
-                viewers.append(user)
-            elif user.role == 'MANAGER':
-                managers.append(user)
+        users = UserTeamRole.objects.filter(business_unit=self.current_business_unit)
+        viewers = [user for user in users if user.role == 'VIEWER']
+        managers = [user for user in users if user.role == 'MANAGER']
         context['viewers'] = viewers
         context['managers'] = managers
         return context
 
 
 class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
-    template_name = 'accounting/base_form.html'
-    form_class = BusinessUnitCreateForm
     model = BusinessUnit
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:home')
+    form_class = BusinessUnitCreateForm
+    template_name = 'accounting/base_form.html'
+    success_url = reverse_lazy('accounting:home')
 
     def form_valid(self, form):
         response = super(BusinessUnitCreateView, self).form_valid(form)
@@ -427,18 +340,16 @@ class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
 class BusinessUnitDeleteView(ManagerMixin, DeleteView):
     model = BusinessUnit
     template_name = 'accounting/base_delete_form.html'
+    success_url = reverse_lazy('accounting:home')
 
     def get_object(self):
         return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
 
-    def get_success_url(self):
-        return reverse_lazy('accounting:home')
-
 
 class BusinessUnitUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/base_form.html'
-    form_class = BusinessUnitUpdateForm
     model = BusinessUnit
+    form_class = BusinessUnitUpdateForm
+    template_name = 'accounting/base_form.html'
 
     def get_object(self):
         return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -448,9 +359,9 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
 
 
 class ContractCreateView(ManagerMixin, CreateView):
-    template_name = 'accounting/base_form.html'
     model = Contract
     form_class = ContractCreateForm
+    template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
@@ -459,13 +370,12 @@ class ContractCreateView(ManagerMixin, CreateView):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
         max_contract_number = Contract.objects.filter(business_unit=business_unit).aggregate(Max('contract_number'))
-        if max_contract_number['contract_number__max'] is None:
+        if not max_contract_number['contract_number__max']:
             form.instance.contract_number = 1
         else:
             form.instance.contract_number = max_contract_number['contract_number__max'] + 1
 
-        response = super(ContractCreateView, self).form_valid(form)
-        return response
+        return super(ContractCreateView, self).form_valid(form)
 
 
 class ContractDeleteView(ManagerMixin, DeleteView):
@@ -480,9 +390,9 @@ class ContractDeleteView(ManagerMixin, DeleteView):
 
 
 class ContractUpdateView(ManagerMixin, UpdateView):
-    template_name = 'accounting/base_form.html'
-    form_class = ContractUpdateForm
     model = Contract
+    form_class = ContractUpdateForm
+    template_name = 'accounting/base_form.html'
 
     def get_object(self):
         return Contract.objects.get(pk=self.kwargs['contract'])
@@ -491,10 +401,11 @@ class ContractUpdateView(ManagerMixin, UpdateView):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs["business_unit"]})
 
 
-class InvoiceCreateView(ManagerMixin, FiscalYearExistMixin, CreateView):
-    template_name = 'accounting/base_form.html'
-    model = Invoice
+class InvoiceCreateView(ManagerMixin, CreateView):
+    pass
+    '''model = Invoice
     form_class = InvoiceCreateForm
+    template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -503,7 +414,7 @@ class InvoiceCreateView(ManagerMixin, FiscalYearExistMixin, CreateView):
         contract = Contract.objects.get(pk=self.kwargs['contract'])
         form.instance.contract = contract
         max_invoice_number = Invoice.objects.filter(contract=contract).aggregate(Max('number'))
-        if max_invoice_number['number__max'] is None:
+        if not max_invoice_number['number__max']:
             form.instance.number = 1
         else:
             form.instance.number = max_invoice_number['number__max'] + 1
@@ -525,7 +436,7 @@ class InvoiceCreateView(ManagerMixin, FiscalYearExistMixin, CreateView):
 
         response = super(InvoiceCreateView, self).form_valid(form)
         updateCashPredicted(business_unit=business_unit)
-        return response
+        return response'''
 
 
 class InvoiceDeleteView(ManagerMixin, DeleteView):
@@ -648,13 +559,13 @@ class PersonnelView(ViewerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PersonnelView, self).get_context_data()
 
-        personnel = Personnel.objects.filter(business_unit=self.current)
+        personnel = Personnel.objects.filter(business_unit=self.current_business_unit)
         context['personnel'] = personnel
 
-        full_time = FullTime.objects.filter(business_unit=self.current)
+        full_time = FullTime.objects.filter(business_unit=self.current_business_unit)
         context['full_time'] = full_time
 
-        part_time = PartTime.objects.filter(business_unit=self.current)
+        part_time = PartTime.objects.filter(business_unit=self.current_business_unit)
         context['part_time'] = part_time
 
         return context
@@ -952,10 +863,10 @@ def populateCashPredicted(fiscal_year, cash_amount):
     cash_previous = Decimal(cash_amount)
     for month in Month.objects.filter(fiscal_year=fiscal_year).order_by('month'):
         expense_month_projected = Decimal('0.00')
-        for expense in Expense.objects.filter(month=month):
+        for expense in Expense.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
             expense_month_projected += expense.predicted_amount
         income_month_projected = Decimal('0.00')
-        for income in Income.objects.filter(month=month):
+        for income in Income.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
             income_month_projected += income.predicted_amount
         cash = Cash.objects.get(month=month)
 
@@ -973,10 +884,10 @@ def updateCashPredicted(business_unit):
         cash_previous = Decimal(fiscal_year.cash_amount)
         for month in Month.objects.filter(fiscal_year=fiscal_year).order_by('month'):
             expense_month_projected = Decimal('0.00')
-            for expense in Expense.objects.filter(month=month):
+            for expense in Expense.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
                 expense_month_projected += expense.predicted_amount
             income_month_projected = Decimal('0.00')
-            for income in Income.objects.filter(month=month):
+            for income in Income.objects.filter(date_for__range=["2016-07-01", "2017-06-30"]):
                 income_month_projected += income.predicted_amount
             cash = Cash.objects.get(month=month)
             cash.predicted_amount = cash_previous - expense_month_projected + income_month_projected

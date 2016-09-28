@@ -34,7 +34,7 @@ class UserTeamRole(models.Model):
 
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    date_for = models.DateField(default=None, verbose_name="Date For")
+    date_for = models.DateField(default=None, null=True, verbose_name="Date For")
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Predicted Amount')
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Amount')
     reconciled = models.BooleanField(default=False, verbose_name='Reconciled')
@@ -139,7 +139,7 @@ class Expense(LineItem):
 
 
 class Payroll(models.Model):
-    date_for = models.DateField(default=None, verbose_name="Date For")
+    date_for = models.DateField(default=None, null=True, verbose_name="Date For")
     expense = models.OneToOneField(Expense, verbose_name='Expense')
 
     def delete(self, *args, **kwargs):
