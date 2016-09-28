@@ -77,7 +77,7 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th><h3>Recieved:</h3></th>
+                                <th><h3>Received:</h3></th>
                                 <th>Date: </th>
                                 <th>Status: </th>
                                 <th>Amount: </th>
@@ -86,7 +86,7 @@
                         </thead>
                     <tbody>
                         {% for invoices in invoices %}
-                        {% if invoices.transition_state == 'RECIEVED'%}
+                        {% if invoices.transition_state == 'RECEIVED'%}
 
                         <tr>
                             <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>

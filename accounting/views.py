@@ -167,11 +167,11 @@ class DashboardView(ViewerMixin, TemplateView):
                 'values': []
             }
             ima = {
-                'title': 'Recievables Month Actual',
+                'title': 'Receivables Month Actual',
                 'values': []
             }
             imp = {
-                'title': 'Recievables Month Projected',
+                'title': 'Receivables Month Projected',
                 'values': []
             }
             pma = {

@@ -111,7 +111,7 @@ class Invoice(Income):
     TRANSITION_STATE = {
         ('INVOICED', "Invoiced"),
         ('NOT_INVOICED', "Not Invoiced"),
-        ('RECIEVED', "Recieved"),
+        ('RECEIVED', "Received"),
     }
 
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, verbose_name='Contract')
