@@ -1,0 +1,114 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+    {% include "accounting/nav_tabs.html" with active="revenue" %}
+    
+    <div class="row">
+            {% if invoices %}
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><h3>Invoiced:</h3></th>
+                                <th>Date: </th>
+                                <th>Status: </th>
+                                <th>Amount: </th>
+                                <th>Update/Delete</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                    {% for invoices in invoices %}
+                        {% if invoices.transition_state == 'INVOICED'%}
+                        <tr>
+                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
+                                <td>{{ invoices.date }}</td>
+                                <td>{{ invoices.transition_state }}</td>
+                                <td>{{ invoices.income.predicted_amount }}</td>
+                                {% if not is_viewer %}
+                                <td>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                        
+                    </table>
+                    
+                
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><h3>Not Invoiced:</h3></th>
+                                <th>Date: </th>
+                                <th>Status: </th>
+                                <th>Amount: </th>
+                                <th>Update/Delete</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        {% for invoices in invoices %}
+                            {% if invoices.transition_state == 'NOT_INVOICED'%}
+
+                        <tr>
+                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
+                                <td>{{ invoices.date }}</td>
+                                <td>{{ invoices.transition_state }}</td>
+                                <td>{{ invoices.income.predicted_amount }}</td>
+                                {% if not is_viewer %}
+                                <td>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                    
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><h3>Received:</h3></th>
+                                <th>Date: </th>
+                                <th>Status: </th>
+                                <th>Amount: </th>
+                                <th>Update/Delete</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        {% for invoices in invoices %}
+                        {% if invoices.transition_state == 'RECEIVED'%}
+
+                        <tr>
+                            <th scope="row">{{invoices.contract.department}}{{invoices.contract.contract_number|stringformat:"04d"}}-{{invoices.number}}: {{invoices.contract.organization_name}}</th>
+                                <td>{{ invoices.date }}</td>
+                                <td>{{ invoices.transition_state }}</td>
+                                <td>{{ invoices.income.predicted_amount }}</td>
+                                {% if not is_viewer %}
+                                <td>
+                                    <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Update</a>
+                                    <a class="btn btn-primary" href={% url 'accounting:delete_invoice' business_unit=current.pk contract=invoices.contract.pk invoice=invoices.pk %}>Delete</a>
+                                </td>
+                                {% endif %}
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    
+
+        {% else %}
+            <h4>No Invoices for this business unit.</h4>
+        {% endif %}
+        
+    </div>
+{% endblock %}

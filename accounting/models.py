@@ -18,8 +18,8 @@ class BusinessUnit(models.Model):
 
 class UserTeamRole(models.Model):
     ROLE_STATE = {
-        ('MANAGER', "manager"),
-        ('VIEWER', "viewer"),
+        ('MANAGER', 'Manager'),
+        ('VIEWER', 'Viewer'),
     }
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User')
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
@@ -31,10 +31,8 @@ class UserTeamRole(models.Model):
     def __unicode__(self):
         return self.user.username + ' is a ' + self.role + ' of ' + self.business_unit.name
 
-
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    date_for = models.DateField(default=None, null=True, verbose_name="Date For")
     predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Predicted Amount')
     actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Amount')
     reconciled = models.BooleanField(default=False, verbose_name='Reconciled')
@@ -51,20 +49,22 @@ class LineItem(models.Model):
         return instance
 
     def save(self, *args, **kwargs):
-        if not self._state.adding and (
-                self.actual_amount != self._loaded_values['actual_amount']):
+        if not self._state.adding and (self.actual_amount != self._loaded_values['actual_amount']):
             self.reconciled = True
         super(LineItem, self).save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
 
 
 class Contract(models.Model):
     CONTRACT_STATE = {
-        ('ACTIVE', "Active"),
-        ('COMPLETE', "Complete"),
+        ('ACTIVE', 'Active'),
+        ('COMPLETE', 'Complete'),
     }
     CONTRACT_TYPE = {
-        ('FIXED', "Fixed"),
-        ('HOURLY', "Hourly"),
+        ('FIXED', 'Fixed'),
+        ('HOURLY', 'Hourly'),
     }
 
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
@@ -80,7 +80,6 @@ class Contract(models.Model):
 class Cash(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
 
-
 class Income(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
@@ -89,9 +88,9 @@ class Income(LineItem):
 
 class Invoice(Income):
     TRANSITION_STATE = {
-        ('INVOICED', "Invoiced"),
-        ('NOT_INVOICED', "Not Invoiced"),
-        ('RECEIVED', "Received"),
+        ('INVOICED', 'Invoiced'),
+        ('NOT_INVOICED', 'Not Invoiced'),
+        ('RECEIVED', 'Received'),
     }
 
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, verbose_name='Contract')
@@ -105,6 +104,9 @@ class Personnel(models.Model):
     last_name = models.CharField(max_length=50, verbose_name='Last Name')
     employee_id = models.IntegerField(verbose_name='Employee ID')
     position = models.CharField(max_length=50, verbose_name='Position')
+
+    class Meta:
+        abstract = True
 
 
 class FullTime(Personnel):
@@ -139,7 +141,6 @@ class Expense(LineItem):
 
 
 class Payroll(models.Model):
-    date_for = models.DateField(default=None, null=True, verbose_name="Date For")
     expense = models.OneToOneField(Expense, verbose_name='Expense')
 
     def delete(self, *args, **kwargs):
