@@ -49,17 +49,6 @@ class HomeView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
-
-        customer_id = obj.user.stripecustomer.customer_id
-
-        obj.invoiceitem = stripe.InvoiceItem.create(
-            customer=customer_id,
-            # amount must be in cents
-            amount=(int(100 * obj.item.cost * obj.quantity)),
-            currency="usd",
-            description=obj.item.name,
-            metadata={"quantity": obj.quantity, "date": obj.date},
-        )
         obj.save()
 
         return HttpResponseRedirect(self.success_url)

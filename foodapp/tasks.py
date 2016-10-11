@@ -6,7 +6,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 
-from foodapp.models import RiceCooker, StripeCustomer
+from foodapp.models import RiceCooker, StripeCustomer, Order
 
 stripe.api_key = settings.STRIPE_API_SECRET_KEY
 
@@ -29,10 +29,30 @@ def reset_rice_cooker():
 
 
 @shared_task
-def send_invoice_notifications():
+def create_invoices_and_send_notifications():
+
+    customers = StripeCustomer.objects.all()
+
+    # Create invoices
+    for customer in customers:
+        uninvoiced_orders = Order.objects.filter(user=customer.user, is_invoiceable=True, invoice_item=None)
+
+        for order in uninvoiced_orders:
+            customer_id = customer.customer_id
+
+            order.invoiceitem = stripe.InvoiceItem.create(
+                customer=customer_id,
+                # amount must be in cents
+                amount=(int(100 * order.item.cost * order.quantity)),
+                currency="usd",
+                description=order.item.name,
+                metadata={"quantity": order.quantity, "date": order.date},
+            )
+            order.save()
+
+    # Send reminders
     if settings.FOODAPP_SEND_INVOICE_REMINDERS:
         connection = mail.get_connection(fail_silently=False)
-        customers = StripeCustomer.objects.all()
 
         for customer in customers:
             # Calculate total cost
