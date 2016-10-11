@@ -28,6 +28,7 @@ class Order(models.Model):
     date = models.DateField(default=datetime.date.today)
     item = models.ForeignKey(Item)
     invoice_item = models.CharField(max_length=36, null=True)
+    is_invoiceable = models.BooleanField(default=True)
     QUANTITY_CHOICES = (
         (1, "one"),
         (2, "two"),
