@@ -46,7 +46,7 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour=0, minute=1, day_of_week=[0, 1, 2, 3, 4, 5, 6]),
     },
     'weekly_billing': {
-        'task': 'foodapp.tasks.send_invoice_notifications',
+        'task': 'foodapp.tasks.create_invoices_and_send_notifications',
         'schedule': crontab(hour=0, minute=0, day_of_week=[6]),
     },
 }
