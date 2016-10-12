@@ -23,6 +23,8 @@ secrets.register('application', OrderedDict([
         ('GITHUB_USER', partial(prompt, "Worklog GitHub username:")),
         ('GITHUB_PASS', partial(prompt, "Worklog GitHub password:")),
         ('SENTRY_DSN',  partial(prompt, "Sentry DSN:")),
+        ('STRIPE_API_SECRET_KEY',  partial(prompt, "Stripe secret key:")),
+        ('STRIPE_API_PUBLISHABLE_KEY',  partial(prompt, "Stripe publishable key:")),
     ])
 )
 
