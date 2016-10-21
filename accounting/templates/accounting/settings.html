@@ -4,82 +4,27 @@
 
 {% block content %}
 
+    <link rel="stylesheet" type="text/css" href="{% static 'css/settings.css' %}"/>
+
     {% include "accounting/nav_tabs.html" with active="settings" %}
 
     <div class="container-fluid">
         <div class="row-fluid">
-            <div class="col-md-2">
-                <ul class="nav nav-pills nav-stacked nav-tabs">
-                    <li role="presentation" class="active"><a data-toggle="tab" href="#general" aria-expanded="true">General</a></li>
-                    <li role="presentation"><a data-toggle="tab" href="#user-roles" aria-expanded="true">Team Roles</a></li>
-                </ul>
-            </div>
-            <div class="col-md-10">
-                <div class="tab-content">
-
-                    <!-- General -->
-                    <div id="general" class="tab-pane active">
-
-                        <div class="panel panel-default">
-                          <div class="panel-heading">
-                            <h3 class="panel-title">General</h3>
-                          </div>
-                          <div class="panel-body">
-
-                            <h4>Name: {{ current_business_unit.name }}</h4>
-                            <h4>Account Number: {{ current_business_unit.account_number }}</h4>
-                            <br>
-                            <p>
-                                <a class="btn btn-primary" href={% url 'accounting:update_business_unit' business_unit=current_business_unit.pk %}>Update</a>
-                            </p>
-                            <p>
-
-                                <form action="{% url 'accounting:delete_business_unit' business_unit=current_business_unit.pk %}" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete {{ current_business_unit.name }}</button>
-                                </form>
-                            </p>
-                          </div>
-                        </div>
-
+        
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ current_business_unit }} Settings</h3>
                     </div>
-                    <!-- End General -->
-
-                    <!-- Team Roles -->
-                    <div id="user-roles" class="tab-pane">
-                        <div class="panel panel-default">
-                          <div class="panel-heading">
-                            <h3 class="panel-title">Team Role</h3>
-                          </div>
-                          <div class="panel-body">
-                            <a class="btn btn-primary" href={% url 'accounting:create_user_team_role' business_unit=current_business_unit.pk %}>Create New User Team Role</a>
-
-                            <h3>Managers</h3>
-                            <hr>
-                            <ul class="list-group">
-                                {% for manager in managers %}
-                                <li class="list-group-item model-display">
-                                    {{ manager.user.username }} - 
-                                    <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Update</a> | 
-                                    <a href={% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Delete</a></li>
-                                {% endfor %}
-                            </ul>
-
-                            <h3>Viewers</h3>
-                            <hr>
-                            <ul class="list-group">
-                                {% for viewer in viewers %}
-                                <li class="list-group-item model-display">
-                                    {{ viewer.user.username }} - 
-                                    <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Update</a> | 
-                                    <a class="btn-delete" href={% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Delete</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
+                    {% block settings_nav %}
+                    {% endblock %}
                 </div>
-                <!-- End Team Roles -->
+            </div>
 
+            <div class="col-md-9">
+                {% block settings_content %}
+
+                {% endblock %}
             </div>
         </div>
     </div>

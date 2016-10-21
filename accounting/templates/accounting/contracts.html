@@ -79,7 +79,7 @@
                                     <th scope="row">{{ invoice.number }}</th>
                                         <td>{{ invoice.date_payable }}</td>
                                         <td>{{ invoice.transition_state }}</td>
-                                        <td>{{ invoice.income.predicted_amount }}</td>
+                                        <td>{{ invoice.predicted_amount }}</td>
                                         {% if not is_viewer %}
                                         <td>
                                                 <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
@@ -161,7 +161,7 @@
                                     <th scope="row">{{ invoice.number }}</th>
                                         <td>{{ invoice.date_payable }}</td>
                                         <td>{{ invoice.transition_state }}</td>
-                                        <td>{{ invoice.income.predicted_amount }}</td>
+                                        <td>{{ invoice.predicted_amount }}</td>
                                         {% if not is_viewer %}
                                         <td>
                                             <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>

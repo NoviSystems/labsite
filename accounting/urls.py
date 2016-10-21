@@ -22,7 +22,8 @@ urlpatterns = [
     url(r'^(?P<business_unit>\d+)/personnel/$', PersonnelView.as_view(), name='personnel'),
 
     # Settings Views
-    url(r'^(?P<business_unit>\d+)/settings/$', SettingsPageView.as_view(), name='settings'),
+    url(r'^(?P<business_unit>\d+)/settings/business_unit/$', BusinessUnitSettingsPageView.as_view(), name='business_unit_settings'),
+    url(r'^(?P<business_unit>\d+)/settings/user_team_roles/$', UserTeamRolesSettingsPageView.as_view(), name='user_team_roles_settings'),
 
     # Business Unit Forms
     url(r'^business_unit/create/$', BusinessUnitCreateView.as_view(), name='create_business_unit'),

@@ -1,0 +1,12 @@
+#settings-nav > .active {
+    background-color: #FFFFFF;
+}
+
+#settings-nav > .active > a:hover {
+    background-color: #FFFFFF;
+}
+
+#settings-nav > .active > a {
+    color: #000000;
+    font-weight: bold;
+}

@@ -316,11 +316,24 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
         return context
 
 
-class SettingsPageView(ManagerMixin, TemplateView):
-    template_name = 'accounting/settings.html'
+class BusinessUnitSettingsPageView(ManagerMixin, TemplateView):
+    template_name = 'accounting/settings/business_unit.html'
 
     def get_context_data(self, **kwargs):
-        context = super(SettingsPageView, self).get_context_data()
+        context = super(BusinessUnitSettingsPageView, self).get_context_data()
+        users = UserTeamRole.objects.filter(business_unit=self.current_business_unit)
+        viewers = [user for user in users if user.role == 'VIEWER']
+        managers = [user for user in users if user.role == 'MANAGER']
+        context['viewers'] = viewers
+        context['managers'] = managers
+        return context
+
+
+class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
+    template_name = 'accounting/settings/user_team_roles.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserTeamRolesSettingsPageView, self).get_context_data()
         users = UserTeamRole.objects.filter(business_unit=self.current_business_unit)
         viewers = [user for user in users if user.role == 'VIEWER']
         managers = [user for user in users if user.role == 'MANAGER']
@@ -359,7 +372,7 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
         return BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:business_unit_settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class ContractCreateView(ManagerMixin, CreateView):
@@ -587,9 +600,6 @@ class PersonnelView(ViewerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PersonnelView, self).get_context_data()
 
-        personnel = Personnel.objects.filter(business_unit=self.current_business_unit)
-        context['personnel'] = personnel
-
         full_time = FullTime.objects.filter(business_unit=self.current_business_unit)
         context['full_time'] = full_time
 
@@ -675,13 +685,14 @@ class PartTimeUpdateView(ManagerMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
 
+
 class UserTeamRoleCreateView(ManagerMixin, CreateView):
     model = UserTeamRole
     form_class = UserTeamRoleCreateForm
     template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def form_valid(self, form):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -710,7 +721,7 @@ class UserTeamRoleDeleteView(ManagerMixin, DeleteView):
             return super(UserTeamRoleDeleteView, self).delete(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
@@ -722,4 +733,4 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
         return UserTeamRole.objects.get(pk=self.kwargs['user_team_role'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
