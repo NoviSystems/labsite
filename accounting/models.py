@@ -6,12 +6,13 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Cash', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense', 'Payroll']
+__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense', 'Payroll']
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
     account_number = models.CharField(max_length=12, verbose_name='Account Number')
-
+    cash = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Cash')
+    
     def __unicode__(self):
         return self.name
 
@@ -76,10 +77,6 @@ class Contract(models.Model):
     amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Amount')
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE, verbose_name='Contract State')
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE, verbose_name='Contract Type')
-
-
-class Cash(LineItem):
-    name = models.CharField(max_length=50, verbose_name='Name')
 
 
 class Income(LineItem):

@@ -6,7 +6,7 @@ from models import *
 __all__ = ['BusinessUnitCreateForm', 'BusinessUnitUpdateForm', 'ContractCreateForm', 'ContractUpdateForm',
            'ExpenseCreateForm', 'ExpenseUpdateForm', 'InvoiceCreateForm', 'InvoiceUpdateForm',
            'FullTimeCreateForm', 'FullTimeUpdateForm', 'PartTimeCreateForm', 'PartTimeUpdateForm',
-           'IncomeCreateForm', 'IncomeUpdateForm', 'CashUpdateForm',
+           'IncomeCreateForm', 'IncomeUpdateForm',
            'UserTeamRoleCreateForm', 'UserTeamRoleUpdateForm']
 
 
@@ -233,23 +233,6 @@ class IncomeUpdateForm(BaseForm, ModelForm):
         model = Income
         fields = '__all__'
         exclude = [
-            'reconciled',
-        ]
-
-
-class CashUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(CashUpdateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = Cash
-        fields = '__all__'
-        exclude = [
-            'name',
-            'business_unit',
-            'month',
-            'predicted_amount',
             'reconciled',
         ]
 
