@@ -8,6 +8,7 @@ urlpatterns = [
 
     # Dashboard Views
     url(r'^(?P<business_unit>\d+)/dashboard/$', DashboardView.as_view(), name='dashboard'),
+    url(r'^(?P<business_unit>\d+)/dashboard/(?P<start_year>\d+)-(?P<end_year>\d+)/$', DashboardView.as_view(), name='dashboard'),
 
     # Expense Views
     url(r'^(?P<business_unit>\d+)/expenses/$', ExpensesView.as_view(), name='expenses'),

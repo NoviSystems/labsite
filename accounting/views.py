@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, datetime
 from dateutil.rrule import rrule, MONTHLY
 
 from django.shortcuts import redirect
@@ -13,6 +13,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 from models import *
 from forms import *
 from decimal import Decimal
+from calendar import monthrange
 
 
 class PermissionsMixin(LoginRequiredMixin, object):
@@ -101,76 +102,95 @@ class DashboardView(ViewerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data()
-        cma = { 'title': 'Cash Month Actual', 'values': [] }
-        cmpr = { 'title': 'Cash Month Projected', 'values': [] }
-        ema = { 'title': 'Expenses Month Actual', 'values': [] }
-        emp = { 'title': 'Expenses Month Projected', 'values': [] }
-        ima = { 'title': 'Receivables Month Actual', 'values': [] }
-        imp = { 'title': 'Receivables Month Projected', 'values': [] }
-        pma = { 'title': 'Payroll Month Actual', 'values': [] }
-        pmp = { 'title': 'Payroll Month Projected', 'values': [] }
-        tama = { 'title': 'Total Assets Projected', 'values': [] }
-        tamp = { 'title': 'Total Assets Actual', 'values': [] }
+        cma = { 'title': 'Cash Month Actual', 'values': {} }
+        cmpr = { 'title': 'Cash Month Projected', 'values': {} }
+        ema = { 'title': 'Expenses Month Actual', 'values': {} }
+        emp = { 'title': 'Expenses Month Projected', 'values': {} }
+        ima = { 'title': 'Receivables Month Actual', 'values': {} }
+        imp = { 'title': 'Receivables Month Projected', 'values': {} }
+        pma = { 'title': 'Payroll Month Actual', 'values': {} }
+        pmp = { 'title': 'Payroll Month Projected', 'values': {} }
+        tama = { 'title': 'Total Assets Projected', 'values': {} }
+        tamp = { 'title': 'Total Assets Actual', 'values': {} }
 
-        months = [month for month in rrule(MONTHLY, dtstart=date(2016, 07, 1), until=date(2017, 06, 30))]
-        print(months)
+        start_year = None
+        end_year = None
+        if 'start_year' in self.kwargs and 'end_year' in self.kwargs:
+            start_year = date(int(self.kwargs['start_year']), 07, 01)
+            end_year = date(int(self.kwargs['end_year']), 06, 30)
+        else:
+            start_year = date(datetime.now().year, 07, 1)
+            end_year = date(datetime.now().year+1, 06, 30)
+
+        months = [month for month in rrule(MONTHLY, dtstart=start_year, until=end_year)]
+        month_names = []
+
+        cash_month_actual = self.current_business_unit.cash
+        cash_month_projected = self.current_business_unit.cash
+
         for month in months:
+
+            start_date = '{}-{}-{}'.format(month.year, month.month, '01')
+            end_date = '{}-{}-{}'.format(month.year, month.month, monthrange(month.year, month.month)[1])
+
+            month_name = month.strftime("%B") 
+            month_names.append(month_name)
+
             payroll_month_actual = Decimal('0.00')
             payroll_month_projected = Decimal('0.00') 
-            #for payroll in Payroll.objects.filter(expense.date_payable__range=['2016-07-01', '2017-06-30']):
-                #if payroll.expense.reconciled:
-                    #payroll_month_actual += payroll.expense.actual_amount
-                #payroll_month_projected += payroll.expense.predicted_amount
-            pma['values'].append(payroll_month_actual)
-            pmp['values'].append(payroll_month_projected)
+            for payroll in Payroll.objects.filter(expense__business_unit=self.current_business_unit, expense__date_payable__range=[start_date, end_date]):
+                if payroll.expense.reconciled:
+                    payroll_month_actual += payroll.expense.actual_amount
+                payroll_month_projected += payroll.expense.predicted_amount
+            pma['values'][month_name] = payroll_month_actual
+            pmp['values'][month_name] = payroll_month_projected
 
             expenses_month_actual = Decimal('0.00')
-            expense_month_projected = Decimal('0.00')
-            for expense in Expense.objects.filter(date_payable__range=['2016-07-01', '2017-06-30']):
+            expenses_month_projected = Decimal('0.00')
+            for expense in Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
                 if expense.reconciled:
                     expenses_month_actual += expense.actual_amount
                 expense_month_projected += expense.predicted_amount
             expenses_month_actual -= payroll_month_actual
-            expense_month_projected -= payroll_month_projected
-            ema['values'].append(expenses_month_actual)
-            emp['values'].append(expense_month_projected)
+            expenses_month_projected -= payroll_month_projected
+            ema['values'][month_name] = expenses_month_actual
+            emp['values'][month_name] = expenses_month_projected
 
             income_month_actual = Decimal('0.00')
             income_month_projected = Decimal('0.00')
-            for income in Income.objects.filter(date_payable__range=['2016-07-01', '2017-06-30']):
+            for income in Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
                 if income.reconciled:
                     income_month_actual += income.actual_amount
                 income_month_projected += income.predicted_amount
-            ima['values'].append(income_month_actual)
-            imp['values'].append(income_month_projected)
+            ima['values'][month_name] = income_month_actual
+            imp['values'][month_name] = income_month_projected
+            
+            cash_month_actual +=  (income_month_actual - payroll_month_actual - expenses_month_actual)
+            cash_month_projected += (income_month_projected - payroll_month_projected - expenses_month_projected)
 
-            cash_month_actual = Decimal('0.00')
-            cash_month_projected = Decimal('0.00')
-            """for cash in Cash.objects.filter(date_payable__range=['2016-07-01', '2017-06-30']):
-                if cash.reconciled:
-                    cash_month_actual += cash.actual_amount
-                cash_month_projected += cash.predicted_amount"""
-            cmpr['values'].append(cash_month_projected)
-            cma['values'].append(cash_month_actual)
+            cmpr['values'][month_name] = cash_month_projected
+            cma['values'][month_name] = cash_month_actual
 
             income_booked_projected = Decimal('0.00')
-            for value in imp['values']:
+            for value in imp['values'].values():
                 income_booked_projected += value
             total_assets_month_projected = cash_month_projected + income_booked_projected
-            tamp['values'].append(total_assets_month_projected)
+            tamp['values'][month_name] = total_assets_month_projected
 
             income_booked_actual = Decimal('0.00')
-            for value in ima['values']:
+            for value in ima['values'].values():
                 income_booked_actual += value
             total_assets_month_actual = cash_month_actual + income_booked_actual
-            tama['values'].append(total_assets_month_actual)
+            tama['values'][month_name] = total_assets_month_actual
 
         dashboard_data = [cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp]
-        #context['months_names'] = json.dumps([date.strftime('%B') for month in self.months])
-        context['predicted_totals'] = json.dumps([float(value) for value in cmpr['values']])
-        context['actual_totals'] = json.dumps([float(value) for value in cma['values']])
+        context['month_names'] = month_names
+        context['predicted_totals'] = json.dumps([float(cmpr['values'][month_name]) for month_name in month_names])
+        context['actual_totals'] = json.dumps([float(cma['values'][month_name]) for month_name in month_names])
         context['dashboard_data'] = dashboard_data
-
+        
+        context['start_year'] = start_year.year
+        context['end_year'] = end_year.year
         return context
 
 
@@ -577,18 +597,6 @@ class IncomeUpdateView(ManagerMixin, UpdateView):
 
     def get_object(self):
         return Income.objects.get(pk=self.kwargs['income'])
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
-class CashUpdateView(ManagerMixin, UpdateView):
-    model = Cash
-    form_class = CashUpdateForm
-    template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return Cash.objects.get(pk=self.kwargs['cash'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})

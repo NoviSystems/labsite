@@ -1,15 +1,79 @@
 {% extends "accounting/base.html" %}
 
 {% load staticfiles %}
+{% load accountingFilters %}
 
 {% block content %}
 
 {% include "accounting/nav_tabs.html" with active="dashboard" %}
 
-Hi!
+<div class="row text-center">
+    <div class="col-md-3 col-sm-12">
+        <div class="btn-group" role="group" aria-label="...">
+          <a class="btn btn-default"  href={% url 'accounting:dashboard' business_unit=current_business_unit.pk start_year=start_year|add:"-1" end_year=end_year|add:"-1" %}><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+          <a class="btn btn-default" href={% url 'accounting:dashboard' business_unit=current_business_unit.pk %}>Current</a>
+          <a class="btn btn-default"  href={% url 'accounting:dashboard' business_unit=current_business_unit.pk start_year=start_year|add:"1" end_year=end_year|add:"1" %}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-12">
+        <h4 class="">July 1 {{start_year}} - June 30 {{end_year}}</h4>
+    </div>
+</div>
 
-{% for item in dashboard_data %}
-  {{ item }}
-{% endfor %}
+<script src={% static 'js/highcharts.js' %}></script>
+<div id="container" style="width:100%; height:400px;"></div>
+<script>
+$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Cash Values for Months'
+        },
+        xAxis: {
+            categories: {{ month_names | safe }}
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Predicted',
+            data: {{ predicted_totals | safe }}
+        }, {
+            name: 'Actual',
+            data: {{ actual_totals | safe }}
+        }]
+    });
+});
+</script>
+
+{% block breakdown %}
+    <div class="container">
+        <div class="row">
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        {% for month in month_names %}
+                        	<th>{{ month }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in dashboard_data %}
+                    <tr class="text-right">
+                        <th class="text-right" scope="row">{{ data.title }}</th>
+                        	{% for month in month_names %}
+                        		<td>${{ data.values | get_item:month }}</td>
+                        	{% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
 
 {% endblock %}
