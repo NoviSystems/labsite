@@ -147,7 +147,7 @@ class DashboardView(ViewerMixin, TemplateView):
             for expense in Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
                 if expense.reconciled:
                     expenses_month_actual += expense.actual_amount
-                expense_month_projected += expense.predicted_amount
+                expenses_month_projected += expense.predicted_amount
             expenses_month_actual += payroll_month_actual
             expenses_month_projected += payroll_month_projected
             ema['values'][month_name] = expenses_month_actual
@@ -484,6 +484,14 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
 
+    def form_valid(self, form):
+        if form.instance.actual_amount != None and form.instance.date_paid != None and form.instance.transition_state == 'RECEIVED':
+            form.instance.reconciled = True
+        else:
+            form.instance.reconciled = False
+        response = super(InvoiceUpdateView, self).form_valid(form)
+        return response
+
 
 class ExpenseCreateView(ManagerMixin, CreateView):
     model = Expense
@@ -496,9 +504,18 @@ class ExpenseCreateView(ManagerMixin, CreateView):
     def form_valid(self, form):
         business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         form.instance.business_unit = business_unit
+        
         try:
-            if self.request.POST['recurring']:
-                monthly_expense_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=form.instance.date_payable, until=date(2017, 06, 30))]
+            if 'recurring' in self.request.POST:
+                date_payable = form.instance.date_payable
+                until_date = None
+                if int(date_payable.month) <=6:
+                    until_date = date(date_payable.year, 06, 30)
+                else:
+                    until_date = date(date_payable.year+1, 06, 30)
+
+                monthly_expense_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=date_payable, until=until_date)]
+                print monthly_expense_dates
                 for expense_date in monthly_expense_dates:
                     expense = Expense(
                         business_unit=form.instance.business_unit,
@@ -506,7 +523,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                         name=form.instance.name,
                         date_payable=expense_date,
                     )
-                    if expense_date < self.now:
+                    if expense_date.date() < self.now:
                         expense.date_paid = expense_date
                         expense.actual_amount = form.instance.predicted_amount
                     expense.save()
@@ -516,8 +533,8 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                 form.instance.date_paid = form.instance.date_payable
                 form.instance.actual_amount = form.instance.predicted_amount
 
-            response = super(ExpenseCreateView, self).form_valid(form)
-            return response
+        response = super(ExpenseCreateView, self).form_valid(form)
+        return response
 
 
 class ExpenseDeleteView(ManagerMixin, DeleteView):

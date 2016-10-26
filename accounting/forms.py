@@ -145,6 +145,8 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
         model = Invoice
         fields = '__all__'
         exclude = [
+            'business_unit',
+            'name',
             'number',
             'contract',
             'reconciled',

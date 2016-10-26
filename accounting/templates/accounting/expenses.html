@@ -15,7 +15,14 @@
                     <h4 class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ display_month }}<span class="caret"></span></h4>
                     <ul class="dropdown-menu">
                         {% for month in months %}
-                            <li class="text-right"><a href={% url 'accounting:expenses' business_unit=current_business_unit.pk month=month.month %}>{{month|date:"F Y" }}</a></li>
+                            <li class="text-right">
+                            {% if start_year and end_year %}
+                            <a href={% url 'accounting:expenses' business_unit=current_business_unit.pk month=month.month start_year=start_year end_year=end_year %}>{{month|date:"F Y" }}</a>
+                            {% else %}
+                            <a href={% url 'accounting:expenses' business_unit=current_business_unit.pk month=month.month %}>{{month|date:"F Y" }}</a>
+                            {% endif %}
+
+                            </li>
                             {% if month|date:"F" == "December" and not forloop.last %}
                                 <li class="divider"></li>
                             {% endif %}
@@ -25,11 +32,6 @@
             </div>
         </div>
         <br>
-        <div class="row">
-            <div class="col-md-3">
-                    <h4>Cash</h4>
-            </div>
-        </div>
         <div class="row">
             <div class="col-md-3">
                     <h4>Expenses</h4>
@@ -61,9 +63,9 @@
                             <td>${{ expense.predicted_amount }}</td>
                             {% if not is_viewer %}
                             <td>
-                                <a class="btn btn-primary" href={% url 'accounting:update_expense' business_unit=current.pk expense=expense.pk month=month_data.month.pk %}>Update</a>
+                                <a class="btn btn-primary" href={% url 'accounting:update_expense' business_unit=current_business_unit.pk expense=expense.pk %}>Update</a>
                                 {% if expense.name != "Payroll" %}
-                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_expense' business_unit=current.pk expense=expense.pk month=month_data.month.pk %}>Delete</a>
+                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_expense' business_unit=current_business_unit.pk expense=expense.pk%}>Delete</a>
                                 {% endif %}
                             </td>
                             {% endif %}
@@ -107,7 +109,8 @@
                             <td>${{ income.predicted_amount }}</td>
                             {% if not is_viewer %}
                             <td>
-
+                                <a class="btn btn-primary" href={% url 'accounting:update_income' business_unit=current_business_unit.pk income=income.pk %}>Update</a>
+                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_income' business_unit=current_business_unit.pk income=income.pk %}>Delete</a>
                             </td>
                             {% endif %}
                     </tr>

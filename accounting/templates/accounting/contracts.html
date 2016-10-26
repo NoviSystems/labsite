@@ -82,8 +82,8 @@
                                         <td>{{ invoice.predicted_amount }}</td>
                                         {% if not is_viewer %}
                                         <td>
-                                                <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
-                                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Delete</a>
+                                            <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
+                                            <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Delete</a>
                                         </td>
                                         {% endif %}
                                 </tr>
