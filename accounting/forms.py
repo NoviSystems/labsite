@@ -151,6 +151,9 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
             'contract',
             'reconciled',
         ]
+        help_texts = {
+            'transition_state': 'Invoices are marked reconciled when Actual Amount and Date Paid are filled and Tansition State is Recieved.'
+        }
 
 
 class FullTimeCreateForm(BaseForm, ModelForm):
