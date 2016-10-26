@@ -12,6 +12,9 @@ urlpatterns = [
 
     # Expense Views
     url(r'^(?P<business_unit>\d+)/expenses/$', ExpensesView.as_view(), name='expenses'),
+    url(r'^(?P<business_unit>\d+)/expenses/(?P<month>\d+)/$', ExpensesView.as_view(), name='expenses'),
+    url(r'^(?P<business_unit>\d+)/expenses/(?P<start_year>\d+)-(?P<end_year>\d+)/$', ExpensesView.as_view(), name='expenses'),
+    url(r'^(?P<business_unit>\d+)/expenses/(?P<start_year>\d+)-(?P<end_year>\d+)/(?P<month>\d+)$', ExpensesView.as_view(), name='expenses'),
 
     # Revenue Views
     url(r'^(?P<business_unit>\d+)/revenue/$', RevenueView.as_view(), name='revenue'),

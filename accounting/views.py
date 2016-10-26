@@ -13,7 +13,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 from models import *
 from forms import *
 from decimal import Decimal
-from calendar import monthrange
+from calendar import monthrange, month_name
 
 
 class PermissionsMixin(LoginRequiredMixin, object):
@@ -43,6 +43,9 @@ class SetUpMixin(object):
     def dispatch(self, request, *args, **kwargs):
         self.current_business_unit = BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.now = date.today()
+        self.start_year = date(self.now.year, 07, 1)
+        self.end_year = date(self.now.year+1, 06, 30)
+
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
@@ -52,6 +55,13 @@ class SetUpMixin(object):
         except AttributeError:
             context['is_viewer'] = False
         context['current_business_unit'] = self.current_business_unit
+
+        if 'start_year' in self.kwargs and 'end_year' in self.kwargs:
+            self.start_year = date(int(self.kwargs['start_year']), 07, 01)
+            self.end_year = date(int(self.kwargs['end_year']), 06, 30)
+
+        context['start_year'] = self.start_year.year
+        context['end_year'] = self.end_year.year
         return context
 
 
@@ -113,20 +123,12 @@ class DashboardView(ViewerMixin, TemplateView):
         tama = { 'title': 'Total Assets Projected', 'values': {} }
         tamp = { 'title': 'Total Assets Actual', 'values': {} }
 
-        start_year = None
-        end_year = None
-        if 'start_year' in self.kwargs and 'end_year' in self.kwargs:
-            start_year = date(int(self.kwargs['start_year']), 07, 01)
-            end_year = date(int(self.kwargs['end_year']), 06, 30)
-        else:
-            start_year = date(datetime.now().year, 07, 1)
-            end_year = date(datetime.now().year+1, 06, 30)
-
-        months = [month for month in rrule(MONTHLY, dtstart=start_year, until=end_year)]
+        months = [month for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
         month_names = []
 
         cash_month_actual = self.current_business_unit.cash
         cash_month_projected = self.current_business_unit.cash
+        payroll_month_projected = calculatePayrollProjectedAmount(self.current_business_unit)
 
         for month in months:
 
@@ -137,11 +139,6 @@ class DashboardView(ViewerMixin, TemplateView):
             month_names.append(month_name)
 
             payroll_month_actual = Decimal('0.00')
-            payroll_month_projected = Decimal('0.00') 
-            for payroll in Payroll.objects.filter(expense__business_unit=self.current_business_unit, expense__date_payable__range=[start_date, end_date]):
-                if payroll.expense.reconciled:
-                    payroll_month_actual += payroll.expense.actual_amount
-                payroll_month_projected += payroll.expense.predicted_amount
             pma['values'][month_name] = payroll_month_actual
             pmp['values'][month_name] = payroll_month_projected
 
@@ -151,8 +148,8 @@ class DashboardView(ViewerMixin, TemplateView):
                 if expense.reconciled:
                     expenses_month_actual += expense.actual_amount
                 expense_month_projected += expense.predicted_amount
-            expenses_month_actual -= payroll_month_actual
-            expenses_month_projected -= payroll_month_projected
+            expenses_month_actual += payroll_month_actual
+            expenses_month_projected += payroll_month_projected
             ema['values'][month_name] = expenses_month_actual
             emp['values'][month_name] = expenses_month_projected
 
@@ -166,7 +163,7 @@ class DashboardView(ViewerMixin, TemplateView):
             imp['values'][month_name] = income_month_projected
             
             cash_month_actual +=  (income_month_actual - payroll_month_actual - expenses_month_actual)
-            cash_month_projected += (income_month_projected - payroll_month_projected - expenses_month_projected)
+            cash_month_projected += (income_month_projected - expenses_month_projected)
 
             cmpr['values'][month_name] = cash_month_projected
             cma['values'][month_name] = cash_month_actual
@@ -188,9 +185,6 @@ class DashboardView(ViewerMixin, TemplateView):
         context['predicted_totals'] = json.dumps([float(cmpr['values'][month_name]) for month_name in month_names])
         context['actual_totals'] = json.dumps([float(cma['values'][month_name]) for month_name in month_names])
         context['dashboard_data'] = dashboard_data
-        
-        context['start_year'] = start_year.year
-        context['end_year'] = end_year.year
         return context
 
 
@@ -313,26 +307,29 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ExpensesView, self).get_context_data()
+        months = []
+        [months.append(month) for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
+        context['months'] = months
 
-        ''' month_data = []
-
+        active_month_int = None
         if 'month' in self.kwargs:
-            display_month = Month.objects.get(pk=self.kwargs['month'])
+            active_month_int = int(self.kwargs['month'])
         else:
-            display_month = self.current_month
+            active_month_int = int(self.now.month)
 
-        try:
-            cash = Cash.objects.get(month=display_month)
-        except ObjectDoesNotExist:
-            cash = None
-        month_data = {
-            'month': display_month,
-            'expenses': Expense.objects.filter(month=display_month),
-            'incomes': Income.objects.filter(month=display_month),
-            'cash': cash
-        }
-
-        context['month_data'] = month_data'''
+        start_date = None
+        end_date = None
+        display_month = None
+        for month in months:
+            if month.month == active_month_int:
+                start_date = '{}-{}-{}'.format(month.year, month.month, '01')
+                end_date = '{}-{}-{}'.format(month.year, month.month, monthrange(month.year, month.month)[1])
+                display_month = month_name[int(active_month_int)] + ' ' + str(month.year)
+        print start_date
+        print end_date
+        context['expenses'] = Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
+        context['incomes'] = Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
+        context['display_month'] = display_month
         return context
 
 
@@ -649,7 +646,7 @@ class FullTimeUpdateView(ManagerMixin, UpdateView):
     template_name = 'accounting/base_form.html'
 
     def get_object(self):
-        return FUllTime.objects.get(pk=self.kwargs['full_time'])
+        return FullTime.objects.get(pk=self.kwargs['full_time'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -742,3 +739,12 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
+
+
+def calculatePayrollProjectedAmount(current_business_unit):
+    payroll_month_projected = Decimal('0.00')
+    for partTime in PartTime.objects.filter(business_unit=current_business_unit):
+        payroll_month_projected += partTime.hourly_amount * partTime.hours_work
+    for fullTime in FullTime.objects.filter(business_unit=current_business_unit):
+        payroll_month_projected += fullTime.salary_amount + fullTime.social_security_amount + fullTime.fed_health_insurance_amount + fullTime.retirement_amount + fullTime.medical_insurance_amount + fullTime.staff_benefits_amount  + fullTime.fringe_amount 
+    return payroll_month_projected
