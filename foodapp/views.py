@@ -17,9 +17,9 @@ from foodapp import forms, models
 
 
 def get_stripe_customer(user):
-    customer = getattr(user, 'stripecustomer')
+    customer = getattr(user, 'stripecustomer', None)
 
-    if not customer.is_valid():
+    if customer is None or not customer.is_valid():
         return None
     return customer
 
