@@ -39,6 +39,9 @@ urlpatterns = [
     url(r'^(?P<business_unit>\d+)/expenses/(?P<expense>\d+)/update/$', ExpenseUpdateView.as_view(), name='update_expense'),
     url(r'^(?P<business_unit>\d+)/expenses/(?P<expense>\d+)/delete/$', ExpenseDeleteView.as_view(), name='delete_expense'),
 
+    # Payroll Forms
+    url(r'^(?P<business_unit>\d+)/expense/(?P<month>\d+)-(?P<year>\d+)/create/$', PayrollExpenseCreateView.as_view(), name='create_payroll_expense'),
+
     # Income Forms
     url(r'^(?P<business_unit>\d+)/income/create/$', IncomeCreateView.as_view(), name='create_income'),
     url(r'^(?P<business_unit>\d+)/income/(?P<income>\d+)/update/$', IncomeUpdateView.as_view(), name='update_income'),

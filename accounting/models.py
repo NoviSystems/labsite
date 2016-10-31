@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense', 'Payroll']
+__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense',]
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
@@ -134,17 +134,14 @@ class PartTime(Personnel):
 
 
 class Expense(LineItem):
+    EXPENSE_TYPE = {
+        ('GENERAL', 'General'),
+        ('PAYROLL', 'Payroll')
+    }
+    expense_type = models.CharField(max_length=7, choices=EXPENSE_TYPE, verbose_name='Expense Type')
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
     date_paid = models.DateField(default=None, null=True, blank=True, verbose_name='Date Paid')
-
-
-class Payroll(models.Model):
-    expense = models.OneToOneField(Expense, verbose_name='Expense')
-
-    def delete(self, *args, **kwargs):
-        self.expense.delete()
-        return super(self.__class__, self).delete(*args, **kwargs)
 
 
 # calculate month duration

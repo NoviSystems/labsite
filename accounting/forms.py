@@ -7,7 +7,7 @@ __all__ = ['BusinessUnitCreateForm', 'BusinessUnitUpdateForm', 'ContractCreateFo
            'ExpenseCreateForm', 'ExpenseUpdateForm', 'InvoiceCreateForm', 'InvoiceUpdateForm',
            'FullTimeCreateForm', 'FullTimeUpdateForm', 'PartTimeCreateForm', 'PartTimeUpdateForm',
            'IncomeCreateForm', 'IncomeUpdateForm',
-           'UserTeamRoleCreateForm', 'UserTeamRoleUpdateForm']
+           'UserTeamRoleCreateForm', 'UserTeamRoleUpdateForm', 'PayrollExpenseCreateForm',]
 
 
 class BaseForm(ModelForm):
@@ -102,6 +102,7 @@ class ExpenseCreateForm(BaseForm, ModelForm):
             'month',
             'date_paid',
             'business_unit',
+            'expense_type',
         ]
         help_texts = {
             'date_payable': 'If this is today or a previous date, it will be entered as already paid',
@@ -120,6 +121,7 @@ class ExpenseUpdateForm(BaseForm, ModelForm):
             'business_unit',
             'month',
             'reconciled',
+            'expense_type',
         ]
 
 
@@ -266,4 +268,24 @@ class UserTeamRoleUpdateForm(BaseForm, ModelForm):
         exclude = [
             'user',
             'business_unit',
+        ]
+
+
+class PayrollExpenseCreateForm(BaseForm, ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PayrollExpenseCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Expense
+        fields = '__all__'
+        exclude = [
+            'predicted_amount',
+            'name',
+            'reconciled',
+            'month',
+            'date_paid',
+            'business_unit',
+            'expense_type',
+            'recurring',
         ]
