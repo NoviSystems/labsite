@@ -16,7 +16,7 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-      <h3 class="form-header">{% if object %} Update {% else %} Create {% endif %} {{ form.instance | get_form_model_name }}</h3>
+      <h3 class="form-header">{% if object %} Update {% else %} Create {% endif %} {% if base_form_title %} {{ base_form_title }} {% else %} {{ form.instance | get_form_model_name }}{% endif %}</h3>
         <form class="form" method="POST" action="">
                 {% csrf_token %}
                 {% for field in form %}
