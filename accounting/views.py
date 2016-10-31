@@ -332,6 +332,7 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
         context['expenses'] = Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         context['incomes'] = Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         context['cash'] = Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
+        print context['cash'].pk
         context['active_month'] = active_month
         return context
 
@@ -827,13 +828,16 @@ class CashCreateView(ManagerMixin, CreateView):
         return response
 
 
-class CashUpdateView(ManagerMixin, CreateView):
+class CashUpdateView(ManagerMixin, UpdateView):
     form_class = CashUpdateForm
     model = Cash
     template_name = 'accounting/base_form.html'
 
     def get_object(self):
         return Cash.objects.get(pk=self.kwargs['cash'])
+
+    def get_success_url(self):
+        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def get_context_data(self, *kwargs):
         context = super(CashUpdateView, self).get_context_data()

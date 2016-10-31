@@ -41,7 +41,7 @@ urlpatterns = [
 
     # Cash Forms
     url(r'^(?P<business_unit>\d+)/cash/(?P<month>\d+)-(?P<year>\d+)/$', CashCreateView.as_view(), name='create_cash'),
-    url(r'^(?P<business_unit>\d+)/cash/(?P<month>\d+)-(?P<year>\d+)/$', CashUpdateView.as_view(), name='update_cash'),
+    url(r'^(?P<business_unit>\d+)/cash/(?P<cash>\d+)/update/$', CashUpdateView.as_view(), name='update_cash'),
 
     # Payroll Forms
     url(r'^(?P<business_unit>\d+)/expense/(?P<month>\d+)-(?P<year>\d+)/create/$', PayrollExpenseCreateView.as_view(), name='create_payroll_expense'),

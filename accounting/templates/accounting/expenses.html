@@ -31,7 +31,6 @@
                 </div>
             </div>
         </div>
-        <br>
         
         <div class="row">
             <div class="col-md-3">
@@ -40,8 +39,10 @@
             <div class="col-md-9">
                 {% if not is_viewer %}
                     {% if cash %}
-                        <h4>Cash Actual: ${{ cash.actual_amount }}</h4>
-                        <a class="btn btn-primary" href={% url 'accounting:update_cash' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Update Cash</a>
+                        <span>
+                            <h4 style="display: inline-block;">Cash Actual: ${{ cash.actual_amount }}</h4>
+                            <a class="btn btn-primary" href={% url 'accounting:update_cash' business_unit=current_business_unit.pk cash=cash.pk %}>Update Cash</a>
+                        </span>
                     {% else %}
                         <a class="btn btn-primary" href={% url 'accounting:create_cash' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Create Cash</a>
                     {% endif %}
