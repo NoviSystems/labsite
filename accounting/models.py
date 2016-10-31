@@ -6,12 +6,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense',]
+__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense', 'Cash',]
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
     account_number = models.CharField(max_length=12, verbose_name='Account Number')
-    cash = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Cash')
     
     def __unicode__(self):
         return self.name
@@ -142,6 +141,11 @@ class Expense(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
     date_paid = models.DateField(default=None, null=True, blank=True, verbose_name='Date Paid')
+
+
+class Cash(LineItem):
+    name = models.CharField(max_length=50, verbose_name='Name')
+    date_associated = models.DateField(verbose_name='Date Associated')
 
 
 # calculate month duration

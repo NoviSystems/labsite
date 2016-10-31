@@ -7,7 +7,8 @@ __all__ = ['BusinessUnitCreateForm', 'BusinessUnitUpdateForm', 'ContractCreateFo
            'ExpenseCreateForm', 'ExpenseUpdateForm', 'InvoiceCreateForm', 'InvoiceUpdateForm',
            'FullTimeCreateForm', 'FullTimeUpdateForm', 'PartTimeCreateForm', 'PartTimeUpdateForm',
            'IncomeCreateForm', 'IncomeUpdateForm',
-           'UserTeamRoleCreateForm', 'UserTeamRoleUpdateForm', 'PayrollExpenseCreateForm',]
+           'UserTeamRoleCreateForm', 'UserTeamRoleUpdateForm', 'PayrollExpenseCreateForm',
+           'CashCreateForm', 'CashUpdateForm', ]
 
 
 class BaseForm(ModelForm):
@@ -288,4 +289,26 @@ class PayrollExpenseCreateForm(BaseForm, ModelForm):
             'business_unit',
             'expense_type',
             'recurring',
+        ]
+
+
+class CashCreateForm(BaseForm, ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CashCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Cash
+        fields = [
+            'actual_amount',
+        ]
+
+
+class CashUpdateForm(BaseForm, ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CashUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Cash
+        fields = [
+            'actual_amount',
         ]

@@ -126,8 +126,8 @@ class DashboardView(ViewerMixin, TemplateView):
         months = [month for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
         month_names = []
 
-        cash_month_actual = self.current_business_unit.cash
-        cash_month_projected = self.current_business_unit.cash
+        cash_month_actual = Decimal('0.00')
+        cash_month_projected = Decimal('0.00')
         payroll_month_projected = calculatePayrollProjectedAmount(self.current_business_unit)
 
         for month in months:
@@ -147,7 +147,8 @@ class DashboardView(ViewerMixin, TemplateView):
             for expense in Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
                 if expense.reconciled:
                     expenses_month_actual += expense.actual_amount
-                expenses_month_projected += expense.predicted_amount
+                else:
+                    expenses_month_projected += expense.predicted_amount
             expenses_month_projected += payroll_month_projected
             ema['values'][month_name] = expenses_month_actual
             emp['values'][month_name] = expenses_month_projected
@@ -157,7 +158,8 @@ class DashboardView(ViewerMixin, TemplateView):
             for income in Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
                 if income.reconciled:
                     income_month_actual += income.actual_amount
-                income_month_projected += income.predicted_amount
+                else:
+                    income_month_projected += income.predicted_amount
             ima['values'][month_name] = income_month_actual
             imp['values'][month_name] = income_month_projected
 
@@ -170,7 +172,7 @@ class DashboardView(ViewerMixin, TemplateView):
             for value in imp['values'].values():
                 print value
                 income_booked_projected += value
-            total_assets_month_projected = cash_month_projected
+            total_assets_month_projected = cash_month_projected + income_booked_projected
             print 'tamp: ' + str(total_assets_month_projected)
             tamp['values'][month_name] = total_assets_month_projected
 
@@ -327,10 +329,9 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
                 start_date = '{}-{}-{}'.format(month.year, month.month, '01')
                 end_date = '{}-{}-{}'.format(month.year, month.month, days_in_month)
                 active_month = date(month.year, month.month, days_in_month)
-        print start_date
-        print end_date
         context['expenses'] = Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         context['incomes'] = Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
+        context['cash'] = Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
         context['active_month'] = active_month
         return context
 
@@ -793,6 +794,51 @@ class PayrollExpenseCreateView(ManagerMixin, CreateView):
         form.instance.date_paid = form.instance.date_payable
         response = super(PayrollExpenseCreateView, self).form_valid(form)
         return response
+
+
+class CashCreateView(ManagerMixin, CreateView):
+    form_class = CashCreateForm
+    model = Cash
+    template_name = 'accounting/base_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+
+    def get_context_data(self, *kwargs):
+        context = super(CashCreateView, self).get_context_data()
+        context['base_form_title'] = 'Cash Actual'
+        return context
+
+    def form_valid(self, form):
+        business_unit = BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+        year = int(self.kwargs['year'])
+        month = int(self.kwargs['month'])
+        days_in_month = monthrange(year, month)[1]
+        
+        date_associated = date(year, month, days_in_month)
+
+        form.instance.business_unit = business_unit
+        form.instance.predicted_amount = form.instance.actual_amount 
+        form.instance.reconciled = True
+        form.instance.name = 'Cash'
+        form.instance.date_associated = date_associated
+
+        response = super(CashCreateView, self).form_valid(form)
+        return response
+
+
+class CashUpdateView(ManagerMixin, CreateView):
+    form_class = CashUpdateForm
+    model = Cash
+    template_name = 'accounting/base_form.html'
+
+    def get_object(self):
+        return Cash.objects.get(pk=self.kwargs['cash'])
+
+    def get_context_data(self, *kwargs):
+        context = super(CashUpdateView, self).get_context_data()
+        context['base_form_title'] = 'Cash Actual'
+        return context
 
 
 def calculatePayrollProjectedAmount(current_business_unit):
