@@ -139,7 +139,7 @@ def application(labsite=None, foodapp=None, worklog=None, accounting=None):
         require.git.working_copy('git@github.com:ITNG/labsite.git', branch=branches['labsite'], clean=True)
 
     # install packages
-    require.python.virtualenv('venv')
+    require.python.virtualenv('venv', venv_python='python3')
     with python.virtualenv('venv'):
 
         require.python.packages([
@@ -232,7 +232,7 @@ def worker():
 @pipeline.requires(application)
 @user.masquerade('labuser')
 def database():
-    require.python.virtualenv('venv')
+    require.python.virtualenv('venv', venv_python='python3')
     with python.virtualenv('venv'), cd('labsite'):
         run('python manage.py migrate --noinput')
 

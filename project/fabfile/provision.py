@@ -56,6 +56,8 @@ def application():
 
     require.rpm.repository('epel')
     require.packages([
+        'python34',
+        'python34-devel',  # necessary for pyscopg2
         'nginx',
         'supervisor',
         'git',
@@ -72,7 +74,7 @@ def application():
 
         require.directory('backups')
 
-        require.python.virtualenv('venv')
+        require.python.virtualenv('venv', venv_python='python3')
 
         execute(config.application_secrets)
 
@@ -165,7 +167,7 @@ def devel():
 
     require.python.pip()
     require.python.package('virtualenv', use_sudo=True)
-    require.python.virtualenv('venv')
+    require.python.virtualenv('venv', venv_python='python3')
 
     with python.virtualenv('venv'), cd('labsite'):
         require.python.requirements('requirements.txt', upgrade=True)
