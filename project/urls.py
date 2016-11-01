@@ -2,7 +2,7 @@ from django.contrib.auth.views import login as auth_login, logout as auth_logout
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from views import HomepageView
+from project.views import HomepageView
 
 
 urlpatterns = [
