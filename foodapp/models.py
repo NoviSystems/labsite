@@ -153,8 +153,8 @@ class Item(models.Model):
     description = models.CharField(max_length=256)
     once_a_day = models.BooleanField(default=False)
 
-    def __unicode__(self):
-        return u'%s: %s' % (self.name, self.description,)
+    def __str__(self):
+        return '%s: %s' % (self.name, self.description,)
 
     class Meta:
         verbose_name = "Item"
@@ -206,23 +206,23 @@ class Order(models.Model):
         verbose_name_plural = "Orders"
         ordering = ["date"]
 
-    def __unicode__(self):
-        return u"%d %s(s) on %s." % (self.quantity, self.item.name, self.date)
+    def __str__(self):
+        return "%d %s(s) on %s." % (self.quantity, self.item.name, self.date)
 
 
 class RiceCooker(models.Model):
     is_on = models.BooleanField(default=False)
 
-    def __unicode__(self):
-        return u"%s." % (self.is_on)
+    def __str__(self):
+        return "%s." % (self.is_on)
 
 
 class MonthlyCost(models.Model):
     cost = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(default=date.today)
 
-    def __unicode__(self):
-        return u"$%3.2f on %s." % (self.cost, self.date)
+    def __str__(self):
+        return "$%3.2f on %s." % (self.cost, self.date)
 
 
 class AmountPaid(models.Model):
@@ -230,5 +230,5 @@ class AmountPaid(models.Model):
     date = models.DateField(default=date.today)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-    def __unicode__(self):
-        return u"$%3.2f by %s on %s" % (self.amount, self.user, self.date)
+    def __str__(self):
+        return "$%3.2f by %s on %s" % (self.amount, self.user, self.date)
