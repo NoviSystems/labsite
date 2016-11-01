@@ -1,6 +1,6 @@
 
 from datetime import date, datetime
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool as Pool
 
 from django.db import models
 from django.conf import settings
