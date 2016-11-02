@@ -6,21 +6,20 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 
-__all__ = ['BusinessUnit', 'UserTeamRole', 'LineItem', 'Contract', 'Income', 'Invoice', 'Personnel', 'FullTime', 'PartTime', 'Expense', 'Cash',]
 
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
     account_number = models.CharField(max_length=12, verbose_name='Account Number')
-    
-    def __unicode__(self):
+ 
+    def __str__(self):
         return self.name
 
 
 class UserTeamRole(models.Model):
-    ROLE_STATE = {
+    ROLE_STATE = (
         ('MANAGER', 'Manager'),
         ('VIEWER', 'Viewer'),
-    }
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User')
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
     role = models.CharField(max_length=12, choices=ROLE_STATE, verbose_name='Role')
@@ -28,8 +27,8 @@ class UserTeamRole(models.Model):
     class Meta:
         unique_together = ['user', 'business_unit']
 
-    def __unicode__(self):
-        return self.user.username + ' is a ' + self.role + ' of ' + self.business_unit.name
+    def __str__(self):
+        return '%s is a %s of %s' % (self.user.username, self.role, self.business_unit.name)
 
 
 class LineItem(models.Model):
@@ -59,15 +58,14 @@ class LineItem(models.Model):
 
 
 class Contract(models.Model):
-    CONTRACT_STATE = {
+    CONTRACT_STATE = (
         ('ACTIVE', 'Active'),
         ('COMPLETE', 'Complete'),
-    }
-    CONTRACT_TYPE = {
+    )
+    CONTRACT_TYPE = (
         ('FIXED', 'Fixed'),
         ('HOURLY', 'Hourly'),
-    }
-
+    )
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE, verbose_name='Business Unit')
     department = models.CharField(max_length=4, default='CSC', verbose_name='Department')
     contract_number = models.IntegerField(verbose_name='Contract Number')
@@ -85,12 +83,11 @@ class Income(LineItem):
 
 
 class Invoice(Income):
-    TRANSITION_STATE = {
+    TRANSITION_STATE = (
         ('INVOICED', 'Invoiced'),
         ('NOT_INVOICED', 'Not Invoiced'),
         ('RECEIVED', 'Received'),
-    }
-
+    )
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, verbose_name='Contract')
     number = models.IntegerField(verbose_name='Number')
     transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE, verbose_name='Transition State')
@@ -108,10 +105,10 @@ class Personnel(models.Model):
 
 
 class FullTime(Personnel):
-    SALARY_TYPE = {
+    SALARY_TYPE = (
         ('EPA', 'EPA'),
         ('SPA', 'SPA'),
-    }
+    )
     salary_type = models.CharField(max_length=3, choices=SALARY_TYPE, verbose_name='Salary Type')
     salary_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Salary')
     social_security_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Social Security Amount')
@@ -133,10 +130,10 @@ class PartTime(Personnel):
 
 
 class Expense(LineItem):
-    EXPENSE_TYPE = {
+    EXPENSE_TYPE = (
         ('GENERAL', 'General'),
         ('PAYROLL', 'Payroll')
-    }
+    )
     expense_type = models.CharField(max_length=7, choices=EXPENSE_TYPE, verbose_name='Expense Type')
     name = models.CharField(max_length=50, verbose_name='Name')
     date_payable = models.DateField(verbose_name='Date Payable')
@@ -146,16 +143,3 @@ class Expense(LineItem):
 class Cash(LineItem):
     name = models.CharField(max_length=50, verbose_name='Name')
     date_associated = models.DateField(verbose_name='Date Associated')
-
-
-# calculate month duration
-def monthdelta(d1, d2):
-    delta = 0
-    while True:
-        mdays = monthrange(d1.year, d1.month)[1]
-        d1 += timedelta(days=mdays)
-        if d1 <= d2:
-            delta += 1
-        else:
-            break
-    return delta
