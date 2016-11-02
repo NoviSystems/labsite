@@ -144,12 +144,12 @@ class DashboardView(ViewerMixin, TemplateView):
                     previous_month = date(previous_month.year - 1, 12, monthrange(previous_month.year - 1, 12)[1])
                 else:
                     previous_month = date(previous_month.year, previous_month.month - 1, monthrange(previous_month.year, previous_month.month - 1)[1])
-                last_cash = Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=('{}-{}-{}'.format(previous_month.year, previous_month.month, monthrange(previous_month.year, previous_month.month)[1]))).actual_amount
+                last_cash = models.Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=('{}-{}-{}'.format(previous_month.year, previous_month.month, monthrange(previous_month.year, previous_month.month)[1]))).actual_amount
             except ObjectDoesNotExist:
                 last_cash = cash_month_projected
 
             try:
-                cash_month_actual = Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=(end_date)).actual_amount
+                cash_month_actual = models.Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=(end_date)).actual_amount
                 cash_month_projected = last_cash
             except ObjectDoesNotExist:
                 cash_month_actual = Decimal('0.00')
@@ -271,7 +271,7 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
         context['expenses'] = models.Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         context['incomes'] = models.Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         try:
-            context['cash'] = Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
+            context['cash'] = models.Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
         except ObjectDoesNotExist:
             context['cash'] = None
         context['active_month'] = active_month
@@ -774,7 +774,7 @@ class CashUpdateView(ManagerMixin, UpdateView):
     template_name = 'accounting/base_form.html'
 
     def get_object(self):
-        return Cash.objects.get(pk=self.kwargs['cash'])
+        return models.Cash.objects.get(pk=self.kwargs['cash'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
