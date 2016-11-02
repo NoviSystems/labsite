@@ -86,7 +86,7 @@
                                 {% if expense.name != "Payroll" %}
                                 <form action="{% url 'accounting:delete_expense' business_unit=current_business_unit.pk expense=expense.pk%}" method="post">
                                     {% csrf_token %}
-                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{expense}}">Delete</a>
+                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{expense.name}}">Delete</a>
                                 </form>
                                 {% endif %}
                             </td>
@@ -132,7 +132,10 @@
                             {% if not is_viewer %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_income' business_unit=current_business_unit.pk income=income.pk %}>Update</a>
-                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_income' business_unit=current_business_unit.pk income=income.pk %}>Delete</a>
+                                <form action="{% url 'accounting:delete_income' business_unit=current_business_unit.pk income=income.pk %}" method="post">
+                                    {% csrf_token %}
+                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{income.name}}">Delete</a>
+                                </form>
                             </td>
                             {% endif %}
                     </tr>

@@ -54,7 +54,7 @@
                                         <a class="btn btn-primary" href={% url 'accounting:update_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}>Update</a>
                                         <form action="{% url 'accounting:delete_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}" method="post">
                                             {% csrf_token %}
-                                            <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{employee}}">Delete</a>
+                                            <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{employee.first_name}} {{employee.last_name}}">Delete</a>
                                         </form>
                                     </h4>
                                     {% endif %}
@@ -102,7 +102,7 @@
                                         <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk business_unit=current_business_unit.pk %}>Update</a>
                                         <form action="{% url 'accounting:delete_part_time' part_time=part_time.pk  business_unit=current_business_unit.pk %}" method="post">
                                             {% csrf_token %}
-                                            <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{}}">Delete</a>
+                                            <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{part_time.first_name}} {{part_time.last_name}}">Delete</a>
                                         </form>
                                     </h4>
                                     {% endif %}
