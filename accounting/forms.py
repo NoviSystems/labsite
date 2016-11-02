@@ -1,6 +1,7 @@
 from django.forms import ModelForm, BooleanField, ValidationError
 from django.core.exceptions import FieldDoesNotExist
-from models import *
+
+from accounting import models
 
 
 class BaseForm(ModelForm):
@@ -31,7 +32,7 @@ class BusinessUnitCreateForm(BaseForm, ModelForm):
         super(BusinessUnitCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = BusinessUnit
+        model = models.BusinessUnit
         fields = '__all__'
         exclude = [
             'user'
@@ -44,46 +45,10 @@ class BusinessUnitUpdateForm(BaseForm, ModelForm):
         super(BusinessUnitUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = BusinessUnit
+        model = models.BusinessUnit
         fields = '__all__'
         exclude = [
             'user'
-        ]
-
-
-class FiscalYearCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(FiscalYearCreateForm, self).__init__(*args, **kwargs)
-
-    def clean_end_date(self):
-        start_date = self.cleaned_data['start_date']
-        end_date = self.cleaned_data['end_date']
-        if end_date < start_date:
-            raise ValidationError('The End Date must be after the Start Date')
-        return end_date 
-
-    class Meta:
-        model = FiscalYear
-        fields = '__all__'
-        exclude = [
-            'business_unit',
-        ]
-        help_texts = {
-            'cash_amount': 'Current cash amount for Business Unit.',
-        }
-
-
-class FiscalYearUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(FiscalYearUpdateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = FiscalYear
-        fields = '__all__'
-        exclude = [
-            'business_unit'
         ]
 
 
@@ -93,7 +58,7 @@ class ContractCreateForm(BaseForm, ModelForm):
         super(ContractCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Contract
+        model = models.Contract
         fields = '__all__'
         exclude = [
             'department',
@@ -108,7 +73,7 @@ class ContractUpdateForm(BaseForm, ModelForm):
         super(ContractUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Contract
+        model = models.Contract
         fields = '__all__'
         exclude = [
             'business_unit'
@@ -123,7 +88,7 @@ class ExpenseCreateForm(BaseForm, ModelForm):
         super(ExpenseCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Expense
+        model = models.Expense
         fields = '__all__'
         exclude = [
             'actual_amount',
@@ -131,6 +96,7 @@ class ExpenseCreateForm(BaseForm, ModelForm):
             'month',
             'date_paid',
             'business_unit',
+            'expense_type',
         ]
         help_texts = {
             'date_payable': 'If this is today or a previous date, it will be entered as already paid',
@@ -143,12 +109,13 @@ class ExpenseUpdateForm(BaseForm, ModelForm):
         super(ExpenseUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Expense
+        model = models.Expense
         fields = '__all__'
         exclude = [
             'business_unit',
             'month',
             'reconciled',
+            'expense_type',
         ]
 
 
@@ -158,7 +125,7 @@ class InvoiceCreateForm(BaseForm, ModelForm):
         super(InvoiceCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Invoice
+        model = models.Invoice
         fields = [
             'predicted_amount',
             'date_payable',
@@ -171,35 +138,40 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
         super(InvoiceUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Invoice
+        model = models.Invoice
         fields = '__all__'
         exclude = [
+            'business_unit',
+            'name',
             'number',
             'contract',
             'reconciled',
         ]
+        help_texts = {
+            'transition_state': 'Invoices are marked reconciled when Actual Amount and Date Paid are filled and Tansition State is Recieved.'
+        }
 
 
-class SalaryCreateForm(BaseForm, ModelForm):
+class FullTimeCreateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(SalaryCreateForm, self).__init__(*args, **kwargs)
+        super(FullTimeCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Salary
+        model = models.FullTime
         fields = '__all__'
         exclude = [
             'business_unit'
         ]
 
 
-class SalaryUpdateForm(BaseForm, ModelForm):
+class FullTimeUpdateForm(BaseForm, ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(SalaryUpdateForm, self).__init__(*args, **kwargs)
+        super(FullTimeUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Salary
+        model = models.FullTime
         fields = '__all__'
         exclude = [
             'business_unit'
@@ -212,7 +184,7 @@ class PartTimeCreateForm(BaseForm, ModelForm):
         super(PartTimeCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = PartTime
+        model = models.PartTime
         fields = '__all__'
         exclude = [
             'business_unit',
@@ -226,7 +198,7 @@ class PartTimeUpdateForm(BaseForm, ModelForm):
         super(PartTimeUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = PartTime
+        model = models.PartTime
         fields = '__all__'
         exclude = [
             'business_unit',
@@ -242,7 +214,7 @@ class IncomeCreateForm(BaseForm, ModelForm):
         super(IncomeCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Income
+        model = models.Income
         fields = '__all__'
         exclude = [
             'actual_amount',
@@ -259,26 +231,9 @@ class IncomeUpdateForm(BaseForm, ModelForm):
         super(IncomeUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Income
+        model = models.Income
         fields = '__all__'
         exclude = [
-            'reconciled',
-        ]
-
-
-class CashUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(CashUpdateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = Cash
-        fields = '__all__'
-        exclude = [
-            'name',
-            'business_unit',
-            'month',
-            'predicted_amount',
             'reconciled',
         ]
 
@@ -289,7 +244,7 @@ class UserTeamRoleCreateForm(BaseForm, ModelForm):
         super(UserTeamRoleCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = UserTeamRole
+        model = models.UserTeamRole
         fields = '__all__'
         exclude = [
             'business_unit',
@@ -302,9 +257,51 @@ class UserTeamRoleUpdateForm(BaseForm, ModelForm):
         super(UserTeamRoleUpdateForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = UserTeamRole
+        model = models.UserTeamRole
         fields = '__all__'
         exclude = [
             'user',
             'business_unit',
+        ]
+
+
+class PayrollExpenseCreateForm(BaseForm, ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(PayrollExpenseCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = models.Expense
+        fields = '__all__'
+        exclude = [
+            'predicted_amount',
+            'name',
+            'reconciled',
+            'month',
+            'date_paid',
+            'business_unit',
+            'expense_type',
+            'recurring',
+        ]
+
+
+class CashCreateForm(BaseForm, ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CashCreateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = models.Cash
+        fields = [
+            'actual_amount',
+        ]
+
+
+class CashUpdateForm(BaseForm, ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CashUpdateForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = models.Cash
+        fields = [
+            'actual_amount',
         ]

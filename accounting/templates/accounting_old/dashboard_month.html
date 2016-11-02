@@ -1,0 +1,214 @@
+{% extends "accounting/dashboard.html" %}
+
+{% load staticfiles %}
+
+{% block breakdown %}
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div id="workTab" class="tabbable">
+			<div class="col-xs-0 col-sm-3">
+	    			<ul class= "nav nav-pills nav-stacked nav-tabs">
+			            <li class="active"><a data-toggle="tab" href="#cash" aria-expanded="true">Cash</a></li>
+			            <li><a data-toggle="tab" href="#expenses" aria-expanded="true">Expenses</a></li>
+			            <li><a data-toggle="tab" href="#receivables" aria-expanded="true">Receivables</a></li>
+			            <li><a data-toggle="tab" href="#payroll" aria-expanded="true">Payroll</a></li>
+			            <li><a data-toggle="tab" href="#assets" aria-expanded="true">Assets</a></li>
+			        </ul>	
+	 		</div>
+	 		<div class="col-xs-0 col-sm-9">
+		 		<div class= "tab-content" >
+		 			<!-- cash tab -->
+		    		<div id="cash" class="tab-pane active">
+				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Cash Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_cmpr }}</h4></div>
+			    			<div class="col-xs-0 col-sm-4"><h4><b>Cash Actual:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_cma }}</h4></div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                    <tr>
+					                        <th scope="row">+ Previous Month Cash</th>
+					                            <td>${{ month_cmpr_pre }}</td>
+					                    </tr>
+					                    <tr>
+					                        <th scope="row">+ Income Projected</th>
+					                            <td>${{ month_imp }}</td>
+					                    </tr>
+					                    <tr>
+					                        <th scope="row">- Expenses Projected</th>
+					                            <td>${{ month_emp }}</td>
+					                    </tr>
+					                    <tr>
+					                        <th scope="row">- Payroll</th>
+					                            <td>${{ month_pmp }}</td>
+					                    </tr>
+					                </tbody>
+					            </table>
+				            </div>
+						</div>
+		    		</div>
+		    		<!-- expenses tab -->
+		    		<div id="expenses" class="tab-pane ">
+				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Expenses Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_emp }}</h4></div>
+			    			<div class="col-xs-0 col-sm-4"><h4><b>Expenses Actual:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_ema }}</h4></div>
+						</div>
+						 <div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                	{% for expense in expenses %}
+					                    <tr>
+					                        <th scope="row">+ {{expense.name}}</th>
+					                            <td>${{expense.predicted_amount}}</td>
+					                    </tr>
+					                    {% endfor %}
+					                </tbody>
+					            </table>
+							</div>
+						</div>
+		    		</div>
+		    		<!-- receivables tab -->
+		    		<div id="receivables" class="tab-pane ">
+				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Receivables Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_imp }}</h4></div>
+			    			<div class="col-xs-0 col-sm-4"><h4><b>Receivables Actual:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_ima }}</h4></div>
+						</div>
+						<div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+					                	{% for income in income %}
+					                    <tr>
+					                        <th scope="row">+ {{income.name}}</th>
+					                            <td>${{imp}}</td>
+					                    </tr>
+					                    {% endfor %}
+					                </tbody>
+					            </table>
+							</div>
+						</div>
+		    		</div>
+		    		<!-- payroll tab -->
+		    		<div id="payroll" class="tab-pane ">
+				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Payroll Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_pmp }}</h4></div>
+							<div id="custom">
+			    				<div class="col-xs-0 col-sm-4"><h4><b>Payroll Actual:</b></h4></div>
+								<div class="col-xs-0 col-sm-2"><h4>${{ month_pma }}</h4></div>
+							</div>
+						</div>
+						<br>
+						<div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Salary Totals</h4></th>
+					                    </tr>
+					                </thead>
+
+					                <tbody>
+						                <tr>
+						                	<th scope="row">+ Social Security</th>
+						                            <td>${{ssa}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Federal Health Insurance</th>
+						                            <td>${{fhit}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Retirement</th>
+						                            <td>${{rt}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Medical Insurance</th>
+						                            <td>${{mit}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Staff Benefits</th>
+						                            <td>${{sbt}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Fringe</th>
+						                            <td>${{ft}}</td>
+						                </tr>
+					                </tbody>
+					            </table>
+							</div>
+							<div class="col-xs-0 col-sm-4">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Part Time Totals</h4></th>
+					                    </tr>
+					                </thead>
+
+					                <tbody>
+						                <tr>
+						                	<th scope="row">+ Total Hours</th>
+						                            <td>{{ptht}}</td>
+						                </tr>
+						                <tr>
+						                	<th scope="row">+ Total Amount</th>
+						                            <td>${{ptt}}</td>
+						                </tr>
+					                </tbody>
+					            </table>
+							</div>
+						</div>
+		    		</div>
+		    		<!-- assets tab -->
+		    		<div id="assets" class="tab-pane ">
+				        <div class = "row">
+				        	<div class="col-xs-0 col-sm-4"><h4><b>Assets Projected:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_tamp }}</h4></div>
+			    			<div class="col-xs-0 col-sm-4"><h4><b>Assets Actual:</b></h4></div>
+							<div class="col-xs-0 col-sm-2"><h4>${{ month_tama }}</h4></div>
+						</div>
+						<div class = "row">
+						 	<div class="col-xs-0 col-sm-6">
+								<table class="table">
+					                <thead>
+					                    <tr>
+					                        <th><h4>Breakdown</h4></th>
+					                    </tr>
+					                </thead>
+					                <tbody>
+
+					                </tbody>
+					            </table>
+							</div>
+						</div>
+		    		</div>
+
+		    	</div>
+	 		</div>
+ 		</div>
+	</div><!--/row-->
+</div><!--/.fluid-container-->
+{% endblock %}

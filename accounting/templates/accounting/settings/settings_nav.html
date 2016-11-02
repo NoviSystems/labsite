@@ -1,0 +1,4 @@
+<ul id="settings-nav" class="nav nav-sidebar">
+    <li {% if active == "business_unit" %}class="active"{% endif %}><a href={% url 'accounting:business_unit_settings' business_unit=current_business_unit.pk %}>Business Unit</a></li>
+    <li {% if active == "user_team_roles" %}class="active"{% endif %}><a href={% url 'accounting:user_team_roles_settings' business_unit=current_business_unit.pk %}>User Team Roles</a></li>
+</ul>

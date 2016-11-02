@@ -1,0 +1,49 @@
+{% extends "accounting/settings.html" %}
+
+{% load staticfiles %}
+
+{% block settings_nav %}
+    {% include "accounting/settings/settings_nav.html" with active="user_team_roles" %}
+{% endblock %}
+
+{% block settings_content %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">User Team Role</h3>
+    </div>
+    <div class="panel-body">
+        <a class="btn btn-primary" href={% url 'accounting:create_user_team_role' business_unit=current_business_unit.pk %}>Create New User Team Role</a>
+
+        <h3>Managers</h3>
+        <hr>
+        <ul class="list-group">
+        {% for manager in managers %}
+            <li class="list-group-item model-display">
+                {{ manager.user.username }} - 
+                <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Update</a> | 
+                <form action="{% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}" method="post">
+                    {% csrf_token %}
+                    <a data-toggle="modal" data-target="#baseDeleteModal" data-model="{{manager}}">Delete</a>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h3>Viewers</h3>
+        <hr>
+        <ul class="list-group">
+        {% for viewer in viewers %}
+            <li class="list-group-item model-display">
+                {{ viewer.user.username }} - 
+                <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Update</a> | 
+                <form action="{% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}" method="post">
+                    {% csrf_token %}
+                    <a data-toggle="modal" data-target="#baseDeleteModal" data-model="{{viewer}}">Delete</a>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

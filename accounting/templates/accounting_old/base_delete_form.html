@@ -8,18 +8,16 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}" />
-<script src="{% static 'js/datepicker.js' %}"></script>
-
 
 <div class="panel panel-default">
   <div class="panel-body">
-      <h3 class="form-header">{% if object %} Update {% else %} Create {% endif %} {% if base_form_title %} {{ base_form_title }} {% else %} {{ form.instance | get_form_model_name }}{% endif %}</h3>
+      <h3 class="form-header">Delete</h3>
+        
         <form class="form" method="POST" action="">
                 {% csrf_token %}
                 {% for field in form %}
+
                 	<div class="form-group {% if field.errors %}has-error{% endif %}">
                 		<label for="{{ field.id_for_label }}">{{field.label | title}}</label>
                 		
@@ -36,7 +34,7 @@
         			{% endif %}
                 	</div>
                 {% endfor %}
-            <button class="btn btn-default" type="submit">{% if object %} Update {% else %} Create {% endif %} {{ form.instance | get_form_model_name }}</button>
+            <button class="btn btn-default" type="submit">Delete</button>
         </form>  </div>
 </div>
 {% endblock %}

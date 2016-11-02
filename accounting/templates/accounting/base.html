@@ -1,49 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}
-    Accounting 
-{% endblock %}
-
+{% block title %}Accounting{% endblock %}
 
 {% load staticfiles %}
 
 {% block scripts %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
     <script src="{% static 'js/delete.js' %}"></script>
-{% endblock %}
 
+    {% include "accounting/base_delete_modal.html" %}
+    <script src="{% static 'js/formModalPopulate.js' %}"></script>
+{% endblock %}
 
 {% block nav-links-left %}
     <ul class="nav navbar-nav">
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current.name|default:"Select Business" }} <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    {% for business_unit in business_units %}
-                        {% if business_unit.name != current.name %}
-                            <li><a href={% url 'accounting:dashboard' business_unit=business_unit.pk %}>{{ business_unit.name }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if business_units|length == 1 and not current.name %}<li class="divider"></li>{% endif %}
-                    {% if business_units|length > 1 %}<li class="divider"></li>{% endif %}
-                    <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
-                </ul>
-            </li>
-    
-        {% if fiscal_years %}
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_fiscal_year }} <span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    {% for fiscal_year in fiscal_years %}
-                        <li><a href={% url 'accounting:dashboard' business_unit=current.pk fiscal_year=fiscal_year.pk %}>{{fiscal_year}}</a></li>
-                    {% endfor %}
-
-                    {% if not is_viewer %}
-                        <li class="divider"></li>
-                        <li><a href={% url 'accounting:create_fiscal_year' business_unit=current.pk %}>Create Fiscal Year</a></li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_business_unit.name|default:"Select Business" }} <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                {% for business_unit in business_units %}
+                    {% if business_unit.name != current_business_unit.name %}
+                        {{ current_business_unit }}
+                        <li><a href={% url 'accounting:dashboard' business_unit=business_unit.pk %}>{{ business_unit.name }}</a></li>
                     {% endif %}
-                </ul>
-            </li>
-        {% endif %}
+                {% endfor %}
+                {% if business_units|length == 1 and not current_business_unit.name %}<li class="divider"></li>{% endif %}
+                {% if business_units|length > 1 %}<li class="divider"></li>{% endif %}
+                <li><a href={% url 'accounting:create_business_unit' %}>Create Business Unit</a></li>
+            </ul>
+        </li>
     </ul>
 {% endblock %}
 
