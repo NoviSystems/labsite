@@ -22,7 +22,10 @@
             <li class="list-group-item model-display">
                 {{ manager.user.username }} - 
                 <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Update</a> | 
-                <a href={% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Delete</a>
+                <form action="{% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}" method="post">
+                    {% csrf_token %}
+                    <a data-toggle="modal" data-target="#baseDeleteModal" data-model="{{manager}}">Delete</a>
+                </form>
             </li>
             {% endfor %}
         </ul>
@@ -34,7 +37,10 @@
             <li class="list-group-item model-display">
                 {{ viewer.user.username }} - 
                 <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Update</a> | 
-                <a class="btn-delete" href={% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Delete</a>
+                <form action="{% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}" method="post">
+                    {% csrf_token %}
+                    <a data-toggle="modal" data-target="#baseDeleteModal" data-model="{{viewer}}">Delete</a>
+                </form>
             </li>
         {% endfor %}
         </ul>

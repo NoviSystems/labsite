@@ -84,7 +84,10 @@
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_expense' business_unit=current_business_unit.pk expense=expense.pk %}>Update</a>
                                 {% if expense.name != "Payroll" %}
-                                <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_expense' business_unit=current_business_unit.pk expense=expense.pk%}>Delete</a>
+                                <form action="{% url 'accounting:delete_expense' business_unit=current_business_unit.pk expense=expense.pk%}" method="post">
+                                    {% csrf_token %}
+                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{expense}}">Delete</a>
+                                </form>
                                 {% endif %}
                             </td>
                             {% endif %}

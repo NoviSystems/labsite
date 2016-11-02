@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <div id="collapse{{ employee.pk }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ employee.pk }}">
+                        <div id="collapse{{ employee.pk }}" class="panel-collapse collapse model-display" role="tabpanel" aria-labelledby="heading{{ employee.pk }}">
                             <div class="row">
                                 <div class="col-md-4">  
                                     <h5>Position: {{ employee.position }}</h5>
@@ -52,7 +52,10 @@
                                     {% if not is_viewer %}
                                     <h4>
                                         <a class="btn btn-primary" href={% url 'accounting:update_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}>Update</a>
-                                        <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}>Delete</a>
+                                        <form action="{% url 'accounting:delete_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}" method="post">
+                                            {% csrf_token %}
+                                            <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{employee}}">Delete</a>
+                                        </form>
                                     </h4>
                                     {% endif %}
                                 </div>
@@ -82,7 +85,7 @@
                                 </a>
                             </div>
                         </div>
-                        <div id="collapse{{part_time.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{part_time.pk}}">
+                        <div id="collapse{{part_time.pk}}" class="panel-collapse collapse model-display" role="tabpanel" aria-labelledby="heading{{part_time.pk}}">
                             <div class="row">
                                 <div class="col-md-4">
                                     <h5>Position: {{ part_time.position }}</5> 
@@ -97,7 +100,10 @@
                                     {% if not is_viewer %}
                                     <h4>
                                         <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk business_unit=current_business_unit.pk %}>Update</a>
-                                        <a class="btn btn-primary btn-delete" href={% url 'accounting:delete_part_time' part_time=part_time.pk  business_unit=current_business_unit.pk %}>Delete</a>
+                                        <form action="{% url 'accounting:delete_part_time' part_time=part_time.pk  business_unit=current_business_unit.pk %}" method="post">
+                                            {% csrf_token %}
+                                            <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{}}">Delete</a>
+                                        </form>
                                     </h4>
                                     {% endif %}
                                 </div>

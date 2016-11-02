@@ -7,6 +7,9 @@
 {% block scripts %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
     <script src="{% static 'js/delete.js' %}"></script>
+
+    {% include "accounting/base_delete_modal.html" %}
+    <script src="{% static 'js/formModalPopulate.js' %}"></script>
 {% endblock %}
 
 {% block nav-links-left %}

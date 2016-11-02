@@ -22,7 +22,7 @@
         <p>
             <form action="{% url 'accounting:delete_business_unit' business_unit=current_business_unit.pk %}" method="post">
                 {% csrf_token %}
-                <button class="btn btn-danger" type="submit">Delete {{current_business_unit.name}}</button>
+                <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{current_business_unit}}">Delete {{current_business_unit.name}}</a>
             </form>
         </p>
     </div>
