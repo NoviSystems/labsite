@@ -126,7 +126,7 @@ class DashboardView(ViewerMixin, TemplateView):
         months = [month for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
         month_names = []
 
-        cash_month_actual = Decimal('0.00')
+        last_cash = Decimal('0.00')
         cash_month_projected = Decimal('0.00')
         payroll_month_projected = calculatePayrollProjectedAmount(self.current_business_unit)
 
@@ -137,6 +137,23 @@ class DashboardView(ViewerMixin, TemplateView):
 
             month_name = month.strftime("%B") 
             month_names.append(month_name)
+
+            try:
+                previous_month = month
+                if previous_month.month == 1:
+                    previous_month = date(previous_month.year - 1, 12, monthrange(previous_month.year - 1, 12)[1])
+                else:
+                    previous_month = date(previous_month.year, previous_month.month - 1, monthrange(previous_month.year, previous_month.month - 1)[1])
+                last_cash = Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=('{}-{}-{}'.format(previous_month.year, previous_month.month , monthrange(previous_month.year, previous_month.month)[1]))).actual_amount
+            except ObjectDoesNotExist:
+                last_cash = cash_month_projected
+
+            try:
+                cash_month_actual = Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=(end_date)).actual_amount    
+                cash_month_projected = last_cash
+            except ObjectDoesNotExist:
+                cash_month_actual = Decimal('0.00')
+                cash_month_projected = last_cash
 
             payroll_month_actual = Decimal('0.00')
             pma['values'][month_name] = payroll_month_actual
@@ -163,24 +180,20 @@ class DashboardView(ViewerMixin, TemplateView):
             ima['values'][month_name] = income_month_actual
             imp['values'][month_name] = income_month_projected
 
-            # cash_month_actual +=  (income_month_actual - expenses_month_actual)
             cash_month_projected += (income_month_projected - expenses_month_projected)
             cmpr['values'][month_name] = cash_month_projected
             cma['values'][month_name] = cash_month_actual
 
             income_booked_projected = Decimal('0.00')
             for value in imp['values'].values():
-                print value
                 income_booked_projected += value
             total_assets_month_projected = cash_month_projected + income_booked_projected
-            print 'tamp: ' + str(total_assets_month_projected)
             tamp['values'][month_name] = total_assets_month_projected
 
             income_booked_actual = Decimal('0.00')
             for value in ima['values'].values():
                 income_booked_actual += value
             total_assets_month_actual = cash_month_actual
-            print 'tama: ' + str(total_assets_month_actual)
             tama['values'][month_name] = total_assets_month_actual
 
         dashboard_data = [cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp]
@@ -331,8 +344,10 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
                 active_month = date(month.year, month.month, days_in_month)
         context['expenses'] = Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         context['incomes'] = Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
-        context['cash'] = Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
-        print context['cash'].pk
+        try:
+            context['cash'] = Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
+        except ObjectDoesNotExist:
+            context['cash'] = None
         context['active_month'] = active_month
         return context
 
