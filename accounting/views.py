@@ -43,8 +43,8 @@ class SetUpMixin(object):
     def dispatch(self, request, *args, **kwargs):
         self.current_business_unit = models.BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.now = date.today()
-        self.start_year = date(self.now.year, 07, 1)
-        self.end_year = date(self.now.year+1, 06, 30)
+        self.start_year = date(self.now.year, 7, 1)
+        self.end_year = date(self.now.year+1, 6, 30)
 
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
@@ -57,8 +57,8 @@ class SetUpMixin(object):
         context['current_business_unit'] = self.current_business_unit
 
         if 'start_year' in self.kwargs and 'end_year' in self.kwargs:
-            self.start_year = date(int(self.kwargs['start_year']), 07, 01)
-            self.end_year = date(int(self.kwargs['end_year']), 06, 30)
+            self.start_year = date(int(self.kwargs['start_year']), 7, 1)
+            self.end_year = date(int(self.kwargs['end_year']), 6, 30)
 
         context['start_year'] = self.start_year.year
         context['end_year'] = self.end_year.year
@@ -455,9 +455,9 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                 date_payable = form.instance.date_payable
                 until_date = None
                 if int(date_payable.month) <= 6:
-                    until_date = date(date_payable.year, 06, 30)
+                    until_date = date(date_payable.year, 6, 30)
                 else:
-                    until_date = date(date_payable.year+1, 06, 30)
+                    until_date = date(date_payable.year+1, 6, 30)
 
                 monthly_expense_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=date_payable, until=until_date)]
                 for expense_date in monthly_expense_dates:
@@ -516,7 +516,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
         form.instance.business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
         try:
             if self.request.POST['recurring']:
-                monthly_income_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=form.instance.date_payable, until=date(2017, 06, 30))]
+                monthly_income_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=form.instance.date_payable, until=date(2017, 6, 30))]
                 for income_date in monthly_income_dates:
                     income = models.Income(
                         business_unit=form.instance.business_unit,
