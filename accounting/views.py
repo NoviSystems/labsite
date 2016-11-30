@@ -197,7 +197,7 @@ class DashboardView(ViewerMixin, TemplateView):
             total_assets_month_actual = cash_month_actual
             tama['values'][month_name] = total_assets_month_actual
 
-        dashboard_data = [cma, cmpr, ema, emp, ima, imp, pma, pmp, tama, tamp]
+        dashboard_data = [cma, cmpr, ima, imp, pma, pmp,ema, emp, tama, tamp]
         context['month_names'] = month_names
         context['predicted_totals'] = json.dumps([float(cmpr['values'][month_name]) for month_name in month_names])
         context['actual_totals'] = json.dumps([float(cma['values'][month_name]) for month_name in month_names])
