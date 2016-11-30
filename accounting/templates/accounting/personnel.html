@@ -16,7 +16,7 @@
             <div id="full-time" class="tab-pane active">
                 </br>
                 {% if not full_time %}
-                    <h4>No part time personnel for this business unit.</h4>
+                    <h4>No full time personnel for this business unit.</h4>
                 {% endif %}
                 {% if not is_viewer %}
                     <a class="btn btn-primary" href={% url 'accounting:create_full_time' business_unit=current_business_unit.pk %}>Create Full Time Employee</a>
