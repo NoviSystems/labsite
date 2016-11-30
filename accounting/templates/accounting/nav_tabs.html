@@ -1,7 +1,7 @@
 <ul class="nav nav-tabs">
     <li {% if active == "dashboard" %}class="active"{% endif %}><a href={% url 'accounting:dashboard' business_unit=current_business_unit.pk %}>Dashboard</a></li>
     <li {% if active == "contracts" %}class="active"{% endif %}><a href={% url 'accounting:contracts' business_unit=current_business_unit.pk %}>Contracts</a></li>
-    <li {% if active == "expenses" %}class="active"{% endif %}><a href={% url 'accounting:expenses' business_unit=current_business_unit.pk %}>Expenses</a></li>
+    <li {% if active == "reconcile" %}class="active"{% endif %}><a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk %}>Monthly Reconcile</a></li>
     <li {% if active == "revenue" %}class="active"{% endif %}><a href={% url 'accounting:revenue' business_unit=current_business_unit.pk %}>Revenue</a></li>
     <li {% if active == "personnel" %}class="active"{% endif %}><a href={% url 'accounting:personnel' business_unit=current_business_unit.pk %}>Personnel</a></li>
     <li {% if active == "prospects" %}class="active"{% endif %}><a href="">Prospects</a></li> 

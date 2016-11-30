@@ -5,10 +5,10 @@
               <a class="btn btn-default" href={% url 'accounting:dashboard' business_unit=current_business_unit.pk start_year=start_year|add:"-1" end_year=end_year|add:"-1" %}><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
               <a class="btn btn-default" href={% url 'accounting:dashboard' business_unit=current_business_unit.pk %}>Current</a>
               <a class="btn btn-default"  href={% url 'accounting:dashboard' business_unit=current_business_unit.pk start_year=start_year|add:"1" end_year=end_year|add:"1" %}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
-            {% elif active == "expenses"%}
-              <a class="btn btn-default" href={% url 'accounting:expenses' business_unit=current_business_unit.pk start_year=start_year|add:"-1" end_year=end_year|add:"-1" %}><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
-              <a class="btn btn-default" href={% url 'accounting:expenses' business_unit=current_business_unit.pk %}>Current</a>
-              <a class="btn btn-default"  href={% url 'accounting:expenses' business_unit=current_business_unit.pk start_year=start_year|add:"1" end_year=end_year|add:"1" %}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+            {% elif active == "reconcile"%}
+              <a class="btn btn-default" href={% url 'accounting:reconcile' business_unit=current_business_unit.pk start_year=start_year|add:"-1" end_year=end_year|add:"-1" %}><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+              <a class="btn btn-default" href={% url 'accounting:reconcile' business_unit=current_business_unit.pk %}>Current</a>
+              <a class="btn btn-default"  href={% url 'accounting:reconcile' business_unit=current_business_unit.pk start_year=start_year|add:"1" end_year=end_year|add:"1" %}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
             {% endif %}
         </div>
     </div>

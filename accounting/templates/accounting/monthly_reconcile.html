@@ -4,9 +4,9 @@
 
 {% block content %}
 
-    {% include "accounting/nav_tabs.html" with active="expenses" %}
+    {% include "accounting/nav_tabs.html" with active="reconcile" %}
     
-    {% include "accounting/year_picker.html" with active="expenses" %}
+    {% include "accounting/year_picker.html" with active="reconcile" %}
 
     <div class="container">
         <div class="row">
@@ -17,9 +17,9 @@
                         {% for month in months %}
                             <li class="text-right">
                             {% if start_year and end_year %}
-                            <a href={% url 'accounting:expenses' business_unit=current_business_unit.pk month=month.month start_year=start_year end_year=end_year %}>{{month|date:"F Y" }}</a>
+                            <a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk month=month.month start_year=start_year end_year=end_year %}>{{month|date:"F Y" }}</a>
                             {% else %}
-                            <a href={% url 'accounting:expenses' business_unit=current_business_unit.pk month=month.month %}>{{month|date:"F Y" }}</a>
+                            <a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk month=month.month %}>{{month|date:"F Y" }}</a>
                             {% endif %}
 
                             </li>
@@ -58,7 +58,7 @@
                     {% if not is_viewer %}
                         <a class="btn btn-primary" href={% url 'accounting:create_expense' business_unit=current_business_unit.pk %}>Create Expense</a>
                         {% if not payroll %}
-                            <a class="btn btn-primary" href={% url 'accounting:create_payroll_expense' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Create Payroll Expense</a>
+                            <a class="btn btn-primary" href={% url 'accounting:create_payroll_expense' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Create Payroll Actual</a>
                         {% endif %}    
                     {% endif %}
             </div>

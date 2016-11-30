@@ -245,11 +245,11 @@ class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
         return context
 
 
-class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
-    template_name = 'accounting/expenses.html'
+class MonthlyReconcileView(ViewerMixin, SetUpMixin, TemplateView):
+    template_name = 'accounting/monthly_reconcile.html'
 
     def get_context_data(self, **kwargs):
-        context = super(ExpensesView, self).get_context_data()
+        context = super(MonthlyReconcileView, self).get_context_data()
         months = []
         [months.append(month) for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
         context['months'] = months
@@ -449,7 +449,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def form_valid(self, form):
         business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -476,7 +476,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                         expense.date_paid = expense_date
                         expense.actual_amount = form.instance.predicted_amount
                     expense.save()
-                return redirect('accounting:expenses', pk=self.kwargs['pk'])
+                return redirect('accounting:reconcile', pk=self.kwargs['pk'])
         except KeyError:
             if form.instance.date_payable < self.now:
                 form.instance.date_paid = form.instance.date_payable
@@ -494,7 +494,7 @@ class ExpenseDeleteView(ManagerMixin, DeleteView):
         return models.Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class ExpenseUpdateView(ManagerMixin, UpdateView):
@@ -506,7 +506,7 @@ class ExpenseUpdateView(ManagerMixin, UpdateView):
         return models.Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class IncomeCreateView(ManagerMixin, CreateView):
@@ -515,7 +515,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def form_valid(self, form):
         form.instance.business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -550,7 +550,7 @@ class IncomeDeleteView(ManagerMixin, DeleteView):
         return models.Income.objects.get(pk=self.kwargs['income'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class IncomeUpdateView(ManagerMixin, UpdateView):
@@ -562,7 +562,7 @@ class IncomeUpdateView(ManagerMixin, UpdateView):
         return models.Income.objects.get(pk=self.kwargs['income'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class PersonnelView(ViewerMixin, TemplateView):
@@ -728,7 +728,7 @@ class PayrollExpenseCreateView(ManagerMixin, CreateView):
         return models.Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def form_valid(self, form):
         business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -748,7 +748,7 @@ class CashCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def get_context_data(self, *kwargs):
         context = super(CashCreateView, self).get_context_data()
@@ -782,7 +782,7 @@ class CashUpdateView(ManagerMixin, UpdateView):
         return models.Cash.objects.get(pk=self.kwargs['cash'])
 
     def get_success_url(self):
-        return reverse_lazy('accounting:expenses', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def get_context_data(self, *kwargs):
         context = super(CashUpdateView, self).get_context_data()
