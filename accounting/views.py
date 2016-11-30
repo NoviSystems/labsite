@@ -269,7 +269,11 @@ class ExpensesView(ViewerMixin, SetUpMixin, TemplateView):
                 start_date = '{}-{}-{}'.format(month.year, month.month, '01')
                 end_date = '{}-{}-{}'.format(month.year, month.month, days_in_month)
                 active_month = date(month.year, month.month, days_in_month)
-        context['expenses'] = models.Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
+        try:
+            context['payroll'] = models.Expense.objects.get(business_unit=self.current_business_unit, expense_type='PAYROLL', date_payable__range=[start_date, end_date])
+        except models.Expense.DoesNotExist:
+            context['payroll'] = None
+        context['expenses'] = models.Expense.objects.filter(business_unit=self.current_business_unit, expense_type='GENERAL', date_payable__range=[start_date, end_date])
         context['incomes'] = models.Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
         try:
             context['cash'] = models.Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
