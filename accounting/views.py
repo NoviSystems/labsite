@@ -5,7 +5,7 @@ from calendar import monthrange, month_name
 from decimal import Decimal
 
 from django.shortcuts import redirect
-from django.db.models import Max
+from django.db.models import Max, Sum
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -155,18 +155,19 @@ class DashboardView(ViewerMixin, TemplateView):
                 cash_month_actual = Decimal('0.00')
                 cash_month_projected = last_cash
 
-            payroll_month_actual = Decimal('0.00')
+            payroll_month_actual = models.Expense.objects.filter(expense_type='PAYROLL', reconciled=True, business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]).aggregate(Sum('actual_amount'))['actual_amount__sum']
+            if payroll_month_actual is None:
+                payroll_month_actual = Decimal('0.00')
             pma['values'][month_name] = payroll_month_actual
             pmp['values'][month_name] = payroll_month_projected
 
             expenses_month_actual = Decimal('0.00')
             expenses_month_projected = Decimal('0.00')
-            for expense in models.Expense.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
+            for expense in models.Expense.objects.filter(expense_type='GENERAL', business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
                 if expense.reconciled:
                     expenses_month_actual += expense.actual_amount
                 else:
                     expenses_month_projected += expense.predicted_amount
-            expenses_month_projected += payroll_month_projected
             ema['values'][month_name] = expenses_month_actual
             emp['values'][month_name] = expenses_month_projected
 
@@ -180,7 +181,7 @@ class DashboardView(ViewerMixin, TemplateView):
             ima['values'][month_name] = income_month_actual
             imp['values'][month_name] = income_month_projected
 
-            cash_month_projected += (income_month_projected - expenses_month_projected)
+            cash_month_projected += (income_month_projected - expenses_month_projected - payroll_month_projected)
             cmpr['values'][month_name] = cash_month_projected
             cma['values'][month_name] = cash_month_actual
 
@@ -730,7 +731,7 @@ class PayrollExpenseCreateView(ManagerMixin, CreateView):
         form.instance.business_unit = business_unit
         form.instance.predicted_amount = form.instance.actual_amount
         form.instance.reconciled = True
-        form.instance.expense_type = 'GENERAL'
+        form.instance.expense_type = 'PAYROLL'
         form.instance.name = 'Payroll'
         form.instance.date_paid = form.instance.date_payable
         response = super(PayrollExpenseCreateView, self).form_valid(form)
