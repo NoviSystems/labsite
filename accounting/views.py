@@ -408,7 +408,20 @@ class InvoiceCreateView(ManagerMixin, CreateView):
         contract_number = contract_number.zfill(4)
         form.instance.name = form.instance.contract.department + contract_number + '-' + str(form.instance.number)
 
-        response = super(InvoiceCreateView, self).form_valid(form)
+        invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
+        if invoices_sum is None:
+            invoices_sum = Decimal('0.00')
+        available_amount = contract.amount - invoices_sum
+        if form.instance.predicted_amount <= available_amount:
+            response = super(InvoiceCreateView, self).form_valid(form)
+            return response
+        else:
+            error_message = 'Predicted amount must be less than or equal to {}'.format(available_amount)
+            if available_amount == Decimal('0.00'):
+                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
+            form.add_error('predicted_amount', error_message )
+            return self.form_invalid(form)
+
         return response
 
 
