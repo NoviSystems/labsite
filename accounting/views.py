@@ -453,7 +453,36 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
         else:
             form.instance.reconciled = False
         response = super(InvoiceUpdateView, self).form_valid(form)
-        return response
+
+        contract = models.Contract.objects.get(pk=self.kwargs['contract'])
+        
+        predicted_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
+        actual_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('actual_amount'))['actual_amount__sum']
+        
+        if predicted_invoices_sum is None or actual_invoices_sum is None:
+            predicted_invoices_sum = Decimal('0.00')
+            actual_invoices_sum = Decimal('0.00')
+        
+        predicted_available_amount = contract.amount - predicted_invoices_sum + self.object.predicted_amount
+        actual_available_amount = contract.amount - actual_invoices_sum + self.object.actual_amount
+
+        if form.instance.predicted_amount > predicted_available_amount:
+            error_message = 'Predicted amount must be less than or equal to {}'.format(predicted_available_amount)
+            if predicted_available_amount == Decimal('0.00'):
+                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
+            form.add_error('predicted_amount', error_message )
+
+        if form.instance.actual_amount > actual_available_amount:
+            error_message = 'Actual amount must be less than or equal to {}'.format(actual_available_amount)
+            if actual_available_amount == Decimal('0.00'):
+                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
+            form.add_error('actual_amount', error_message )
+
+        elif form.instance.predicted_amount <= predicted_available_amount and form.instance.actual_amount <= actual_available_amount:
+            response = super(InvoiceUpdateView, self).form_valid(form)
+            return response
+
+        return self.form_invalid(form)
 
 
 class ExpenseCreateView(ManagerMixin, CreateView):
