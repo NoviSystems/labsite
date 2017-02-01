@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64, verbose_name='Name')
     account_number = models.CharField(max_length=12, verbose_name='Account Number')
- 
+
     def __str__(self):
         return self.name
 
@@ -120,10 +120,10 @@ class FullTime(Personnel):
 
 
 class PartTime(Personnel):
-    HOURLY_TYPE = {
+    HOURLY_TYPE = (
         ('STUDENT', 'Student'),
-        ('NON_STUDENT', 'Non-Student')
-    }
+        ('NON_STUDENT', 'Non-Student'),
+    )
     hourly_type = models.CharField(max_length=12, choices=HOURLY_TYPE, verbose_name='Hourly Type')
     hourly_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Hourly Amount')
     hours_work = models.IntegerField(verbose_name='Hours Worked')
@@ -132,7 +132,7 @@ class PartTime(Personnel):
 class Expense(LineItem):
     EXPENSE_TYPE = (
         ('GENERAL', 'General'),
-        ('PAYROLL', 'Payroll')
+        ('PAYROLL', 'Payroll'),
     )
     expense_type = models.CharField(max_length=7, choices=EXPENSE_TYPE, verbose_name='Expense Type')
     name = models.CharField(max_length=50, verbose_name='Name')
