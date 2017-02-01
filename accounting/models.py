@@ -1,9 +1,5 @@
-from datetime import date, datetime, timedelta
-from calendar import monthrange
 
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.contrib.auth.models import User
 
 
@@ -33,8 +29,8 @@ class UserTeamRole(models.Model):
 
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    predicted_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Predicted Amount')
-    actual_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Actual Amount')
+    predicted_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Predicted Amount')
+    actual_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Actual Amount')
     reconciled = models.BooleanField(default=False, verbose_name='Reconciled')
 
     @classmethod
@@ -71,7 +67,7 @@ class Contract(models.Model):
     contract_number = models.IntegerField(verbose_name='Contract Number')
     organization_name = models.CharField(max_length=255, verbose_name='Contract Name')
     start_date = models.DateField(verbose_name='Start Date')
-    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Amount')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Amount')
     contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE, verbose_name='Contract State')
     contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE, verbose_name='Contract Type')
 
@@ -110,13 +106,13 @@ class FullTime(Personnel):
         ('SPA', 'SPA'),
     )
     salary_type = models.CharField(max_length=3, choices=SALARY_TYPE, verbose_name='Salary Type')
-    salary_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Salary')
-    social_security_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Social Security Amount')
-    fed_health_insurance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Federal Health Insurance Amount')
-    retirement_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Retirement Amount')
-    medical_insurance_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Medical Insurance Amount')
-    staff_benefits_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Staff Benefits Amount')
-    fringe_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Fringe Amount')
+    salary_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Salary')
+    social_security_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Social Security Amount')
+    fed_health_insurance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Federal Health Insurance Amount')
+    retirement_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Retirement Amount')
+    medical_insurance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Medical Insurance Amount')
+    staff_benefits_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Staff Benefits Amount')
+    fringe_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Fringe Amount')
 
 
 class PartTime(Personnel):
@@ -125,7 +121,7 @@ class PartTime(Personnel):
         ('NON_STUDENT', 'Non-Student'),
     )
     hourly_type = models.CharField(max_length=12, choices=HOURLY_TYPE, verbose_name='Hourly Type')
-    hourly_amount = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, verbose_name='Hourly Amount')
+    hourly_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Hourly Amount')
     hours_work = models.IntegerField(verbose_name='Hours Worked')
 
 
