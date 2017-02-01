@@ -43,8 +43,15 @@ class SetUpMixin(object):
     def dispatch(self, request, *args, **kwargs):
         self.current_business_unit = models.BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.now = date.today()
-        self.start_year = date(self.now.year, 7, 1)
-        self.end_year = date(self.now.year+1, 6, 30)
+
+        fiscal_year = self.now.year
+
+        # if we're in the first half of the calendar year, then we're in the previous fiscal year
+        if self.now < date(fiscal_year, 7, 1):
+            fiscal_year -= 1
+
+        self.start_year = date(fiscal_year, 7, 1)
+        self.end_year = date(fiscal_year+1, 6, 30)
 
         return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
 
@@ -455,14 +462,14 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
         response = super(InvoiceUpdateView, self).form_valid(form)
 
         contract = models.Contract.objects.get(pk=self.kwargs['contract'])
-        
+
         predicted_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
         actual_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('actual_amount'))['actual_amount__sum']
-        
+
         if predicted_invoices_sum is None or actual_invoices_sum is None:
             predicted_invoices_sum = Decimal('0.00')
             actual_invoices_sum = Decimal('0.00')
-        
+
         predicted_available_amount = contract.amount - predicted_invoices_sum + self.object.predicted_amount
         actual_available_amount = contract.amount - actual_invoices_sum + self.object.actual_amount
 
