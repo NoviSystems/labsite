@@ -1,14 +1,14 @@
 import json
-from datetime import date, datetime
+from datetime import date
 from dateutil.rrule import rrule, MONTHLY
-from calendar import monthrange, month_name
+from calendar import monthrange
 from decimal import Decimal
 
 from django.shortcuts import redirect
 from django.db.models import Max, Sum
 from django.db.transaction import atomic
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
@@ -40,17 +40,25 @@ class PermissionsMixin(LoginRequiredMixin, object):
 
 
 class SetUpMixin(object):
+    success_url_name = None
+
+    def get_fiscal_year(self, calendar_date):
+        calendar_year = calendar_date.year
+
+        # if we're in the first half of the calendar year, then we're in the previous fiscal year
+        if calendar_date < date(calendar_year, 7, 1):
+            return calendar_year - 1
+        return calendar_year
+
+    def get_object_fiscal_year(self):
+        pass
 
     @atomic
     def dispatch(self, request, *args, **kwargs):
         self.current_business_unit = models.BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.now = date.today()
 
-        fiscal_year = self.now.year
-
-        # if we're in the first half of the calendar year, then we're in the previous fiscal year
-        if self.now < date(fiscal_year, 7, 1):
-            fiscal_year -= 1
+        fiscal_year = self.get_fiscal_year(self.now)
 
         self.start_year = date(fiscal_year, 7, 1)
         self.end_year = date(fiscal_year+1, 6, 30)
@@ -72,6 +80,22 @@ class SetUpMixin(object):
         context['start_year'] = self.start_year.year
         context['end_year'] = self.end_year.year
         return context
+
+    def get_success_url_kwargs(self):
+        fy_object = self.get_object_fiscal_year()
+        fy_now = self.get_fiscal_year(self.now)
+
+        kwargs = {'business_unit': self.kwargs['business_unit']}
+        if fy_object is not None and fy_now != fy_object:
+            kwargs.update({
+                'start_year': fy_object,
+                'end_year': fy_object + 1,
+            })
+
+        return kwargs
+
+    def get_success_url(self):
+        return reverse(self.success_url_name, kwargs=self.get_success_url_kwargs())
 
 
 class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
