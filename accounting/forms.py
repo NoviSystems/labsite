@@ -27,10 +27,6 @@ class BaseForm(ModelForm):
 
 
 class BusinessUnitCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(BusinessUnitCreateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.BusinessUnit
         fields = '__all__'
@@ -40,10 +36,6 @@ class BusinessUnitCreateForm(BaseForm, ModelForm):
 
 
 class BusinessUnitUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(BusinessUnitUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.BusinessUnit
         fields = '__all__'
@@ -53,10 +45,6 @@ class BusinessUnitUpdateForm(BaseForm, ModelForm):
 
 
 class ContractCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(ContractCreateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Contract
         fields = '__all__'
@@ -68,10 +56,6 @@ class ContractCreateForm(BaseForm, ModelForm):
 
 
 class ContractUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(ContractUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Contract
         fields = '__all__'
@@ -81,11 +65,7 @@ class ContractUpdateForm(BaseForm, ModelForm):
 
 
 class ExpenseCreateForm(BaseForm, ModelForm):
-
     recurring = BooleanField(label='recurring', initial=False, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(ExpenseCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = models.Expense
@@ -104,10 +84,6 @@ class ExpenseCreateForm(BaseForm, ModelForm):
 
 
 class ExpenseUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(ExpenseUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Expense
         fields = '__all__'
@@ -120,10 +96,6 @@ class ExpenseUpdateForm(BaseForm, ModelForm):
 
 
 class InvoiceCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(InvoiceCreateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Invoice
         fields = [
@@ -133,10 +105,6 @@ class InvoiceCreateForm(BaseForm, ModelForm):
 
 
 class InvoiceUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(InvoiceUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Invoice
         fields = '__all__'
@@ -153,11 +121,7 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
 
 
 class IncomeCreateForm(BaseForm, ModelForm):
-
     recurring = BooleanField(label='recurring', initial=False, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(IncomeCreateForm, self).__init__(*args, **kwargs)
 
     class Meta:
         model = models.Income
@@ -172,10 +136,6 @@ class IncomeCreateForm(BaseForm, ModelForm):
 
 
 class IncomeUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(IncomeUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Income
         fields = '__all__'
@@ -185,10 +145,6 @@ class IncomeUpdateForm(BaseForm, ModelForm):
 
 
 class UserTeamRoleCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(UserTeamRoleCreateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.UserTeamRole
         fields = '__all__'
@@ -198,10 +154,6 @@ class UserTeamRoleCreateForm(BaseForm, ModelForm):
 
 
 class UserTeamRoleUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(UserTeamRoleUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.UserTeamRole
         fields = '__all__'
@@ -212,10 +164,6 @@ class UserTeamRoleUpdateForm(BaseForm, ModelForm):
 
 
 class PayrollExpenseCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(PayrollExpenseCreateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Expense
         fields = '__all__'
@@ -232,9 +180,6 @@ class PayrollExpenseCreateForm(BaseForm, ModelForm):
 
 
 class CashCreateForm(BaseForm, ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CashCreateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Cash
         fields = [
@@ -243,9 +188,6 @@ class CashCreateForm(BaseForm, ModelForm):
 
 
 class CashUpdateForm(BaseForm, ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CashUpdateForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = models.Cash
         fields = [
