@@ -89,42 +89,6 @@ class Invoice(Income):
     transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE, verbose_name='Transition State')
 
 
-class Personnel(models.Model):
-    business_unit = models.ForeignKey(BusinessUnit, verbose_name='Business Unit')
-    first_name = models.CharField(max_length=50, verbose_name='First Name')
-    last_name = models.CharField(max_length=50, verbose_name='Last Name')
-    employee_id = models.IntegerField(verbose_name='Employee ID')
-    position = models.CharField(max_length=50, verbose_name='Position')
-
-    class Meta:
-        abstract = True
-
-
-class FullTime(Personnel):
-    SALARY_TYPE = (
-        ('EPA', 'EPA'),
-        ('SPA', 'SPA'),
-    )
-    salary_type = models.CharField(max_length=3, choices=SALARY_TYPE, verbose_name='Salary Type')
-    salary_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Salary')
-    social_security_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Social Security Amount')
-    fed_health_insurance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Federal Health Insurance Amount')
-    retirement_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Retirement Amount')
-    medical_insurance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Medical Insurance Amount')
-    staff_benefits_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Staff Benefits Amount')
-    fringe_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Fringe Amount')
-
-
-class PartTime(Personnel):
-    HOURLY_TYPE = (
-        ('STUDENT', 'Student'),
-        ('NON_STUDENT', 'Non-Student'),
-    )
-    hourly_type = models.CharField(max_length=12, choices=HOURLY_TYPE, verbose_name='Hourly Type')
-    hourly_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name='Hourly Amount')
-    hours_work = models.IntegerField(verbose_name='Hours Worked')
-
-
 class Expense(LineItem):
     EXPENSE_TYPE = (
         ('GENERAL', 'General'),

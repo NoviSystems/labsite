@@ -3,8 +3,7 @@
     <li {% if active == "contracts" %}class="active"{% endif %}><a href={% url 'accounting:contracts' business_unit=current_business_unit.pk %}>Contracts</a></li>
     <li {% if active == "reconcile" %}class="active"{% endif %}><a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk %}>Monthly Reconcile</a></li>
     <li {% if active == "revenue" %}class="active"{% endif %}><a href={% url 'accounting:revenue' business_unit=current_business_unit.pk %}>Revenue</a></li>
-    <li {% if active == "personnel" %}class="active"{% endif %}><a href={% url 'accounting:personnel' business_unit=current_business_unit.pk %}>Personnel</a></li>
-    <li {% if active == "prospects" %}class="active"{% endif %}><a href="">Prospects</a></li> 
+    <li {% if active == "prospects" %}class="active"{% endif %}><a href="">Prospects</a></li>
     {% if not is_viewer %}
         <li {% if active == "settings" %}class="active"{% endif %}><a href={% url 'accounting:business_unit_settings' business_unit=current_business_unit.pk %}>Settings</a></li>
     {% endif %}

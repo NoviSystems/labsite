@@ -1,5 +1,6 @@
-from django.conf.urls import url, include, patterns
+from django.conf.urls import url
 from accounting import views
+
 
 urlpatterns = [
 
@@ -21,9 +22,6 @@ urlpatterns = [
 
     # Contracts View
     url(r'^(?P<business_unit>\d+)/contracts/$', views.ContractsView.as_view(), name='contracts'),
-
-    # Personnel Views
-    url(r'^(?P<business_unit>\d+)/personnel/$', views.PersonnelView.as_view(), name='personnel'),
 
     # Settings Views
     url(r'^(?P<business_unit>\d+)/settings/business_unit/$', views.BusinessUnitSettingsPageView.as_view(), name='business_unit_settings'),
@@ -60,16 +58,6 @@ urlpatterns = [
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/create/$', views.InvoiceCreateView.as_view(), name='create_invoice'),
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/(?P<invoice>\d+)/update/$', views.InvoiceUpdateView.as_view(), name='update_invoice'),
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/(?P<invoice>\d+)/delete/$', views.InvoiceDeleteView.as_view(), name='delete_invoice'),
-
-    # Full Time Forms
-    url(r'^(?P<business_unit>\d+)/full_time/create/$', views.FullTimeCreateView.as_view(), name='create_full_time'),
-    url(r'^(?P<business_unit>\d+)/full_time/(?P<full_time>\d+)/update/$', views.FullTimeUpdateView.as_view(), name='update_full_time'),
-    url(r'^(?P<business_unit>\d+)/full_time/(?P<full_time>\d+)/delete/$', views.FullTimeDeleteView.as_view(), name='delete_full_time'),
-
-    # Part Time Forms
-    url(r'^(?P<business_unit>\d+)/part_time/create/$', views.PartTimeCreateView.as_view(), name='create_part_time'),
-    url(r'^(?P<business_unit>\d+)/part_time/(?P<part_time>\d+)/update/$', views.PartTimeUpdateView.as_view(), name='update_part_time'),
-    url(r'^(?P<business_unit>\d+)/part_time/(?P<part_time>\d+)/delete/$', views.PartTimeDeleteView.as_view(), name='delete_part_time'),
 
     # User Team Role Forms
     url(r'^(?P<business_unit>\d+)/user_team_role/create/$', views.UserTeamRoleCreateView.as_view(), name='create_user_team_role'),

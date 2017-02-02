@@ -1,4 +1,4 @@
-from django.forms import ModelForm, BooleanField, ValidationError
+from django.forms import ModelForm, BooleanField
 from django.core.exceptions import FieldDoesNotExist
 
 from accounting import models
@@ -150,60 +150,6 @@ class InvoiceUpdateForm(BaseForm, ModelForm):
         help_texts = {
             'transition_state': 'Invoices are marked reconciled when Actual Amount and Date Paid are filled and Tansition State is Recieved.'
         }
-
-
-class FullTimeCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(FullTimeCreateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = models.FullTime
-        fields = '__all__'
-        exclude = [
-            'business_unit'
-        ]
-
-
-class FullTimeUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(FullTimeUpdateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = models.FullTime
-        fields = '__all__'
-        exclude = [
-            'business_unit'
-        ]
-
-
-class PartTimeCreateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(PartTimeCreateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = models.PartTime
-        fields = '__all__'
-        exclude = [
-            'business_unit',
-            'hours_work'
-        ]
-
-
-class PartTimeUpdateForm(BaseForm, ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(PartTimeUpdateForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = models.PartTime
-        fields = '__all__'
-        exclude = [
-            'business_unit',
-            'hours_work'
-        ]
 
 
 class IncomeCreateForm(BaseForm, ModelForm):
