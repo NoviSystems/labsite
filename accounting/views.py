@@ -204,7 +204,7 @@ class DashboardView(ViewerMixin, TemplateView):
             total_assets_month_actual = cash_month_actual
             tama['values'][month_name] = total_assets_month_actual
 
-        dashboard_data = [cma, cmpr, ima, imp, pma, pmp,ema, emp, tama, tamp]
+        dashboard_data = [cma, cmpr, ima, imp, pma, pmp, ema, emp, tama, tamp]
         context['month_names'] = month_names
         context['predicted_totals'] = json.dumps([float(cmpr['values'][month_name]) for month_name in month_names])
         context['actual_totals'] = json.dumps([float(cma['values'][month_name]) for month_name in month_names])
@@ -426,7 +426,7 @@ class InvoiceCreateView(ManagerMixin, CreateView):
             error_message = 'Predicted amount must be less than or equal to {}'.format(available_amount)
             if available_amount == Decimal('0.00'):
                 error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('predicted_amount', error_message )
+            form.add_error('predicted_amount', error_message)
             return self.form_invalid(form)
 
         return response
@@ -477,13 +477,13 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
             error_message = 'Predicted amount must be less than or equal to {}'.format(predicted_available_amount)
             if predicted_available_amount == Decimal('0.00'):
                 error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('predicted_amount', error_message )
+            form.add_error('predicted_amount', error_message)
 
         if form.instance.actual_amount > actual_available_amount:
             error_message = 'Actual amount must be less than or equal to {}'.format(actual_available_amount)
             if actual_available_amount == Decimal('0.00'):
                 error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('actual_amount', error_message )
+            form.add_error('actual_amount', error_message)
 
         elif form.instance.predicted_amount <= predicted_available_amount and form.instance.actual_amount <= actual_available_amount:
             response = super(InvoiceUpdateView, self).form_valid(form)
