@@ -332,18 +332,14 @@ class BusinessUnitDeleteView(ManagerMixin, DeleteView):
     model = models.BusinessUnit
     template_name = 'accounting/base_delete_form.html'
     success_url = reverse_lazy('accounting:home')
-
-    def get_object(self):
-        return models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+    pk_url_kwarg = 'business_unit'
 
 
 class BusinessUnitUpdateView(ManagerMixin, UpdateView):
     model = models.BusinessUnit
     form_class = forms
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+    pk_url_kwarg = 'business_unit'
 
     def get_success_url(self):
         return reverse_lazy('accounting:business_unit_settings', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -372,9 +368,7 @@ class ContractCreateView(ManagerMixin, CreateView):
 class ContractDeleteView(ManagerMixin, DeleteView):
     model = models.Contract
     template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return models.Contract.objects.get(pk=self.kwargs['contract'])
+    pk_url_kwarg = 'contract'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -384,9 +378,7 @@ class ContractUpdateView(ManagerMixin, UpdateView):
     model = models.Contract
     form_class = forms.ContractUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.Contract.objects.get(pk=self.kwargs['contract'])
+    pk_url_kwarg = 'contract'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -435,9 +427,7 @@ class InvoiceCreateView(ManagerMixin, CreateView):
 class InvoiceDeleteView(ManagerMixin, DeleteView):
     model = models.Invoice
     template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return models.Invoice.objects.get(pk=self.kwargs['invoice'])
+    pk_url_kwarg = 'invoice'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -447,9 +437,7 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
     model = models.Invoice
     form_class = forms.InvoiceUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.Invoice.objects.get(pk=self.kwargs['invoice'])
+    pk_url_kwarg = 'invoice'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -538,9 +526,7 @@ class ExpenseCreateView(ManagerMixin, CreateView):
 class ExpenseDeleteView(ManagerMixin, DeleteView):
     model = models.Expense
     template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return models.Expense.objects.get(pk=self.kwargs['expense'])
+    pk_url_kwarg = 'expense'
 
     def get_success_url(self):
         return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -550,9 +536,7 @@ class ExpenseUpdateView(ManagerMixin, UpdateView):
     model = models.Expense
     form_class = forms.ExpenseUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.Expense.objects.get(pk=self.kwargs['expense'])
+    pk_url_kwarg = 'expense'
 
     def get_success_url(self):
         return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -594,9 +578,7 @@ class IncomeCreateView(ManagerMixin, CreateView):
 class IncomeDeleteView(ManagerMixin, DeleteView):
     model = models.Income
     template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return models.Income.objects.get(pk=self.kwargs['income'])
+    pk_url_kwarg = 'income'
 
     def get_success_url(self):
         return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -606,9 +588,7 @@ class IncomeUpdateView(ManagerMixin, UpdateView):
     model = models.Income
     form_class = forms.IncomeUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.Income.objects.get(pk=self.kwargs['income'])
+    pk_url_kwarg = 'income'
 
     def get_success_url(self):
         return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -647,9 +627,7 @@ class FullTimeCreateView(ManagerMixin, CreateView):
 class FullTimeDeleteView(ManagerMixin, DeleteView):
     model = models.FullTime
     template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return models.FullTime.objects.get(pk=self.kwargs['full_time'])
+    pk_url_kwarg = 'full_time'
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -659,9 +637,7 @@ class FullTimeUpdateView(ManagerMixin, UpdateView):
     model = models.FullTime
     form_class = forms.FullTimeUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.FullTime.objects.get(pk=self.kwargs['full_time'])
+    pk_url_kwarg = 'full_time'
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -686,9 +662,7 @@ class PartTimeCreateView(ManagerMixin, CreateView):
 class PartTimeDeleteView(ManagerMixin, DeleteView):
     model = models.PartTime
     template_name = 'accounting/base_delete_form.html'
-
-    def get_object(self):
-        return models.PartTime.objects.get(pk=self.kwargs['part_time'])
+    pk_url_kwarg = 'part_time'
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -698,9 +672,7 @@ class PartTimeUpdateView(ManagerMixin, UpdateView):
     model = models.PartTime
     form_class = forms.PartTimeUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.PartTime.objects.get(pk=self.kwargs['part_time'])
+    pk_url_kwarg = 'part_time'
 
     def get_success_url(self):
         return reverse_lazy('accounting:personnel', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -729,9 +701,7 @@ class UserTeamRoleCreateView(ManagerMixin, CreateView):
 class UserTeamRoleDeleteView(ManagerMixin, DeleteView):
     model = models.UserTeamRole
     template_name = 'accounting/user_team_role_delete_form.html'
-
-    def get_object(self):
-        return models.UserTeamRole.objects.get(pk=self.kwargs['user_team_role'])
+    pk_url_kwarg = 'user_team_role'
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -748,9 +718,7 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
     model = models.UserTeamRole
     form_class = forms.UserTeamRoleUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.UserTeamRole.objects.get(pk=self.kwargs['user_team_role'])
+    pk_url_kwarg = 'user_team_role'
 
     def get_success_url(self):
         return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -760,6 +728,7 @@ class PayrollExpenseCreateView(ManagerMixin, CreateView):
     model = models.Expense
     form_class = forms.PayrollExpenseCreateForm
     template_name = 'accounting/base_form.html'
+    pk_url_kwarg = 'expense'
 
     def get_initial(self):
         if 'month' in self.kwargs and 'year' in self.kwargs:
@@ -772,9 +741,6 @@ class PayrollExpenseCreateView(ManagerMixin, CreateView):
         context = super(PayrollExpenseCreateView, self).get_context_data()
         context['base_form_title'] = 'Payroll Expense'
         return context
-
-    def get_object(self):
-        return models.Expense.objects.get(pk=self.kwargs['expense'])
 
     def get_success_url(self):
         return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
@@ -826,9 +792,7 @@ class CashUpdateView(ManagerMixin, UpdateView):
     model = models.Cash
     form_class = forms.CashUpdateForm
     template_name = 'accounting/base_form.html'
-
-    def get_object(self):
-        return models.Cash.objects.get(pk=self.kwargs['cash'])
+    pk_url_kwarg = 'cash'
 
     def get_success_url(self):
         return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
