@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.shortcuts import redirect
 from django.db.models import Max, Sum
+from django.db.transaction import atomic
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -40,6 +41,7 @@ class PermissionsMixin(LoginRequiredMixin, object):
 
 class SetUpMixin(object):
 
+    @atomic
     def dispatch(self, request, *args, **kwargs):
         self.current_business_unit = models.BusinessUnit.objects.get(pk=kwargs['business_unit'])
         self.now = date.today()
