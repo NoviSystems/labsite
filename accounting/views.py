@@ -82,17 +82,9 @@ class SetUpMixin(object):
         return context
 
     def get_success_url_kwargs(self):
-        fy_object = self.get_object_fiscal_year()
-        fy_now = self.get_fiscal_year(self.now)
-
-        kwargs = {'business_unit': self.kwargs['business_unit']}
-        if fy_object is not None and fy_now != fy_object:
-            kwargs.update({
-                'start_year': fy_object,
-                'end_year': fy_object + 1,
-            })
-
-        return kwargs
+        return {
+            'business_unit': self.kwargs['business_unit']
+        }
 
     def get_success_url(self):
         return reverse(self.success_url_name, kwargs=self.get_success_url_kwargs())
@@ -506,13 +498,33 @@ class InvoiceUpdateView(ManagerMixin, UpdateView):
         return self.form_invalid(form)
 
 
-class ExpenseCreateView(ManagerMixin, CreateView):
+class ExpenseMixin(ManagerMixin):
     model = models.Expense
+    pk_url_kwarg = 'expense'
+    success_url_name = 'accounting:reconcile'
+
+    def get_object_fiscal_year(self):
+        date = self.get_object().date_payable
+        return self.get_fiscal_year(date)
+
+    def get_success_url_kwargs(self):
+        kwargs = super().get_success_url_kwargs()
+
+        fy_object = self.get_object_fiscal_year()
+        fy_now = self.get_fiscal_year(self.now)
+
+        if fy_object is not None and fy_now != fy_object:
+            kwargs.update({
+                'start_year': fy_object,
+                'end_year': fy_object + 1,
+            })
+
+        return kwargs
+
+
+class ExpenseCreateView(ExpenseMixin, CreateView):
     form_class = forms.ExpenseCreateForm
     template_name = 'accounting/base_form.html'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
     def form_valid(self, form):
         business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -545,27 +557,24 @@ class ExpenseCreateView(ManagerMixin, CreateView):
                 form.instance.date_paid = form.instance.date_payable
                 form.instance.actual_amount = form.instance.predicted_amount
 
+        # cache so we can us this in get_object_fiscal_year()
+        self.object_date = form.instance.date_payable
+
         response = super(ExpenseCreateView, self).form_valid(form)
         return response
 
+    def get_object_fiscal_year(self):
+        return self.get_fiscal_year(self.object_date)
 
-class ExpenseDeleteView(ManagerMixin, DeleteView):
+
+class ExpenseDeleteView(ExpenseMixin, DeleteView):
     model = models.Expense
     template_name = 'accounting/base_delete_form.html'
-    pk_url_kwarg = 'expense'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
-class ExpenseUpdateView(ManagerMixin, UpdateView):
-    model = models.Expense
+class ExpenseUpdateView(ExpenseMixin, UpdateView):
     form_class = forms.ExpenseUpdateForm
     template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'expense'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
 class IncomeCreateView(ManagerMixin, CreateView):
