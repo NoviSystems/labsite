@@ -1,46 +1,30 @@
-import json
 from datetime import date
 from dateutil.rrule import rrule, MONTHLY
 from calendar import monthrange
 from decimal import Decimal
 
-from django.shortcuts import redirect
 from django.db.models import Max, Sum
 from django.db.transaction import atomic
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
+from django.utils.functional import cached_property
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 
 from accounting import models
 from accounting import forms
 
 
-class PermissionsMixin(LoginRequiredMixin, object):
-
-    def dispatch(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated():
-            try:
-                self.team_roles = models.UserTeamRole.objects.filter(user=self.request.user)
-                self.business_units = []
-                for team_role in self.team_roles:
-                    self.business_units.append(team_role.business_unit)
-            except ObjectDoesNotExist:
-                self.team_roles = None
-                self.business_units = None
-        else:
-            self.team_roles = None
-        return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(PermissionsMixin, self).get_context_data(*args, **kwargs)
-        context['business_units'] = self.business_units
-        return context
-
-
-class SetUpMixin(object):
+class AccountingMixin(LoginRequiredMixin):
+    """
+    Common setup required for most accounting views.
+    """
     success_url_name = None
+
+    @atomic
+    def dispatch(self, request, *args, **kwargs):
+        return super(AccountingMixin, self).dispatch(request, *args, **kwargs)
 
     def get_fiscal_year(self, calendar_date):
         calendar_year = calendar_date.year
@@ -53,32 +37,52 @@ class SetUpMixin(object):
     def get_object_fiscal_year(self):
         pass
 
-    @atomic
-    def dispatch(self, request, *args, **kwargs):
-        self.current_business_unit = models.BusinessUnit.objects.get(pk=kwargs['business_unit'])
-        self.now = date.today()
+    @cached_property
+    def user(self):
+        return self.request.user
 
-        fiscal_year = self.get_fiscal_year(self.now)
-
-        self.start_year = date(fiscal_year, 7, 1)
-        self.end_year = date(fiscal_year+1, 6, 30)
-
-        return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(SetUpMixin, self).get_context_data(*args, **kwargs)
+    @cached_property
+    def team_role(self):
         try:
-            context['is_viewer'] = self.is_viewer
-        except AttributeError:
-            context['is_viewer'] = False
-        context['current_business_unit'] = self.current_business_unit
+            return models.UserTeamRole.objects.get(user=self.user, business_unit=self.current_business_unit)
+        except models.UserTeamRole.DoesNotExist:
+            return None
 
-        if 'start_year' in self.kwargs and 'end_year' in self.kwargs:
-            self.start_year = date(int(self.kwargs['start_year']), 7, 1)
-            self.end_year = date(int(self.kwargs['end_year']), 6, 30)
+    @cached_property
+    def business_units(self):
+        return self.user.business_units.all()
 
-        context['start_year'] = self.start_year.year
-        context['end_year'] = self.end_year.year
+    @cached_property
+    def current_business_unit(self):
+        pk = self.kwargs.get('business_unit', None)
+
+        if pk is None:
+            return None
+        return models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+
+    @cached_property
+    def fiscal_year(self):
+        return self.kwargs.get('fiscal_year', self.get_fiscal_year(date.today()))
+
+    @cached_property
+    def fiscal_start(self):
+        return date(self.fiscal_year, 7, 1)
+
+    @cached_property
+    def fiscal_end(self):
+        return date(self.fiscal_year+1, 6, 30)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'business_units': self.business_units,
+            'current_business_unit': self.current_business_unit,
+            'fiscal_year': self.fiscal_year,
+            'fiscal_start': self.fiscal_start,
+            'fiscal_end': self.fiscal_end,
+            'is_viewer': True,  # use secure default
+        })
+
         return context
 
     def get_success_url_kwargs(self):
@@ -90,46 +94,64 @@ class SetUpMixin(object):
         return reverse(self.success_url_name, kwargs=self.get_success_url_kwargs())
 
 
-class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
+class ViewerMixin(AccountingMixin, UserPassesTestMixin):
+    """
+    View requires 'view' permissions
+    """
+    raise_exception = True
+
+    @cached_property
+    def is_viewer(self):
+        if self.team_role is None:
+            return False
+
+        ROLES = models.UserTeamRole.ROLES
+        return self.team_role.role == ROLES.VIEWER
 
     def test_func(self):
-        try:
-            bu_role = models.UserTeamRole.objects.get(user=self.request.user, business_unit=self.current_business_unit).role
-            if self.request.user.is_superuser:
-                return True
-            elif bu_role == 'MANAGER':
-                return True
-            elif bu_role == 'VIEWER':
-                self.is_viewer = True
-                return True
-            else:
-                raise Http404()
-        except ObjectDoesNotExist:
-            raise Http404()
+        if self.request.user.is_superuser:
+            return True
 
-
-class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
-
-    def test_func(self):
-        try:
-            bu_role = models.UserTeamRole.objects.get(user=self.request.user, business_unit=self.current_business_unit).role
-            if self.request.user.is_superuser:
+        if self.team_role is not None:
+            ROLES = models.UserTeamRole.ROLES
+            if self.team_role.role in (ROLES.MANAGER, ROLES.VIEWER):
                 return True
-            elif bu_role == 'MANAGER':
-                return True
-            else:
-                raise Http404()
-        except ObjectDoesNotExist:
-            raise Http404()
 
-
-class HomePageView(PermissionsMixin, TemplateView):
-    template_name = 'accounting/home.html'
+        return False
 
     def get_context_data(self, **kwargs):
-        context = super(HomePageView, self).get_context_data()
-        context['business_units'] = self.business_units
+        context = super().get_context_data(**kwargs)
+        context['is_viewer'] = self.is_viewer
+
         return context
+
+
+class ManagerMixin(AccountingMixin, UserPassesTestMixin):
+    """
+    View requires 'edit' permissions
+    """
+    raise_exception = True
+
+    def test_func(self):
+        if self.request.user.is_superuser:
+            return True
+
+        if self.team_role is not None:
+            ROLES = models.UserTeamRole.ROLES
+            if self.team_role.role == ROLES.MANAGER:
+                return True
+
+        return False
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_viewer'] = False
+
+        return context
+
+
+class HomePageView(ViewerMixin, TemplateView):
+    template_name = 'accounting/home.html'
 
 
 class DashboardView(ViewerMixin, TemplateView):

@@ -9,13 +9,11 @@ urlpatterns = [
 
     # Dashboard Views
     url(r'^(?P<business_unit>\d+)/dashboard/$', views.DashboardView.as_view(), name='dashboard'),
-    url(r'^(?P<business_unit>\d+)/dashboard/(?P<start_year>\d+)-(?P<end_year>\d+)/$', views.DashboardView.as_view(), name='dashboard'),
+    url(r'^(?P<business_unit>\d+)/dashboard/fy-(?P<fiscal_year>\d+)/$', views.DashboardView.as_view(), name='dashboard'),
 
     # Expense Views
     url(r'^(?P<business_unit>\d+)/reconcile/$', views.MonthlyReconcileView.as_view(), name='reconcile'),
-    url(r'^(?P<business_unit>\d+)/reconcile/(?P<month>\d+)/$', views.MonthlyReconcileView.as_view(), name='reconcile'),
-    url(r'^(?P<business_unit>\d+)/reconcile/(?P<start_year>\d+)-(?P<end_year>\d+)/$', views.MonthlyReconcileView.as_view(), name='reconcile'),
-    url(r'^(?P<business_unit>\d+)/reconcile/(?P<start_year>\d+)-(?P<end_year>\d+)/(?P<month>\d+)$', views.MonthlyReconcileView.as_view(), name='reconcile'),
+    url(r'^(?P<business_unit>\d+)/reconcile/fy-(?P<fiscal_year>\d+)/$', views.MonthlyReconcileView.as_view(), name='reconcile'),
 
     # Revenue Views
     url(r'^(?P<business_unit>\d+)/revenue/$', views.RevenueView.as_view(), name='revenue'),
