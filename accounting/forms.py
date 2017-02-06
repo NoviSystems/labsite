@@ -30,22 +30,10 @@ class BaseForm(forms.ModelForm):
                 })
 
 
-class BusinessUnitCreateForm(BaseForm, ModelForm):
+class BusinessUnitForm(BaseForm):
     class Meta:
         model = models.BusinessUnit
-        fields = '__all__'
-        exclude = [
-            'user'
-        ]
-
-
-class BusinessUnitUpdateForm(BaseForm, ModelForm):
-    class Meta:
-        model = models.BusinessUnit
-        fields = '__all__'
-        exclude = [
-            'user'
-        ]
+        fields = ['name', 'account_number']
 
 
 class ContractCreateForm(BaseForm, ModelForm):

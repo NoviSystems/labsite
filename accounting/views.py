@@ -358,7 +358,7 @@ class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
 
 class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
     model = models.BusinessUnit
-    form_class = forms.BusinessUnitCreateForm
+    form_class = forms.BusinessUnitForm
     template_name = 'accounting/base_form.html'
     success_url = reverse_lazy('accounting:home')
 
@@ -377,7 +377,7 @@ class BusinessUnitDeleteView(ManagerMixin, DeleteView):
 
 class BusinessUnitUpdateView(ManagerMixin, UpdateView):
     model = models.BusinessUnit
-    form_class = forms
+    form_class = forms.BusinessUnitForm
     template_name = 'accounting/base_form.html'
     pk_url_kwarg = 'business_unit'
 
@@ -394,13 +394,12 @@ class ContractCreateView(ManagerMixin, CreateView):
         return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
 
     def form_valid(self, form):
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
-        max_contract_number = models.Contract.objects.filter(business_unit=business_unit).aggregate(Max('contract_number'))
-        if not max_contract_number['contract_number__max']:
-            form.instance.contract_number = 1
-        else:
-            form.instance.contract_number = max_contract_number['contract_number__max'] + 1
+        max_contract_number = models.Contract.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .aggregate(max=Max('number'))['max'] or 0
+
+        form.instance.number = max_contract_number + 1
+        form.instance.business_unit = self.current_business_unit
 
         return super(ContractCreateView, self).form_valid(form)
 
