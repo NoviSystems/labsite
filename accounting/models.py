@@ -88,34 +88,49 @@ class LineItem(models.Model):
         abstract = True
 
 
-class Income(LineItem):
-    name = models.CharField(max_length=50)
-    date_payable = models.DateField()
-    date_paid = models.DateField(default=None, null=True, blank=True)
-
-
-class Invoice(Income):
+class Invoice(LineItem):
     STATES = choices((
         ('NOT_INVOICED', 'Not Invoiced'),
         ('INVOICED', 'Invoiced'),
         ('RECEIVED', 'Received'),
     ))
+    name = models.CharField(max_length=50)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
-    number = models.IntegerField()
-    transition_state = models.CharField(max_length=15, choices=STATES, default=STATES.NOT_INVOICED)
+    number = models.PositiveIntegerField()
+    state = models.CharField(max_length=15, choices=STATES, default=STATES.NOT_INVOICED)
+
+    class Meta:
+        unique_together = ('contract', 'number')
 
 
-class Expense(LineItem):
-    EXPENSE_TYPES = choices((
-        ('GENERAL', 'General'),
-        ('PAYROLL', 'Payroll'),
-    ))
-    expense_type = models.CharField(max_length=7, choices=EXPENSE_TYPES)
-    name = models.CharField(max_length=50)
-    date_payable = models.DateField()
-    date_paid = models.DateField(default=None, null=True, blank=True)
+class MonthlyBalance(LineItem):
+    class Meta:
+        unique_together = ('month', 'year')
+        abstract = True
 
 
-class Cash(LineItem):
-    name = models.CharField(max_length=50)
-    date_associated = models.DateField()
+class CashBalance(MonthlyBalance):
+    """
+    The actual "cash on hand" balance per month.
+
+    Predictions are always computed from last month's results.
+    """
+    predicted_amount = None
+
+
+class Expenses(MonthlyBalance):
+    """
+    The total miscelaneous expenses for a month. (eg, phone bill + electric + ...)
+    """
+
+
+class FullTimePayroll(MonthlyBalance):
+    """
+    The full time payroll costs for a month.
+    """
+
+
+class PartTimePayroll(MonthlyBalance):
+    """
+    The part time payroll costs for a month.
+    """
