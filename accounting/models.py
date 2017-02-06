@@ -63,16 +63,15 @@ class Contract(models.Model):
         ('HOURLY', 'Hourly'),
     ))
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
-    department = models.CharField(max_length=4, default='CSC')
-    number = models.IntegerField(verbose_name='Contract Number')
-    name = models.CharField(max_length=255, verbose_name='Contract Name')
+    contract_id = models.CharField(max_length=64, unique=True, verbose_name=_("contract ID"))
+    name = models.CharField(max_length=255, verbose_name=_("contract name"))
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     state = models.CharField(max_length=8, choices=STATES, default=STATES.ACTIVE)
     type = models.CharField(max_length=8, choices=TYPES)
 
     def __str__(self):
-        return '%d: %s' % (self.contract_number, self.name)
+        return '%d: %s' % (self.contract_id, self.name)
 
 
 class LineItem(models.Model):

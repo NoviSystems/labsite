@@ -29,23 +29,16 @@ class BusinessUnitForm(BaseForm):
         fields = ['name', 'account_number']
 
 
-class ContractCreateForm(BaseForm, ModelForm):
+class ContractForm(BaseForm):
     class Meta:
         model = models.Contract
-        fields = '__all__'
-        exclude = [
-            'department',
-            'contract_number',
-            'business_unit'
-        ]
-
-
-class ContractUpdateForm(BaseForm, ModelForm):
-    class Meta:
-        model = models.Contract
-        fields = '__all__'
-        exclude = [
-            'business_unit'
+        fields = [
+            'contract_id',
+            'name',
+            'start_date',
+            'amount',
+            'state',
+            'type',
         ]
 
 

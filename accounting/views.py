@@ -387,18 +387,13 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
 
 class ContractCreateView(ManagerMixin, CreateView):
     model = models.Contract
-    form_class = forms.ContractCreateForm
+    form_class = forms.ContractForm
     template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
         return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
 
     def form_valid(self, form):
-        max_contract_number = models.Contract.objects \
-            .filter(business_unit=self.current_business_unit) \
-            .aggregate(max=Max('number'))['max'] or 0
-
-        form.instance.number = max_contract_number + 1
         form.instance.business_unit = self.current_business_unit
 
         return super(ContractCreateView, self).form_valid(form)
@@ -415,7 +410,7 @@ class ContractDeleteView(ManagerMixin, DeleteView):
 
 class ContractUpdateView(ManagerMixin, UpdateView):
     model = models.Contract
-    form_class = forms.ContractUpdateForm
+    form_class = forms.ContractForm
     template_name = 'accounting/base_form.html'
     pk_url_kwarg = 'contract'
 
