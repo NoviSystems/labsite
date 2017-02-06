@@ -1,8 +1,6 @@
 {% extends "accounting/base.html" %}
 
-{% load staticfiles %}
-
-{% block nav-links %}{% endblock %}
+{% block nav-links-left %}{% endblock %}
 
 {% block content %}
 
@@ -12,26 +10,28 @@
         {% for business_unit in business_units %}
             <tr>
                 <td>
-                    <a href={% url 'accounting:dashboard' business_unit=business_unit.pk %}>{{ business_unit.name }} (Account {{ business_unit.account_number }})</a>
+                    <a href="{% url 'accounting:dashboard' business_unit=business_unit.pk %}">
+                        {{ business_unit.name }} (Account {{ business_unit.account_number }})
+                    </a>
                 </td>
             </tr>
         {% empty %}
             <tr>
                 <td>
-                    <div class="col-xs-12 col-centered" style="text-align: center;">
-                        <h3>You currently are not associated with any buisness units.</h3>
+                    <div class="col-xs-12 text-center">
+                        <h3 class="">You currently are not associated with any business units.</h3>
                     </div>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
 
 <div class="row">
-    <div class="col-xs-12 col-centered" style="text-align: center;">
+    <div class="col-xs-12 text-center">
         <a class="btn btn-primary" href={% url 'accounting:create_business_unit' %}>
-            Create New Buisness Unit <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+            Create Business Unit <i class="fa fa-fw fa-plus-square" title="Add" aria-hidden="true"></i>
         </a>
     </div>
 </div>
