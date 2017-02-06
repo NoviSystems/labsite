@@ -1,4 +1,3 @@
-from django.core.exceptions import FieldDoesNotExist
 from django.db.models import DateField
 from django import forms
 
@@ -14,13 +13,7 @@ class BaseForm(forms.ModelForm):
         for field in self.fields:
             model_field = model._meta.get_field(field)
 
-            try:
-                placeholder = model_field.verbose_name
-            except FieldDoesNotExist:
-                placeholder = ''
-
             self.fields[field].widget.attrs.update({
-                'placeholder': placeholder,
                 'class': 'form-control',
             })
 
