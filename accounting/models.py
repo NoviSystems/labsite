@@ -1,6 +1,7 @@
 
 from django.conf import settings
 from django.db import models
+from itng.common.utils import choices
 
 User = settings.AUTH_USER_MODEL
 
@@ -14,13 +15,13 @@ class BusinessUnit(models.Model):
 
 
 class UserTeamRole(models.Model):
-    ROLE_STATE = (
+    ROLES = choices((
         ('MANAGER', 'Manager'),
         ('VIEWER', 'Viewer'),
-    )
+    ))
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
-    role = models.CharField(max_length=12, choices=ROLE_STATE)
+    role = models.CharField(max_length=12, choices=ROLES, default=ROLES.VIEWER)
 
     class Meta:
         unique_together = ['user', 'business_unit']
@@ -56,22 +57,22 @@ class LineItem(models.Model):
 
 
 class Contract(models.Model):
-    CONTRACT_STATE = (
+    STATES = choices((
         ('ACTIVE', 'Active'),
         ('COMPLETE', 'Complete'),
-    )
-    CONTRACT_TYPE = (
+    ))
+    TYPES = choices((
         ('FIXED', 'Fixed'),
         ('HOURLY', 'Hourly'),
-    )
+    ))
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     department = models.CharField(max_length=4, default='CSC')
     contract_number = models.IntegerField()
     organization_name = models.CharField(max_length=255, verbose_name='Contract Name')
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    contract_state = models.CharField(max_length=8, choices=CONTRACT_STATE)
-    contract_type = models.CharField(max_length=8, choices=CONTRACT_TYPE)
+    state = models.CharField(max_length=8, choices=STATES, default=STATES.ACTIVE)
+    type = models.CharField(max_length=8, choices=TYPES)
 
 
 class Income(LineItem):
@@ -81,22 +82,22 @@ class Income(LineItem):
 
 
 class Invoice(Income):
-    TRANSITION_STATE = (
-        ('INVOICED', 'Invoiced'),
+    STATES = choices((
         ('NOT_INVOICED', 'Not Invoiced'),
+        ('INVOICED', 'Invoiced'),
         ('RECEIVED', 'Received'),
-    )
+    ))
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
     number = models.IntegerField()
-    transition_state = models.CharField(max_length=15, choices=TRANSITION_STATE)
+    transition_state = models.CharField(max_length=15, choices=STATES, default=STATES.NOT_INVOICED)
 
 
 class Expense(LineItem):
-    EXPENSE_TYPE = (
+    EXPENSE_TYPES = choices((
         ('GENERAL', 'General'),
         ('PAYROLL', 'Payroll'),
-    )
-    expense_type = models.CharField(max_length=7, choices=EXPENSE_TYPE)
+    ))
+    expense_type = models.CharField(max_length=7, choices=EXPENSE_TYPES)
     name = models.CharField(max_length=50)
     date_payable = models.DateField()
     date_paid = models.DateField(default=None, null=True, blank=True)
