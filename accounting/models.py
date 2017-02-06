@@ -1,9 +1,30 @@
-
+from datetime import date
 from django.conf import settings
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from itng.common.utils import choices
 
 User = settings.AUTH_USER_MODEL
+
+
+MONTHS = choices((
+    (1, _('January')),
+    (2, _('February')),
+    (3, _('March')),
+    (4, _('April')),
+    (5, _('May')),
+    (6, _('June')),
+    (7, _('July')),
+    (8, _('August')),
+    (9, _('September')),
+    (10, _('October')),
+    (11, _('November')),
+    (12, _('December')),
+))
+
+
+def current_year():
+    return date.today().year
 
 
 class BusinessUnit(models.Model):
@@ -55,26 +76,13 @@ class Contract(models.Model):
 
 
 class LineItem(models.Model):
-    business_unit = models.ForeignKey(BusinessUnit)
-    predicted_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    actual_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    reconciled = models.BooleanField(default=False)
+    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
+    predicted_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    actual_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
 
-    @classmethod
-    def from_db(cls, db, field_names, values):
-        if cls._deferred:
-            instance = cls(**zip(field_names, values))
-        else:
-            instance = cls(*values)
-        instance._state.adding = False
-        instance._state.db = db
-        instance._loaded_values = dict(zip(field_names, values))
-        return instance
-
-    def save(self, *args, **kwargs):
-        if not self._state.adding and (self.actual_amount != self._loaded_values['actual_amount']):
-            self.reconciled = True
-        super(LineItem, self).save(*args, **kwargs)
+    # Date field isn't entirely appropriate, since items are associated by month.
+    month = models.SmallIntegerField(choices=MONTHS, default=MONTHS._1)
+    year = models.SmallIntegerField(default=current_year)
 
     class Meta():
         abstract = True
