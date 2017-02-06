@@ -2,6 +2,8 @@ from django.conf.urls import url
 from accounting import views
 
 
+app_name = 'accounting'
+
 urlpatterns = [
 
     # Accounting HomePage
