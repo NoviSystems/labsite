@@ -32,6 +32,25 @@ class UserTeamRole(models.Model):
         return '%s is a %s of %s' % (self.user.username, self.role, self.business_unit.name)
 
 
+class Contract(models.Model):
+    STATES = choices((
+        ('ACTIVE', 'Active'),
+        ('COMPLETE', 'Complete'),
+    ))
+    TYPES = choices((
+        ('FIXED', 'Fixed'),
+        ('HOURLY', 'Hourly'),
+    ))
+    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
+    department = models.CharField(max_length=4, default='CSC')
+    contract_number = models.IntegerField()
+    organization_name = models.CharField(max_length=255, verbose_name='Contract Name')
+    start_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    state = models.CharField(max_length=8, choices=STATES, default=STATES.ACTIVE)
+    type = models.CharField(max_length=8, choices=TYPES)
+
+
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit)
     predicted_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -56,25 +75,6 @@ class LineItem(models.Model):
 
     class Meta():
         abstract = True
-
-
-class Contract(models.Model):
-    STATES = choices((
-        ('ACTIVE', 'Active'),
-        ('COMPLETE', 'Complete'),
-    ))
-    TYPES = choices((
-        ('FIXED', 'Fixed'),
-        ('HOURLY', 'Hourly'),
-    ))
-    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
-    department = models.CharField(max_length=4, default='CSC')
-    contract_number = models.IntegerField()
-    organization_name = models.CharField(max_length=255, verbose_name='Contract Name')
-    start_date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    state = models.CharField(max_length=8, choices=STATES, default=STATES.ACTIVE)
-    type = models.CharField(max_length=8, choices=TYPES)
 
 
 class Income(LineItem):
