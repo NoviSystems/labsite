@@ -1,17 +1,21 @@
-from django.forms import ModelForm, BooleanField
 from django.core.exceptions import FieldDoesNotExist
+from django.db.models import DateField
+from django import forms
 
 from accounting import models
 
 
-class BaseForm(ModelForm):
+class BaseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(BaseForm, self).__init__(*args, **kwargs)
 
+        model = self._meta.model
         for field in self.fields:
+            model_field = model._meta.get_field(field)
+
             try:
-                placeholder = self.instance._meta.get_field(field).verbose_name
+                placeholder = model_field.verbose_name
             except FieldDoesNotExist:
                 placeholder = ''
 
@@ -20,7 +24,7 @@ class BaseForm(ModelForm):
                 'class': 'form-control',
             })
 
-            if 'date' in self.fields[field].label.lower():
+            if isinstance(model_field, DateField):
                 self.fields[field].widget.attrs.update({
                     'class': 'form-control datepicker',
                 })
