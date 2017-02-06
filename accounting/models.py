@@ -10,6 +10,8 @@ class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)
     account_number = models.CharField(max_length=12)
 
+    users = models.ManyToManyField(User, through='UserTeamRole', related_name='business_units')
+
     def __str__(self):
         return self.name
 
