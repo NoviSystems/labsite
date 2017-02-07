@@ -1,0 +1,88 @@
+<div role="tab">
+    <div class="panel-title">
+        <a role="button" data-toggle="collapse" href="#collapse-{{ contract.pk }}">
+            <h4 class="lead" style="margin: 10px 0">
+                {{ contract.contract_id }}: {{ contract.name }}
+            </h4>
+        </a>
+    </div>
+</div>
+
+<div id="collapse-{{ contract.pk }}" class="panel-collapse collapse" role="tabpanel">
+    <div class="row">
+
+        <!-- Contract Details -->
+        <div class="col-md-5">
+            <table class="table">
+                <tr><th>Total Amount:</th>  <td>${{ contract.amount }}</td></tr>
+                <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
+                <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
+            </table>
+            {% if not is_viewer %}
+            <form action="{{ contract_ctx.delete_url }}" method="post">
+                {% csrf_token %}
+                <div class="btn-group btn-group-sm">
+                    <a class="btn btn-sm btn-primary" href="{{ contract_ctx.update_url }}">Update Contract</a>
+                    <a class="btn btn-sm btn-danger" data-toggle="modal" data-target="#baseDeleteModal">
+                        <i class="fa fa-trash"></i>
+                    </a>
+                </div>
+            </form>
+            <br>
+            {% endif %}
+        </div>
+
+        <!-- Contract Invoices -->
+        <div class="col-md-7">
+            {% if not contract_ctx.invoices %}
+            <p class="text-center"><b>No invoices for this contract.</b></p>
+            {% endif %}
+
+            {% if contract_ctx.invoices %}
+            <table class="table table-hover">
+                <tr>
+                    <th class="col-xs-3">Invoice ID:</th>
+                    <th class="col-xs-2">Date:</th>
+                    <th class="col-xs-2">Status:</th>
+                    <th class="col-xs-2">Predicted:</th>
+                    <th class="col-xs-2">Actual:</th>
+                    <th class="col-xs-1">Actions:</th>
+                </tr>
+
+                {% for invoice_ctx in contract_ctx.invoices %}
+                {% with invoice=invoice_ctx.invoice %}
+                <tr>
+                    <td>{{ invoice.invoice_id }}</td>
+                    <td>{{ invoice.get_month_display }} {{ invoice.year }}</td>
+                    <td>{{ invoice.get_state_display }}</td>
+                    <td>{{ invoice.predicted_amount }}</td>
+                    <td>{{ invoice.actual_amount|default:"null" }}</td>
+                    {% if not is_viewer %}
+                    <td>
+                        <form action="{{ invoice_ctx.delete_url }}" method="post">
+                            {% csrf_token %}
+                            <div class="btn-group btn-group-xs" style="display: flex;"> <!-- prevents button wrapping -->
+                                <a class="btn btn-default" href="{{ invoice_ctx.update_url }}">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </table>
+            {% endif %}
+
+            {% if not is_viewer %}
+            <p class="text-center">
+                <a class="btn btn-sm btn-primary" href="{{ contract_ctx.invoice_url }}">Create Invoice</a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>

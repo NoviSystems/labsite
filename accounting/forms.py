@@ -73,29 +73,18 @@ class ExpenseUpdateForm(BaseForm, ModelForm):
         ]
 
 
-class InvoiceCreateForm(BaseForm, ModelForm):
+class InvoiceForm(BaseForm):
     class Meta:
         model = models.Invoice
         fields = [
-            'predicted_amount',
-            'date_payable',
-        ]
-
-
-class InvoiceUpdateForm(BaseForm, ModelForm):
-    class Meta:
-        model = models.Invoice
-        fields = '__all__'
-        exclude = [
-            'business_unit',
+            'invoice_id',
             'name',
-            'number',
-            'contract',
-            'reconciled',
+            'month',
+            'year',
+            'predicted_amount',
+            'actual_amount',
+            'state',
         ]
-        help_texts = {
-            'transition_state': 'Invoices are marked reconciled when Actual Amount and Date Paid are filled and Tansition State is Recieved.'
-        }
 
 
 class IncomeCreateForm(BaseForm, ModelForm):

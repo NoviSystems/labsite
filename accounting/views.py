@@ -252,33 +252,53 @@ class DashboardView(ViewerMixin, TemplateView):
         return context
 
 
-class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
+class ContractsView(ViewerMixin, TemplateView):
     template_name = 'accounting/contracts.html'
 
+    def contract_url_kwargs(self, contract):
+        return {
+            'business_unit': self.current_business_unit.pk,
+            'contract': contract.pk
+        }
+
+    def invoice_url_kwargs(self, invoice):
+        kwargs = self.contract_url_kwargs(invoice.contract)
+        kwargs['invoice'] = invoice.pk
+
+        return kwargs
+
+    def make_contract_context(self, contract):
+        return {
+            'contract': contract,
+            'invoices': [
+                self.make_invoice_context(invoice) for invoice
+                in models.Invoice.objects.filter(contract=contract).order_by('month', 'year')  # .order_by('date_payable')
+            ],
+            'delete_url': reverse('accounting:delete_contract', kwargs=self.contract_url_kwargs(contract)),
+            'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
+            'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
+        }
+
+    def make_invoice_context(self, invoice):
+        return {
+            'invoice': invoice,
+            'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+            'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+        }
+
     def get_context_data(self, **kwargs):
-        context = super(ContractsView, self).get_context_data()
-        contracts = models.Contract.objects.filter(business_unit=self.current_business_unit)
-        completed_contracts = []
-        active_contracts = []
-        for contract in contracts:
-            if contract.contract_state == 'ACTIVE':
-                invoices = models.Invoice.objects.filter(contract=contract).order_by('date_payable')
-                active_contracts.extend([
-                    {
-                        'contract': contract,
-                        'invoices': invoices,
-                    }
-                ])
-            elif contract.contract_state == 'COMPLETE':
-                invoices = models.Invoice.objects.filter(contract=contract)
-                completed_contracts.extend([
-                    {
-                        'contract': contract,
-                        'invoices': invoices,
-                    }
-                ])
-        context['active_contracts'] = active_contracts
-        context['completed_contracts'] = completed_contracts
+        context = super().get_context_data(**kwargs)
+
+        STATES = models.Contract.STATES
+        context['active_contracts'] = [
+            self.make_contract_context(contract) for contract
+            in models.Contract.objects.filter(state=STATES.ACTIVE).order_by('-start_date')
+        ]
+        context['completed_contracts'] = [
+            self.make_contract_context(contract) for contract
+            in models.Contract.objects.filter(state=STATES.COMPLETE).order_by('-start_date')
+        ]
+
         return context
 
 
@@ -385,13 +405,21 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
         return reverse_lazy('accounting:business_unit_settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
-class ContractCreateView(ManagerMixin, CreateView):
+class ContractMixin(ManagerMixin):
     model = models.Contract
-    form_class = forms.ContractForm
-    template_name = 'accounting/base_form.html'
+    pk_url_kwarg = 'contract'
+    success_url_name = 'accounting:contracts'
 
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = self.get_success_url()
+
+        return context
+
+
+class ContractCreateView(ContractMixin, CreateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.ContractForm
 
     def form_valid(self, form):
         form.instance.business_unit = self.current_business_unit
@@ -399,119 +427,59 @@ class ContractCreateView(ManagerMixin, CreateView):
         return super(ContractCreateView, self).form_valid(form)
 
 
-class ContractDeleteView(ManagerMixin, DeleteView):
-    model = models.Contract
-    template_name = 'accounting/base_delete_form.html'
-    pk_url_kwarg = 'contract'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
-class ContractUpdateView(ManagerMixin, UpdateView):
-    model = models.Contract
+class ContractUpdateView(ContractMixin, UpdateView):
+    template_name = 'accounting/base_form.html'
     form_class = forms.ContractForm
-    template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'contract'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
-class InvoiceCreateView(ManagerMixin, CreateView):
-    model = models.Invoice
-    form_class = forms.InvoiceCreateForm
-    template_name = 'accounting/base_form.html'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def form_valid(self, form):
-        contract = models.Contract.objects.get(pk=self.kwargs['contract'])
-        form.instance.contract = contract
-        max_invoice_number = models.Invoice.objects.filter(contract=contract).aggregate(Max('number'))
-        if not max_invoice_number['number__max']:
-            form.instance.number = 1
-        else:
-            form.instance.number = max_invoice_number['number__max'] + 1
-        form.instance.transition_state = 'NOT_INVOICED'
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
-        contract_number = str(form.instance.contract.contract_number)
-        contract_number = contract_number.zfill(4)
-        form.instance.name = form.instance.contract.department + contract_number + '-' + str(form.instance.number)
-
-        invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
-        if invoices_sum is None:
-            invoices_sum = Decimal('0.00')
-        available_amount = contract.amount - invoices_sum
-        if form.instance.predicted_amount <= available_amount:
-            response = super(InvoiceCreateView, self).form_valid(form)
-            return response
-        else:
-            error_message = 'Predicted amount must be less than or equal to {}'.format(available_amount)
-            if available_amount == Decimal('0.00'):
-                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('predicted_amount', error_message)
-            return self.form_invalid(form)
-
-        return response
-
-
-class InvoiceDeleteView(ManagerMixin, DeleteView):
-    model = models.Invoice
+class ContractDeleteView(ContractMixin, DeleteView):
     template_name = 'accounting/base_delete_form.html'
-    pk_url_kwarg = 'invoice'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
-class InvoiceUpdateView(ManagerMixin, UpdateView):
+class InvoiceMixin(ManagerMixin):
     model = models.Invoice
-    form_class = forms.InvoiceUpdateForm
-    template_name = 'accounting/base_form.html'
     pk_url_kwarg = 'invoice'
+    success_url_name = 'accounting:contracts'
 
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
+    @cached_property
+    def current_contract(self):
+        pk = self.kwargs.get('contract', None)
+
+        if pk is None:
+            return None
+        return models.Contract.objects.get(pk=pk)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = self.get_success_url()
+
+        return context
+
+
+class InvoiceCreateView(InvoiceMixin, CreateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.InvoiceForm
 
     def form_valid(self, form):
-        if form.instance.actual_amount is not None and form.instance.date_paid is not None and form.instance.transition_state == 'RECEIVED':
-            form.instance.reconciled = True
-        else:
-            form.instance.reconciled = False
-        response = super(InvoiceUpdateView, self).form_valid(form)
+        form.instance.business_unit = self.current_business_unit
+        form.instance.contract = self.current_contract
 
-        contract = models.Contract.objects.get(pk=self.kwargs['contract'])
+        return super().form_valid(form)
 
-        predicted_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
-        actual_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('actual_amount'))['actual_amount__sum']
 
-        if predicted_invoices_sum is None or actual_invoices_sum is None:
-            predicted_invoices_sum = Decimal('0.00')
-            actual_invoices_sum = Decimal('0.00')
+class InvoiceUpdateView(InvoiceMixin, UpdateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.InvoiceForm
 
-        predicted_available_amount = contract.amount - predicted_invoices_sum + self.object.predicted_amount
-        actual_available_amount = contract.amount - actual_invoices_sum + self.object.actual_amount
+    def form_valid(self, form):
+        form.instance.business_unit = self.current_business_unit
+        form.instance.contract = self.current_contract
 
-        if form.instance.predicted_amount > predicted_available_amount:
-            error_message = 'Predicted amount must be less than or equal to {}'.format(predicted_available_amount)
-            if predicted_available_amount == Decimal('0.00'):
-                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('predicted_amount', error_message)
+        return super().form_valid(form)
 
-        if form.instance.actual_amount > actual_available_amount:
-            error_message = 'Actual amount must be less than or equal to {}'.format(actual_available_amount)
-            if actual_available_amount == Decimal('0.00'):
-                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('actual_amount', error_message)
 
-        elif form.instance.predicted_amount <= predicted_available_amount and form.instance.actual_amount <= actual_available_amount:
-            response = super(InvoiceUpdateView, self).form_valid(form)
-            return response
-
-        return self.form_invalid(form)
+class InvoiceDeleteView(InvoiceMixin, DeleteView):
+    template_name = 'accounting/base_delete_form.html'
 
 
 class UserTeamRoleCreateView(ManagerMixin, CreateView):

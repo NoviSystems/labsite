@@ -71,13 +71,13 @@ class Contract(models.Model):
     type = models.CharField(max_length=8, choices=TYPES)
 
     def __str__(self):
-        return '%d: %s' % (self.contract_id, self.name)
+        return '%s: %s' % (self.contract_id, self.name)
 
 
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     predicted_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    actual_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=None)
+    actual_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=None)
 
     # Date field isn't entirely appropriate, since items are associated by month.
     month = models.SmallIntegerField(choices=MONTHS, default=MONTHS._1)
@@ -93,13 +93,16 @@ class Invoice(LineItem):
         ('INVOICED', 'Invoiced'),
         ('RECEIVED', 'Received'),
     ))
-    name = models.CharField(max_length=50)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
-    number = models.PositiveIntegerField()
+    invoice_id = models.CharField(max_length=64, unique=True, verbose_name=_("invoice ID"))
+    name = models.CharField(max_length=50)
     state = models.CharField(max_length=15, choices=STATES, default=STATES.NOT_INVOICED)
 
     class Meta:
-        unique_together = ('contract', 'number')
+        unique_together = ('contract', 'invoice_id')
+
+    def __str__(self):
+        return '%s: %s' % (self.invoice_id, self.name)
 
 
 class MonthlyBalance(LineItem):
