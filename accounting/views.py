@@ -161,6 +161,13 @@ class DashboardView(ViewerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context.update({
+            'next_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
+            'prev_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
+            'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
+        })
+
         cma = {'title': 'Cash Month Actual', 'values': {}}
         cmpr = {'title': 'Cash Month Projected', 'values': {}}
         ema = {'title': 'Expenses Month Actual', 'values': {}}
@@ -319,6 +326,13 @@ class MonthlyReconcileView(ViewerMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context.update({
+            'next_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
+            'prev_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
+            'current_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk}),
+        })
+
         months = []
         [months.append(month) for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
         context['months'] = months
