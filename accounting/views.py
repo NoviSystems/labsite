@@ -160,7 +160,7 @@ class DashboardView(ViewerMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
     def get_context_data(self, **kwargs):
-        context = super(DashboardView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         cma = {'title': 'Cash Month Actual', 'values': {}}
         cmpr = {'title': 'Cash Month Projected', 'values': {}}
         ema = {'title': 'Expenses Month Actual', 'values': {}}
@@ -304,21 +304,21 @@ class ContractsView(ViewerMixin, TemplateView):
         return context
 
 
-class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
+class RevenueView(ViewerMixin, TemplateView):
     template_name = 'accounting/revenue.html'
 
     def get_context_data(self, **kwargs):
-        context = super(RevenueView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         invoices = models.Invoice.objects.filter(contract__business_unit=self.current_business_unit)
         context['invoices'] = invoices
         return context
 
 
-class MonthlyReconcileView(ViewerMixin, SetUpMixin, TemplateView):
+class MonthlyReconcileView(ViewerMixin, TemplateView):
     template_name = 'accounting/monthly_reconcile.html'
 
     def get_context_data(self, **kwargs):
-        context = super(MonthlyReconcileView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         months = []
         [months.append(month) for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
         context['months'] = months
@@ -356,7 +356,7 @@ class BusinessUnitSettingsPageView(ManagerMixin, TemplateView):
     template_name = 'accounting/settings/business_unit.html'
 
     def get_context_data(self, **kwargs):
-        context = super(BusinessUnitSettingsPageView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         users = models.UserTeamRole.objects.filter(business_unit=self.current_business_unit)
         viewers = [user for user in users if user.role == 'VIEWER']
         managers = [user for user in users if user.role == 'MANAGER']
@@ -369,7 +369,7 @@ class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
     template_name = 'accounting/settings/user_team_roles.html'
 
     def get_context_data(self, **kwargs):
-        context = super(UserTeamRolesSettingsPageView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         users = models.UserTeamRole.objects.filter(business_unit=self.current_business_unit)
         viewers = [user for user in users if user.role == 'VIEWER']
         managers = [user for user in users if user.role == 'MANAGER']
@@ -378,7 +378,7 @@ class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
         return context
 
 
-class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
+class BusinessUnitCreateView(AccountingMixin, CreateView):
     model = models.BusinessUnit
     form_class = forms.BusinessUnitForm
     template_name = 'accounting/base_form.html'
