@@ -18,7 +18,7 @@
                 {% if not full_time %}
                     <h4>No full time personnel for this business unit.</h4>
                 {% endif %}
-                {% if not is_viewer %}
+                {% if is_manager %}
                     <a class="btn btn-primary" href={% url 'accounting:create_full_time' business_unit=current_business_unit.pk %}>Create Full Time Employee</a>
                 {% endif %}
                 <div class="row">
@@ -35,9 +35,9 @@
 
                         <div id="collapse{{ employee.pk }}" class="panel-collapse collapse model-display" role="tabpanel" aria-labelledby="heading{{ employee.pk }}">
                             <div class="row">
-                                <div class="col-md-4">  
+                                <div class="col-md-4">
                                     <h5>Position: {{ employee.position }}</h5>
-                                    <h5>ID: {{ employee.employee_id }}</h5>                          
+                                    <h5>ID: {{ employee.employee_id }}</h5>
                                     <h5>Salary Type: {{ employee.salary_type }}</h5>
                                 </div>
                                 <div class="col-md-4">
@@ -49,7 +49,7 @@
                                     <h5>Fringe: {{ employee.fringe_amount }}</h5>
                                 </div>
                                 <div class="col-md-4">
-                                    {% if not is_viewer %}
+                                    {% if is_manager %}
                                     <h4>
                                         <a class="btn btn-primary" href={% url 'accounting:update_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}>Update</a>
                                         <form action="{% url 'accounting:delete_full_time' business_unit=current_business_unit.pk full_time=employee.pk %}" method="post">
@@ -71,7 +71,7 @@
                 {% if not part_time %}
                 <h4>No part time personnel for this business unit.</h4>
                 {% endif %}
-                {% if not is_viewer %}
+                {% if is_manager %}
                     <a class="btn btn-primary" href={% url 'accounting:create_part_time' business_unit=current_business_unit.pk  %}>Create Part Time Employee</a>
                 {% endif %}
                 <div class="row">
@@ -88,16 +88,16 @@
                         <div id="collapse{{part_time.pk}}" class="panel-collapse collapse model-display" role="tabpanel" aria-labelledby="heading{{part_time.pk}}">
                             <div class="row">
                                 <div class="col-md-4">
-                                    <h5>Position: {{ part_time.position }}</5> 
-                                    <h5>ID: {{ part_time.employee_id }}</h5> 
+                                    <h5>Position: {{ part_time.position }}</5>
+                                    <h5>ID: {{ part_time.employee_id }}</h5>
                                     <h5>Type: {{ part_time.hourly_type }}</h5>
                                 </div>
                                 <div class="col-md-4">
                                     <h5>Wage: ${{ part_time.hourly_amount }}</h5>
-                                    <h5>Hours: {{ part_time.hours_work }}</h5> 
+                                    <h5>Hours: {{ part_time.hours_work }}</h5>
                                 </div>
                                 <div class="col-md-4">
-                                    {% if not is_viewer %}
+                                    {% if is_manager %}
                                     <h4>
                                         <a class="btn btn-primary" href={% url 'accounting:update_part_time' part_time=part_time.pk business_unit=current_business_unit.pk %}>Update</a>
                                         <form action="{% url 'accounting:delete_part_time' part_time=part_time.pk  business_unit=current_business_unit.pk %}" method="post">

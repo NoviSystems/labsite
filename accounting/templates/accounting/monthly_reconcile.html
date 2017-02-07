@@ -5,7 +5,7 @@
 {% block content %}
 
     {% include "accounting/nav_tabs.html" with active="reconcile" %}
-    
+
     {% include "accounting/year_picker.html" with active="reconcile" %}
 
     <div class="container">
@@ -31,13 +31,13 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-md-3">
                     <h4>Cash</h4>
             </div>
             <div class="col-md-9">
-                {% if not is_viewer %}
+                {% if is_manager %}
                     {% if cash %}
                         <span>
                             <h4 style="display: inline-block;">Cash Actual: ${{ cash.actual_amount }}</h4>
@@ -57,11 +57,11 @@
                     <h4>Expenses</h4>
             </div>
             <div class="col-md-9">
-                    {% if not is_viewer %}
+                    {% if is_manager %}
                         <a class="btn btn-primary" href={% url 'accounting:create_expense' business_unit=current_business_unit.pk %}>Create Expense</a>
                         {% if not payroll %}
                             <a class="btn btn-primary" href={% url 'accounting:create_payroll_expense' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Create Payroll Actual</a>
-                        {% endif %}    
+                        {% endif %}
                     {% endif %}
             </div>
         </div>
@@ -91,7 +91,7 @@
                             <td>{{ expense.date_payable }}</td>
                             <td>{{ expense.date_paid }}</td>
                             <td>${{ expense.predicted_amount }}</td>
-                            {% if not is_viewer %}
+                            {% if is_manager %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_expense' business_unit=current_business_unit.pk expense=expense.pk %}>Update</a>
                                 {% if expense.name != "Payroll" %}
@@ -118,7 +118,7 @@
                     <h4>Income</h4>
             </div>
             <div class="col-md-9">
-                {% if not is_viewer %}
+                {% if is_manager %}
                     <a class="btn btn-primary" href={% url 'accounting:create_income' business_unit=current_business_unit.pk %}>Create Income</a>
                 {% endif %}
             </div>
@@ -143,7 +143,7 @@
                             <td>{{ income.date_payable }}</td>
                             <td>{{ income.date_paid }}</td>
                             <td>${{ income.predicted_amount }}</td>
-                            {% if not is_viewer %}
+                            {% if is_manager %}
                             <td>
                                 <a class="btn btn-primary" href={% url 'accounting:update_income' business_unit=current_business_unit.pk income=income.pk %}>Update</a>
                                 <form action="{% url 'accounting:delete_income' business_unit=current_business_unit.pk income=income.pk %}" method="post">

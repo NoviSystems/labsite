@@ -5,7 +5,7 @@
 {% block content %}
 
     {% include "accounting/nav_tabs.html" with active="revenue" %}
-    
+
     <div class="row">
             {% if invoices %}
 
@@ -25,7 +25,7 @@
                             <th scope="row">{{invoice.contract.department}}{{invoice.contract.contract_number|stringformat:"04d"}}-{{invoice.number}}: {{invoice.contract.organization_name}}</th>
                                 <td>{{ invoice.date }}</td>
                                 <td>{{ invoice.predicted_amount }}</td>
-                                {% if not is_viewer %}
+                                {% if is_manager %}
                                 <td>
                                     <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=invoice.contract.pk invoice=invoice.pk %}>Update</a>
                                     <form action="{% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=invoice.contract.pk invoice=invoice.pk %}" method="post">
@@ -57,7 +57,7 @@
                             <th scope="row">{{invoice.contract.department}}{{invoice.contract.contract_number|stringformat:"04d"}}-{{invoice.number}}: {{invoice.contract.organization_name}}</th>
                                 <td>{{ invoice.date_payable }}</td>
                                 <td>{{ invoice.predicted_amount }}</td>
-                                {% if not is_viewer %}
+                                {% if is_manager %}
                                 <td>
                                     <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=invoice.contract.pk invoice=invoice.pk %}>Update</a>
                                     <form action="{% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=invoice.contract.pk invoice=invoice.pk %}" method="post">
@@ -71,7 +71,7 @@
                         {% endfor %}
                     </tbody>
                     </table>
-                    
+
 
                     <table class="table">
                         <thead>
@@ -90,7 +90,7 @@
                             <th scope="row">{{invoice.contract.department}}{{invoice.contract.contract_number|stringformat:"04d"}}-{{invoice.number}}: {{invoice.contract.organization_name}}</th>
                                 <td>{{ invoice.date_paid }}</td>
                                 <td>{{ invoice.actual_amount }}</td>
-                                {% if not is_viewer %}
+                                {% if is_manager %}
                                 <td>
                                     <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=invoice.contract.pk invoice=invoice.pk %}>Update</a>
                                     <form action="{% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=invoice.contract.pk invoice=invoice.pk %}" method="post">
@@ -104,11 +104,11 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                    
+
 
         {% else %}
             <h4>No Invoices for this business unit.</h4>
         {% endif %}
-        
+
     </div>
 {% endblock %}

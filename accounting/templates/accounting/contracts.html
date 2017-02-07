@@ -8,7 +8,7 @@
     <div class="panel-body">
         <h3>
             Active Contracts
-            {% if not is_viewer %}
+            {% if is_manager %}
             <a class="btn btn-xs btn-primary" href="{% url 'accounting:create_contract' business_unit=current_business_unit.pk %}">
                 New <i class="fa fa-fw fa-plus"></i>
             </a>

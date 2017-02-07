@@ -18,7 +18,7 @@
                 <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
                 <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
             </table>
-            {% if not is_viewer %}
+            {% if is_manager %}
             <form action="{{ contract_ctx.delete_url }}" method="post">
                 {% csrf_token %}
                 <div class="btn-group btn-group-sm">
@@ -57,7 +57,7 @@
                     <td>{{ invoice.get_state_display }}</td>
                     <td>{{ invoice.predicted_amount }}</td>
                     <td>{{ invoice.actual_amount|default:"null" }}</td>
-                    {% if not is_viewer %}
+                    {% if is_manager %}
                     <td>
                         <form action="{{ invoice_ctx.delete_url }}" method="post">
                             {% csrf_token %}
@@ -78,7 +78,7 @@
             </table>
             {% endif %}
 
-            {% if not is_viewer %}
+            {% if is_manager %}
             <p class="text-center">
                 <a class="btn btn-sm btn-primary" href="{{ contract_ctx.invoice_url }}">Create Invoice</a>
             </p>

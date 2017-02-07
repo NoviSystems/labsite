@@ -4,7 +4,7 @@
     <li {% if active == "reconcile" %}class="active"{% endif %}><a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk %}>Monthly Reconcile</a></li>
     <li {% if active == "revenue" %}class="active"{% endif %}><a href={% url 'accounting:revenue' business_unit=current_business_unit.pk %}>Revenue</a></li>
     <li {% if active == "prospects" %}class="active"{% endif %}><a href="">Prospects</a></li>
-    {% if not is_viewer %}
+    {% if is_manager %}
         <li {% if active == "settings" %}class="active"{% endif %}><a href={% url 'accounting:business_unit_settings' business_unit=current_business_unit.pk %}>Settings</a></li>
     {% endif %}
 </ul>

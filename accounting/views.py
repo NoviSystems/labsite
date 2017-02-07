@@ -49,6 +49,17 @@ class AccountingMixin(LoginRequiredMixin):
             return None
 
     @cached_property
+    def is_manager(self):
+        if self.user.is_superuser:
+            return True
+
+        if self.team_role is None:
+            return False
+
+        ROLES = models.UserTeamRole.ROLES
+        return self.team_role.role == ROLES.MANAGER
+
+    @cached_property
     def business_units(self):
         return self.user.business_units.all()
 
@@ -80,7 +91,7 @@ class AccountingMixin(LoginRequiredMixin):
             'fiscal_year': self.fiscal_year,
             'fiscal_start': self.fiscal_start,
             'fiscal_end': self.fiscal_end,
-            'is_viewer': True,  # use secure default
+            'is_manager': self.is_manager,
         })
 
         return context
@@ -102,30 +113,15 @@ class ViewerMixin(AccountingMixin, UserPassesTestMixin):
     """
     raise_exception = True
 
-    @cached_property
-    def is_viewer(self):
-        if self.team_role is None:
-            return False
-
-        ROLES = models.UserTeamRole.ROLES
-        return self.team_role.role == ROLES.VIEWER
-
     def test_func(self):
-        if self.request.user.is_superuser:
+        if self.is_manager:
             return True
 
         if self.team_role is not None:
             ROLES = models.UserTeamRole.ROLES
-            if self.team_role.role in (ROLES.MANAGER, ROLES.VIEWER):
+            if self.team_role.role == ROLES.VIEWER:
                 return True
-
         return False
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_viewer'] = self.is_viewer
-
-        return context
 
 
 class ManagerMixin(AccountingMixin, UserPassesTestMixin):
@@ -135,21 +131,7 @@ class ManagerMixin(AccountingMixin, UserPassesTestMixin):
     raise_exception = True
 
     def test_func(self):
-        if self.request.user.is_superuser:
-            return True
-
-        if self.team_role is not None:
-            ROLES = models.UserTeamRole.ROLES
-            if self.team_role.role == ROLES.MANAGER:
-                return True
-
-        return False
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['is_viewer'] = False
-
-        return context
+        return self.is_manager
 
 
 ################################################################
