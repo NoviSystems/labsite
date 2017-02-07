@@ -152,6 +152,9 @@ class ManagerMixin(AccountingMixin, UserPassesTestMixin):
         return context
 
 
+################################################################
+# Dashboard Views                                              #
+################################################################
 class HomePageView(ViewerMixin, TemplateView):
     template_name = 'accounting/home.html'
 
@@ -392,6 +395,9 @@ class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
         return context
 
 
+################################################################
+# Business Units                                               #
+################################################################
 class BusinessUnitCreateView(AccountingMixin, CreateView):
     model = models.BusinessUnit
     form_class = forms.BusinessUnitForm
@@ -421,6 +427,9 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
         return reverse_lazy('accounting:business_unit_settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
+################################################################
+# Contracts                                                    #
+################################################################
 class ContractMixin(ManagerMixin):
     model = models.Contract
     pk_url_kwarg = 'contract'
@@ -452,6 +461,9 @@ class ContractDeleteView(ContractMixin, DeleteView):
     template_name = 'accounting/base_delete_form.html'
 
 
+################################################################
+# Invoices                                                     #
+################################################################
 class InvoiceMixin(ManagerMixin):
     model = models.Invoice
     pk_url_kwarg = 'invoice'
@@ -498,6 +510,9 @@ class InvoiceDeleteView(InvoiceMixin, DeleteView):
     template_name = 'accounting/base_delete_form.html'
 
 
+################################################################
+# User Team Roles                                              #
+################################################################
 class UserTeamRoleCreateView(ManagerMixin, CreateView):
     model = models.UserTeamRole
     form_class = forms.UserTeamRoleCreateForm
