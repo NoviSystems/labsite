@@ -14,16 +14,22 @@
 <script src="{% static 'js/datepicker.js' %}"></script>
 
 
-<div class="panel panel-default">
+<div class="panel panel-default col-sm-offset-2 col-sm-8">
     <div class="panel-body">
         <h3 class="form-header">
         {% if object %}Update{% else %}Create{% endif %}
-        {% if base_form_title %}{{ base_form_title }}{% else %}{{ form | get_form_model_name }}{% endif %}</h3>
+        {% if base_form_title %}{{ base_form_title }}{% else %}{{ form | get_form_model_name }}{% endif %}
+        </h3>
         <hr>
         <form class="form" method="POST" action="">
             {% csrf_token %}
             {% include 'forms/block_form.html' with form=form %}
-            <button class="btn btn-primary pull-right" type="submit">{% if object %} Update {% else %} Create {% endif %} {{ form.instance | get_form_model_name }}</button>
+            <div class="pull-right">
+                {% if cancel_url %}
+                <a href="{{ cancel_url }}" class="btn btn-default">Cancel</a>
+                {% endif %}
+                <button class="btn btn-primary" type="submit">{% if object %} Update {% else %} Create {% endif %} {{ form | get_form_model_name }}</button>
+            </div>
         </form>
     </div>
 </div>
