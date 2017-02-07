@@ -1,3 +1,6 @@
 $(document).ready(function(){
-    $(".datepicker").datepicker();
+    $(".datepicker").datepicker({
+        clearBtn: true,
+        format: 'yyyy-mm-dd',
+    });
 });
