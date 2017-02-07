@@ -284,7 +284,7 @@ class ContractsView(ViewerMixin, TemplateView):
             'contract': contract,
             'invoices': [
                 self.make_invoice_context(invoice) for invoice
-                in models.Invoice.objects.filter(contract=contract).order_by('month', 'year')  # .order_by('date_payable')
+                in models.Invoice.objects.filter(contract=contract).order_by('-year', '-month')
             ],
             'delete_url': reverse('accounting:delete_contract', kwargs=self.contract_url_kwargs(contract)),
             'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
