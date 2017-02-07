@@ -58,7 +58,7 @@ class AccountingMixin(LoginRequiredMixin):
 
         if pk is None:
             return None
-        return models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
+        return models.BusinessUnit.objects.get(pk=pk)
 
     @cached_property
     def fiscal_year(self):
@@ -87,10 +87,12 @@ class AccountingMixin(LoginRequiredMixin):
 
     def get_success_url_kwargs(self):
         return {
-            'business_unit': self.kwargs['business_unit']
+            'business_unit': self.current_business_unit.pk
         }
 
     def get_success_url(self):
+        if self.success_url_name is None:
+            return super().get_success_url()
         return reverse(self.success_url_name, kwargs=self.get_success_url_kwargs())
 
 
