@@ -39,8 +39,8 @@ class BusinessUnit(models.Model):
 
 class UserTeamRole(models.Model):
     ROLES = choices((
-        ('MANAGER', 'Manager'),
-        ('VIEWER', 'Viewer'),
+        ('MANAGER', _('Manager')),
+        ('VIEWER', _('Viewer')),
     ))
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
@@ -55,12 +55,12 @@ class UserTeamRole(models.Model):
 
 class Contract(models.Model):
     STATES = choices((
-        ('ACTIVE', 'Active'),
-        ('COMPLETE', 'Complete'),
+        ('ACTIVE', _('Active')),
+        ('COMPLETE', _('Complete')),
     ))
     TYPES = choices((
-        ('FIXED', 'Fixed'),
-        ('HOURLY', 'Hourly'),
+        ('FIXED', _('Fixed')),
+        ('HOURLY', _('Hourly')),
     ))
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     contract_id = models.CharField(max_length=64, unique=True, verbose_name=_("contract ID"))
@@ -89,9 +89,9 @@ class LineItem(models.Model):
 
 class Invoice(LineItem):
     STATES = choices((
-        ('NOT_INVOICED', 'Not Invoiced'),
-        ('INVOICED', 'Invoiced'),
-        ('RECEIVED', 'Received'),
+        ('NOT_INVOICED', _('Not Invoiced')),
+        ('INVOICED', _('Invoiced')),
+        ('RECEIVED', _('Received')),
     ))
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE)
     invoice_id = models.CharField(max_length=64, unique=True, verbose_name=_("invoice ID"))
