@@ -19,7 +19,7 @@
     <div class="panel-body">
         <h3 class="form-header">
         {% if object %}Update{% else %}Create{% endif %}
-        {% if base_form_title %}{{ base_form_title }}{% else %}{{ form | get_form_model_name }}{% endif %}
+        {% if base_form_title %}{{ base_form_title }}{% else %}{{ form | get_form_model_name }} {% if object %}{{ object }}{% endif %}{% endif %}
         </h3>
         <hr>
         <form class="form" method="POST" action="">
