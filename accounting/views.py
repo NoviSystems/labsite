@@ -450,12 +450,14 @@ class BusinessUnitCreateView(AccountingMixin, CreateView):
     model = models.BusinessUnit
     form_class = forms.BusinessUnitForm
     template_name = 'accounting/base_form.html'
-    success_url = reverse_lazy('accounting:home')
 
     def form_valid(self, form):
         response = super(BusinessUnitCreateView, self).form_valid(form)
         models.UserTeamRole.objects.create(user=self.request.user, business_unit=form.instance, role='MANAGER')
         return response
+
+    def get_success_url(self):
+        return reverse('accounting:dashboard', kwargs={'business_unit': self.object.pk})
 
 
 class BusinessUnitDeleteView(ManagerMixin, DeleteView):
