@@ -1,4 +1,13 @@
 
+.nav-well {
+    padding: 5px 8px 0;
+    border-radius: 3px;
+}
+
+.nav-well .nav-tabs {
+    border: 0;
+}
+
 th.year-header {
     vertical-align: middle !important;
 }
