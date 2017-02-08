@@ -13,6 +13,7 @@ import os
 import socket
 from project.secrets import *
 from django.core.urlresolvers import reverse_lazy
+from django.contrib.messages import constants as messages
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'accounts',
@@ -111,18 +113,28 @@ TEMPLATES = [
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.tz',
-                'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
                 'itng.registration.templates.context_processors.auth_base',
+                'itng.common.context_processors.debug',
                 'project.context_processors.navbar_context',
             ],
         },
     },
 ]
+
+
+# Messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-debug',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 # CELERY SETTINGS
 CELERY_TIMEZONE = 'America/New_York'
