@@ -35,7 +35,6 @@ urlpatterns = [
     # Contracts Forms
     url(r'^(?P<business_unit>\d+)/contracts/create/$', views.ContractCreateView.as_view(), name='create_contract'),
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/update/$', views.ContractUpdateView.as_view(), name='update_contract'),
-    url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/delete/$', views.ContractDeleteView.as_view(), name='delete_contract'),
 
     # Invoice Forms
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/create/$', views.InvoiceCreateView.as_view(), name='create_invoice'),

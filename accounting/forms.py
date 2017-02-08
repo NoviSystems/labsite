@@ -37,7 +37,6 @@ class ContractForm(BaseForm):
             'name',
             'start_date',
             'amount',
-            'state',
             'type',
         ]
 

@@ -1,3 +1,6 @@
+{% load humanize %}
+
+{% with contract=contract_ctx.contract %}
 <div role="tab">
     <div class="panel-title">
         <a role="button" data-toggle="collapse" href="#collapse-{{ contract.pk }}">
@@ -12,28 +15,56 @@
     <div class="row">
 
         <!-- Contract Details -->
-        <div class="col-md-5">
+        <div class="col-md-4">
             <table class="table">
                 <tr><th>Total Amount:</th>  <td>${{ contract.amount }}</td></tr>
                 <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
                 <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
             </table>
             {% if is_manager %}
-            <form action="{{ contract_ctx.delete_url }}" method="post">
+
+            <!-- New controls-->
+            {% if contract.state == contract.STATES.NEW %}
+            <form action="" method="post">
                 {% csrf_token %}
+                <a class="btn btn-sm btn-primary" name="activate" value="{{ contract.pk }}"
+                 data-toggle="modal" data-target="#action-modal"
+                 data-title="Confirm Activation" data-body="Are you sure you want to activate <b>{{ contract.contract_id }}: {{ contract.name }}</b>?"
+                 data-btn-class="btn-primary">
+                    Activate
+                </a>
+
                 <div class="btn-group btn-group-sm">
                     <a class="btn btn-sm btn-primary" href="{{ contract_ctx.update_url }}">Update Contract</a>
-                    <a class="btn btn-sm btn-danger" data-toggle="modal" data-target="#baseDeleteModal">
+                    <a class="btn btn-sm btn-danger" name="delete" value="{{ contract.pk }}"
+                     data-toggle="modal" data-target="#action-modal"
+                     data-title="Confirm Deletion" data-body="Are you sure you want to delete <b>{{ contract.contract_id }}: {{ contract.name }}</b>?"
+                     data-btn-class="btn-danger">
                         <i class="fa fa-trash"></i>
                     </a>
                 </div>
             </form>
+            {% endif %}
+
+            <!-- Active controls-->
+            {% if contract_ctx.contract.state == contract.STATES.ACTIVE %}
+            <form action="" method="post">
+                {% csrf_token %}
+                <a class="btn btn-sm btn-primary" name="complete" value="{{ contract.pk }}"
+                 data-toggle="modal" data-target="#action-modal"
+                 data-title="Confirm Completion" data-body="Are you sure you want to mark <b>{{ contract.contract_id }}: {{ contract.name }}</b> as complete?"
+                 data-btn-class="btn-primary">
+                    Complete
+                </a>
+            </form>
+            {% endif %}
+
             <br>
             {% endif %}
         </div>
 
         <!-- Contract Invoices -->
-        <div class="col-md-7">
+        <div class="col-md-8">
             {% if not contract_ctx.invoices %}
             <p class="text-center"><b>No invoices for this contract.</b></p>
             {% endif %}
@@ -52,22 +83,30 @@
                 {% for invoice_ctx in contract_ctx.invoices %}
                 {% with invoice=invoice_ctx.invoice %}
                 <tr>
-                    <td>{{ invoice.invoice_id }}</td>
-                    <td>{{ invoice.get_month_display }} {{ invoice.year }}</td>
+                    <td>{{ invoice.invoice_id|default:"---------" }}</td>
+                    <td>{{ invoice.date|date:"DATE_FORMAT" }}</td>
                     <td>{{ invoice.get_state_display }}</td>
-                    <td>{{ invoice.predicted_amount }}</td>
-                    <td>{{ invoice.actual_amount|default:"null" }}</td>
+                    <td>${{ invoice.predicted_amount|intcomma }}</td>
+                    <td>{% if invoice.actual_amount is not None %}
+                        ${{ invoice.actual_amount|intcomma }}
+                        {% endif %}
+                    </td>
                     {% if is_manager %}
                     <td>
                         <form action="{{ invoice_ctx.delete_url }}" method="post">
                             {% csrf_token %}
                             <div class="btn-group btn-group-xs" style="display: flex;"> <!-- prevents button wrapping -->
+                                {% if contract.state != contract.STATES.COMPLETE %}
                                 <a class="btn btn-default" href="{{ invoice_ctx.update_url }}">
                                     <i class="fa fa-pencil"></i>
                                 </a>
-                                <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal">
+                                {% endif %}
+
+                                {% if contract.state == contract.STATES.NEW %}
+                                <a class="btn btn-danger" data-toggle="modal" data-target="#action-modal">
                                     <i class="fa fa-trash"></i>
                                 </a>
+                                {% endif %}
                             </div>
                         </form>
                     </td>
@@ -78,7 +117,7 @@
             </table>
             {% endif %}
 
-            {% if is_manager %}
+            {% if is_manager and contract.state == contract.STATES.NEW %}
             <p class="text-center">
                 <a class="btn btn-sm btn-primary" href="{{ contract_ctx.invoice_url }}">Create Invoice</a>
             </p>
@@ -86,3 +125,4 @@
         </div>
     </div>
 </div>
+{% endwith %}

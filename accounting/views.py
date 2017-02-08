@@ -271,7 +271,6 @@ class ContractsView(ViewerMixin, TemplateView):
                 self.make_invoice_context(invoice) for invoice
                 in models.Invoice.objects.filter(contract=contract).order_by('-date')
             ],
-            'delete_url': reverse('accounting:delete_contract', kwargs=self.contract_url_kwargs(contract)),
             'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
             'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
         }
@@ -308,6 +307,59 @@ class ContractsView(ViewerMixin, TemplateView):
         })
 
         return context
+
+    def post(self, *args, **kwargs):
+        activate = self.request.POST.get('activate')
+        complete = self.request.POST.get('complete')
+        delete = self.request.POST.get('delete')
+
+        if activate is not None:
+            instance = models.Contract.objects.get(pk=activate)
+            self.activate(instance)
+
+        elif complete is not None:
+            instance = models.Contract.objects.get(pk=complete)
+            self.complete(instance)
+
+        elif delete is not None:
+            instance = models.Contract.objects.get(pk=delete)
+            self.delete(instance)
+
+        return redirect('accounting:contracts', business_unit=self.current_business_unit.pk)
+
+    def activate(self, contract):
+        if not contract.has_invoice():
+            msg = "Contract %s not activated. Activation requires at least one invoice."
+            messages.error(self.request, msg % contract.contract_id)
+
+        elif not contract.amount_matches_invoices():
+            msg = "Contract %s not activated. Sum of invoice amounts (%s) do not equal contract amount (%s)."
+            messages.error(self.request, msg % (
+                contract.contract_id,
+                "$%s" % intcomma(contract.get_invoices_predicted_total()),
+                "$%s" % intcomma(contract.amount),
+            ))
+
+        else:
+            contract.activate()
+            contract.save()
+
+    def complete(self, contract):
+        if not contract.all_invoices_received():
+            msg = "Contract %s not completed. Contract has unreceived invoices."
+            messages.error(self.request, msg % contract.contract_id)
+
+        else:
+            contract.complete()
+            contract.save()
+
+    def delete(self, contract):
+        if contract.state != contract.STATES.NEW:
+            msg = "Contract %s not deleted. Cannot delete active/completed contracts."
+            messages.error(self.request, msg % contract.contract_id)
+
+        else:
+            contract.delete()
 
 
 class RevenueView(ViewerMixin, TemplateView):
@@ -451,10 +503,6 @@ class ContractCreateView(ContractMixin, CreateView):
 class ContractUpdateView(ContractMixin, UpdateView):
     template_name = 'accounting/base_form.html'
     form_class = forms.ContractForm
-
-
-class ContractDeleteView(ContractMixin, DeleteView):
-    template_name = 'accounting/base_delete_form.html'
 
 
 ################################################################

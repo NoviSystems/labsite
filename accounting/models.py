@@ -1,7 +1,9 @@
 from datetime import date
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django_fsm import FSMField, transition
 from itng.common.utils import choices
 
 User = settings.AUTH_USER_MODEL
@@ -25,6 +27,11 @@ MONTHS = choices((
 
 def current_year():
     return date.today().year
+
+
+def validate_positive(value):
+    if value < 0:
+        raise ValidationError(_('Value must be a positive number.'))
 
 
 class BusinessUnit(models.Model):
@@ -67,12 +74,49 @@ class Contract(models.Model):
     contract_id = models.CharField(max_length=64, unique=True, verbose_name=_("contract ID"))
     name = models.CharField(max_length=255, verbose_name=_("contract name"))
     start_date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    state = models.CharField(max_length=8, choices=STATES, default=STATES.ACTIVE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[validate_positive])
+    state = FSMField(max_length=8, choices=STATES, default=STATES.NEW)
     type = models.CharField(max_length=8, choices=TYPES)
 
     def __str__(self):
         return '%s: %s' % (self.contract_id, self.name)
+
+    def get_invoices_predicted_total(self):
+        aggregate = models.Sum(
+            'predicted_amount',
+            output_field=models.DecimalField(max_digits=10, decimal_places=2, default=0)
+        )
+        return self.invoice_set.all().aggregate(amount=aggregate)['amount']
+
+    def get_unreceived_invoices(self):
+        return self.invoice_set.filter(actual_amount=None) | \
+            self.invoice_set.exclude(state=Invoice.STATES.RECEIVED)
+
+    def has_invoice(self):
+        return self.invoice_set.exists()
+
+    def amount_matches_invoices(self):
+        # The predicted amount of all invoices should match the contract's dollar amount.
+        return self.amount == self.get_invoices_predicted_total()
+
+    def all_invoices_received(self):
+        return not self.get_unreceived_invoices().exists()
+
+    @transition(field=state, source=STATES.NEW, target=STATES.ACTIVE, conditions=[has_invoice, amount_matches_invoices])
+    def activate(self):
+        """
+        Mark the Contract as active.
+        """
+
+        for idx, invoice in enumerate(self.invoice_set.order_by('date'), start=1):
+            invoice.invoice_id = "%s-%02d" % (self.contract_id, idx)
+            invoice.save()
+
+    @transition(field=state, source=STATES.ACTIVE, target=STATES.COMPLETE, conditions=[all_invoices_received])
+    def complete(self):
+        """
+        Mark the contract as complete.
+        """
 
 
 class LineItem(models.Model):
