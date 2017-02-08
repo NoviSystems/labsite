@@ -521,6 +521,12 @@ class InvoiceMixin(ManagerMixin):
             return None
         return models.Contract.objects.get(pk=pk)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['contract'] = self.current_contract
+
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['cancel_url'] = self.get_success_url()
@@ -530,24 +536,19 @@ class InvoiceMixin(ManagerMixin):
 
 class InvoiceCreateView(InvoiceMixin, CreateView):
     template_name = 'accounting/base_form.html'
-    form_class = forms.InvoiceForm
-
-    def form_valid(self, form):
-        form.instance.business_unit = self.current_business_unit
-        form.instance.contract = self.current_contract
-
-        return super().form_valid(form)
+    form_class = forms.InvoiceCreateForm
 
 
 class InvoiceUpdateView(InvoiceMixin, UpdateView):
     template_name = 'accounting/base_form.html'
-    form_class = forms.InvoiceForm
 
-    def form_valid(self, form):
-        form.instance.business_unit = self.current_business_unit
-        form.instance.contract = self.current_contract
+    def get_form_class(self):
+        STATES = models.Contract.STATES
 
-        return super().form_valid(form)
+        return {
+            STATES.NEW: forms.NewInvoiceUpdateForm,
+            STATES.ACTIVE: forms.ActiveInvoiceUpdateForm,
+        }[self.current_contract.state]
 
 
 class InvoiceDeleteView(InvoiceMixin, DeleteView):

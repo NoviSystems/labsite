@@ -145,7 +145,7 @@ class Invoice(LineItem):
         unique_together = ('contract', 'date')
 
     def __str__(self):
-        return '%s: %s' % (self.invoice_id, self.name)
+        return self.invoice_id or "Invoice: %d" % self.pk
 
 
 class MonthlyBalance(LineItem):
