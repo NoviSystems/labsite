@@ -103,7 +103,10 @@
                                 {% endif %}
 
                                 {% if contract.state == contract.STATES.NEW %}
-                                <a class="btn btn-danger" data-toggle="modal" data-target="#action-modal">
+                                <a class="btn btn-danger" data-toggle="modal" data-target="#action-modal"
+                                 data-title="Confirm Deletion"
+                                 data-body="Are you sure you want to delete invoice on <b>{{ invoice.date }}</b> for contract <b>{{ contract.contract_id }}</b>?"
+                                 data-btn-class="btn-danger" data-btn-text="Delete">
                                     <i class="fa fa-trash"></i>
                                 </a>
                                 {% endif %}
