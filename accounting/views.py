@@ -5,10 +5,13 @@ from decimal import Decimal
 
 from django.db.models import Max, Sum
 from django.db.transaction import atomic
+from django.contrib import messages
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
+from django.shortcuts import redirect
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 
@@ -283,15 +286,26 @@ class ContractsView(ViewerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        contracts = models.Contract.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .order_by('-start_date')
+
         STATES = models.Contract.STATES
-        context['active_contracts'] = [
-            self.make_contract_context(contract) for contract
-            in models.Contract.objects.filter(state=STATES.ACTIVE).order_by('-start_date')
-        ]
-        context['completed_contracts'] = [
-            self.make_contract_context(contract) for contract
-            in models.Contract.objects.filter(state=STATES.COMPLETE).order_by('-start_date')
-        ]
+        context.update({
+            'has_contracts': contracts.exists(),
+            'new_contracts': [
+                self.make_contract_context(contract) for contract
+                in contracts.filter(state=STATES.NEW)
+            ],
+            'active_contracts': [
+                self.make_contract_context(contract) for contract
+                in contracts.filter(state=STATES.ACTIVE)
+            ],
+            'completed_contracts': [
+                self.make_contract_context(contract) for contract
+                in contracts.filter(state=STATES.COMPLETE)
+            ],
+        })
 
         return context
 

@@ -3,44 +3,71 @@
 {% block content %}
 {% include "accounting/nav_tabs.html" with active="contracts" %}
 
-<!-- Active Contracts -->
-<div class="panel panel-default">
-    <div class="panel-body">
-        <h3>
-            Active Contracts
-            {% if is_manager %}
-            <a class="btn btn-xs btn-primary" href="{% url 'accounting:create_contract' business_unit=current_business_unit.pk %}">
-                New <i class="fa fa-fw fa-plus"></i>
-            </a>
-            {% endif %}
-        </h3>
-    </div>
-    <ul class="list-group">
-        {% for contract_ctx in active_contracts %}
-        <li class="list-group-item">
-            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx contract=contract_ctx.contract %}
-        </li>
-        {% empty %}
-        <li class="list-group-item text-center">
-            <h4>No active contracts for this business unit.</h4>
-        </li>
-        {% endfor %}
-    </ul>
+{% if is_manager %}
+<div class="page-header">
+    <a class="btn btn-primary" href="{% url 'accounting:create_contract' business_unit=current_business_unit.pk %}">
+        New Contract <i class="fa fa-fw fa-plus"></i>
+    </a>
 </div>
+{% endif %}
 
-<!-- Completed Contracts-->
-{% if completed_contracts %}
+
+
+<!-- New Contracts -->
+{% if new_contracts %}
 <div class="panel panel-default">
-    <div class="panel-body">
-        <h3>Completed Contracts</h3>
+    <div class="panel-heading">
+        <h3 class="panel-title">New Contracts</h3>
     </div>
     <ul class="list-group">
-        {% for contract_ctx in completed_contracts %}
+        {% for contract_ctx in new_contracts %}
         <li class="list-group-item">
-            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx contract=contract_ctx.contract %}
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
         </li>
         {% endfor %}
     </ul>
 </div>
 {% endif %}
+
+<!-- Active Contracts -->
+{% if active_contracts %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Active Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for contract_ctx in active_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Completed Contracts -->
+{% if completed_contracts %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Completed Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for contract_ctx in completed_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- No contracts-->
+{% if not has_contracts %}
+<div class="panel panel-default">
+    <div class="panel-body text-center">
+        <h4>No contracts for this business unit.</h4>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

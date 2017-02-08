@@ -55,6 +55,7 @@ class UserTeamRole(models.Model):
 
 class Contract(models.Model):
     STATES = choices((
+        ('NEW', _('New')),
         ('ACTIVE', _('Active')),
         ('COMPLETE', _('Complete')),
     ))
