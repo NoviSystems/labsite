@@ -3,4 +3,4 @@ contextlib2
 fabric
 celery
 git+git://github.com/ITNG/fabtools.git
-git+git://github.com/ITNG/prefab.git
+git+git://github.com/ITNG/prefab.git@0.0.1
