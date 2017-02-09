@@ -166,7 +166,7 @@ class DashboardView(ViewerMixin, TemplateView):
         return models.Invoice.objects \
             .filter(business_unit=self.current_business_unit) \
             .exclude(contract__state=models.Contract.STATES.NEW) \
-            .filter(date__year=date.year, date__month=date.month) \
+            .filter(predicted_date__year=date.year, predicted_date__month=date.month) \
             .aggregate(
                 predicted=Coalesce(Sum('predicted_amount'), V(0)),
                 actual=Coalesce(Sum('actual_amount'), V(0)))
@@ -261,7 +261,7 @@ class ContractsView(ViewerMixin, TemplateView):
             'contract': contract,
             'invoices': [
                 self.make_invoice_context(invoice) for invoice
-                in models.Invoice.objects.filter(contract=contract).order_by('-date')
+                in models.Invoice.objects.filter(contract=contract).order_by('-invoice_date')
             ],
             'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
             'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),

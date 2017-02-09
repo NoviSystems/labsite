@@ -15,9 +15,9 @@
     <div class="row">
 
         <!-- Contract Details -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <table class="table">
-                <tr><th>Total Amount:</th>  <td>${{ contract.amount }}</td></tr>
+                <tr><th>Total Amount:</th>  <td>${{ contract.amount|intcomma }}</td></tr>
                 <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
                 <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
             </table>
@@ -64,7 +64,7 @@
         </div>
 
         <!-- Contract Invoices -->
-        <div class="col-md-8">
+        <div class="col-md-9">
             {% if not contract_ctx.invoices %}
             <p class="text-center"><b>No invoices for this contract.</b></p>
             {% endif %}
@@ -72,23 +72,27 @@
             {% if contract_ctx.invoices %}
             <table class="table table-hover">
                 <tr>
-                    <th class="col-xs-3">Invoice ID:</th>
-                    <th class="col-xs-2">Date:</th>
-                    <th class="col-xs-2">Status:</th>
-                    <th class="col-xs-2">Predicted:</th>
-                    <th class="col-xs-2">Actual:</th>
-                    <th class="col-xs-1">Actions:</th>
+                    <th class="col-xs-2 no-wrap">Invoice ID</th>
+                    <th class="col-xs-2 no-wrap">Invoice Date</th>
+                    <th class="col-xs-2 no-wrap">Payment Date</th>
+                    <th class="col-xs-1 no-wrap">Status</th>
+                    <th class="col-xs-2 no-wrap">Predicted Amt.</th>
+                    <th class="col-xs-2 no-wrap">Actual Amt.</th>
+                    <th class="col-xs-1 no-wrap">Actions</th>
                 </tr>
 
                 {% for invoice_ctx in contract_ctx.invoices %}
                 {% with invoice=invoice_ctx.invoice %}
                 <tr>
-                    <td>{{ invoice.invoice_id|default:"---------" }}</td>
-                    <td>{{ invoice.date|date:"DATE_FORMAT" }}</td>
-                    <td>{{ invoice.get_state_display }}</td>
-                    <td>${{ invoice.predicted_amount|intcomma }}</td>
-                    <td>{% if invoice.actual_amount is not None %}
+                    <td class="no-wrap">{{ invoice.invoice_id|default:"---------" }}</td>
+                    <td class="no-wrap">{{ invoice.invoice_date|date:"DATE_FORMAT" }}</td>
+                    <td class="no-wrap">{{ invoice.predicted_date|date:"DATE_FORMAT" }}</td>
+                    <td class="no-wrap">{{ invoice.get_state_display }}</td>
+                    <td class="no-wrap">${{ invoice.predicted_amount|intcomma }}</td>
+                    <td class="no-wrap">{% if invoice.actual_amount is not None %}
                         ${{ invoice.actual_amount|intcomma }}
+                        {% else %}
+                        ---------
                         {% endif %}
                     </td>
                     {% if is_manager %}

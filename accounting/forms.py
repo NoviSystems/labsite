@@ -51,8 +51,8 @@ class InvoiceForm(BaseForm):
         self.instance.contract = contract
         self.instance.business_unit = contract.business_unit
 
-    def clean_date(self):
-        date = self.cleaned_data['date']
+    def clean_invoice_date(self):
+        date = self.cleaned_data['invoice_date']
 
         if date < self.contract.start_date:
             raise forms.ValidationError(
@@ -60,7 +60,7 @@ class InvoiceForm(BaseForm):
                 params={'start_date': str(self.contract.start_date)},
             )
 
-        duplicate = self.contract.invoice_set.filter(date=date)
+        duplicate = self.contract.invoice_set.filter(invoice_date=date)
         if hasattr(self.instance, 'pk'):
             duplicate = duplicate.exclude(pk=self.instance.pk)
 
@@ -68,6 +68,15 @@ class InvoiceForm(BaseForm):
             raise forms.ValidationError(_("Invoice already exists for this date."))
 
         return date
+
+    def clean_predicted_date(self):
+        date = self.cleaned_data['predicted_date']
+
+        if date < self.contract.start_date:
+            raise forms.ValidationError(
+                _("Predicted payment date must occur after or on the contract's start date (%(start_date)s)."),
+                params={'start_date': str(self.contract.start_date)},
+            )
 
     def clean_predicted_amount(self):
         value = self.cleaned_data['predicted_amount']
@@ -84,7 +93,8 @@ class InvoiceForm(BaseForm):
     class Meta:
         model = models.Invoice
         fields = [
-            'date',
+            'invoice_date',
+            'predicted_date',
             'predicted_amount',
         ]
 
