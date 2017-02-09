@@ -122,7 +122,6 @@ class ViewerMixin(AccountingMixin, UserPassesTestMixin):
     """
     View requires 'view' permissions
     """
-    raise_exception = True
 
     def test_func(self):
         if self.is_manager:
@@ -139,7 +138,6 @@ class ManagerMixin(AccountingMixin, UserPassesTestMixin):
     """
     View requires 'edit' permissions
     """
-    raise_exception = True
 
     def test_func(self):
         return self.is_manager
