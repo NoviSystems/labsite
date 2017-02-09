@@ -30,7 +30,7 @@ def current_year():
 
 
 def validate_positive(value):
-    if value < 0:
+    if value is not None and value < 0:
         raise ValidationError(_('Value must be a positive number.'))
 
 
