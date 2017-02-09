@@ -8,13 +8,12 @@ def read(fname):
 
 setup(
     name="accounting",
-    version="0.1",
+    version="0.0.1",
     author="OSCAR Lab",
     packages=find_packages(),
     include_package_data=True,
     long_description=read('README.md'),
     install_requires=[
-        'python-dateutil',
         'django-fsm',
     ],
 )

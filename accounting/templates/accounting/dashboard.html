@@ -2,6 +2,7 @@
 
 {% load staticfiles %}
 {% load accounting_filters %}
+{% load humanize %}
 
 {% block content %}
 
@@ -9,60 +10,103 @@
 
 {% include "accounting/year_picker.html" with active="dashboard" %}
 
-<script src={% static 'js/highcharts.js' %}></script>
 <div id="container" style="width:100%; height:400px;"></div>
+<script src="{% static 'js/highcharts.js' %}"></script>
 <script>
-$(function () {
-    $('#container').highcharts({
-        chart: {
-            type: 'column'
+Highcharts.setOptions({
+    lang: {thousandsSep: ","},
+});
+
+Highcharts.chart('container', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Cash Values for Months'
+    },
+    xAxis: {
+        categories: {{ month_names | safe }}
+    },
+    credits: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '${y:.0f}',
+            },
+            tooltip: {
+                valueDecimals: 0,
+                valuePrefix: '$'
+            },
         },
-        title: {
-            text: 'Cash Values for Months'
-        },
-        xAxis: {
-            categories: {{ month_names | safe }}
-        },
-        credits: {
-            enabled: false
-        },
-        series: [{
-            name: 'Predicted',
-            data: {{ predicted_totals | safe }}
-        }, {
-            name: 'Actual',
-            data: {{ actual_totals | safe }}
-        }]
-    });
+    },
+    series: [{
+        name: 'Predicted',
+        data: {{ predicted_totals | safe }},
+    }, {
+        name: 'Actual',
+        data: {{ actual_totals | safe }},
+    }]
 });
 </script>
 
-{% block breakdown %}
-    <div class="container">
-        <div class="row">
+<div class="container">
+    <div class="row">
+        <div class="col-xs-2">
 
             <table class="table">
                 <thead>
+                    <tr><th colspan="2" class="text-right">Date</th></tr>
+                </thead>
+                {% for title in dashboard_data %}
+                {% if forloop.last %}<tbody>{% endif %}
+                <tr>
+                    <th rowspan="2">{{ title }}</th>
+                    <th>Predicted</th>
+                </tr>
+                <tr>
+                    <th>Actual</th>
+                </tr>
+                {% if forloop.last %}</tbody>{% endif %}
+                {% endfor %}
+            </table>
+        </div>
+        <div class="col-xs-10">
+            <table class="table table-responsive">
+                <thead>
                     <tr>
-                        <th>Date</th>
                         {% for month in month_names %}
-                        	<th>{{ month }}</th>
+                            <th class="col-xs-1 text-right">{{ month }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
+
                 <tbody>
-                    {% for data in dashboard_data %}
+                    {% for data in dashboard_data.values %}
+                    {% if forloop.last %}
+                </tbody>
+                <tbody>
+                    {% endif %}
                     <tr class="text-right">
-                        <th class="text-right" scope="row">{{ data.title }}</th>
-                        	{% for month in month_names %}
-                        		<td>${{ data.values | get_item:month }}</td>
-                        	{% endfor %}
+                        {% for month in fiscal_months %}
+                        {% with obj=data|get_item:month %}
+                            <td>${{ obj.predicted|stringformat:".0f" | intcomma }}</td>
+                        {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    <tr class="text-right">
+                        {% for month in fiscal_months %}
+                        {% with obj=data|get_item:month %}
+                            <td>${{ obj.actual|stringformat:".0f" | intcomma }}</td>
+                        {% endwith %}
+                        {% endfor %}
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-{% endblock %}
-
+</div>
 {% endblock %}

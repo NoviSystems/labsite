@@ -1,13 +1,13 @@
+import json
+from collections import OrderedDict
 from datetime import date
-from dateutil.rrule import rrule, MONTHLY
-from calendar import monthrange
 from decimal import Decimal
 
-from django.db.models import Max, Sum
+from django.db.models import Sum, Value as V
+from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.contrib import messages
 from django.contrib.humanize.templatetags.humanize import intcomma
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
@@ -17,6 +17,14 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 
 from accounting import models
 from accounting import forms
+from accounting.utils import Month
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return int(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 
 class AccountingMixin(LoginRequiredMixin):
@@ -147,6 +155,55 @@ class HomePageView(ViewerMixin, TemplateView):
 class DashboardView(ViewerMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
+    @cached_property
+    def fiscal_months(self):
+        start = Month(self.fiscal_year, 7)
+        end = Month(self.fiscal_year+1, 7)
+
+        return Month.range(start, end)
+
+    def get_monthly_invoices(self, date):
+        # Although this call looks similar to the other queries, there may be multiple
+        # invoices per month while the other models are an aggregate monthly balance.
+        return models.Invoice.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .exclude(contract__state=models.Contract.STATES.NEW) \
+            .filter(date__year=date.year, date__month=date.month) \
+            .aggregate(
+                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                actual=Coalesce(Sum('actual_amount'), V(0)))
+
+    def get_monthly_expenses(self, date):
+        return models.Expenses.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(year=date.year, month=date.month) \
+            .aggregate(
+                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                actual=Coalesce(Sum('actual_amount'), V(0)))
+
+    def get_monthly_ft_payroll(self, date):
+        return models.FullTimePayroll.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(year=date.year, month=date.month) \
+            .aggregate(
+                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                actual=Coalesce(Sum('actual_amount'), V(0)))
+
+    def get_monthly_pt_payroll(self, date):
+        return models.PartTimePayroll.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(year=date.year, month=date.month) \
+            .aggregate(
+                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                actual=Coalesce(Sum('actual_amount'), V(0)))
+
+    def get_monthly_cash_balance(self, date):
+        # predicted values are calculated
+        return models.CashBalance.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(year=date.year, month=date.month) \
+            .aggregate(actual=Coalesce(Sum('actual_amount'), V(0)))
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -156,95 +213,32 @@ class DashboardView(ViewerMixin, TemplateView):
             'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
         })
 
-        cma = {'title': 'Cash Month Actual', 'values': {}}
-        cmpr = {'title': 'Cash Month Projected', 'values': {}}
-        ema = {'title': 'Expenses Month Actual', 'values': {}}
-        emp = {'title': 'Expenses Month Projected', 'values': {}}
-        ima = {'title': 'Receivables Month Actual', 'values': {}}
-        imp = {'title': 'Receivables Month Projected', 'values': {}}
-        pma = {'title': 'Payroll Month Actual', 'values': {}}
-        pmp = {'title': 'Payroll Month Projected', 'values': {}}
-        tama = {'title': 'Total Assets Actual', 'values': {}}
-        tamp = {'title': 'Total Assets Projected', 'values': {}}
+        invoices = {m: self.get_monthly_invoices(m) for m in self.fiscal_months}
+        expenses = {m: self.get_monthly_expenses(m) for m in self.fiscal_months}
+        ft_payroll = {m: self.get_monthly_ft_payroll(m) for m in self.fiscal_months}
+        pt_payroll = {m: self.get_monthly_pt_payroll(m) for m in self.fiscal_months}
+        cash_balance = {m: self.get_monthly_cash_balance(m) for m in self.fiscal_months}
 
-        months = [month for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
-        month_names = []
+        # calculate the monthly predicted cash balance
+        for month in self.fiscal_months:
+            cash_balance[month]['predicted'] = invoices[month]['predicted'] - (
+                expenses[month]['predicted'] +
+                ft_payroll[month]['predicted'] +
+                pt_payroll[month]['predicted']
+            )
 
-        last_cash = Decimal('0.00')
-        cash_month_projected = Decimal('0.00')
-        payroll_month_projected = calculatePayrollProjectedAmount(self.current_business_unit)
+        dashboard_data = OrderedDict([
+            ('Invoices', invoices),
+            ('Expenses', expenses),
+            ('Full-time Payroll', ft_payroll),
+            ('Part-time Payroll', pt_payroll),
+            ('Cash Balance', cash_balance),
+        ])
 
-        for month in months:
-
-            start_date = '{}-{}-{}'.format(month.year, month.month, '01')
-            end_date = '{}-{}-{}'.format(month.year, month.month, monthrange(month.year, month.month)[1])
-
-            month_name = month.strftime("%B")
-            month_names.append(month_name)
-
-            try:
-                previous_month = month
-                if previous_month.month == 1:
-                    previous_month = date(previous_month.year - 1, 12, monthrange(previous_month.year - 1, 12)[1])
-                else:
-                    previous_month = date(previous_month.year, previous_month.month - 1, monthrange(previous_month.year, previous_month.month - 1)[1])
-                last_cash = models.Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=('{}-{}-{}'.format(previous_month.year, previous_month.month, monthrange(previous_month.year, previous_month.month)[1]))).actual_amount
-            except ObjectDoesNotExist:
-                last_cash = cash_month_projected
-
-            try:
-                cash_month_actual = models.Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=(end_date)).actual_amount
-                cash_month_projected = last_cash
-            except ObjectDoesNotExist:
-                cash_month_actual = Decimal('0.00')
-                cash_month_projected = last_cash
-
-            payroll_month_actual = models.Expense.objects.filter(expense_type='PAYROLL', reconciled=True, business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]).aggregate(Sum('actual_amount'))['actual_amount__sum']
-            if payroll_month_actual is None:
-                payroll_month_actual = Decimal('0.00')
-            pma['values'][month_name] = payroll_month_actual
-            pmp['values'][month_name] = payroll_month_projected
-
-            expenses_month_actual = Decimal('0.00')
-            expenses_month_projected = Decimal('0.00')
-            for expense in models.Expense.objects.filter(expense_type='GENERAL', business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
-                if expense.reconciled:
-                    expenses_month_actual += expense.actual_amount
-                else:
-                    expenses_month_projected += expense.predicted_amount
-            ema['values'][month_name] = expenses_month_actual
-            emp['values'][month_name] = expenses_month_projected
-
-            income_month_actual = Decimal('0.00')
-            income_month_projected = Decimal('0.00')
-            for income in models.Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
-                if income.reconciled:
-                    income_month_actual += income.actual_amount
-                else:
-                    income_month_projected += income.predicted_amount
-            ima['values'][month_name] = income_month_actual
-            imp['values'][month_name] = income_month_projected
-
-            cash_month_projected += (income_month_projected - expenses_month_projected - payroll_month_projected)
-            cmpr['values'][month_name] = cash_month_projected
-            cma['values'][month_name] = cash_month_actual
-
-            income_booked_projected = Decimal('0.00')
-            for value in imp['values'].values():
-                income_booked_projected += value
-            total_assets_month_projected = cash_month_projected + income_booked_projected
-            tamp['values'][month_name] = total_assets_month_projected
-
-            income_booked_actual = Decimal('0.00')
-            for value in ima['values'].values():
-                income_booked_actual += value
-            total_assets_month_actual = cash_month_actual
-            tama['values'][month_name] = total_assets_month_actual
-
-        dashboard_data = [cma, cmpr, ima, imp, pma, pmp, ema, emp, tama, tamp]
-        context['month_names'] = month_names
-        context['predicted_totals'] = json.dumps([float(cmpr['values'][month_name]) for month_name in month_names])
-        context['actual_totals'] = json.dumps([float(cma['values'][month_name]) for month_name in month_names])
+        context['fiscal_months'] = self.fiscal_months
+        context['month_names'] = [month.get_month_display() for month in self.fiscal_months]
+        context['predicted_totals'] = json.dumps([cash_balance[m]['predicted'] for m in self.fiscal_months], cls=DecimalEncoder)
+        context['actual_totals'] = json.dumps([cash_balance[m]['actual'] for m in self.fiscal_months], cls=DecimalEncoder)
         context['dashboard_data'] = dashboard_data
         return context
 
