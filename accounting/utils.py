@@ -5,6 +5,12 @@ from datetime import date
 
 class Month(namedtuple('Month', ['year', 'month'])):
 
+    def __new__(cls, *args, **kwargs):
+        # allow date-like object as sole positional argument
+        if len(args) == 1 and not kwargs and not isinstance(args[0], int):
+            return super(Month, cls).__new__(cls, args[0].year, args[0].month)
+        return super(Month, cls).__new__(cls, *args, **kwargs)
+
     @classmethod
     def range(cls, start, to):
         assert start < to
@@ -25,10 +31,6 @@ class Month(namedtuple('Month', ['year', 'month'])):
         month = ((month-1) % 12) + 1
 
         return Month(year, month)
-
-    @classmethod
-    def from_date(cls, date):
-        return cls(date.year, date.month)
 
     def as_date(self):
         return date(self.year, self.month, 1)
@@ -81,7 +83,7 @@ class FiscalCalendar:
 
     @property
     def months(self):
-        start = Month.from_date(self.start_date)
-        end = Month.from_date(self.end_date)
+        start = Month(self.start_date)
+        end = Month(self.end_date)
 
         return Month.range(start, end)
