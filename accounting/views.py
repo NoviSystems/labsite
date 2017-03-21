@@ -17,7 +17,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, DeleteVie
 
 from accounting import models
 from accounting import forms
-from accounting.utils import Month
+from accounting.utils import Month, FiscalCalendar
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -83,16 +83,21 @@ class AccountingMixin(LoginRequiredMixin):
         return models.BusinessUnit.objects.get(pk=pk)
 
     @cached_property
+    def fiscal_calendar(self):
+        fiscal_year = self.kwargs.get('fiscal_year')
+
+        if fiscal_year is not None:
+            fiscal_year = int(fiscal_year)
+
+        return FiscalCalendar(fiscal_year)
+
+    @cached_property
     def fiscal_year(self):
-        return self.kwargs.get('fiscal_year', self.get_fiscal_year(date.today()))
+        return self.fiscal_calendar.fiscal_year
 
     @cached_property
-    def fiscal_start(self):
-        return date(self.fiscal_year, 7, 1)
-
-    @cached_property
-    def fiscal_end(self):
-        return date(self.fiscal_year+1, 6, 30)
+    def fiscal_months(self):
+        return self.fiscal_calendar.months
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -100,8 +105,8 @@ class AccountingMixin(LoginRequiredMixin):
             'business_units': self.business_units,
             'current_business_unit': self.current_business_unit,
             'fiscal_year': self.fiscal_year,
-            'fiscal_start': self.fiscal_start,
-            'fiscal_end': self.fiscal_end,
+            'fiscal_start': self.fiscal_calendar.start_date,
+            'fiscal_end': self.fiscal_calendar.end_date,
             'is_manager': self.is_manager,
         })
 
@@ -152,13 +157,6 @@ class HomePageView(ViewerMixin, TemplateView):
 
 class DashboardView(ViewerMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
-
-    @cached_property
-    def fiscal_months(self):
-        start = Month(self.fiscal_year, 7)
-        end = Month(self.fiscal_year+1, 7)
-
-        return Month.range(start, end)
 
     def get_monthly_invoices(self, date):
         # Although this call looks similar to the other queries, there may be multiple

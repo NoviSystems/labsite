@@ -26,8 +26,62 @@ class Month(namedtuple('Month', ['year', 'month'])):
 
         return Month(year, month)
 
+    @classmethod
+    def from_date(cls, date):
+        return cls(date.year, date.month)
+
     def as_date(self):
         return date(self.year, self.month, 1)
 
     def get_month_display(self):
         return self.as_date().strftime('%B')
+
+
+class FiscalCalendar:
+
+    def __init__(self, fiscal_year=None):
+        self.fiscal_year = fiscal_year
+
+        if fiscal_year is None:
+            self.fiscal_year = self.get_fiscal_year(date.today())
+
+    def __str__(self):
+        return "FY %d" % self.fiscal_year
+
+    def __repr__(self):
+        return '<%(cls)s fiscal_year=%(fiscal_year)s>' % {
+            'cls': self.__class__.__name__,
+            'fiscal_year': self.fiscal_year,
+        }
+
+    @staticmethod
+    def get_start_date(fiscal_year):
+        return date(fiscal_year, 7, 1)
+
+    @staticmethod
+    def get_end_date(fiscal_year):
+        return date(fiscal_year+1, 6, 30)
+
+    @classmethod
+    def get_fiscal_year(cls, calendar_date):
+        calendar_year = calendar_date.year
+
+        # if the date is before the start of the fiscal year, then we're in the previous fiscal year
+        if calendar_date < cls.get_start_date(calendar_year):
+            return calendar_year - 1
+        return calendar_year
+
+    @property
+    def start_date(self):
+        return self.get_start_date(self.fiscal_year)
+
+    @property
+    def end_date(self):
+        return self.get_end_date(self.fiscal_year)
+
+    @property
+    def months(self):
+        start = Month.from_date(self.start_date)
+        end = Month.from_date(self.end_date)
+
+        return Month.range(start, end)
