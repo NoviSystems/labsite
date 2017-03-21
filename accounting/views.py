@@ -86,9 +86,21 @@ class AccountingMixin(LoginRequiredMixin):
     def fiscal_calendar(self):
         fiscal_year = self.kwargs.get('fiscal_year')
 
+        # coerce to int
         if fiscal_year is not None:
             fiscal_year = int(fiscal_year)
 
+        # try to determine from the last reconcile date
+        else:
+            latest = models.MonthlyReconcile.objects \
+                .filter(business_unit=self.current_business_unit) \
+                .order_by('-year', '-month').first()
+
+            if latest is not None:
+                latest_date = Month(latest).as_date()
+                fiscal_year = FiscalCalendar.get_fiscal_year(latest_date)
+
+        # if fiscal_year is none, will default to fiscal year for current date
         return FiscalCalendar(fiscal_year)
 
     @cached_property
