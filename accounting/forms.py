@@ -1,7 +1,10 @@
+from collections import OrderedDict
+
 from django import forms
 from django.db.models import DateField
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.utils.translation import ugettext as _
+from django.utils.formats import number_format
 
 from accounting import models
 
@@ -172,6 +175,100 @@ class BalanceField(forms.DecimalField):
         attrs = super().widget_attrs(widget)
         attrs['initial'] = self.initial or ''
         return attrs
+
+
+class MonthlyBalanceForm(forms.Form):
+    headers = [
+        'Misc. Expenses',
+        'Full-time Payroll',
+        'Part-time Payroll',
+        'Cash Balance',
+    ]
+    models = OrderedDict((
+        ('exp', models.Expenses),
+        ('ftp', models.FullTimePayroll),
+        ('ptp', models.PartTimePayroll),
+        ('bal', models.CashBalance),
+    ))
+
+    def __init__(self, *args, business_unit, billing_month, fiscal_months, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.business_unit = business_unit
+        self.billing_month = billing_month
+        self.fiscal_months = fiscal_months
+
+        # build month fields & data, make accessible through `month_data` attribute
+        self.month_data = []
+        for month in fiscal_months:
+            data = self.build_month_data(month)
+
+            # don't add formatted values to form fields list
+            for name, value in data.items():
+                if isinstance(value, forms.Field):
+                    self.fields[name] = value
+
+            # fields => bound fields
+            bound = [
+                self[name] if isinstance(value, forms.Field) else value
+                for name, value in data.items()
+            ]
+
+            # add fields & formatted values to month data
+            self.month_data.append({
+                'month': month, 'fields': bound,
+            })
+
+    @staticmethod
+    def format_currency(value):
+        if value is None:
+            return ''
+        return '$' + number_format(100000, force_grouping=True)
+
+    @staticmethod
+    def build_field(value):
+        # TODO: use model's field.formfield() to build our custom decimal field instead?
+        return BalanceField(
+            initial=value,
+            required=False,
+            max_digits=10,
+            decimal_places=2,
+        )
+
+    def build_month_data(self, month):
+        """
+        The design here could be better, but is what enables a simpler template layout.
+
+        - if the month is past, the returned fields are actually formatted text values.
+        - if the month is the current billing month, the fields are actual form fields.
+        - if the month is in the future, only the predicted fields are provided.
+        """
+        is_current = (month == self.billing_month)
+        is_future = (month > self.billing_month)
+
+        fields = OrderedDict()
+
+        month_id = '%d_%02d' % (month.year, month.month)
+        name_fmt = '%s_%s_%s'
+
+        for key, model in self.models.items():
+            try:
+                instance = model.objects.get(month=month.month, year=month.year)
+                actual, predicted = instance.actual_amount, instance.predicted_amount
+            except model.DoesNotExist:
+                actual, predicted = None, None
+
+            if is_current:
+                fields[name_fmt % (month_id, key, 'predicted')] = self.build_field(value=predicted)
+                fields[name_fmt % (month_id, key, 'actual')] = self.build_field(value=actual)
+            elif is_future:
+                fields[name_fmt % (month_id, key, 'predicted')] = self.build_field(value=predicted)
+                fields[name_fmt % (month_id, key, 'actual')] = self.format_currency(actual)  # should be null
+            else:  # is past
+                fields[name_fmt % (month_id, key, 'predicted')] = self.format_currency(predicted)
+                fields[name_fmt % (month_id, key, 'actual')] = self.format_currency(actual)
+
+        return fields
 
 
 class UserTeamRoleCreateForm(BaseForm):

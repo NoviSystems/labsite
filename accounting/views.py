@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.functional import cached_property
-from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
 
 from accounting import models
 from accounting import forms
@@ -110,6 +110,25 @@ class AccountingMixin(LoginRequiredMixin):
     @cached_property
     def fiscal_months(self):
         return self.fiscal_calendar.months
+
+    @cached_property
+    def current_billing_month(self):
+        """
+        The current month to focus on for billing purposes. This will either be
+        the next month to reconcile, or (if no months have been reconciled yet)
+        the first month of this fiscal year.
+        """
+        latest = models.MonthlyReconcile.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .order_by('-year', '-month').first()
+
+        # get the next month
+        if latest is not None:
+            latest = Month(latest.year, latest.month)
+            return Month.next_month(latest)
+
+        # default to start of this fiscal year
+        return Month(self.fiscal_calendar.start_date)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -374,49 +393,39 @@ class RevenueView(ViewerMixin, TemplateView):
         return context
 
 
-class MonthlyReconcileView(ViewerMixin, TemplateView):
+class MonthlyReconcileView(ViewerMixin, FormView):
     template_name = 'accounting/monthly_reconcile.html'
+    form_class = forms.MonthlyBalanceForm
+    success_url_name = 'accounting:reconcile'
+
+    def get_success_url_kwargs(self):
+        kwargs = super().get_success_url_kwargs()
+        if 'fiscal_year' in self.kwargs:
+            kwargs['fiscal_year'] = self.kwargs['fiscal_year']
+
+        return kwargs
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'business_unit': self.current_business_unit,
+            'billing_month': self.current_billing_month,
+            'fiscal_months': self.fiscal_months,
+        })
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context.update({
             'next_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
             'prev_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
             'current_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk}),
         })
-
-        months = []
-        [months.append(month) for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
-        context['months'] = months
-
-        active_month_int = None
-        if 'month' in self.kwargs:
-            active_month_int = int(self.kwargs['month'])
-        else:
-            active_month_int = int(self.now.month)
-
-        start_date = None
-        end_date = None
-        active_month = None
-        for month in months:
-            if month.month == active_month_int:
-                days_in_month = monthrange(month.year, month.month)[1]
-                start_date = '{}-{}-{}'.format(month.year, month.month, '01')
-                end_date = '{}-{}-{}'.format(month.year, month.month, days_in_month)
-                active_month = date(month.year, month.month, days_in_month)
-        try:
-            context['payroll'] = models.Expense.objects.get(business_unit=self.current_business_unit, expense_type='PAYROLL', date_payable__range=[start_date, end_date])
-        except models.Expense.DoesNotExist:
-            context['payroll'] = None
-        context['expenses'] = models.Expense.objects.filter(business_unit=self.current_business_unit, expense_type='GENERAL', date_payable__range=[start_date, end_date])
-        context['incomes'] = models.Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
-        try:
-            context['cash'] = models.Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
-        except ObjectDoesNotExist:
-            context['cash'] = None
-        context['active_month'] = active_month
         return context
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
 
 
 class BusinessUnitSettingsPageView(ManagerMixin, TemplateView):

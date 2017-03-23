@@ -8,19 +8,6 @@
     border: 0;
 }
 
-th.year-header {
-    vertical-align: middle !important;
-}
-
-th.year-header div {
-    transform:
-        rotate(270deg);
-}
-
-table [contenteditable] {
-    border-bottom: 1px solid black;
-}
-
 .no-wrap {
     white-space: nowrap
 }

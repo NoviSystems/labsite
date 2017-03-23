@@ -2,164 +2,130 @@
 
 {% load staticfiles %}
 
+{% block styles %}
+{{ form.media.css }}
+<style>
+/*tr.billing-month {
+    border-top: 4px solid #2e6da4;
+}*/
+
+th.year-header {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+th.year-header div {
+    transform: rotate(270deg);
+}
+
+.btn-sq {
+    width: 19px;
+    height: 19px;
+    padding: 0;
+}
+
+.has-error .errors {
+    line-height: 1.42857143;
+    float: left;
+
+    /* text-danger */
+    color: #a94442;
+}
+</style>
+{% endblock styles %}
+
 {% block content %}
+{% include "accounting/nav_tabs.html" with active="reconcile" %}
+{% include "accounting/year_picker.html" with active="reconcile" %}
 
-    {% include "accounting/nav_tabs.html" with active="reconcile" %}
+<form method="post">
+    {% csrf_token %}
+    <div class="row" id="reconcile">
+        <div class="col-xs-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="2" rowspan="2" class="col-xs-2 year-header">
+                            FY {{ fiscal_year }}
+                        </th>
 
-    {% include "accounting/year_picker.html" with active="reconcile" %}
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-2">
-                <div class="dropdown">
-                    <h4 class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ active_month|date:"F Y" }}<span class="caret"></span></h4>
-                    <ul class="dropdown-menu">
-                        {% for month in months %}
-                            <li class="text-right">
-                            {% if start_year and end_year %}
-                            <a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk month=month.month start_year=start_year end_year=end_year %}>{{month|date:"F Y" }}</a>
-                            {% else %}
-                            <a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk month=month.month %}>{{month|date:"F Y" }}</a>
-                            {% endif %}
-
-                            </li>
-                            {% if month|date:"F" == "December" and not forloop.last %}
-                                <li class="divider"></li>
-                            {% endif %}
+                        {% for header in form.headers %}
+                        <th colspan="2" class="text-center">{{ header }}</th>
                         {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
+                    </tr>
 
-        <div class="row">
-            <div class="col-md-3">
-                    <h4>Cash</h4>
-            </div>
-            <div class="col-md-9">
-                {% if is_manager %}
-                    {% if cash %}
-                        <span>
-                            <h4 style="display: inline-block;">Cash Actual: ${{ cash.actual_amount }}</h4>
-                            <a class="btn btn-primary" href={% url 'accounting:update_cash' business_unit=current_business_unit.pk cash=cash.pk %}>Update Cash</a>
-                        </span>
-                    {% else %}
-                        <a class="btn btn-primary" href={% url 'accounting:create_cash' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Create Cash</a>
-                    {% endif %}
-                {% endif %}
-            </div>
-        </div>
+                    <tr>
+                        {% for header in form.headers %}
+                        <th class="text-center col-xs-1">Predicted</th>
+                        <th class="text-center col-xs-1">Actual</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
 
-        <hr>
+                {% regroup form.month_data by month.year as years %}
+                {% for year in years %}
+                <tbody>
+                    <tr>
+                        <th rowspan="{{ year.list|length|add:1 }}" class="year-header"><div>{{ year.grouper }}</div></th>
+                    </tr>
 
-        <div class="row">
-            <div class="col-md-3">
-                    <h4>Expenses</h4>
-            </div>
-            <div class="col-md-9">
-                    {% if is_manager %}
-                        <a class="btn btn-primary" href={% url 'accounting:create_expense' business_unit=current_business_unit.pk %}>Create Expense</a>
-                        {% if not payroll %}
-                            <a class="btn btn-primary" href={% url 'accounting:create_payroll_expense' business_unit=current_business_unit.pk month=active_month.month year=active_month.year %}>Create Payroll Actual</a>
+                    {% for month_data in year.list %}
+                    {% with month=month_data.month fields=month_data.fields %}
+                    <tr class="no-wrap text-right{% if month == form.billing_month %} billing-month{% endif %}">
+                        {% if month == form.billing_month %}
+                        <th class="info">
+                            {{ month.get_month_display }}
+                            <button type="submit" class="btn btn-xs btn-sq btn-primary pull-right" name="reconcile">R</button>
+                        </th>
+                        {% else %}
+                        <th>{{ month.get_month_display }}</th>
                         {% endif %}
-                    {% endif %}
-            </div>
-        </div>
-        <div class="row">
-            {% if expenses %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name:</th>
-                        <th>Date Payable: </th>
-                        <th>Date Paid: </th>
-                        <th>Amount: </th>
-                        <th>Update/Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% if payroll %}
-                        <th scope="row">{{ payroll.name }}</th>
-                            <td>{{ payroll.date_payable }}</td>
-                            <td>{{ payroll.date_paid }}</td>
-                            <td>${{ payroll.predicted_amount }}</td>
-                {% endif %}
 
-                    {% for expense in expenses %}
-                    <tr class="model-display">
-                        <th scope="row">{{ expense.name }}</th>
-                            <td>{{ expense.date_payable }}</td>
-                            <td>{{ expense.date_paid }}</td>
-                            <td>${{ expense.predicted_amount }}</td>
-                            {% if is_manager %}
-                            <td>
-                                <a class="btn btn-primary" href={% url 'accounting:update_expense' business_unit=current_business_unit.pk expense=expense.pk %}>Update</a>
-                                {% if expense.name != "Payroll" %}
-                                <form action="{% url 'accounting:delete_expense' business_unit=current_business_unit.pk expense=expense.pk%}" method="post">
-                                    {% csrf_token %}
-                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{expense.name}}">Delete</a>
-                                </form>
-                                {% endif %}
-                            </td>
+                        {# field may either be a form field or a formatted value #}
+                        {% for field in fields %}
+                        <td {% if field.errors %}class="has-error"{% endif %}>
+                            {% if field.errors %}
+                            <i class="fa fa-fw fa-warning errors pull-left"
+                               data-toggle="popover"
+                               data-placement="top"
+                               data-content="{% for error in field.errors %}{{ error }}<br>{% endfor %}">
+                            </i>
                             {% endif %}
+                            {{ field }}
+                        </td>
+                        {% endfor %}
                     </tr>
+                    {% endwith %}
                     {% endfor %}
                 </tbody>
+                {% endfor %}
             </table>
-                {% else %}
-                <p>No expenses for this month. </p>
-                {% endif %}
-        </div>
-
-        <hr>
-
-        <div class="row">
-            <div class="col-md-3">
-                    <h4>Income</h4>
-            </div>
-            <div class="col-md-9">
-                {% if is_manager %}
-                    <a class="btn btn-primary" href={% url 'accounting:create_income' business_unit=current_business_unit.pk %}>Create Income</a>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="row">
-        {% if incomes %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name:</th>
-                        <th>Date Payable: </th>
-                        <th>Date Paid: </th>
-                        <th>Amount: </th>
-                        <th>Update/Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for income in incomes %}
-                    <tr class="model-display">
-                        <th scope="row">{{ income.name }}</th>
-                            <td>{{ income.date_payable }}</td>
-                            <td>{{ income.date_paid }}</td>
-                            <td>${{ income.predicted_amount }}</td>
-                            {% if is_manager %}
-                            <td>
-                                <a class="btn btn-primary" href={% url 'accounting:update_income' business_unit=current_business_unit.pk income=income.pk %}>Update</a>
-                                <form action="{% url 'accounting:delete_income' business_unit=current_business_unit.pk income=income.pk %}" method="post">
-                                    {% csrf_token %}
-                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{income.name}}">Delete</a>
-                                </form>
-                            </td>
-                            {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-                <p>No incomes for this month. </p>
-            {% endif %}
         </div>
     </div>
 
+    <button type="submit" class="btn btn-primary pull-right">Save Changes</button>
+</form>
+
+<script src="{% static 'js/vue.js' %}"></script>
+<script src="{% static 'js/utils.js' %}"></script>
+
+{{ form.media.js }}
+
+<script>
+new Vue({
+    el: '#reconcile',
+    components: {
+        // imported via form media
+        'balance-input': BalanceInput,
+    },
+});
+
+
+$(function popovers() {
+    $('[data-toggle="popover"]').popover({
+        trigger: "hover",
+        html: true,
+    });
+})
+</script>
 {% endblock %}
