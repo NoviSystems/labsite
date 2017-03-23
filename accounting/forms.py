@@ -226,9 +226,17 @@ class MonthlyBalanceForm(forms.Form):
             return ''
         return '$' + number_format(value, decimal_pos=0, force_grouping=True)
 
-    @staticmethod
-    def build_field(value):
+    def build_field(self, model, attr, value, month):
         # TODO: use model's field.formfield() to build our custom decimal field instead?
+        is_past = (month < self.billing_month)
+        is_future = (month > self.billing_month)
+
+        if model is models.CashBalance and attr == 'predicted':
+            return '---------'
+
+        if (is_future and attr == 'actual') or is_past:
+            return self.format_currency(value)
+
         return BalanceField(
             initial=value,
             required=False,
@@ -250,11 +258,7 @@ class MonthlyBalanceForm(forms.Form):
         - if the month is the current billing month, the fields are actual form fields.
         - if the month is in the future, only the predicted fields are provided.
         """
-        is_current = (month == self.billing_month)
-        is_future = (month > self.billing_month)
-
         fields = OrderedDict()
-
         for key, model in self.models.items():
             try:
                 instance = model.objects.get(month=month.month, year=month.year)
@@ -268,15 +272,9 @@ class MonthlyBalanceForm(forms.Form):
             if actual is not None:
                 actual = actual.quantize(1)
 
-            if is_current:
-                fields[self.field_name(month, key, 'predicted')] = self.build_field(value=predicted)
-                fields[self.field_name(month, key, 'actual')] = self.build_field(value=actual)
-            elif is_future:
-                fields[self.field_name(month, key, 'predicted')] = self.build_field(value=predicted)
-                fields[self.field_name(month, key, 'actual')] = self.format_currency(actual)  # should be null
-            else:  # is past
-                fields[self.field_name(month, key, 'predicted')] = self.format_currency(predicted)
-                fields[self.field_name(month, key, 'actual')] = self.format_currency(actual)
+            # build fields or get formatted values
+            fields[self.field_name(month, key, 'predicted')] = self.build_field(model, 'predicted', predicted, month)
+            fields[self.field_name(month, key, 'actual')] = self.build_field(model, 'actual', actual, month)
 
         return fields
 
