@@ -144,6 +144,36 @@ class ActiveInvoiceUpdateForm(InvoiceForm):
         ]
 
 
+class BalanceInput(forms.TextInput):
+    # Base off of text widget, since we plan to use commas
+
+    def __init__(self, attrs=None):
+        super().__init__(attrs)
+        self.attrs['is'] = 'balance-input'
+        self.attrs['placeholder'] = '\u2013.\u2013\u2013'
+
+    class Media:
+        js = ('js/balance-input.js', )
+        css = {
+            'all': ('css/balance-input.css', )
+        }
+
+
+class BalanceField(forms.DecimalField):
+    widget = BalanceInput
+
+    def to_python(self, value):
+        return super().to_python(value.replace(',', ''))
+
+    def widget_attrs(self, widget):
+        # TODO: Is there a better way to provide the initial to the input as an attr?
+        # Note: This is not ideal - form's initial data could override this. However,
+        #       we don't set initial data on the form so this is... acceptable.
+        attrs = super().widget_attrs(widget)
+        attrs['initial'] = self.initial or ''
+        return attrs
+
+
 class UserTeamRoleCreateForm(BaseForm):
     class Meta:
         model = models.UserTeamRole
