@@ -2,9 +2,12 @@ from datetime import date
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from itng.common.utils import choices
+
+from accounting.utils import Month
 
 User = settings.AUTH_USER_MODEL
 
@@ -149,13 +152,54 @@ class Invoice(LineItem):
         return self.invoice_id or "Invoice: %d" % self.pk
 
 
+class MonthlyQuerySet(models.QuerySet):
+    # TODO: define before/after if useful
+
+    def range(self, start, stop, inclusive=True):
+        # While counterintuitive, we're mostly dealing with inclusive month ranges.
+        # eg, FY 2016 starts on July 2016 and ends in June of 2017.
+
+        # coerce date-likes to Month types.
+        start, stop = Month(start), Month(stop)
+
+        # ensure start is before stop
+        if start > stop:
+            start, stop = stop, start
+
+        if inclusive:
+            stop = Month.next_month(stop)
+
+        return self.filter(
+            Q(year=start.year, month__gte=start.month) |
+            Q(year__gt=start.year, year__lt=stop.year) |
+            Q(year=stop.year, month__lt=stop.month)
+        )
+
+
+class MonthlyReconcile(models.Model):
+    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
+
+    # Date field isn't entirely appropriate, since items are associated by month.
+    month = models.SmallIntegerField(choices=MONTHS, default=MONTHS._1)
+    year = models.SmallIntegerField(default=current_year)
+
+    objects = MonthlyQuerySet.as_manager()
+
+    class Meta:
+        unique_together = ('month', 'year')
+        ordering = ('-year', '-month')
+
+
 class MonthlyBalance(LineItem):
     # Date field isn't entirely appropriate, since items are associated by month.
     month = models.SmallIntegerField(choices=MONTHS, default=MONTHS._1)
     year = models.SmallIntegerField(default=current_year)
 
+    objects = MonthlyQuerySet.as_manager()
+
     class Meta:
         unique_together = ('month', 'year')
+        ordering = ('-year', '-month')
         abstract = True
 
 
