@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from itertools import chain
 
 from django import forms
 from django.db.models import DateField
@@ -235,6 +236,12 @@ class MonthlyBalanceForm(forms.Form):
             decimal_places=2,
         )
 
+    def field_name(self, month, model_id, attr):
+        name_fmt = '%s_%s_%s'
+        month_id = '%d_%02d' % (month.year, month.month)
+
+        return name_fmt % (month_id, model_id, attr)
+
     def build_month_data(self, month):
         """
         The design here could be better, but is what enables a simpler template layout.
@@ -248,9 +255,6 @@ class MonthlyBalanceForm(forms.Form):
 
         fields = OrderedDict()
 
-        month_id = '%d_%02d' % (month.year, month.month)
-        name_fmt = '%s_%s_%s'
-
         for key, model in self.models.items():
             try:
                 instance = model.objects.get(month=month.month, year=month.year)
@@ -258,17 +262,69 @@ class MonthlyBalanceForm(forms.Form):
             except model.DoesNotExist:
                 actual, predicted = None, None
 
+            # round off past the decimal (cents not currently supported by interface)
+            if predicted is not None:
+                predicted = predicted.quantize(1)
+            if actual is not None:
+                actual = actual.quantize(1)
+
             if is_current:
-                fields[name_fmt % (month_id, key, 'predicted')] = self.build_field(value=predicted)
-                fields[name_fmt % (month_id, key, 'actual')] = self.build_field(value=actual)
+                fields[self.field_name(month, key, 'predicted')] = self.build_field(value=predicted)
+                fields[self.field_name(month, key, 'actual')] = self.build_field(value=actual)
             elif is_future:
-                fields[name_fmt % (month_id, key, 'predicted')] = self.build_field(value=predicted)
-                fields[name_fmt % (month_id, key, 'actual')] = self.format_currency(actual)  # should be null
+                fields[self.field_name(month, key, 'predicted')] = self.build_field(value=predicted)
+                fields[self.field_name(month, key, 'actual')] = self.format_currency(actual)  # should be null
             else:  # is past
-                fields[name_fmt % (month_id, key, 'predicted')] = self.format_currency(predicted)
-                fields[name_fmt % (month_id, key, 'actual')] = self.format_currency(actual)
+                fields[self.field_name(month, key, 'predicted')] = self.format_currency(predicted)
+                fields[self.field_name(month, key, 'actual')] = self.format_currency(actual)
 
         return fields
+
+    def save_month_data(self, month, data):
+        saved = []
+
+        for key, model in self.models.items():
+            predicted = data.pop(self.field_name(month, key, 'predicted'), None)
+            actual = data.pop(self.field_name(month, key, 'actual'), None)
+
+            update = {}
+            if predicted is not None:
+                update['predicted_amount'] = predicted
+            if actual is not None:
+                update['actual_amount'] = actual
+
+            # noop if no updated values
+            if not update:
+                continue
+
+            instance, created = model.objects.get_or_create(
+                month=month.month, year=month.year,
+                business_unit=self.business_unit,
+                defaults=update)
+
+            # instance exists, update fields manually
+            if not created:
+                for k, v in update.items():
+                    setattr(instance, k, v)
+                instance.save(update_fields=update.keys())
+
+            saved.append(instance)
+
+        return saved
+
+    def save(self):
+        # Only save fields that have changed
+        cleaned_data = {key: self.cleaned_data[key] for key in self.changed_data}
+        saved = [
+            self.save_month_data(month, cleaned_data)
+            for month in self.fiscal_months
+        ]
+
+        # Something went wrong if 'cleaned_data' is not empty
+        assert not cleaned_data
+
+        # 'saved' is a list of lists - this flattens the results
+        return list(chain.from_iterable(saved))
 
 
 class UserTeamRoleCreateForm(BaseForm):
