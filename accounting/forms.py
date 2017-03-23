@@ -173,7 +173,7 @@ class BalanceField(forms.DecimalField):
         # Note: This is not ideal - form's initial data could override this. However,
         #       we don't set initial data on the form so this is... acceptable.
         attrs = super().widget_attrs(widget)
-        attrs['initial'] = self.initial or ''
+        attrs['initial'] = '' if self.initial is None else self.initial
         return attrs
 
 
@@ -200,7 +200,7 @@ class MonthlyBalanceForm(forms.Form):
 
         # build month fields & data, make accessible through `month_data` attribute
         self.month_data = []
-        for month in fiscal_months:
+        for month in self.fiscal_months:
             data = self.build_month_data(month)
 
             # don't add formatted values to form fields list
@@ -223,7 +223,7 @@ class MonthlyBalanceForm(forms.Form):
     def format_currency(value):
         if value is None:
             return ''
-        return '$' + number_format(100000, force_grouping=True)
+        return '$' + number_format(value, decimal_pos=0, force_grouping=True)
 
     @staticmethod
     def build_field(value):

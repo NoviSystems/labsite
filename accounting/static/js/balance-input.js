@@ -125,7 +125,7 @@ const BalanceInput = Vue.extend({
     props: ['name', 'value', 'initial', 'placeholder'],
 
     data() {
-        const value = this.value || '';
+        const value = !isNaN(this.value) ? this.format(this.value) : '';
         return {
             actual: value,
             validated: value,
@@ -141,7 +141,7 @@ const BalanceInput = Vue.extend({
 
     computed: {
         isDirty() {
-            return this.actual !== this.initial;
+            return this.raw(this.actual) !== this.raw(this.initial);
         },
     },
 
