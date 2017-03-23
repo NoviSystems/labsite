@@ -423,9 +423,43 @@ class MonthlyReconcileView(ViewerMixin, FormView):
         })
         return context
 
+    def post(self, request, *args, **kwargs):
+        self.reconciling = 'reconcile' in self.request.POST
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
+        response = self.check_reconcile(form)
+        if response is not None:
+            return response
+
         form.save()
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        response = self.check_reconcile(form)
+        if response is not None:
+            return response
+
+        return super().form_invalid(form)
+
+    def check_reconcile(self, form):
+        if not self.reconciling:
+            return
+
+        month = self.current_billing_month
+        data = {'month': month.month, 'year': month.year, 'business_unit': self.current_business_unit.pk}
+        reconcile_form = forms.MonthlyReconcileForm(dirty=form.has_changed(), data=data)
+
+        if reconcile_form.is_valid():
+            reconcile_form.save()
+            messages.success(self.request, '%s %d has been reconciled.' % (month.get_month_display(), month.year))
+            return super().form_valid(form)
+
+        for _, errors in reconcile_form.errors.items():
+            for error in errors:
+                messages.error(self.request, error)
+
+        return super().form_invalid(form)
 
 
 class BusinessUnitSettingsPageView(ManagerMixin, TemplateView):

@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from itertools import chain
+from datetime import date
 
 from django import forms
 from django.db.models import DateField
@@ -8,6 +9,7 @@ from django.utils.translation import ugettext as _
 from django.utils.formats import number_format
 
 from accounting import models
+from accounting.utils import Month
 
 
 class BaseForm(forms.ModelForm):
@@ -146,6 +148,52 @@ class ActiveInvoiceUpdateForm(InvoiceForm):
             'state',
             'actual_amount',
         ]
+
+
+class MonthlyReconcileForm(forms.ModelForm):
+    models = [
+        models.Expenses,
+        models.FullTimePayroll,
+        models.PartTimePayroll,
+        models.CashBalance,
+    ]
+
+    def __init__(self, dirty, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dirty = dirty
+
+    def clean(self):
+        cleaned_data = super().clean()
+        month = Month(cleaned_data['year'], cleaned_data['month'])
+
+        # The month can only be reconciled if it's passed.
+        # So, validate that next month is not in the future.
+        if Month.next_month(month).as_date() > date.today():
+            msg = _("Month cannot be reconciled until it has passed.")
+            raise forms.ValidationError(msg, code='inactive')
+
+        if self.dirty:
+            msg = _("Changes need to be saved before the month can be reconciled.")
+            raise forms.ValidationError(msg, code='dirty')
+
+        for model in self.models:
+            try:
+                instance = model.objects.get(year=month.year, month=month.month)
+            except model.DoesNotExist:
+                instance = None
+
+            if instance is None or \
+               instance.predicted_amount is None or \
+               instance.actual_amount is None:
+                msg = _("All values for this month need to be submitted "
+                        "before the month can be reconciled.")
+                raise forms.ValidationError(msg, code='incomplete')
+
+        return cleaned_data
+
+    class Meta:
+        model = models.MonthlyReconcile
+        fields = ['month', 'year', 'business_unit']
 
 
 class BalanceInput(forms.TextInput):
