@@ -75,7 +75,11 @@ th.year-header div {
                         {% if month == form.billing_month %}
                         <th class="info">
                             {{ month.get_month_display }}
-                            <button type="submit" class="btn btn-xs btn-sq btn-primary pull-right" name="reconcile">R</button>
+                            <button class="btn btn-xs btn-sq btn-primary pull-right"
+                                    type="submit"
+                                    name="reconcile"
+                                    :disabled="reconcileDisabled">R
+                            </button>
                         </th>
                         {% else %}
                         <th>{{ month.get_month_display }}</th>
@@ -117,6 +121,19 @@ new Vue({
     components: {
         // imported via form media
         'balance-input': BalanceInput,
+    },
+
+    data: {
+        reconcileDisabled: false,
+    },
+
+    mounted() {
+        for (const child of this.$children) {
+            if (child.initial === '') {
+                this.reconcileDisabled = true;
+                break;
+            }
+        }
     },
 });
 
