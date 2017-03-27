@@ -128,7 +128,7 @@ class Contract(models.Model):
 
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
-    expected_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    expected_amount = models.DecimalField(max_digits=10, decimal_places=2)
     actual_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=None)
 
     class Meta():
@@ -248,7 +248,7 @@ class CashBalance(MonthlyBalance):
         expenses = Decimal(0)
         for inst in [self.expenses, self.fulltime_payroll, self.parttime_payroll]:
             if inst is not None:
-                expenses += inst.expected_amount
+                expenses += inst.expected_amount or 0
 
         return cash_balance + income - expenses
 
