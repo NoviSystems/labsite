@@ -43,8 +43,8 @@ Highcharts.chart('container', {
         },
     },
     series: [{
-        name: 'Predicted',
-        data: {{ predicted_totals | safe }},
+        name: 'Expected',
+        data: {{ expected_totals | safe }},
     }, {
         name: 'Actual',
         data: {{ actual_totals | safe }},
@@ -64,7 +64,7 @@ Highcharts.chart('container', {
                 {% if forloop.last %}<tbody>{% endif %}
                 <tr>
                     <th rowspan="2">{{ title }}</th>
-                    <th>Predicted</th>
+                    <th>Expected</th>
                 </tr>
                 <tr>
                     <th>Actual</th>
@@ -92,7 +92,7 @@ Highcharts.chart('container', {
                     <tr class="text-right">
                         {% for month in fiscal_months %}
                         {% with obj=data|get_item:month %}
-                            <td>${{ obj.predicted|stringformat:".0f" | intcomma }}</td>
+                            <td>${{ obj.expected|stringformat:".0f" | intcomma }}</td>
                         {% endwith %}
                         {% endfor %}
                     </tr>

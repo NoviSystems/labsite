@@ -195,9 +195,9 @@ class DashboardView(ViewerMixin, TemplateView):
         return models.Invoice.objects \
             .filter(business_unit=self.current_business_unit) \
             .exclude(contract__state=models.Contract.STATES.NEW) \
-            .filter(predicted_date__year=date.year, predicted_date__month=date.month) \
+            .filter(expected_payment_date__year=date.year, expected_payment_date__month=date.month) \
             .aggregate(
-                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                expected=Coalesce(Sum('expected_amount'), V(0)),
                 actual=Coalesce(Sum('actual_amount'), V(0)))
 
     def get_monthly_expenses(self, date):
@@ -205,7 +205,7 @@ class DashboardView(ViewerMixin, TemplateView):
             .filter(business_unit=self.current_business_unit) \
             .filter(year=date.year, month=date.month) \
             .aggregate(
-                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                expected=Coalesce(Sum('expected_amount'), V(0)),
                 actual=Coalesce(Sum('actual_amount'), V(0)))
 
     def get_monthly_ft_payroll(self, date):
@@ -213,7 +213,7 @@ class DashboardView(ViewerMixin, TemplateView):
             .filter(business_unit=self.current_business_unit) \
             .filter(year=date.year, month=date.month) \
             .aggregate(
-                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                expected=Coalesce(Sum('expected_amount'), V(0)),
                 actual=Coalesce(Sum('actual_amount'), V(0)))
 
     def get_monthly_pt_payroll(self, date):
@@ -221,11 +221,11 @@ class DashboardView(ViewerMixin, TemplateView):
             .filter(business_unit=self.current_business_unit) \
             .filter(year=date.year, month=date.month) \
             .aggregate(
-                predicted=Coalesce(Sum('predicted_amount'), V(0)),
+                expected=Coalesce(Sum('expected_amount'), V(0)),
                 actual=Coalesce(Sum('actual_amount'), V(0)))
 
     def get_monthly_cash_balance(self, date):
-        # predicted values are calculated
+        # expected values are calculated
         return models.CashBalance.objects \
             .filter(business_unit=self.current_business_unit) \
             .filter(year=date.year, month=date.month) \
@@ -246,12 +246,12 @@ class DashboardView(ViewerMixin, TemplateView):
         pt_payroll = {m: self.get_monthly_pt_payroll(m) for m in self.fiscal_months}
         cash_balance = {m: self.get_monthly_cash_balance(m) for m in self.fiscal_months}
 
-        # calculate the monthly predicted cash balance
+        # calculate the monthly expected cash balance
         for month in self.fiscal_months:
-            cash_balance[month]['predicted'] = invoices[month]['predicted'] - (
-                expenses[month]['predicted'] +
-                ft_payroll[month]['predicted'] +
-                pt_payroll[month]['predicted']
+            cash_balance[month]['expected'] = invoices[month]['expected'] - (
+                expenses[month]['expected'] +
+                ft_payroll[month]['expected'] +
+                pt_payroll[month]['expected']
             )
 
         dashboard_data = OrderedDict([
@@ -264,7 +264,7 @@ class DashboardView(ViewerMixin, TemplateView):
 
         context['fiscal_months'] = self.fiscal_months
         context['month_names'] = [month.get_month_display() for month in self.fiscal_months]
-        context['predicted_totals'] = json.dumps([cash_balance[m]['predicted'] for m in self.fiscal_months], cls=DecimalEncoder)
+        context['expected_totals'] = json.dumps([cash_balance[m]['expected'] for m in self.fiscal_months], cls=DecimalEncoder)
         context['actual_totals'] = json.dumps([cash_balance[m]['actual'] for m in self.fiscal_months], cls=DecimalEncoder)
         context['dashboard_data'] = dashboard_data
         return context
@@ -357,7 +357,7 @@ class ContractsView(ViewerMixin, TemplateView):
             msg = "Contract %s not activated. Sum of invoice amounts (%s) do not equal contract amount (%s)."
             messages.error(self.request, msg % (
                 contract.contract_id,
-                "$%s" % intcomma(contract.get_invoices_predicted_total()),
+                "$%s" % intcomma(contract.get_invoices_expected_total()),
                 "$%s" % intcomma(contract.amount),
             ))
 
