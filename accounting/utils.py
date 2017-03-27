@@ -3,6 +3,13 @@ from collections import namedtuple
 from datetime import date
 
 
+def get_or_none(queryset):
+    try:
+        return queryset.get()
+    except queryset.model.DoesNotExist:
+        return None
+
+
 class Month(namedtuple('Month', ['year', 'month'])):
 
     def __new__(cls, *args, **kwargs):

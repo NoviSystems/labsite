@@ -1,13 +1,17 @@
 from datetime import date
+from decimal import Decimal
+
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Value as V, Sum
+from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 from itng.common.utils import choices
 
-from accounting.utils import Month
+from accounting.utils import Month, get_or_none
 
 User = settings.AUTH_USER_MODEL
 
@@ -215,10 +219,79 @@ class MonthlyBalance(LineItem):
 class CashBalance(MonthlyBalance):
     """
     The actual "cash on hand" balance per month.
-
-    Predictions are always computed from last month's results.
     """
-    expected_amount = None
+    @property
+    def expected_amount(self):
+        """
+        Formula:
+            - use *last* month's cash balance
+            - add this month's billable invoices
+            - subtract this month's expenses
+        """
+        # carry over last month's cash balance
+        cash_balance = Decimal(0)
+        if self.previous_cashbalance is not None:
+            # preference actual cash balance over expected
+            cash_balance = self.previous_cashbalance.actual_amount \
+                or self.previous_cashbalance.expected_amount
+
+        # sum all billable invoices
+        income = Invoice.objects \
+            .filter(
+                business_unit=self.business_unit,
+                expected_payment_date__year=self.year,
+                expected_payment_date__month=self.month) \
+            .exclude(contract__state=Contract.STATES.NEW) \
+            .aggregate(v=Coalesce(Sum('expected_amount'), V(Decimal(0))))['v']
+
+        # sum all expenses
+        expenses = Decimal(0)
+        for inst in [self.expenses, self.fulltime_payroll, self.parttime_payroll]:
+            if inst is not None:
+                expenses += inst.expected_amount
+
+        return cash_balance + income - expenses
+
+    @property
+    def previous_balance_kwargs(self):
+        previous = Month.prev(self)
+        return {
+            'business_unit': self.business_unit,
+            'year': previous.year,
+            'month': previous.month,
+        }
+
+    @property
+    def balance_kwargs(self):
+        return {
+            'business_unit': self.business_unit,
+            'year': self.year,
+            'month': self.month,
+        }
+
+    def balance_property(model_name, kwargs_name):
+        def fget(self):
+            model = apps.get_model('accounting', model_name)
+            name = '_previous_%s' % model.__name__.lower()
+
+            if not hasattr(self, name):
+                kwargs = getattr(self, kwargs_name)
+                setattr(self, name, get_or_none(model.objects.filter(**kwargs)))
+
+            return getattr(self, name)
+
+        def fset(self, value):
+            model = apps.get_model('accounting', model_name)
+            name = '_previous_%s' % model.__name__.lower()
+
+            setattr(self, name, value)
+
+        return {'fget': fget, 'fset': fset}
+
+    previous_cashbalance = property(**balance_property('CashBalance', 'previous_balance_kwargs'))
+    expenses = property(**balance_property('Expenses', 'balance_kwargs'))
+    fulltime_payroll = property(**balance_property('FullTimePayroll', 'balance_kwargs'))
+    parttime_payroll = property(**balance_property('PartTimePayroll', 'balance_kwargs'))
 
 
 class Expenses(MonthlyBalance):
