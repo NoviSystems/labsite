@@ -19,11 +19,8 @@
         <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
         <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-        {% block styles %}{% endblock %}
-        {% block scripts %}{% endblock %}
-
         {% block app-styles %}{% endblock %}
-        {% block app-scripts %}{% endblock %}
+        {% block styles %}{% endblock %}
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -113,4 +110,7 @@
             {% block content %}{% endblock %}
         </div>
     </body>
+
+    {% block app-scripts %}{% endblock %}
+    {% block scripts %}{% endblock %}
 </html>
