@@ -4,6 +4,17 @@
 {% load accounting_filters %}
 {% load humanize %}
 
+{% block styles %}
+<style>
+.clear-gutter-l {
+    padding-left: 0;
+}
+.clear-gutter-r {
+    padding-right: 0;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 {% include "accounting/nav_tabs.html" with active="dashboard" %}
@@ -54,7 +65,7 @@ Highcharts.chart('container', {
 
 <div class="container">
     <div class="row">
-        <div class="col-xs-2">
+        <div class="col-xs-2 clear-gutter-r">
 
             <table class="table">
                 <thead>
@@ -73,7 +84,7 @@ Highcharts.chart('container', {
                 {% endfor %}
             </table>
         </div>
-        <div class="col-xs-10">
+        <div class="col-xs-10 clear-gutter-l">
             <table class="table table-responsive">
                 <thead>
                     <tr>
