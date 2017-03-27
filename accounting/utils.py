@@ -19,18 +19,26 @@ class Month(namedtuple('Month', ['year', 'month'])):
         current = start
         while current != to:
             months.append(current)
-            current = cls.next_month(current)
+            current = cls.next(current)
 
         return months
 
     @classmethod
-    def next_month(cls, date):
-        month = date.month + 1
+    def offset(cls, date, months):
+        month = date.month + months
 
         year = date.year + ((month-1) // 12)
         month = ((month-1) % 12) + 1
 
         return Month(year, month)
+
+    @classmethod
+    def next(cls, date):
+        return cls.offset(date, 1)
+
+    @classmethod
+    def prev(cls, date):
+        return cls.offset(date, -1)
 
     def as_date(self):
         return date(self.year, self.month, 1)
