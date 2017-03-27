@@ -183,7 +183,7 @@ class MonthlyReconcileForm(forms.ModelForm):
                 instance = None
 
             if instance is None or \
-               instance.predicted_amount is None or \
+               instance.expected_amount is None or \
                instance.actual_amount is None:
                 msg = _("All values for this month need to be submitted "
                         "before the month can be reconciled.")
@@ -279,7 +279,7 @@ class MonthlyBalanceForm(forms.Form):
         is_past = (month < self.billing_month)
         is_future = (month > self.billing_month)
 
-        if model is models.CashBalance and attr == 'predicted':
+        if model is models.CashBalance and attr == 'expected':
             return '---------'
 
         if (is_future and attr == 'actual') or is_past:
@@ -304,24 +304,24 @@ class MonthlyBalanceForm(forms.Form):
 
         - if the month is past, the returned fields are actually formatted text values.
         - if the month is the current billing month, the fields are actual form fields.
-        - if the month is in the future, only the predicted fields are provided.
+        - if the month is in the future, only the expected fields are provided.
         """
         fields = OrderedDict()
         for key, model in self.models.items():
             try:
                 instance = model.objects.get(month=month.month, year=month.year)
-                actual, predicted = instance.actual_amount, instance.predicted_amount
+                actual, expected = instance.actual_amount, instance.expected_amount
             except model.DoesNotExist:
-                actual, predicted = None, None
+                actual, expected = None, None
 
             # round off past the decimal (cents not currently supported by interface)
-            if predicted is not None:
-                predicted = predicted.quantize(1)
+            if expected is not None:
+                expected = expected.quantize(1)
             if actual is not None:
                 actual = actual.quantize(1)
 
             # build fields or get formatted values
-            fields[self.field_name(month, key, 'predicted')] = self.build_field(model, 'predicted', predicted, month)
+            fields[self.field_name(month, key, 'expected')] = self.build_field(model, 'expected', expected, month)
             fields[self.field_name(month, key, 'actual')] = self.build_field(model, 'actual', actual, month)
 
         return fields
@@ -330,12 +330,12 @@ class MonthlyBalanceForm(forms.Form):
         saved = []
 
         for key, model in self.models.items():
-            predicted = data.pop(self.field_name(month, key, 'predicted'), None)
+            expected = data.pop(self.field_name(month, key, 'expected'), None)
             actual = data.pop(self.field_name(month, key, 'actual'), None)
 
             update = {}
-            if predicted is not None:
-                update['predicted_amount'] = predicted
+            if expected is not None:
+                update['expected_amount'] = expected
             if actual is not None:
                 update['actual_amount'] = actual
 
