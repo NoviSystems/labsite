@@ -56,7 +56,7 @@ th.year-header div {
 
                     <tr>
                         {% for header in form.headers %}
-                        <th class="text-center col-xs-1">Predicted</th>
+                        <th class="text-center col-xs-1">Expected</th>
                         <th class="text-center col-xs-1">Actual</th>
                         {% endfor %}
                     </tr>
@@ -128,8 +128,9 @@ new Vue({
     },
 
     mounted() {
+        const prefix = '{{ billing_prefix }}';
         for (const child of this.$children) {
-            if (child.initial === '') {
+            if (child.name.startsWith(prefix) && child.initial === '') {
                 this.reconcileDisabled = true;
                 break;
             }

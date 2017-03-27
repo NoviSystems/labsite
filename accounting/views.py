@@ -420,6 +420,7 @@ class MonthlyReconcileView(ViewerMixin, FormView):
             'next_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
             'prev_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
             'current_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk}),
+            'billing_prefix': '%d_%02d' % (self.current_billing_month.year, self.current_billing_month.month, )
         })
         return context
 
