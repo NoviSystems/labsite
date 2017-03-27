@@ -168,7 +168,7 @@ class MonthlyReconcileForm(forms.ModelForm):
 
         # The month can only be reconciled if it's passed.
         # So, validate that next month is not in the future.
-        if Month.next_month(month).as_date() > date.today():
+        if Month.next(month).as_date() > date.today():
             msg = _("Month cannot be reconciled until it has passed.")
             raise forms.ValidationError(msg, code='inactive')
 

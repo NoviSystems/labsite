@@ -125,7 +125,7 @@ class AccountingMixin(LoginRequiredMixin):
         # get the next month
         if latest is not None:
             latest = Month(latest.year, latest.month)
-            return Month.next_month(latest)
+            return Month.next(latest)
 
         # default to start of this fiscal year
         return Month(self.fiscal_calendar.start_date)

@@ -170,7 +170,7 @@ class MonthlyQuerySet(models.QuerySet):
             start, stop = stop, start
 
         if inclusive:
-            stop = Month.next_month(stop)
+            stop = Month.next(stop)
 
         return self.filter(
             Q(year=start.year, month__gte=start.month) |

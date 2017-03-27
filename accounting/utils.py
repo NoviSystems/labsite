@@ -92,6 +92,6 @@ class FiscalCalendar:
     @property
     def months(self):
         start = Month(self.start_date)
-        end = Month.next_month(self.end_date)
+        end = Month.next(self.end_date)
 
         return Month.range(start, end)
