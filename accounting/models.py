@@ -205,6 +205,12 @@ class MonthlyBalance(LineItem):
         ordering = ('-year', '-month')
         abstract = True
 
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, str(self), )
+
+    def __str__(self):
+        return "%4d-%02d (%s)" % (self.year, self.month, self.business_unit, )
+
 
 class CashBalance(MonthlyBalance):
     """
