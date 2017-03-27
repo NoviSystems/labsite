@@ -4,11 +4,8 @@
 
 {% load staticfiles %}
 
-{% block scripts %}
+{% block app-styles %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
-
-    {% include "accounting/action_modal.html" %}
-    <script src="{% static 'js/modal-populate.js' %}"></script>
 {% endblock %}
 
 {% block nav-links-left %}
@@ -34,4 +31,9 @@
         </li>
     </ul>
 {% endif %}
+{% endblock %}
+
+{% block app-scripts %}
+    {% include "accounting/action_modal.html" %}
+    <script src="{% static 'js/modal-populate.js' %}"></script>
 {% endblock %}
