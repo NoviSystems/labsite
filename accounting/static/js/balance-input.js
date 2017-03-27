@@ -1,4 +1,7 @@
 
+Vue.config.keyCodes = {minus: 189};
+
+
 const AutoScalingTest = Vue.extend({
     /**
      * Watch's a text value for changes and reports its width.
@@ -111,12 +114,12 @@ const BalanceInput = Vue.extend({
             </i>
             <autoscaling-input value-name="actual">
                 <i class="fa fa-usd"></i>
-                <!-- maxlength of 10 is 8 digits + 2 comma separators -->
                 <input ref="input"
-                       maxlength=10
+                       :maxlength="maxlength"
                        :name="name"
                        v-model="actual"
                        :placeholder="placeholder"
+                       @keydown.minus.prevent="negate"
                        @focus="selectContents"
                        @input="update($event.target.value)">
             </autoscaling-input>
@@ -145,12 +148,21 @@ const BalanceInput = Vue.extend({
         isDirty() {
             return this.raw(this.actual) !== this.raw(this.initial);
         },
+
+        isNegative() {
+            return this.validated.startsWith('-');
+        },
+
+        maxlength() {
+            // maxlength of 10 is 8 digits + 2 comma separators
+            return this.isNegative ? 11 : 10;
+        },
     },
 
     methods: {
         isValid(value) {
             // empty and number strings validate
-            return !isNaN(value);
+            return !isNaN(value) || value === '-';
         },
 
         raw(value) {
@@ -161,9 +173,20 @@ const BalanceInput = Vue.extend({
         },
 
         format(value) {
-            if (value === '')
+            if (value === '' || value === '-')
                 return value;
             return this.formatter.format(value);
+        },
+
+        negate() {
+            const makeNegative = !this.isNegative;
+
+            const raw = this.validated === '' ? '' : Math.abs(this.raw(this.validated));
+            const value = (makeNegative ? '-' : '') + raw;
+
+            this.$nextTick(() => {
+                this.update(value);
+            });
         },
 
         update(value) {
@@ -174,12 +197,15 @@ const BalanceInput = Vue.extend({
             // capture cursor postion
             const position = this.$refs.input.selectionEnd;
 
+            // TODO: the new position calculations are kind of a mess - need to rework this.
             let mod;
             if (isValid) {
-                const diff = Math.abs(newValue.length - this.validated.length) > 1 ? 1 : 0;
+                const negated = (this.raw(newValue) * -1) == (this.raw(this.validated) * 1);
+                const diff = Math.abs(newValue.length - this.validated.length) > 1
+                    ? 1
+                    : negated ? 1 : 0;
                 const direction = newValue.length >= this.validated.length ? 1 : -1;
 
-                // mod = (this.validated === '') ? 0 : (diff * direction);
                 mod = diff * direction;
             } else {
                 // invalid value implies letter entry - move caret back.
@@ -193,7 +219,10 @@ const BalanceInput = Vue.extend({
             // restore cursor positions
             this.$nextTick(() => {
                 // hack to handle field clearing
-                const newPosition = value.length === 1 ? 1 : (position + mod);
+                let newPosition = value.length === 1 ? 1 : (position + mod);
+                if (newPosition < 0)
+                    newPosition = 0;
+
                 this.$refs.input.selectionStart = newPosition;
                 this.$refs.input.selectionEnd = newPosition;
             });
