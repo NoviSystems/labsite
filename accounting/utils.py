@@ -18,7 +18,7 @@ def format_currency(value):
         return ''
 
     value = number_format(value, decimal_pos=0, force_grouping=True)
-    return mark_safe('<i class="fa fa-usd"></i> %s' % value)
+    return mark_safe('<span class="currency"><i class="fa fa-usd"></i> %s</span>' % value)
 
 
 class Month(namedtuple('Month', ['year', 'month'])):
