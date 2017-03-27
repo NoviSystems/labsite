@@ -189,72 +189,59 @@ class HomePageView(ViewerMixin, TemplateView):
 class DashboardView(ViewerMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
-    def get_monthly_invoices(self, date):
+    def get_expected_monthly_invoices(self, date):
         # Although this call looks similar to the other queries, there may be multiple
         # invoices per month while the other models are an aggregate monthly balance.
         return models.Invoice.objects \
-            .filter(business_unit=self.current_business_unit) \
             .exclude(contract__state=models.Contract.STATES.NEW) \
+            .filter(business_unit=self.current_business_unit) \
             .filter(expected_payment_date__year=date.year, expected_payment_date__month=date.month) \
-            .aggregate(
-                expected=Coalesce(Sum('expected_amount'), V(0)),
-                actual=Coalesce(Sum('actual_amount'), V(0)))
+            .aggregate(v=Coalesce(Sum('expected_amount'), V(0)))['v']
 
-    def get_monthly_expenses(self, date):
-        return models.Expenses.objects \
+    def get_actual_monthly_invoices(self, date):
+        # Although this call looks similar to the other queries, there may be multiple
+        # invoices per month while the other models are an aggregate monthly balance.
+        return models.Invoice.objects \
+            .exclude(contract__state=models.Contract.STATES.NEW) \
             .filter(business_unit=self.current_business_unit) \
-            .filter(year=date.year, month=date.month) \
-            .aggregate(
-                expected=Coalesce(Sum('expected_amount'), V(0)),
-                actual=Coalesce(Sum('actual_amount'), V(0)))
+            .filter(actual_payment_date__year=date.year, actual_payment_date__month=date.month) \
+            .aggregate(v=Coalesce(Sum('actual_amount'), V(0)))['v']
 
-    def get_monthly_ft_payroll(self, date):
-        return models.FullTimePayroll.objects \
-            .filter(business_unit=self.current_business_unit) \
-            .filter(year=date.year, month=date.month) \
-            .aggregate(
-                expected=Coalesce(Sum('expected_amount'), V(0)),
-                actual=Coalesce(Sum('actual_amount'), V(0)))
+    def get_monthly_invoices(self, date):
+        return {
+            'expected_amount': self.get_expected_monthly_invoices(date),
+            'actual_amount': self.get_actual_monthly_invoices(date),
+        }
 
-    def get_monthly_pt_payroll(self, date):
-        return models.PartTimePayroll.objects \
-            .filter(business_unit=self.current_business_unit) \
-            .filter(year=date.year, month=date.month) \
-            .aggregate(
-                expected=Coalesce(Sum('expected_amount'), V(0)),
-                actual=Coalesce(Sum('actual_amount'), V(0)))
+    def get_monthly_instance(self, model, date):
+        try:
+            return model.objects \
+                .filter(business_unit=self.current_business_unit) \
+                .filter(year=date.year, month=date.month).get()
+        except model.DoesNotExist:
+            return model(
+                business_unit=self.current_business_unit,
+                year=date.year, month=date.month)
 
-    def get_monthly_cash_balance(self, date):
-        # expected values are calculated
-        return models.CashBalance.objects \
-            .filter(business_unit=self.current_business_unit) \
-            .filter(year=date.year, month=date.month) \
-            .aggregate(actual=Coalesce(Sum('actual_amount'), V(0)))
+    def get_balances(self):
+        # get instances
+        invoices = [self.get_monthly_invoices(month) for month in self.fiscal_months]  # alreaady in dict form
+        expenses = [self.get_monthly_instance(models.Expenses, month) for month in self.fiscal_months]
+        ft_payroll = [self.get_monthly_instance(models.FullTimePayroll, month) for month in self.fiscal_months]
+        pt_payroll = [self.get_monthly_instance(models.PartTimePayroll, month) for month in self.fiscal_months]
+        cash_balance = [self.get_monthly_instance(models.CashBalance, month) for month in self.fiscal_months]
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        # avoid executing duplicate query for expected cash balance calculation.
+        for i, _ in enumerate(self.fiscal_months):
+            cash_balance[i].expenses = expenses[i]
+            cash_balance[i].fulltime_payroll = ft_payroll[i]
+            cash_balance[i].parttime_payroll = pt_payroll[i]
 
-        context.update({
-            'next_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
-            'prev_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
-            'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
-        })
+            if i > 0:
+                cash_balance[i].previous_cashbalance = cash_balance[i - 1]
 
-        invoices = {m: self.get_monthly_invoices(m) for m in self.fiscal_months}
-        expenses = {m: self.get_monthly_expenses(m) for m in self.fiscal_months}
-        ft_payroll = {m: self.get_monthly_ft_payroll(m) for m in self.fiscal_months}
-        pt_payroll = {m: self.get_monthly_pt_payroll(m) for m in self.fiscal_months}
-        cash_balance = {m: self.get_monthly_cash_balance(m) for m in self.fiscal_months}
-
-        # calculate the monthly expected cash balance
-        for month in self.fiscal_months:
-            cash_balance[month]['expected'] = invoices[month]['expected'] - (
-                expenses[month]['expected'] +
-                ft_payroll[month]['expected'] +
-                pt_payroll[month]['expected']
-            )
-
-        dashboard_data = OrderedDict([
+        # create dictionaries
+        return OrderedDict([
             ('Invoices', invoices),
             ('Expenses', expenses),
             ('Full-time Payroll', ft_payroll),
@@ -262,11 +249,24 @@ class DashboardView(ViewerMixin, TemplateView):
             ('Cash Balance', cash_balance),
         ])
 
-        context['fiscal_months'] = self.fiscal_months
-        context['month_names'] = [month.get_month_display() for month in self.fiscal_months]
-        context['expected_totals'] = json.dumps([cash_balance[m]['expected'] for m in self.fiscal_months], cls=DecimalEncoder)
-        context['actual_totals'] = json.dumps([cash_balance[m]['actual'] for m in self.fiscal_months], cls=DecimalEncoder)
-        context['dashboard_data'] = dashboard_data
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        balances = self.get_balances()
+        cash_balances = balances['Cash Balance']
+
+        context.update({
+            'next_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
+            'prev_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
+            'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
+
+            'billing_month': self.current_billing_month,
+            'fiscal_months': self.fiscal_months,
+            'balances': balances,
+            'expected_totals': json.dumps([balance.expected_amount for balance in cash_balances], cls=DecimalEncoder),
+            'actual_totals': json.dumps([balance.actual_amount for balance in cash_balances], cls=DecimalEncoder),
+        })
+
         return context
 
 

@@ -2,7 +2,6 @@
 
 {% load staticfiles %}
 {% load accounting_filters %}
-{% load humanize %}
 
 {% block styles %}
 <style>
@@ -24,6 +23,10 @@
 <div id="container" style="width:100%; height:400px;"></div>
 <script src="{% static 'js/highcharts.js' %}"></script>
 <script>
+const categories = [{% for month in fiscal_months %}
+    '{{ month.get_month_display }}', {% endfor %}
+];
+
 Highcharts.setOptions({
     lang: {thousandsSep: ","},
 });
@@ -36,7 +39,7 @@ Highcharts.chart('container', {
         text: 'Cash Values for Months'
     },
     xAxis: {
-        categories: {{ month_names | safe }}
+        categories: categories
     },
     credits: {
         enabled: false
@@ -63,15 +66,18 @@ Highcharts.chart('container', {
 });
 </script>
 
-<div class="container">
+<hr>
+
+
     <div class="row">
         <div class="col-xs-2 clear-gutter-r">
 
-            <table class="table">
+            <table class="table table-responsive">
                 <thead>
+                    <tr><th>&nbsp;</th></tr>
                     <tr><th colspan="2" class="text-right">Date</th></tr>
                 </thead>
-                {% for title in dashboard_data %}
+                {% for title in balances %}
                 {% if forloop.last %}<tbody>{% endif %}
                 <tr>
                     <th rowspan="2">{{ title }}</th>
@@ -87,31 +93,34 @@ Highcharts.chart('container', {
         <div class="col-xs-10 clear-gutter-l">
             <table class="table table-responsive">
                 <thead>
+                    {% regroup fiscal_months by year as years %}
                     <tr>
-                        {% for month in month_names %}
-                            <th class="col-xs-1 text-right">{{ month }}</th>
+                        {% for year in years %}
+                        <th class="text-right">{{ year.grouper }}</th>
+                        <th colspan="{{ year.list|length|add:-1 }}"></th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for month in fiscal_months %}
+                            <th class="col-xs-1 text-right{% if month == billing_month %} billing-month{% endif %}">{{ month.get_month_display }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
 
                 <tbody>
-                    {% for data in dashboard_data.values %}
+                    {% for data in balances.values %}
                     {% if forloop.last %}
                 </tbody>
                 <tbody>
                     {% endif %}
                     <tr class="text-right">
-                        {% for month in fiscal_months %}
-                        {% with obj=data|get_item:month %}
-                            <td>${{ obj.expected|stringformat:".0f" | intcomma }}</td>
-                        {% endwith %}
+                        {% for balance in data %}
+                            <td>{{ balance.expected_amount|currency|default:'---' }}</td>
                         {% endfor %}
                     </tr>
                     <tr class="text-right">
-                        {% for month in fiscal_months %}
-                        {% with obj=data|get_item:month %}
-                            <td>${{ obj.actual|stringformat:".0f" | intcomma }}</td>
-                        {% endwith %}
+                        {% for balance in data %}
+                            <td>{{ balance.actual_amount|currency|default:'---' }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
@@ -119,5 +128,5 @@ Highcharts.chart('container', {
             </table>
         </div>
     </div>
-</div>
+
 {% endblock %}
