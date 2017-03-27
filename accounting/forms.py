@@ -6,11 +6,9 @@ from django import forms
 from django.db.models import DateField
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.utils.translation import ugettext as _
-from django.utils.formats import number_format
-from django.utils.safestring import mark_safe
 
 from accounting import models
-from accounting.utils import Month
+from accounting.utils import Month, format_currency
 
 
 class BaseForm(forms.ModelForm):
@@ -269,24 +267,16 @@ class MonthlyBalanceForm(forms.Form):
                 'month': month, 'fields': bound,
             })
 
-    @staticmethod
-    def format_currency(value):
-        if value is None:
-            return ''
-
-        value = number_format(value, decimal_pos=0, force_grouping=True)
-        return mark_safe('<i class="fa fa-usd"></i> %s' % value)
-
     def build_field(self, model, attr, value, month):
         # TODO: use model's field.formfield() to build our custom decimal field instead?
         is_past = (month < self.billing_month)
         is_future = (month > self.billing_month)
 
         if model is models.CashBalance and attr == 'expected':
-            return '---------'
+            return format_currency(value) or '---------'
 
         if (is_future and attr == 'actual') or is_past:
-            return self.format_currency(value)
+            return format_currency(value)
 
         return BalanceField(
             initial=value,

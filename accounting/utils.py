@@ -2,12 +2,23 @@
 from collections import namedtuple
 from datetime import date
 
+from django.utils.formats import number_format
+from django.utils.safestring import mark_safe
+
 
 def get_or_none(queryset):
     try:
         return queryset.get()
     except queryset.model.DoesNotExist:
         return None
+
+
+def format_currency(value):
+    if value is None:
+        return ''
+
+    value = number_format(value, decimal_pos=0, force_grouping=True)
+    return mark_safe('<i class="fa fa-usd"></i> %s' % value)
 
 
 class Month(namedtuple('Month', ['year', 'month'])):
