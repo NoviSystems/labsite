@@ -4,7 +4,7 @@ from datetime import date
 
 from django import forms
 from django.db.models import DateField
-from django.contrib.humanize.templatetags.humanize import intcomma
+from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
 from accounting import models
@@ -137,16 +137,30 @@ class ActiveInvoiceUpdateForm(InvoiceForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        predicted = self.instance.predicted_amount
-        predicted = "$%s" % intcomma(predicted)
+        # expected invoice date
+        expected = self.instance.expected_invoice_date
+        self.fields['actual_invoice_date'].help_text = (
+            "Expected date: %s" % date_format(expected)
+        )
+
+        # expected payment date
+        expected = self.instance.expected_payment_date
+        self.fields['actual_payment_date'].help_text = (
+            "Expected date: %s" % date_format(expected)
+        )
+
+        # expected amount
+        expected = self.instance.expected_amount
         self.fields['actual_amount'].help_text = (
-            "Predicted amount: %s" % predicted
+            "Expected amount: %s" % format_currency(expected, html=False)
         )
 
     class Meta:
         model = models.Invoice
         fields = [
             'state',
+            'actual_invoice_date',
+            'actual_payment_date',
             'actual_amount',
         ]
 
