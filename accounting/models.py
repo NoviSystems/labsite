@@ -115,7 +115,7 @@ class Contract(models.Model):
         Mark the Contract as active.
         """
 
-        for idx, invoice in enumerate(self.invoice_set.order_by('date'), start=1):
+        for idx, invoice in enumerate(self.invoice_set.order_by('expected_invoice_date'), start=1):
             invoice.invoice_id = "%s-%02d" % (self.contract_id, idx)
             invoice.save()
 
