@@ -1,18 +1,17 @@
-{% load humanize %}
+{% load accounting_filters %}
 
 {% with contract=contract_ctx.contract %}
 <div role="tab">
     <div class="panel-title">
         <h4 class="lead">
             {{ contract.contract_id }}: {{ contract.name }}
-
         </h4>
 
         <small class="visible-md-inline visible-lg-inline">
             <ul class="list-inline" style="margin-left: 2em;">
-                <li><b>Amount:</b></li>   <li>${{ contract.amount|intcomma }}</li>
-                <li><b>Start:</b></li>     <li>{{ contract.start_date }}</li>
-                <li><b>Type:</b></li>  <li>{{ contract.get_type_display }}</li>
+                <li><b>Amount:</b></li> <li>{{ contract.amount|currency }}</li>
+                <li><b>Start:</b></li>  <li>{{ contract.start_date }}</li>
+                <li><b>Type:</b></li>   <li>{{ contract.get_type_display }}</li>
             </ul>
         </small>
 
@@ -35,13 +34,12 @@
 </div>
 
 <div id="collapse-{{ contract.pk }}" class="panel-collapse collapse" role="tabpanel">
-    <hr>
 
     <!-- Contract Details -->
     <div class="row">
         <div class="col-xs-12 visible-xs-block visible-sm-block">
             <table class="table">
-                <tr><th>Total Amount:</th>  <td>${{ contract.amount|intcomma }}</td></tr>
+                <tr><th>Total Amount:</th>  <td>{{ contract.amount|currency }}</td></tr>
                 <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
                 <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
             </table>
