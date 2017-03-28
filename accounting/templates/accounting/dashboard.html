@@ -94,9 +94,16 @@
 
 {% block scripts %}
 <script src="{% static 'js/highcharts.js' %}"></script>
+<script src="{% static 'js/highcharts-grouped.js' %}"></script>
 <script>
-const categories = [{% for month in fiscal_months %}
-    '{{ month.get_month_display }}', {% endfor %}
+{% regroup fiscal_months by year as years %}
+const categories = [{% for year in years %}
+    {
+        name: '{{ year.grouper }}',
+        categories: [{% for month in year.list %}
+        '{{ month.get_month_display }}', {% endfor %}
+        ],
+    },{% endfor %}
 ];
 
 Highcharts.setOptions({
