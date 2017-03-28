@@ -3,68 +3,56 @@
 {% with contract=contract_ctx.contract %}
 <div role="tab">
     <div class="panel-title">
-        <a role="button" data-toggle="collapse" href="#collapse-{{ contract.pk }}">
-            <h4 class="lead" style="margin: 10px 0">
-                {{ contract.contract_id }}: {{ contract.name }}
-            </h4>
-        </a>
+        <h4 class="lead">
+            {{ contract.contract_id }}: {{ contract.name }}
+
+        </h4>
+
+        <small class="visible-md-inline visible-lg-inline">
+            <ul class="list-inline" style="margin-left: 2em;">
+                <li><b>Amount:</b></li>   <li>${{ contract.amount|intcomma }}</li>
+                <li><b>Start:</b></li>     <li>{{ contract.start_date }}</li>
+                <li><b>Type:</b></li>  <li>{{ contract.get_type_display }}</li>
+            </ul>
+        </small>
+
+        <div class="pull-right">
+            <ul class="list-inline pull-right">
+                <li class="visible-md-inline-block visible-lg-inline-block">
+                    {% include 'accounting/contract_actions.html' with contract=contract size='xs' %}
+                </li>
+                <li>
+                    <a role="button" data-toggle="collapse" href="#collapse-{{ contract.pk }}" style="font-size: 14px;">
+                        <span class="fa-stack fa-sm text-primary">
+                            <i class="fa fa-circle-thin fa-stack-2x"></i>
+                            <i class="fa fa-chevron-down fa-stack-1x"></i>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 
 <div id="collapse-{{ contract.pk }}" class="panel-collapse collapse" role="tabpanel">
-    <div class="row">
+    <hr>
 
-        <!-- Contract Details -->
-        <div class="col-md-3">
+    <!-- Contract Details -->
+    <div class="row">
+        <div class="col-xs-12 visible-xs-block visible-sm-block">
             <table class="table">
                 <tr><th>Total Amount:</th>  <td>${{ contract.amount|intcomma }}</td></tr>
                 <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
                 <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
             </table>
-            {% if is_manager %}
-
-            <!-- New controls-->
-            {% if contract.state == contract.STATES.NEW %}
-            <form action="" method="post">
-                {% csrf_token %}
-                <a class="btn btn-sm btn-primary" name="activate" value="{{ contract.pk }}"
-                 data-toggle="modal" data-target="#action-modal"
-                 data-title="Confirm Activation" data-body="Are you sure you want to activate <b>{{ contract.contract_id }}: {{ contract.name }}</b>?"
-                 data-btn-class="btn-primary">
-                    Activate
-                </a>
-
-                <div class="btn-group btn-group-sm">
-                    <a class="btn btn-sm btn-primary" href="{{ contract_ctx.update_url }}">Update Contract</a>
-                    <a class="btn btn-sm btn-danger" name="delete" value="{{ contract.pk }}"
-                     data-toggle="modal" data-target="#action-modal"
-                     data-title="Confirm Deletion" data-body="Are you sure you want to delete <b>{{ contract.contract_id }}: {{ contract.name }}</b>?"
-                     data-btn-class="btn-danger">
-                        <i class="fa fa-trash"></i>
-                    </a>
-                </div>
-            </form>
-            {% endif %}
-
-            <!-- Active controls-->
-            {% if contract_ctx.contract.state == contract.STATES.ACTIVE %}
-            <form action="" method="post">
-                {% csrf_token %}
-                <a class="btn btn-sm btn-primary" name="complete" value="{{ contract.pk }}"
-                 data-toggle="modal" data-target="#action-modal"
-                 data-title="Confirm Completion" data-body="Are you sure you want to mark <b>{{ contract.contract_id }}: {{ contract.name }}</b> as complete?"
-                 data-btn-class="btn-primary">
-                    Complete
-                </a>
-            </form>
-            {% endif %}
-
+            {% include 'accounting/contract_actions.html' with contract=contract %}
             <br>
-            {% endif %}
         </div>
+    </div>
 
-        <!-- Contract Invoices -->
-        <div class="col-md-9">
+    <!-- Contract Invoices -->
+    <div class="row">
+        <div class="col-xs-12">
             {% if not contract_ctx.invoices %}
             <p class="text-center"><b>No invoices for this contract.</b></p>
             {% endif %}

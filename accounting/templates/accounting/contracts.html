@@ -1,5 +1,26 @@
 {% extends "accounting/base.html" %}
 
+
+{% block styles %}
+<style>
+.panel-title .lead {
+    display: inline-block;
+
+    /* remove bottom margin from lead text */
+    margin-bottom: 10px;
+}
+
+.panel-title .list-inline {
+    display: inline-block;
+}
+
+.fa-chevron-down {
+    /* animate chevron when toggling rotate class */
+    transition: transform .2s linear;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 {% include "accounting/nav_tabs.html" with active="contracts" %}
 
@@ -12,9 +33,7 @@
 {% endif %}
 
 
-
 <!-- New Contracts -->
-{% if new_contracts %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3 class="panel-title">New Contracts</h3>
@@ -24,13 +43,13 @@
         <li class="list-group-item">
             {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
         </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
         {% endfor %}
     </ul>
 </div>
-{% endif %}
 
 <!-- Active Contracts -->
-{% if active_contracts %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3 class="panel-title">Active Contracts</h3>
@@ -40,13 +59,13 @@
         <li class="list-group-item">
             {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
         </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
         {% endfor %}
     </ul>
 </div>
-{% endif %}
 
 <!-- Completed Contracts -->
-{% if completed_contracts %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3 class="panel-title">Completed Contracts</h3>
@@ -56,10 +75,11 @@
         <li class="list-group-item">
             {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
         </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
         {% endfor %}
     </ul>
 </div>
-{% endif %}
 
 <!-- No contracts-->
 {% if not has_contracts %}
@@ -70,4 +90,14 @@
 </div>
 {% endif %}
 
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+$('.collapse').on('show.bs.collapse hide.bs.collapse', function(event) {
+    const id = event.target.getAttribute('id');
+    $(`[href="#${id}"] i`).toggleClass('fa-rotate-180');
+});
+</script>
 {% endblock %}
