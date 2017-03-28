@@ -153,6 +153,11 @@ class Invoice(LineItem):
     actual_payment_date = models.DateField(null=True, blank=True)
 
     class Meta:
+        # The unique_together constraint soft requirement:
+        # - expected invoice date is used for ordering before the ID is created.
+        # - It doesn't really make sense to expect two separate invoices on the
+        #   same date for the same contract.
+        # - This can easily be removed if necessary
         unique_together = ('contract', 'expected_invoice_date')
 
     def __str__(self):
