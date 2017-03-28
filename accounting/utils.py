@@ -13,11 +13,13 @@ def get_or_none(queryset):
         return None
 
 
-def format_currency(value):
+def format_currency(value, html=True):
     if value is None:
         return ''
 
     value = number_format(value, decimal_pos=0, force_grouping=True)
+    if not html:
+        return '$ %s' % value
     return mark_safe('<span class="currency"><i class="fa fa-usd"></i> %s</span>' % value)
 
 
