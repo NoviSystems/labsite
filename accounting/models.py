@@ -149,8 +149,8 @@ class Invoice(LineItem):
 
     expected_invoice_date = models.DateField()
     expected_payment_date = models.DateField()
-    actual_invoice_date = models.DateField()
-    actual_payment_date = models.DateField()
+    actual_invoice_date = models.DateField(null=True, blank=True)
+    actual_payment_date = models.DateField(null=True, blank=True)
 
     class Meta:
         unique_together = ('contract', 'expected_invoice_date')
