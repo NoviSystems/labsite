@@ -7,17 +7,17 @@ from django.db.models import Sum, Value as V
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.contrib import messages
-from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
 
 from accounting import models
 from accounting import forms
-from accounting.utils import Month, FiscalCalendar
+from accounting.utils import format_currency, Month, FiscalCalendar
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -290,7 +290,7 @@ class ContractsView(ViewerMixin, TemplateView):
             'contract': contract,
             'invoices': [
                 self.make_invoice_context(invoice) for invoice
-                in models.Invoice.objects.filter(contract=contract).order_by('-invoice_date')
+                in models.Invoice.objects.filter(contract=contract).order_by('-expected_invoice_date')
             ],
             'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
             'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
@@ -355,11 +355,11 @@ class ContractsView(ViewerMixin, TemplateView):
 
         elif not contract.amount_matches_invoices():
             msg = "Contract %s not activated. Sum of invoice amounts (%s) do not equal contract amount (%s)."
-            messages.error(self.request, msg % (
+            messages.error(self.request, mark_safe(msg % (
                 contract.contract_id,
-                "$%s" % intcomma(contract.get_invoices_expected_total()),
-                "$%s" % intcomma(contract.amount),
-            ))
+                format_currency(contract.get_invoices_expected_total()),
+                format_currency(contract.amount),
+            )))
 
         else:
             contract.activate()
