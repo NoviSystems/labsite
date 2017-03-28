@@ -56,8 +56,8 @@ class InvoiceForm(BaseForm):
         self.instance.contract = contract
         self.instance.business_unit = contract.business_unit
 
-    def clean_invoice_date(self):
-        date = self.cleaned_data['invoice_date']
+    def clean_expected_invoice_date(self):
+        date = self.cleaned_data['expected_invoice_date']
 
         if date < self.contract.start_date:
             raise forms.ValidationError(
@@ -65,7 +65,7 @@ class InvoiceForm(BaseForm):
                 params={'start_date': str(self.contract.start_date)},
             )
 
-        duplicate = self.contract.invoice_set.filter(invoice_date=date)
+        duplicate = self.contract.invoice_set.filter(expected_invoice_date=date)
         if hasattr(self.instance, 'pk'):
             duplicate = duplicate.exclude(pk=self.instance.pk)
 
@@ -74,17 +74,19 @@ class InvoiceForm(BaseForm):
 
         return date
 
-    def clean_predicted_date(self):
-        date = self.cleaned_data['predicted_date']
+    def clean_expected_payment_date(self):
+        date = self.cleaned_data['expected_payment_date']
 
         if date < self.contract.start_date:
             raise forms.ValidationError(
-                _("Predicted payment date must occur after or on the contract's start date (%(start_date)s)."),
+                _("Expected payment date must occur after or on the contract's start date (%(start_date)s)."),
                 params={'start_date': str(self.contract.start_date)},
             )
 
-    def clean_predicted_amount(self):
-        value = self.cleaned_data['predicted_amount']
+        return date
+
+    def clean_expected_amount(self):
+        value = self.cleaned_data['expected_amount']
         models.validate_positive(value)
 
         return value
@@ -98,9 +100,9 @@ class InvoiceForm(BaseForm):
     class Meta:
         model = models.Invoice
         fields = [
-            'invoice_date',
-            'predicted_date',
-            'predicted_amount',
+            'expected_invoice_date',
+            'expected_payment_date',
+            'expected_amount',
         ]
 
 
