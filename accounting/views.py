@@ -380,6 +380,7 @@ class ContractsView(ViewerMixin, TemplateView):
             messages.error(self.request, msg % contract.contract_id)
 
         else:
+            messages.success(self.request, "Contract '%s' was successfully deleted." % contract.name)
             contract.delete()
 
 
@@ -600,7 +601,10 @@ class InvoiceUpdateView(InvoiceMixin, UpdateView):
 
 
 class InvoiceDeleteView(InvoiceMixin, DeleteView):
-    template_name = 'accounting/base_delete_form.html'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Invoice successfully deleted.')
+        return super().delete(request, *args, **kwargs)
 
 
 ################################################################
