@@ -1,198 +1,103 @@
 {% extends "accounting/base.html" %}
 
-{% load staticfiles %}
+
+{% block styles %}
+<style>
+.panel-title .lead {
+    display: inline-block;
+
+    /* remove bottom margin from lead text */
+    margin-bottom: 10px;
+}
+
+.panel-title .list-inline {
+    display: inline-block;
+}
+
+.fa-chevron-down {
+    /* animate chevron when toggling rotate class */
+    transition: transform .2s linear;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-
 {% include "accounting/nav_tabs.html" with active="contracts" %}
 
-    <div class="row">
-        <div class="col-md-12">
-            </br>
-            {% if not is_viewer %}
-            <a class="btn btn-primary" href={% url 'accounting:create_contract' business_unit=current_business_unit.pk %}>Create Contract</a>
-            {% endif %}
-            </br>
-        </div>
+{% if is_manager %}
+<div class="page-header">
+    <a class="btn btn-primary" href="{% url 'accounting:create_contract' business_unit=current_business_unit.pk %}">
+        New Contract <i class="fa fa-fw fa-plus"></i>
+    </a>
+</div>
+{% endif %}
+
+
+<!-- New Contracts -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">New Contracts</h3>
     </div>
+    <ul class="list-group">
+        {% for contract_ctx in new_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
 
-    <div class="row">
-        <div class="col-md-12">
-
-        {% if active_contracts %}
-            <h3>Active Contracts</h3>
-            <hr></hr>
-            {% for contract_invoice in active_contracts %}
-
-            <div class="model-display">
-
-            <div role="tab" id="headingOne">
-                <div class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract_invoice.contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract_invoice.contract.pk}}">
-                        <h4 class="lead'">{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }}</h4><hr>
-                    </a>
-                </div>
-            </div>
-
-            <div id="collapse{{contract_invoice.contract.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{contract_invoice.contract.pk}}">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h4>Total Amount: ${{contract_invoice.contract.amount }}</h4>
-                            <h5>Start Date: {{contract_invoice.contract.start_date}}</h5>
-                            <h5>Contract Type: {{contract_invoice.contract.contract_type }}</h5>
-                        </div>
-                        <div class="col-md-8">
-                            {% if not is_viewer %}
-                            <h4>
-                                <a class="btn btn-primary" href={% url 'accounting:update_contract' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk %}>Update Contract</a>
-                                <form action="{% url 'accounting:delete_contract' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk %}" method="post">
-                                    {% csrf_token %}
-                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }}">Delete Contract</a>
-                                </form>
-                            </h4>
-                            {% endif %}
-                        </div>
-                    </div>
-                    </br>
-                    <div class="row">
-                        {% if not contract_invoice.invoices %}
-                        <div class="col-md-12">
-                            <p>No invoices for this contract.</p>
-                        </div>
-                        {% endif %}
-                        <div class="col-md-12">
-                            {% if not is_viewer %}
-                                <a class="btn btn-primary" href={% url 'accounting:create_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk %}>Create Invoice</a>
-                            {% endif %}
-                        </div>
-                        {% if contract_invoice.invoices %}
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Invoice Date: </th>
-                                        <th>Status: </th>
-                                        <th>Amount: </th>
-                                        <th>Update/Delete</th>
-                                    </tr>
-                                </thead>
-                            <tbody>
-                                {% for invoice in contract_invoice.invoices %}
-                                <tr class="model-display">
-                                    <th scope="row">{{ invoice.number }}</th>
-                                        <td>{{ invoice.date_payable }}</td>
-                                        <td>{{ invoice.transition_state }}</td>
-                                        <td>{{ invoice.predicted_amount }}</td>
-                                        {% if not is_viewer %}
-                                        <td>
-                                            <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
-                                            <form action="{% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}" method="post">
-                                                {% csrf_token %}
-                                                <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{invoice.name}}">Delete</a>
-                                            </form>
-                                        </td>
-                                        {% endif %}
-                                </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                            {% endif %}
-                    </div>
-                    </br>
-            </div>
-
-            </div>
-
-            {% endfor %}
-        {% else %}
-            <h4>No active contracts for this business unit.</h4>
-        {% endif %}
-        {% if completed_contracts %}
-            <h3>Completed Contracts</h3>
-            <hr></hr>
-            {% for contract_invoice in completed_contracts %}
-
-            <div class="model-display">
-
-            <div role="tab" id="headingOne">
-                <div class="panel-title">
-                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{contract_invoice.contract.pk}}" aria-expanded="true" aria-controls="collapse{{contract_invoice.contract.pk}}">
-                        <h4 class="lead'">{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }}</h4><hr>
-                    </a>
-                </div>
-            </div>
-
-            <div id="collapse{{contract_invoice.contract.pk}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{contract_invoice.contract.pk}}">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h4>Total Amount: ${{contract_invoice.contract.amount }}</h4>
-                            <h5>Start Date: {{contract_invoice.contract.start_date}}</h5>
-                            <h5>Contract Type: {{contract_invoice.contract.contract_type }}</h5>
-                        </div>
-                        <div class="col-md-8">
-                            {% if not is_viewer %}
-                            <h4>
-                                <a class="btn btn-primary" href={% url 'accounting:update_contract' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk %}>Update</a>
-                                <form action="{% url 'accounting:delete_contract' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk %}" method="post">
-                                    {% csrf_token %}
-                                    <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{contract_invoice.contract.department}} {{ contract_invoice.contract.contract_number|stringformat:"04d" }}: {{ contract_invoice.contract.organization_name }}">Delete Contract</a>
-                                </form>
-                            </h4>
-                            {% endif %}
-                        </div>
-                    </div>
-                    </br>
-                    <div class="row">
-                        {% if not contract_invoice.invoices %}
-                        <div class="col-md-12">
-                            <p>No invoices for this contract.</p>
-                        </div>
-                        {% endif %}
-                        <div class="col-md-12">
-                            {% if not is_viewer %}
-                                <a class="btn btn-primary" href={% url 'accounting:create_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk %}>Create Invoice</a>
-                            {% endif %}
-                        </div>
-                        {% if contract_invoice.invoices %}
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Invoice Date: </th>
-                                        <th>Status: </th>
-                                        <th>Amount: </th>
-                                        <th>Update/Delete</th>
-                                    </tr>
-                                </thead>
-                            <tbody>
-                                {% for invoice in contract_invoice.invoices %}
-                                <tr class="model-display">
-                                    <th scope="row">{{ invoice.number }}</th>
-                                        <td>{{ invoice.date_payable }}</td>
-                                        <td>{{ invoice.transition_state }}</td>
-                                        <td>{{ invoice.predicted_amount }}</td>
-                                        {% if not is_viewer %}
-                                        <td>
-                                            <a class="btn btn-primary" href={% url 'accounting:update_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}>Update</a>
-                                            <form action="{% url 'accounting:delete_invoice' business_unit=current_business_unit.pk contract=contract_invoice.contract.pk invoice=invoice.pk %}" method="post">
-                                                {% csrf_token %}
-                                                <a class="btn btn-danger" data-toggle="modal" data-target="#baseDeleteModal" data-model="{{invoice.name}}">Delete</a>
-                                            </form>
-                                        </td>
-                                        {% endif %}
-                                </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                            {% endif %}
-                    </div>
-                    </br>
-            </div>
-
-            </div>
-
-            {% endfor %}
-        {% endif %}
-        </div>
+<!-- Active Contracts -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Active Contracts</h3>
     </div>
+    <ul class="list-group">
+        {% for contract_ctx in active_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Completed Contracts -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Completed Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for contract_ctx in completed_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- No contracts-->
+{% if not has_contracts %}
+<div class="panel panel-default">
+    <div class="panel-body text-center">
+        <h4>No contracts for this business unit.</h4>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+$('.collapse').on('show.bs.collapse hide.bs.collapse', function(event) {
+    const id = event.target.getAttribute('id');
+    $(`[href="#${id}"] i`).toggleClass('fa-rotate-180');
+});
+</script>
 {% endblock %}

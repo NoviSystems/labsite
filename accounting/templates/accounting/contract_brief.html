@@ -1,0 +1,122 @@
+{% load accounting_filters %}
+
+{% with contract=contract_ctx.contract %}
+<div role="tab">
+    <div class="panel-title">
+        <h4 class="lead">
+            {{ contract.contract_id }}: {{ contract.name }}
+        </h4>
+
+        <small class="visible-md-inline visible-lg-inline">
+            <ul class="list-inline" style="margin-left: 2em;">
+                <li><b>Amount:</b></li> <li>{{ contract.amount|currency }}</li>
+                <li><b>Start:</b></li>  <li>{{ contract.start_date }}</li>
+                <li><b>Type:</b></li>   <li>{{ contract.get_type_display }}</li>
+            </ul>
+        </small>
+
+        <div class="pull-right">
+            <ul class="list-inline pull-right">
+                <li class="visible-md-inline-block visible-lg-inline-block">
+                    {% include 'accounting/contract_actions.html' with contract=contract size='xs' %}
+                </li>
+                <li>
+                    <a role="button" data-toggle="collapse" href="#collapse-{{ contract.pk }}" style="font-size: 14px;">
+                        <span class="fa-stack fa-sm text-primary">
+                            <i class="fa fa-circle-thin fa-stack-2x"></i>
+                            <i class="fa fa-chevron-down fa-stack-1x"></i>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="collapse-{{ contract.pk }}" class="panel-collapse collapse" role="tabpanel">
+    <!-- Contract Details -->
+    <div class="row">
+        <div class="col-xs-12 visible-xs-block visible-sm-block">
+            <table class="table">
+                <tr><th>Total Amount:</th>  <td>{{ contract.amount|currency }}</td></tr>
+                <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
+                <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
+            </table>
+            {% include 'accounting/contract_actions.html' with contract=contract %}
+            <br>
+        </div>
+    </div>
+
+    <!-- Contract Invoices -->
+    <div class="row">
+        <div class="col-xs-12">
+            {% if not contract_ctx.invoices %}
+            <hr>
+            <p class="text-center"><b>No invoices for this contract.</b></p>
+            {% endif %}
+
+            {% if contract_ctx.invoices %}
+            <br>
+            <table class="table table-hover">
+                <tr>
+                    <th class="col-xs-2 no-wrap">Invoice ID</th>
+                    <th class="col-xs-2 no-wrap">Status</th>
+                    <th class="col-xs-1 no-wrap">Expected Inv. Date</th>
+                    <th class="col-xs-1 no-wrap">Expected Pay. Date</th>
+                    <th class="col-xs-1 no-wrap">Actual Inv. Date</th>
+                    <th class="col-xs-1 no-wrap">Actual Pay. Date</th>
+                    <th class="col-xs-1 no-wrap">Expected Amount</th>
+                    <th class="col-xs-1 no-wrap">Actual Amount</th>
+                    <th class="col-xs-2 no-wrap">Actions</th>
+                </tr>
+
+                {% for invoice_ctx in contract_ctx.invoices %}
+                {% with invoice=invoice_ctx.invoice %}
+                <tr>
+                    <td class="no-wrap">{{ invoice.invoice_id|default:"---------" }}</td>
+                    <td class="no-wrap">{{ invoice.get_state_display }}</td>
+                    <td class="no-wrap">{{ invoice.expected_invoice_date|date:"DATE_FORMAT" }}</td>
+                    <td class="no-wrap">{{ invoice.actual_invoice_date|date:"DATE_FORMAT"|default:"---------" }}</td>
+                    <td class="no-wrap">{{ invoice.expected_payment_date|date:"DATE_FORMAT" }}</td>
+                    <td class="no-wrap">{{ invoice.actual_payment_date|date:"DATE_FORMAT"|default:"---------" }}</td>
+                    <td class="no-wrap">{{ invoice.expected_amount|currency }}</td>
+                    <td class="no-wrap">{{ invoice.actual_amount|currency|default:"---------" }}
+                    </td>
+                    {% if is_manager %}
+                    <td>
+                        <form action="{{ invoice_ctx.delete_url }}" method="post">
+                            {% csrf_token %}
+                            <div class="btn-group btn-group-xs" style="display: flex;"> <!-- prevents button wrapping -->
+                                {% if contract.state != contract.STATES.COMPLETE %}
+                                <a class="btn btn-default" href="{{ invoice_ctx.update_url }}">
+                                    <i class="fa fa-pencil"></i>
+                                </a>
+                                {% endif %}
+
+                                {% if contract.state == contract.STATES.NEW %}
+                                <a class="btn btn-danger" data-toggle="modal" data-target="#action-modal"
+                                 data-title="Confirm Deletion"
+                                 data-body="Are you sure you want to delete invoice on <b>{{ invoice.expected_invoice_date|date }}</b> for contract <b>{{ contract.contract_id }}</b>?"
+                                 data-btn-class="btn-danger" data-btn-text="Delete">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </table>
+            {% endif %}
+
+            {% if is_manager and contract.state == contract.STATES.NEW %}
+            <p class="text-center">
+                <a class="btn btn-sm btn-primary" href="{{ contract_ctx.invoice_url }}">Create Invoice</a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endwith %}

@@ -1,18 +1,15 @@
 <div class="row text-center">
     <div class="col-md-3 col-sm-12">
-        <div class="btn-group" role="group" aria-label="...">
-            {% if active == "dashboard" %}
-              <a class="btn btn-default" href={% url 'accounting:dashboard' business_unit=current_business_unit.pk start_year=start_year|add:"-1" end_year=end_year|add:"-1" %}><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
-              <a class="btn btn-default" href={% url 'accounting:dashboard' business_unit=current_business_unit.pk %}>Current</a>
-              <a class="btn btn-default"  href={% url 'accounting:dashboard' business_unit=current_business_unit.pk start_year=start_year|add:"1" end_year=end_year|add:"1" %}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
-            {% elif active == "reconcile"%}
-              <a class="btn btn-default" href={% url 'accounting:reconcile' business_unit=current_business_unit.pk start_year=start_year|add:"-1" end_year=end_year|add:"-1" %}><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
-              <a class="btn btn-default" href={% url 'accounting:reconcile' business_unit=current_business_unit.pk %}>Current</a>
-              <a class="btn btn-default"  href={% url 'accounting:reconcile' business_unit=current_business_unit.pk start_year=start_year|add:"1" end_year=end_year|add:"1" %}><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
-            {% endif %}
+        <div class="btn-group btn-group-sm" role="group" aria-label="...">
+            <a class="btn btn-sm btn-default" href="{{ prev_url }}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+            <a class="btn btn-sm btn-default" href="{{ current_url }}">Current</a>
+            <a class="btn btn-sm btn-default" href="{{ next_url }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
         </div>
     </div>
-    <div class="col-md-4 col-sm-12">
-        <h4 class="">July 1 {{start_year}} - June 30 {{end_year}}</h4>
+    <div class="col-md-6 col-sm-12">
+        <h4 class="">
+            FY {{ fiscal_year }}
+            <small>({{ fiscal_start|date:"DATE_FORMAT" }} - {{ fiscal_end|date:"DATE_FORMAT" }})</small>
+        </h4>
     </div>
 </div>

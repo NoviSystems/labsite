@@ -1,11 +1,13 @@
 from django.contrib import admin
 from accounting import models
 
-# Register your models here.
+
 admin.site.register(models.BusinessUnit)
+admin.site.register(models.UserTeamRole)
 admin.site.register(models.Contract)
 admin.site.register(models.Invoice)
-admin.site.register(models.Cash)
-admin.site.register(models.Expense)
-admin.site.register(models.Income)
-admin.site.register(models.UserTeamRole)
+admin.site.register(models.CashBalance)
+admin.site.register(models.Expenses)
+admin.site.register(models.FullTimePayroll)
+admin.site.register(models.PartTimePayroll)
+admin.site.register(models.MonthlyReconcile)

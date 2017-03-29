@@ -1,42 +1,39 @@
 {% extends 'accounting/base.html' %}
 
 {% load staticfiles %}
-{% load accountingFilters %}
+{% load accounting_filters %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-datepicker.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/accounting/form.css' %}" />
+{% endblock %}
 
 {% block nav-links %}
 {% endblock %}
 
 {% block content %}
-
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}" />
-<script src="{% static 'js/datepicker.js' %}"></script>
-
-
-<div class="panel panel-default">
-  <div class="panel-body">
-      <h3 class="form-header">{% if object %} Update {% else %} Create {% endif %} {% if base_form_title %} {{ base_form_title }} {% else %} {{ form.instance | get_form_model_name }}{% endif %}</h3>
+<div class="panel panel-default col-sm-offset-2 col-sm-8">
+    <div class="panel-body">
+        <h3 class="form-header">
+        {% if object %}Update{% else %}Create{% endif %}
+        {% if base_form_title %}{{ base_form_title }}{% else %}{{ form | get_form_model_name }} {% if object %}{{ object }}{% endif %}{% endif %}
+        </h3>
+        <hr>
         <form class="form" method="POST" action="">
-                {% csrf_token %}
-                {% for field in form %}
-                	<div class="form-group {% if field.errors %}has-error{% endif %}">
-                		<label for="{{ field.id_for_label }}">{{field.label | title}}</label>
-                		
-                		{% if field.errors %}
-	                		{% for error in field.errors %}
-	                	        		<p class="error"> {{ error }} </p>
-	                	        	{% endfor %}
-			{% endif %}
-                		
-                		{{ field }}
-
-       			{% if field.help_text %}
-        				<p class="help">{{ field.help_text|safe }}</p>
-        			{% endif %}
-                	</div>
-                {% endfor %}
-            <button class="btn btn-default" type="submit">{% if object %} Update {% else %} Create {% endif %} {{ form.instance | get_form_model_name }}</button>
-        </form>  </div>
+            {% csrf_token %}
+            {% include 'forms/block_form.html' with form=form %}
+            <div class="pull-right">
+                {% if cancel_url %}
+                <a href="{{ cancel_url }}" class="btn btn-default">Cancel</a>
+                {% endif %}
+                <button class="btn btn-primary" type="submit">{% if object %} Update {% else %} Create {% endif %} {{ form | get_form_model_name }}</button>
+            </div>
+        </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/vendor/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'js/accounting/datepicker.js' %}"></script>
 {% endblock %}

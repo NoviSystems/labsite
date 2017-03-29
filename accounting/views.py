@@ -1,46 +1,41 @@
 import json
+from collections import OrderedDict
 from datetime import date
-from dateutil.rrule import rrule, MONTHLY
-from calendar import monthrange
 from decimal import Decimal
 
-from django.shortcuts import redirect
-from django.db.models import Max, Sum
+from django.db.models import Sum, Value as V
+from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
-from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
-from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
+from django.shortcuts import redirect
+from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
 
 from accounting import models
 from accounting import forms
+from accounting.utils import format_currency, Month, FiscalCalendar
 
 
-class PermissionsMixin(LoginRequiredMixin, object):
-
-    def dispatch(self, request, *args, **kwargs):
-        if self.request.user.is_authenticated():
-            try:
-                self.team_roles = models.UserTeamRole.objects.filter(user=self.request.user)
-                self.business_units = []
-                for team_role in self.team_roles:
-                    self.business_units.append(team_role.business_unit)
-            except ObjectDoesNotExist:
-                self.team_roles = None
-                self.business_units = None
-        else:
-            self.team_roles = None
-        return super(PermissionsMixin, self).dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(PermissionsMixin, self).get_context_data(*args, **kwargs)
-        context['business_units'] = self.business_units
-        return context
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return int(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 
-class SetUpMixin(object):
+class AccountingMixin(LoginRequiredMixin):
+    """
+    Common setup required for most accounting views.
+    """
     success_url_name = None
+
+    @atomic
+    def dispatch(self, request, *args, **kwargs):
+        return super(AccountingMixin, self).dispatch(request, *args, **kwargs)
 
     def get_fiscal_year(self, calendar_date):
         calendar_year = calendar_date.year
@@ -53,266 +48,427 @@ class SetUpMixin(object):
     def get_object_fiscal_year(self):
         pass
 
-    @atomic
-    def dispatch(self, request, *args, **kwargs):
-        self.current_business_unit = models.BusinessUnit.objects.get(pk=kwargs['business_unit'])
-        self.now = date.today()
+    @cached_property
+    def user(self):
+        return self.request.user
 
-        fiscal_year = self.get_fiscal_year(self.now)
-
-        self.start_year = date(fiscal_year, 7, 1)
-        self.end_year = date(fiscal_year+1, 6, 30)
-
-        return super(SetUpMixin, self).dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(SetUpMixin, self).get_context_data(*args, **kwargs)
+    @cached_property
+    def team_role(self):
         try:
-            context['is_viewer'] = self.is_viewer
-        except AttributeError:
-            context['is_viewer'] = False
-        context['current_business_unit'] = self.current_business_unit
+            return models.UserTeamRole.objects.get(user=self.user, business_unit=self.current_business_unit)
+        except models.UserTeamRole.DoesNotExist:
+            return None
 
-        if 'start_year' in self.kwargs and 'end_year' in self.kwargs:
-            self.start_year = date(int(self.kwargs['start_year']), 7, 1)
-            self.end_year = date(int(self.kwargs['end_year']), 6, 30)
+    @cached_property
+    def is_manager(self):
+        if self.user.is_superuser:
+            return True
 
-        context['start_year'] = self.start_year.year
-        context['end_year'] = self.end_year.year
+        if self.team_role is None:
+            return False
+
+        ROLES = models.UserTeamRole.ROLES
+        return self.team_role.role == ROLES.MANAGER
+
+    @cached_property
+    def business_units(self):
+        return self.user.business_units.all()
+
+    @cached_property
+    def current_business_unit(self):
+        pk = self.kwargs.get('business_unit', None)
+
+        if pk is None:
+            return None
+        return models.BusinessUnit.objects.get(pk=pk)
+
+    @cached_property
+    def fiscal_calendar(self):
+        fiscal_year = self.kwargs.get('fiscal_year')
+
+        # coerce to int
+        if fiscal_year is not None:
+            fiscal_year = int(fiscal_year)
+
+        # try to determine from the last reconcile date
+        else:
+            latest = models.MonthlyReconcile.objects \
+                .filter(business_unit=self.current_business_unit) \
+                .order_by('-year', '-month').first()
+
+            if latest is not None:
+                latest_date = Month(latest).as_date()
+                fiscal_year = FiscalCalendar.get_fiscal_year(latest_date)
+
+        # if fiscal_year is none, will default to fiscal year for current date
+        return FiscalCalendar(fiscal_year)
+
+    @cached_property
+    def fiscal_year(self):
+        return self.fiscal_calendar.fiscal_year
+
+    @cached_property
+    def fiscal_months(self):
+        return self.fiscal_calendar.months
+
+    @cached_property
+    def current_billing_month(self):
+        """
+        The current month to focus on for billing purposes. This will either be
+        the next month to reconcile, or (if no months have been reconciled yet)
+        the first month of this fiscal year.
+        """
+        latest = models.MonthlyReconcile.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .order_by('-year', '-month').first()
+
+        # get the next month
+        if latest is not None:
+            latest = Month(latest.year, latest.month)
+            return Month.next(latest)
+
+        # default to start of this fiscal year
+        return Month(self.fiscal_calendar.start_date)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'business_units': self.business_units,
+            'current_business_unit': self.current_business_unit,
+            'fiscal_year': self.fiscal_year,
+            'fiscal_start': self.fiscal_calendar.start_date,
+            'fiscal_end': self.fiscal_calendar.end_date,
+            'is_manager': self.is_manager,
+        })
+
         return context
 
     def get_success_url_kwargs(self):
         return {
-            'business_unit': self.kwargs['business_unit']
+            'business_unit': self.current_business_unit.pk
         }
 
     def get_success_url(self):
+        if self.success_url_name is None:
+            return super().get_success_url()
         return reverse(self.success_url_name, kwargs=self.get_success_url_kwargs())
 
 
-class ViewerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
+class ViewerMixin(AccountingMixin, UserPassesTestMixin):
+    """
+    View requires 'view' permissions
+    """
 
     def test_func(self):
-        try:
-            bu_role = models.UserTeamRole.objects.get(user=self.request.user, business_unit=self.current_business_unit).role
-            if self.request.user.is_superuser:
+        if self.is_manager:
+            return True
+
+        if self.team_role is not None:
+            ROLES = models.UserTeamRole.ROLES
+            if self.team_role.role == ROLES.VIEWER:
                 return True
-            elif bu_role == 'MANAGER':
-                return True
-            elif bu_role == 'VIEWER':
-                self.is_viewer = True
-                return True
-            else:
-                raise Http404()
-        except ObjectDoesNotExist:
-            raise Http404()
+        return False
 
 
-class ManagerMixin(SetUpMixin, PermissionsMixin, UserPassesTestMixin):
+class ManagerMixin(AccountingMixin, UserPassesTestMixin):
+    """
+    View requires 'edit' permissions
+    """
 
     def test_func(self):
-        try:
-            bu_role = models.UserTeamRole.objects.get(user=self.request.user, business_unit=self.current_business_unit).role
-            if self.request.user.is_superuser:
-                return True
-            elif bu_role == 'MANAGER':
-                return True
-            else:
-                raise Http404()
-        except ObjectDoesNotExist:
-            raise Http404()
+        return self.is_manager
 
 
-class HomePageView(PermissionsMixin, TemplateView):
+################################################################
+# Dashboard Views                                              #
+################################################################
+class HomePageView(ViewerMixin, TemplateView):
     template_name = 'accounting/home.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(HomePageView, self).get_context_data()
-        context['business_units'] = self.business_units
-        return context
 
 
 class DashboardView(ViewerMixin, TemplateView):
     template_name = 'accounting/dashboard.html'
 
+    def get_expected_monthly_invoices(self, date):
+        # Although this call looks similar to the other queries, there may be multiple
+        # invoices per month while the other models are an aggregate monthly balance.
+        return models.Invoice.objects \
+            .exclude(contract__state=models.Contract.STATES.NEW) \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(expected_payment_date__year=date.year, expected_payment_date__month=date.month) \
+            .aggregate(v=Coalesce(Sum('expected_amount'), V(0)))['v']
+
+    def get_actual_monthly_invoices(self, date):
+        # Although this call looks similar to the other queries, there may be multiple
+        # invoices per month while the other models are an aggregate monthly balance.
+        return models.Invoice.objects \
+            .exclude(contract__state=models.Contract.STATES.NEW) \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(actual_payment_date__year=date.year, actual_payment_date__month=date.month) \
+            .aggregate(v=Coalesce(Sum('actual_amount'), V(0)))['v']
+
+    def get_monthly_invoices(self, date):
+        return {
+            'expected_amount': self.get_expected_monthly_invoices(date),
+            'actual_amount': self.get_actual_monthly_invoices(date),
+        }
+
+    def get_monthly_instance(self, model, date):
+        try:
+            return model.objects \
+                .filter(business_unit=self.current_business_unit) \
+                .filter(year=date.year, month=date.month).get()
+        except model.DoesNotExist:
+            return model(
+                business_unit=self.current_business_unit,
+                year=date.year, month=date.month)
+
+    def get_balances(self):
+        # get instances
+        invoices = [self.get_monthly_invoices(month) for month in self.fiscal_months]  # alreaady in dict form
+        expenses = [self.get_monthly_instance(models.Expenses, month) for month in self.fiscal_months]
+        ft_payroll = [self.get_monthly_instance(models.FullTimePayroll, month) for month in self.fiscal_months]
+        pt_payroll = [self.get_monthly_instance(models.PartTimePayroll, month) for month in self.fiscal_months]
+        cash_balance = [self.get_monthly_instance(models.CashBalance, month) for month in self.fiscal_months]
+
+        # avoid executing duplicate query for expected cash balance calculation.
+        for i, _ in enumerate(self.fiscal_months):
+            cash_balance[i].expenses = expenses[i]
+            cash_balance[i].fulltime_payroll = ft_payroll[i]
+            cash_balance[i].parttime_payroll = pt_payroll[i]
+
+            if i > 0:
+                cash_balance[i].previous_cashbalance = cash_balance[i - 1]
+
+        # create dictionaries
+        return OrderedDict([
+            ('Invoices', invoices),
+            ('Expenses', expenses),
+            ('Full-time Payroll', ft_payroll),
+            ('Part-time Payroll', pt_payroll),
+            ('Cash Balance', cash_balance),
+        ])
+
     def get_context_data(self, **kwargs):
-        context = super(DashboardView, self).get_context_data()
-        cma = {'title': 'Cash Month Actual', 'values': {}}
-        cmpr = {'title': 'Cash Month Projected', 'values': {}}
-        ema = {'title': 'Expenses Month Actual', 'values': {}}
-        emp = {'title': 'Expenses Month Projected', 'values': {}}
-        ima = {'title': 'Receivables Month Actual', 'values': {}}
-        imp = {'title': 'Receivables Month Projected', 'values': {}}
-        pma = {'title': 'Payroll Month Actual', 'values': {}}
-        pmp = {'title': 'Payroll Month Projected', 'values': {}}
-        tama = {'title': 'Total Assets Actual', 'values': {}}
-        tamp = {'title': 'Total Assets Projected', 'values': {}}
+        context = super().get_context_data(**kwargs)
 
-        months = [month for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
-        month_names = []
+        balances = self.get_balances()
+        cash_balances = balances['Cash Balance']
 
-        last_cash = Decimal('0.00')
-        cash_month_projected = Decimal('0.00')
-        payroll_month_projected = calculatePayrollProjectedAmount(self.current_business_unit)
+        context.update({
+            'next_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
+            'prev_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
+            'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
 
-        for month in months:
+            'billing_month': self.current_billing_month,
+            'fiscal_months': self.fiscal_months,
+            'balances': balances,
+            'expected_totals': json.dumps([balance.expected_amount for balance in cash_balances], cls=DecimalEncoder),
+            'actual_totals': json.dumps([balance.actual_amount for balance in cash_balances], cls=DecimalEncoder),
+        })
 
-            start_date = '{}-{}-{}'.format(month.year, month.month, '01')
-            end_date = '{}-{}-{}'.format(month.year, month.month, monthrange(month.year, month.month)[1])
-
-            month_name = month.strftime("%B")
-            month_names.append(month_name)
-
-            try:
-                previous_month = month
-                if previous_month.month == 1:
-                    previous_month = date(previous_month.year - 1, 12, monthrange(previous_month.year - 1, 12)[1])
-                else:
-                    previous_month = date(previous_month.year, previous_month.month - 1, monthrange(previous_month.year, previous_month.month - 1)[1])
-                last_cash = models.Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=('{}-{}-{}'.format(previous_month.year, previous_month.month, monthrange(previous_month.year, previous_month.month)[1]))).actual_amount
-            except ObjectDoesNotExist:
-                last_cash = cash_month_projected
-
-            try:
-                cash_month_actual = models.Cash.objects.get(business_unit=self.current_business_unit.pk, date_associated=(end_date)).actual_amount
-                cash_month_projected = last_cash
-            except ObjectDoesNotExist:
-                cash_month_actual = Decimal('0.00')
-                cash_month_projected = last_cash
-
-            payroll_month_actual = models.Expense.objects.filter(expense_type='PAYROLL', reconciled=True, business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]).aggregate(Sum('actual_amount'))['actual_amount__sum']
-            if payroll_month_actual is None:
-                payroll_month_actual = Decimal('0.00')
-            pma['values'][month_name] = payroll_month_actual
-            pmp['values'][month_name] = payroll_month_projected
-
-            expenses_month_actual = Decimal('0.00')
-            expenses_month_projected = Decimal('0.00')
-            for expense in models.Expense.objects.filter(expense_type='GENERAL', business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
-                if expense.reconciled:
-                    expenses_month_actual += expense.actual_amount
-                else:
-                    expenses_month_projected += expense.predicted_amount
-            ema['values'][month_name] = expenses_month_actual
-            emp['values'][month_name] = expenses_month_projected
-
-            income_month_actual = Decimal('0.00')
-            income_month_projected = Decimal('0.00')
-            for income in models.Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date]):
-                if income.reconciled:
-                    income_month_actual += income.actual_amount
-                else:
-                    income_month_projected += income.predicted_amount
-            ima['values'][month_name] = income_month_actual
-            imp['values'][month_name] = income_month_projected
-
-            cash_month_projected += (income_month_projected - expenses_month_projected - payroll_month_projected)
-            cmpr['values'][month_name] = cash_month_projected
-            cma['values'][month_name] = cash_month_actual
-
-            income_booked_projected = Decimal('0.00')
-            for value in imp['values'].values():
-                income_booked_projected += value
-            total_assets_month_projected = cash_month_projected + income_booked_projected
-            tamp['values'][month_name] = total_assets_month_projected
-
-            income_booked_actual = Decimal('0.00')
-            for value in ima['values'].values():
-                income_booked_actual += value
-            total_assets_month_actual = cash_month_actual
-            tama['values'][month_name] = total_assets_month_actual
-
-        dashboard_data = [cma, cmpr, ima, imp, pma, pmp, ema, emp, tama, tamp]
-        context['month_names'] = month_names
-        context['predicted_totals'] = json.dumps([float(cmpr['values'][month_name]) for month_name in month_names])
-        context['actual_totals'] = json.dumps([float(cma['values'][month_name]) for month_name in month_names])
-        context['dashboard_data'] = dashboard_data
         return context
 
 
-class ContractsView(ViewerMixin, SetUpMixin, TemplateView):
+class ContractsView(ViewerMixin, TemplateView):
     template_name = 'accounting/contracts.html'
 
+    def contract_url_kwargs(self, contract):
+        return {
+            'business_unit': self.current_business_unit.pk,
+            'contract': contract.pk
+        }
+
+    def invoice_url_kwargs(self, invoice):
+        kwargs = self.contract_url_kwargs(invoice.contract)
+        kwargs['invoice'] = invoice.pk
+
+        return kwargs
+
+    def make_contract_context(self, contract):
+        return {
+            'contract': contract,
+            'invoices': [
+                self.make_invoice_context(invoice) for invoice
+                in models.Invoice.objects.filter(contract=contract).order_by('-expected_invoice_date')
+            ],
+            'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
+            'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
+        }
+
+    def make_invoice_context(self, invoice):
+        return {
+            'invoice': invoice,
+            'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+            'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+        }
+
     def get_context_data(self, **kwargs):
-        context = super(ContractsView, self).get_context_data()
-        contracts = models.Contract.objects.filter(business_unit=self.current_business_unit)
-        completed_contracts = []
-        active_contracts = []
-        for contract in contracts:
-            if contract.contract_state == 'ACTIVE':
-                invoices = models.Invoice.objects.filter(contract=contract).order_by('date_payable')
-                active_contracts.extend([
-                    {
-                        'contract': contract,
-                        'invoices': invoices,
-                    }
-                ])
-            elif contract.contract_state == 'COMPLETE':
-                invoices = models.Invoice.objects.filter(contract=contract)
-                completed_contracts.extend([
-                    {
-                        'contract': contract,
-                        'invoices': invoices,
-                    }
-                ])
-        context['active_contracts'] = active_contracts
-        context['completed_contracts'] = completed_contracts
+        context = super().get_context_data(**kwargs)
+
+        contracts = models.Contract.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .order_by('-start_date')
+
+        STATES = models.Contract.STATES
+        context.update({
+            'has_contracts': contracts.exists(),
+            'new_contracts': [
+                self.make_contract_context(contract) for contract
+                in contracts.filter(state=STATES.NEW)
+            ],
+            'active_contracts': [
+                self.make_contract_context(contract) for contract
+                in contracts.filter(state=STATES.ACTIVE)
+            ],
+            'completed_contracts': [
+                self.make_contract_context(contract) for contract
+                in contracts.filter(state=STATES.COMPLETE)
+            ],
+        })
+
         return context
 
+    def post(self, *args, **kwargs):
+        activate = self.request.POST.get('activate')
+        complete = self.request.POST.get('complete')
+        delete = self.request.POST.get('delete')
 
-class RevenueView(ViewerMixin, SetUpMixin, TemplateView):
+        if activate is not None:
+            instance = models.Contract.objects.get(pk=activate)
+            self.activate(instance)
+
+        elif complete is not None:
+            instance = models.Contract.objects.get(pk=complete)
+            self.complete(instance)
+
+        elif delete is not None:
+            instance = models.Contract.objects.get(pk=delete)
+            self.delete(instance)
+
+        return redirect('accounting:contracts', business_unit=self.current_business_unit.pk)
+
+    def activate(self, contract):
+        if not contract.has_invoice():
+            msg = "Contract %s not activated. Activation requires at least one invoice."
+            messages.error(self.request, msg % contract.contract_id)
+
+        elif not contract.amount_matches_invoices():
+            msg = "Contract %s not activated. Sum of invoice amounts (%s) do not equal contract amount (%s)."
+            messages.error(self.request, mark_safe(msg % (
+                contract.contract_id,
+                format_currency(contract.get_invoices_expected_total()),
+                format_currency(contract.amount),
+            )))
+
+        else:
+            contract.activate()
+            contract.save()
+
+    def complete(self, contract):
+        if not contract.all_invoices_received():
+            msg = "Contract %s not completed. Contract has unreceived invoices."
+            messages.error(self.request, msg % contract.contract_id)
+
+        else:
+            contract.complete()
+            contract.save()
+
+    def delete(self, contract):
+        if contract.state != contract.STATES.NEW:
+            msg = "Contract %s not deleted. Cannot delete active/completed contracts."
+            messages.error(self.request, msg % contract.contract_id)
+
+        else:
+            messages.success(self.request, "Contract '%s' was successfully deleted." % contract.name)
+            contract.delete()
+
+
+class RevenueView(ViewerMixin, TemplateView):
     template_name = 'accounting/revenue.html'
 
     def get_context_data(self, **kwargs):
-        context = super(RevenueView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         invoices = models.Invoice.objects.filter(contract__business_unit=self.current_business_unit)
         context['invoices'] = invoices
         return context
 
 
-class MonthlyReconcileView(ViewerMixin, SetUpMixin, TemplateView):
+class MonthlyReconcileView(ViewerMixin, FormView):
     template_name = 'accounting/monthly_reconcile.html'
+    form_class = forms.MonthlyBalanceForm
+    success_url_name = 'accounting:reconcile'
+
+    def get_success_url_kwargs(self):
+        kwargs = super().get_success_url_kwargs()
+        if 'fiscal_year' in self.kwargs:
+            kwargs['fiscal_year'] = self.kwargs['fiscal_year']
+
+        return kwargs
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'business_unit': self.current_business_unit,
+            'billing_month': self.current_billing_month,
+            'fiscal_months': self.fiscal_months,
+        })
+        return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(MonthlyReconcileView, self).get_context_data()
-        months = []
-        [months.append(month) for month in rrule(MONTHLY, dtstart=self.start_year, until=self.end_year)]
-        context['months'] = months
-
-        active_month_int = None
-        if 'month' in self.kwargs:
-            active_month_int = int(self.kwargs['month'])
-        else:
-            active_month_int = int(self.now.month)
-
-        start_date = None
-        end_date = None
-        active_month = None
-        for month in months:
-            if month.month == active_month_int:
-                days_in_month = monthrange(month.year, month.month)[1]
-                start_date = '{}-{}-{}'.format(month.year, month.month, '01')
-                end_date = '{}-{}-{}'.format(month.year, month.month, days_in_month)
-                active_month = date(month.year, month.month, days_in_month)
-        try:
-            context['payroll'] = models.Expense.objects.get(business_unit=self.current_business_unit, expense_type='PAYROLL', date_payable__range=[start_date, end_date])
-        except models.Expense.DoesNotExist:
-            context['payroll'] = None
-        context['expenses'] = models.Expense.objects.filter(business_unit=self.current_business_unit, expense_type='GENERAL', date_payable__range=[start_date, end_date])
-        context['incomes'] = models.Income.objects.filter(business_unit=self.current_business_unit, date_payable__range=[start_date, end_date])
-        try:
-            context['cash'] = models.Cash.objects.get(business_unit=self.current_business_unit, date_associated=end_date)
-        except ObjectDoesNotExist:
-            context['cash'] = None
-        context['active_month'] = active_month
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'next_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
+            'prev_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
+            'current_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk}),
+            'billing_prefix': '%d_%02d' % (self.current_billing_month.year, self.current_billing_month.month, )
+        })
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.reconciling = 'reconcile' in self.request.POST
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = self.check_reconcile(form)
+        if response is not None:
+            return response
+
+        form.save()
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        response = self.check_reconcile(form)
+        if response is not None:
+            return response
+
+        return super().form_invalid(form)
+
+    def check_reconcile(self, form):
+        if not self.reconciling:
+            return
+
+        month = self.current_billing_month
+        data = {'month': month.month, 'year': month.year, 'business_unit': self.current_business_unit.pk}
+        reconcile_form = forms.MonthlyReconcileForm(dirty=form.has_changed(), data=data)
+
+        if reconcile_form.is_valid():
+            reconcile_form.save()
+            messages.success(self.request, '%s %d has been reconciled.' % (month.get_month_display(), month.year))
+            return super().form_valid(form)
+
+        for _, errors in reconcile_form.errors.items():
+            for error in errors:
+                messages.error(self.request, error)
+
+        return super().form_invalid(form)
 
 
 class BusinessUnitSettingsPageView(ManagerMixin, TemplateView):
     template_name = 'accounting/settings/business_unit.html'
 
     def get_context_data(self, **kwargs):
-        context = super(BusinessUnitSettingsPageView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         users = models.UserTeamRole.objects.filter(business_unit=self.current_business_unit)
         viewers = [user for user in users if user.role == 'VIEWER']
         managers = [user for user in users if user.role == 'MANAGER']
@@ -325,7 +481,7 @@ class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
     template_name = 'accounting/settings/user_team_roles.html'
 
     def get_context_data(self, **kwargs):
-        context = super(UserTeamRolesSettingsPageView, self).get_context_data()
+        context = super().get_context_data(**kwargs)
         users = models.UserTeamRole.objects.filter(business_unit=self.current_business_unit)
         viewers = [user for user in users if user.role == 'VIEWER']
         managers = [user for user in users if user.role == 'MANAGER']
@@ -334,28 +490,36 @@ class UserTeamRolesSettingsPageView(ManagerMixin, TemplateView):
         return context
 
 
-class BusinessUnitCreateView(LoginRequiredMixin, CreateView):
+################################################################
+# Business Units                                               #
+################################################################
+class BusinessUnitCreateView(AccountingMixin, CreateView):
     model = models.BusinessUnit
-    form_class = forms.BusinessUnitCreateForm
+    form_class = forms.BusinessUnitForm
     template_name = 'accounting/base_form.html'
-    success_url = reverse_lazy('accounting:home')
 
     def form_valid(self, form):
         response = super(BusinessUnitCreateView, self).form_valid(form)
         models.UserTeamRole.objects.create(user=self.request.user, business_unit=form.instance, role='MANAGER')
         return response
 
+    def get_success_url(self):
+        return reverse('accounting:dashboard', kwargs={'business_unit': self.object.pk})
+
 
 class BusinessUnitDeleteView(ManagerMixin, DeleteView):
     model = models.BusinessUnit
-    template_name = 'accounting/base_delete_form.html'
     success_url = reverse_lazy('accounting:home')
     pk_url_kwarg = 'business_unit'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Business unit successfully deleted.')
+        return super().delete(request, *args, **kwargs)
 
 
 class BusinessUnitUpdateView(ManagerMixin, UpdateView):
     model = models.BusinessUnit
-    form_class = forms
+    form_class = forms.BusinessUnitForm
     template_name = 'accounting/base_form.html'
     pk_url_kwarg = 'business_unit'
 
@@ -363,272 +527,92 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
         return reverse_lazy('accounting:business_unit_settings', kwargs={'business_unit': self.kwargs['business_unit']})
 
 
-class ContractCreateView(ManagerMixin, CreateView):
+################################################################
+# Contracts                                                    #
+################################################################
+class ContractMixin(ManagerMixin):
     model = models.Contract
-    form_class = forms.ContractCreateForm
-    template_name = 'accounting/base_form.html'
+    pk_url_kwarg = 'contract'
+    success_url_name = 'accounting:contracts'
 
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs=self.kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = self.get_success_url()
+
+        return context
+
+
+class ContractCreateView(ContractMixin, CreateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.ContractForm
 
     def form_valid(self, form):
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
-        max_contract_number = models.Contract.objects.filter(business_unit=business_unit).aggregate(Max('contract_number'))
-        if not max_contract_number['contract_number__max']:
-            form.instance.contract_number = 1
-        else:
-            form.instance.contract_number = max_contract_number['contract_number__max'] + 1
+        form.instance.business_unit = self.current_business_unit
 
         return super(ContractCreateView, self).form_valid(form)
 
 
-class ContractDeleteView(ManagerMixin, DeleteView):
-    model = models.Contract
-    template_name = 'accounting/base_delete_form.html'
-    pk_url_kwarg = 'contract'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
-class ContractUpdateView(ManagerMixin, UpdateView):
-    model = models.Contract
-    form_class = forms.ContractUpdateForm
+class ContractUpdateView(ContractMixin, UpdateView):
     template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'contract'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
+    form_class = forms.ContractForm
 
 
-class InvoiceCreateView(ManagerMixin, CreateView):
+################################################################
+# Invoices                                                     #
+################################################################
+class InvoiceMixin(ManagerMixin):
     model = models.Invoice
-    form_class = forms.InvoiceCreateForm
-    template_name = 'accounting/base_form.html'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def form_valid(self, form):
-        contract = models.Contract.objects.get(pk=self.kwargs['contract'])
-        form.instance.contract = contract
-        max_invoice_number = models.Invoice.objects.filter(contract=contract).aggregate(Max('number'))
-        if not max_invoice_number['number__max']:
-            form.instance.number = 1
-        else:
-            form.instance.number = max_invoice_number['number__max'] + 1
-        form.instance.transition_state = 'NOT_INVOICED'
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
-        contract_number = str(form.instance.contract.contract_number)
-        contract_number = contract_number.zfill(4)
-        form.instance.name = form.instance.contract.department + contract_number + '-' + str(form.instance.number)
-
-        invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
-        if invoices_sum is None:
-            invoices_sum = Decimal('0.00')
-        available_amount = contract.amount - invoices_sum
-        if form.instance.predicted_amount <= available_amount:
-            response = super(InvoiceCreateView, self).form_valid(form)
-            return response
-        else:
-            error_message = 'Predicted amount must be less than or equal to {}'.format(available_amount)
-            if available_amount == Decimal('0.00'):
-                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('predicted_amount', error_message)
-            return self.form_invalid(form)
-
-        return response
-
-
-class InvoiceDeleteView(ManagerMixin, DeleteView):
-    model = models.Invoice
-    template_name = 'accounting/base_delete_form.html'
     pk_url_kwarg = 'invoice'
+    success_url_name = 'accounting:contracts'
 
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
+    @cached_property
+    def current_contract(self):
+        pk = self.kwargs.get('contract', None)
 
+        if pk is None:
+            return None
+        return models.Contract.objects.get(pk=pk)
 
-class InvoiceUpdateView(ManagerMixin, UpdateView):
-    model = models.Invoice
-    form_class = forms.InvoiceUpdateForm
-    template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'invoice'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:contracts', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def form_valid(self, form):
-        if form.instance.actual_amount is not None and form.instance.date_paid is not None and form.instance.transition_state == 'RECEIVED':
-            form.instance.reconciled = True
-        else:
-            form.instance.reconciled = False
-        response = super(InvoiceUpdateView, self).form_valid(form)
-
-        contract = models.Contract.objects.get(pk=self.kwargs['contract'])
-
-        predicted_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('predicted_amount'))['predicted_amount__sum']
-        actual_invoices_sum = models.Invoice.objects.filter(contract=contract).aggregate(Sum('actual_amount'))['actual_amount__sum']
-
-        if predicted_invoices_sum is None or actual_invoices_sum is None:
-            predicted_invoices_sum = Decimal('0.00')
-            actual_invoices_sum = Decimal('0.00')
-
-        predicted_available_amount = contract.amount - predicted_invoices_sum + self.object.predicted_amount
-        actual_available_amount = contract.amount - actual_invoices_sum + self.object.actual_amount
-
-        if form.instance.predicted_amount > predicted_available_amount:
-            error_message = 'Predicted amount must be less than or equal to {}'.format(predicted_available_amount)
-            if predicted_available_amount == Decimal('0.00'):
-                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('predicted_amount', error_message)
-
-        if form.instance.actual_amount > actual_available_amount:
-            error_message = 'Actual amount must be less than or equal to {}'.format(actual_available_amount)
-            if actual_available_amount == Decimal('0.00'):
-                error_message = 'Invoices have reached contract total. Please update or delete exisiting invoices.'
-            form.add_error('actual_amount', error_message)
-
-        elif form.instance.predicted_amount <= predicted_available_amount and form.instance.actual_amount <= actual_available_amount:
-            response = super(InvoiceUpdateView, self).form_valid(form)
-            return response
-
-        return self.form_invalid(form)
-
-
-class ExpenseMixin(ManagerMixin):
-    model = models.Expense
-    pk_url_kwarg = 'expense'
-    success_url_name = 'accounting:reconcile'
-
-    def get_object_fiscal_year(self):
-        date = self.get_object().date_payable
-        return self.get_fiscal_year(date)
-
-    def get_success_url_kwargs(self):
-        kwargs = super().get_success_url_kwargs()
-
-        fy_object = self.get_object_fiscal_year()
-        fy_now = self.get_fiscal_year(self.now)
-
-        if fy_object is not None and fy_now != fy_object:
-            kwargs.update({
-                'start_year': fy_object,
-                'end_year': fy_object + 1,
-            })
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['contract'] = self.current_contract
 
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = self.get_success_url()
 
-class ExpenseCreateView(ExpenseMixin, CreateView):
-    form_class = forms.ExpenseCreateForm
+        return context
+
+
+class InvoiceCreateView(InvoiceMixin, CreateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.InvoiceCreateForm
+
+
+class InvoiceUpdateView(InvoiceMixin, UpdateView):
     template_name = 'accounting/base_form.html'
 
-    def form_valid(self, form):
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
+    def get_form_class(self):
+        STATES = models.Contract.STATES
 
-        try:
-            if 'recurring' in self.request.POST:
-                date_payable = form.instance.date_payable
-                until_date = None
-                if int(date_payable.month) <= 6:
-                    until_date = date(date_payable.year, 6, 30)
-                else:
-                    until_date = date(date_payable.year+1, 6, 30)
-
-                monthly_expense_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=date_payable, until=until_date)]
-                for expense_date in monthly_expense_dates:
-                    expense = models.Expense(
-                        business_unit=form.instance.business_unit,
-                        predicted_amount=form.instance.predicted_amount,
-                        name=form.instance.name,
-                        date_payable=expense_date,
-                    )
-                    if expense_date.date() < self.now:
-                        expense.date_paid = expense_date
-                        expense.actual_amount = form.instance.predicted_amount
-                    expense.save()
-                return redirect('accounting:reconcile', pk=self.kwargs['pk'])
-        except KeyError:
-            if form.instance.date_payable < self.now:
-                form.instance.date_paid = form.instance.date_payable
-                form.instance.actual_amount = form.instance.predicted_amount
-
-        # cache so we can us this in get_object_fiscal_year()
-        self.object_date = form.instance.date_payable
-
-        response = super(ExpenseCreateView, self).form_valid(form)
-        return response
-
-    def get_object_fiscal_year(self):
-        return self.get_fiscal_year(self.object_date)
+        return {
+            STATES.NEW: forms.NewInvoiceUpdateForm,
+            STATES.ACTIVE: forms.ActiveInvoiceUpdateForm,
+        }[self.current_contract.state]
 
 
-class ExpenseDeleteView(ExpenseMixin, DeleteView):
-    model = models.Expense
-    template_name = 'accounting/base_delete_form.html'
+class InvoiceDeleteView(InvoiceMixin, DeleteView):
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Invoice successfully deleted.')
+        return super().delete(request, *args, **kwargs)
 
 
-class ExpenseUpdateView(ExpenseMixin, UpdateView):
-    form_class = forms.ExpenseUpdateForm
-    template_name = 'accounting/base_form.html'
-
-
-class IncomeCreateView(ManagerMixin, CreateView):
-    model = models.Income
-    form_class = forms.IncomeCreateForm
-    template_name = 'accounting/base_form.html'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def form_valid(self, form):
-        form.instance.business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        try:
-            if self.request.POST['recurring']:
-                monthly_income_dates = [monthly_date for monthly_date in rrule(MONTHLY, dtstart=form.instance.date_payable, until=date(2017, 6, 30))]
-                for income_date in monthly_income_dates:
-                    income = models.Income(
-                        business_unit=form.instance.business_unit,
-                        predicted_amount=form.instance.predicted_amount,
-                        name=form.instance.name,
-                        date_payable=income_date,
-                    )
-                    if form.instance.date_payable < self.now:
-                        form.instance.date_paid = form.instance.date_payable
-                        form.instance.actual_amount = form.instance.predicted_amount
-                    income.save()
-        except KeyError:
-            if form.instance.date_payable < self.now:
-                form.instance.date_paid = form.instance.date_payable
-                form.instance.actual_amount = form.instance.predicted_amount
-
-        response = super(IncomeCreateView, self).form_valid(form)
-        return response
-
-
-class IncomeDeleteView(ManagerMixin, DeleteView):
-    model = models.Income
-    template_name = 'accounting/base_delete_form.html'
-    pk_url_kwarg = 'income'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
-class IncomeUpdateView(ManagerMixin, UpdateView):
-    model = models.Income
-    form_class = forms.IncomeUpdateForm
-    template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'income'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
+################################################################
+# User Team Roles                                              #
+################################################################
 class UserTeamRoleCreateView(ManagerMixin, CreateView):
     model = models.UserTeamRole
     form_class = forms.UserTeamRoleCreateForm
@@ -673,85 +657,6 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
-class PayrollExpenseCreateView(ManagerMixin, CreateView):
-    model = models.Expense
-    form_class = forms.PayrollExpenseCreateForm
-    template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'expense'
-
-    def get_initial(self):
-        if 'month' in self.kwargs and 'year' in self.kwargs:
-            date_payable = '{}/{}/{}'.format(self.kwargs['month'], monthrange(int(self.kwargs['year']), int(self.kwargs['month']))[1], self.kwargs['year'])
-            return {
-                'date_payable': date_payable
-            }
-
-    def get_context_data(self, *kwargs):
-        context = super(PayrollExpenseCreateView, self).get_context_data()
-        context['base_form_title'] = 'Payroll Expense'
-        return context
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def form_valid(self, form):
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        form.instance.business_unit = business_unit
-        form.instance.predicted_amount = form.instance.actual_amount
-        form.instance.reconciled = True
-        form.instance.expense_type = 'PAYROLL'
-        form.instance.name = 'Payroll'
-        form.instance.date_paid = form.instance.date_payable
-        response = super(PayrollExpenseCreateView, self).form_valid(form)
-        return response
-
-
-class CashCreateView(ManagerMixin, CreateView):
-    model = models.Cash
-    form_class = forms.CashCreateForm
-    template_name = 'accounting/base_form.html'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def get_context_data(self, *kwargs):
-        context = super(CashCreateView, self).get_context_data()
-        context['base_form_title'] = 'Cash Actual'
-        return context
-
-    def form_valid(self, form):
-        business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
-        year = int(self.kwargs['year'])
-        month = int(self.kwargs['month'])
-        days_in_month = monthrange(year, month)[1]
-
-        date_associated = date(year, month, days_in_month)
-
-        form.instance.business_unit = business_unit
-        form.instance.predicted_amount = form.instance.actual_amount
-        form.instance.reconciled = True
-        form.instance.name = 'Cash'
-        form.instance.date_associated = date_associated
-
-        response = super(CashCreateView, self).form_valid(form)
-        return response
-
-
-class CashUpdateView(ManagerMixin, UpdateView):
-    model = models.Cash
-    form_class = forms.CashUpdateForm
-    template_name = 'accounting/base_form.html'
-    pk_url_kwarg = 'cash'
-
-    def get_success_url(self):
-        return reverse_lazy('accounting:reconcile', kwargs={'business_unit': self.kwargs['business_unit']})
-
-    def get_context_data(self, *kwargs):
-        context = super(CashUpdateView, self).get_context_data()
-        context['base_form_title'] = 'Cash Actual'
-        return context
 
 
 def calculatePayrollProjectedAmount(current_business_unit):

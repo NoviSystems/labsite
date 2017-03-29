@@ -1,7 +1,18 @@
 {% extends "accounting/base.html" %}
 
 {% load staticfiles %}
-{% load accountingFilters %}
+{% load accounting_filters %}
+
+{% block styles %}
+<style>
+.clear-gutter-l {
+    padding-left: 0;
+}
+.clear-gutter-r {
+    padding-right: 0;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 
@@ -9,60 +20,128 @@
 
 {% include "accounting/year_picker.html" with active="dashboard" %}
 
-<script src={% static 'js/highcharts.js' %}></script>
-<div id="container" style="width:100%; height:400px;"></div>
-<script>
-$(function () {
-    $('#container').highcharts({
-        chart: {
-            type: 'column'
-        },
-        title: {
-            text: 'Cash Values for Months'
-        },
-        xAxis: {
-            categories: {{ month_names | safe }}
-        },
-        credits: {
-            enabled: false
-        },
-        series: [{
-            name: 'Predicted',
-            data: {{ predicted_totals | safe }}
-        }, {
-            name: 'Actual',
-            data: {{ actual_totals | safe }}
-        }]
-    });
-});
-</script>
+<div clas="row">
+    <div id="chart" class="col-xs-12" height="400"></div>
+</div>
 
-{% block breakdown %}
-    <div class="container">
-        <div class="row">
-
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        {% for month in month_names %}
-                        	<th>{{ month }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for data in dashboard_data %}
-                    <tr class="text-right">
-                        <th class="text-right" scope="row">{{ data.title }}</th>
-                        	{% for month in month_names %}
-                        		<td>${{ data.values | get_item:month }}</td>
-                        	{% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<div class="row">
+    <div class="col-xs-12">
+        <br><br>
     </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-2 clear-gutter-r">
+        <table class="table table-responsive">
+            <thead>
+                <tr><th>&nbsp;</th></tr>
+                <tr><th colspan="2" class="text-right">Date</th></tr>
+            </thead>
+            {% for title in balances %}
+            {% if forloop.last %}<tbody>{% endif %}
+            <tr>
+                <th rowspan="2">{{ title }}</th>
+                <th>Expected</th>
+            </tr>
+            <tr>
+                <th>Actual</th>
+            </tr>
+            {% if forloop.last %}</tbody>{% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    <div class="col-xs-10 clear-gutter-l">
+        <table class="table table-responsive">
+            <thead>
+                {% regroup fiscal_months by year as years %}
+                <tr>
+                    {% for year in years %}
+                    <th class="text-right">{{ year.grouper }}</th>
+                    <th colspan="{{ year.list|length|add:-1 }}"></th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for month in fiscal_months %}
+                        <th class="col-xs-1 text-right{% if month == billing_month %} billing-month{% endif %}">{{ month.get_month_display }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for data in balances.values %}
+                {% if forloop.last %}
+            </tbody>
+            <tbody>
+                {% endif %}
+                <tr class="text-right">
+                    {% for balance in data %}
+                        <td>{{ balance.expected_amount|currency|default:'---' }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="text-right">
+                    {% for balance in data %}
+                        <td>{{ balance.actual_amount|currency|default:'---' }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endblock %}
 
+
+{% block scripts %}
+<script src="{% static 'js/vendor/highcharts.js' %}"></script>
+<script src="{% static 'js/vendor/highcharts-grouped.js' %}"></script>
+<script>
+{% regroup fiscal_months by year as years %}
+const categories = [{% for year in years %}
+    {
+        name: '{{ year.grouper }}',
+        categories: [{% for month in year.list %}
+        '{{ month.get_month_display }}', {% endfor %}
+        ],
+    },{% endfor %}
+];
+
+Highcharts.setOptions({
+    lang: {thousandsSep: ","},
+});
+
+Highcharts.chart('chart', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Cash Values for Months'
+    },
+    xAxis: {
+        categories: categories
+    },
+    credits: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '${y:.0f}',
+            },
+            tooltip: {
+                valueDecimals: 0,
+                valuePrefix: '$'
+            },
+        },
+    },
+    series: [{
+        name: 'Expected',
+        data: {{ expected_totals | safe }},
+    }, {
+        name: 'Actual',
+        data: {{ actual_totals | safe }},
+    }]
+});
+</script>
 {% endblock %}
