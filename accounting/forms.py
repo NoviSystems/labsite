@@ -294,6 +294,11 @@ class MonthlyBalanceForm(forms.Form):
         if (is_future and attr == 'actual') or is_past:
             return format_currency(value)
 
+        if self.billing_month >= Month(date.today()) and attr == 'actual':
+            # You should only be able to input actuals once the billing month has passed.
+            # eg, you would enter March's actuals in April.
+            return ''
+
         return BalanceField(
             initial=value,
             required=False,
