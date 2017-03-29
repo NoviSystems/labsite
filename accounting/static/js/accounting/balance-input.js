@@ -115,11 +115,12 @@ const BalanceInput = Vue.extend({
             <autoscaling-input value-name="actual">
                 <i class="fa fa-usd"></i>
                 <input ref="input"
-                       :maxlength="maxlength"
+                       autocomplete="off"
                        :name="name"
                        v-model="actual"
                        :placeholder="placeholder"
                        @keydown.minus.prevent="negate"
+                       @keydown="captureInput"
                        @focus="selectContents"
                        @input="update($event.target.value)">
             </autoscaling-input>
@@ -140,7 +141,8 @@ const BalanceInput = Vue.extend({
     beforeCreate() {
         this.formatter = new Intl.NumberFormat('en-US', {
             style: 'decimal',
-            maximumFractionDigits: 0,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
         });
     },
 
@@ -152,11 +154,6 @@ const BalanceInput = Vue.extend({
         isNegative() {
             return this.validated.startsWith('-');
         },
-
-        maxlength() {
-            // maxlength of 10 is 8 digits + 2 comma separators
-            return this.isNegative ? 11 : 10;
-        },
     },
 
     methods: {
@@ -166,15 +163,27 @@ const BalanceInput = Vue.extend({
         },
 
         raw(value) {
-            // strip only commas - NaN's desired for invalid chars
-            if (isString(value))
+            if (isString(value)) {
+                // strip only commas - NaN's desired for invalid chars
                 value = value.replace(/,/g, '');
+
+                // strip beyond two frac. digits - prevents rounding issues w/ format
+                const dec = value.lastIndexOf('.');
+                if (dec > 0)
+                    value = value.substring(0, dec + 3)
+            }
+
             return value;
         },
 
         format(value) {
             if (value === '' || value === '-')
                 return value;
+
+            // clear when removing leading digit
+            if (value === '.00')
+                return '';
+
             return this.formatter.format(value);
         },
 
@@ -189,28 +198,54 @@ const BalanceInput = Vue.extend({
             });
         },
 
+        captureInput(event) {
+            this.position = event.target.selectionEnd;
+            this.keyCode = event.keyCode;
+        },
+
+        computePosition(newValue) {
+            // special case when going from empty to _.00
+            if (this.validated === '')
+                return 1;
+
+            let mod = newValue.length - this.validated.length;
+
+            if (mod === 0) {
+                // backspace handling
+                if (this.keyCode === 8)
+                    mod = -1;
+
+                // type over commas, decimals
+                else if ((this.keyCode === 188 && newValue.charAt(this.position) === ',')
+                      || (this.keyCode === 190 && newValue.charAt(this.position) === '.'))
+                    mod = 1;
+
+                // if typing beyond decimal, length won't change so manually index
+                else if (this.position > newValue.indexOf('.')) {
+                    mod = 1;
+                }
+            }
+
+            return Math.max(this.position + mod, 0);
+        },
+
         update(value) {
             const raw = this.raw(value);
             const isValid = this.isValid(raw);
-            const newValue = isValid ? this.format(raw) : this.validated;
 
-            // capture cursor postion
-            const position = this.$refs.input.selectionEnd;
+            console.log(raw)
 
-            // TODO: the new position calculations are kind of a mess - need to rework this.
-            let mod;
-            if (isValid) {
-                const negated = (this.raw(newValue) * -1) == (this.raw(this.validated) * 1);
-                const diff = Math.abs(newValue.length - this.validated.length) > 1
-                    ? 1
-                    : negated ? 1 : 0;
-                const direction = newValue.length >= this.validated.length ? 1 : -1;
+            // prevent removing decimal w/ backspace. otherwise values like 1.00 would reformat as 100.00
+            const decimalCheck = (this.validated.charAt(this.position-1) !== '.') || (this.keyCode !== 8);
 
-                mod = diff * direction;
-            } else {
-                // invalid value implies letter entry - move caret back.
-                mod = -1;
-            }
+            // prevent more than 8 digits. no need to check fractional part, as it's always 2
+            const lengthCheck = (raw.split('.')[0].length <= 8);
+
+            const newValue = isValid && decimalCheck && lengthCheck
+                ? this.format(raw)
+                : this.validated;
+
+            const newPosition = this.computePosition(newValue);
 
             // set input value
             this.validated = newValue;
@@ -218,11 +253,6 @@ const BalanceInput = Vue.extend({
 
             // restore cursor positions
             this.$nextTick(() => {
-                // hack to handle field clearing
-                let newPosition = value.length === 1 ? 1 : (position + mod);
-                if (newPosition < 0)
-                    newPosition = 0;
-
                 this.$refs.input.selectionStart = newPosition;
                 this.$refs.input.selectionEnd = newPosition;
             });
