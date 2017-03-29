@@ -201,6 +201,12 @@ class MonthlyReconcile(models.Model):
         unique_together = ('month', 'year')
         ordering = ('-year', '-month')
 
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__, str(self), )
+
+    def __str__(self):
+        return "%4d-%02d (%s)" % (self.year, self.month, self.business_unit, )
+
 
 class MonthlyBalance(LineItem):
     # Date field isn't entirely appropriate, since items are associated by month.
