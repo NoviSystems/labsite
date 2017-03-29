@@ -331,12 +331,6 @@ class MonthlyBalanceForm(forms.Form):
             except model.DoesNotExist:
                 actual, expected = None, None
 
-            # round off past the decimal (cents not currently supported by interface)
-            if expected is not None:
-                expected = expected.quantize(1)
-            if actual is not None:
-                actual = actual.quantize(1)
-
             # build fields or get formatted values
             fields[self.field_name(month, key, 'expected')] = self.build_field(model, 'expected', expected, month)
             fields[self.field_name(month, key, 'actual')] = self.build_field(model, 'actual', actual, month)
