@@ -11,6 +11,9 @@ from accounting import models
 from accounting.utils import Month, format_currency
 
 
+empty = object()
+
+
 class BaseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -344,17 +347,33 @@ class MonthlyBalanceForm(forms.Form):
         saved = []
 
         for key, model in self.models.items():
-            expected = data.pop(self.field_name(month, key, 'expected'), None)
-            actual = data.pop(self.field_name(month, key, 'actual'), None)
+            expected = data.pop(self.field_name(month, key, 'expected'), empty)
+            actual = data.pop(self.field_name(month, key, 'actual'), empty)
 
             update = {}
-            if expected is not None:
+            if expected is not empty:
                 update['expected_amount'] = expected
-            if actual is not None:
+            if actual is not empty:
                 update['actual_amount'] = actual
 
             # noop if no updated values
             if not update:
+                continue
+
+            # handle expected_amount clearing
+            # since the field has a not-null constraint, it's necessary to delete the instance
+            # if the actual_amount has not been set, then this is safe to do
+            # if the actual is set, then we either have to noop and keep both or delete and remove both
+            if expected is None:
+                instance = model.objects.get(
+                    month=month.month, year=month.year,
+                    business_unit=self.business_unit)
+
+                # we can safely delete if actual is not set
+                if instance.actual_amount is None:
+                    instance.delete()
+                    saved.append(instance)
+
                 continue
 
             instance, created = model.objects.get_or_create(
