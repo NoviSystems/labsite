@@ -220,9 +220,9 @@ class BalanceInput(forms.TextInput):
         self.attrs['placeholder'] = '\u2013.\u2013\u2013'
 
     class Media:
-        js = ('js/balance-input.js', )
+        js = ('js/accounting/balance-input.js', )
         css = {
-            'all': ('css/balance-input.css', )
+            'all': ('css/accounting/balance-input.css', )
         }
 
 

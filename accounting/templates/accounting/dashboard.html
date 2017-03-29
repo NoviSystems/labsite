@@ -93,8 +93,8 @@
 
 
 {% block scripts %}
-<script src="{% static 'js/highcharts.js' %}"></script>
-<script src="{% static 'js/highcharts-grouped.js' %}"></script>
+<script src="{% static 'js/vendor/highcharts.js' %}"></script>
+<script src="{% static 'js/vendor/highcharts-grouped.js' %}"></script>
 <script>
 {% regroup fiscal_months by year as years %}
 const categories = [{% for year in years %}
