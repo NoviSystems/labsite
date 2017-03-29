@@ -509,9 +509,12 @@ class BusinessUnitCreateView(AccountingMixin, CreateView):
 
 class BusinessUnitDeleteView(ManagerMixin, DeleteView):
     model = models.BusinessUnit
-    template_name = 'accounting/base_delete_form.html'
     success_url = reverse_lazy('accounting:home')
     pk_url_kwarg = 'business_unit'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Business unit successfully deleted.')
+        return super().delete(request, *args, **kwargs)
 
 
 class BusinessUnitUpdateView(ManagerMixin, UpdateView):
