@@ -128,13 +128,21 @@ new Vue({
     },
 
     mounted() {
+        const today = new Date();
         const prefix = '{{ billing_prefix }}';
+        const [year, month] = prefix.split('_');
+
         for (const child of this.$children) {
             if (child.name.startsWith(prefix) && child.initial === '') {
                 this.reconcileDisabled = true;
                 break;
             }
         }
+
+        // only enable reconcile once the billing month has passed.
+        if ((Number(year) > today.getFullYear())
+         || (Number(month) >= today.getMonth()))
+            this.reconcileDisabled = true;
     },
 });
 
