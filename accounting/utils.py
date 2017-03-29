@@ -17,6 +17,8 @@ def format_currency(value, html=True):
     if value is None:
         return ''
 
+    # For display purposes, we can drop the cents. It only matters that the
+    # true value is stored in the database and is used in calculations.
     value = number_format(value, decimal_pos=0, force_grouping=True)
     if not html:
         return '$ %s' % value
