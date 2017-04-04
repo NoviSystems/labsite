@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'raven.contrib.django.raven_compat',
     'rest_framework',
+    'rangefilter',
     'accounts',
     'itng.common',
     'itng.registration.backends.invite',
