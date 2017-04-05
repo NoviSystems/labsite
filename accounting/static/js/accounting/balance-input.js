@@ -201,12 +201,20 @@ const BalanceInput = Vue.extend({
         captureInput(event) {
             this.position = event.target.selectionEnd;
             this.keyCode = event.keyCode;
+
+
+            this.contentsSelected = (event.target.selectionStart === 0)
+                && (event.target.selectionEnd === event.target.value.length);
         },
 
         computePosition(newValue) {
             // special case when going from empty to _.00
             if (this.validated === '')
                 return 1;
+
+            // special case for when contents are selected and replaced
+            if (this.contentsSelected)
+                return newValue.indexOf('.');
 
             let mod = newValue.length - this.validated.length;
 
@@ -232,8 +240,6 @@ const BalanceInput = Vue.extend({
         update(value) {
             const raw = this.raw(value);
             const isValid = this.isValid(raw);
-
-            console.log(raw)
 
             // prevent removing decimal w/ backspace. otherwise values like 1.00 would reformat as 100.00
             const decimalCheck = (this.validated.charAt(this.position-1) !== '.') || (this.keyCode !== 8);
