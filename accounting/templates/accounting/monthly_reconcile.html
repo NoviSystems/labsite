@@ -141,7 +141,7 @@ new Vue({
 
         // only enable reconcile once the billing month has passed.
         if ((Number(year) >= today.getFullYear())
-         && (Number(month) >= today.getMonth()))
+         && (Number(month) >= (today.getMonth() + 1) ))
             this.reconcileDisabled = true;
     },
 });
