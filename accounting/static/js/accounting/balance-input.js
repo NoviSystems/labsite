@@ -176,6 +176,10 @@ const BalanceInput = Vue.extend({
             return value;
         },
 
+        numba(value) {
+            return Number(this.raw(value));
+        },
+
         format(value) {
             if (value === '' || value === '-')
                 return value;
@@ -202,7 +206,6 @@ const BalanceInput = Vue.extend({
             this.position = event.target.selectionEnd;
             this.keyCode = event.keyCode;
 
-
             this.contentsSelected = (event.target.selectionStart === 0)
                 && (event.target.selectionEnd === event.target.value.length);
         },
@@ -213,8 +216,12 @@ const BalanceInput = Vue.extend({
                 return 1;
 
             // special case for when contents are selected and replaced
-            if (this.contentsSelected)
+            if (this.contentsSelected) {
+                // extra special case for negation
+                if ((this.numba(newValue) * -1) === this.numba(this.validated))
+                    return this.numba(newValue) >= 0 ? 0 : 1;
                 return newValue.indexOf('.');
+            }
 
             let mod = newValue.length - this.validated.length;
 
