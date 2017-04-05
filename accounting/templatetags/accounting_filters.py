@@ -10,5 +10,5 @@ def get_form_model_name(form):
 
 
 @register.filter
-def currency(value):
-    return format_currency(value)
+def currency(value, decimal=True):
+    return format_currency(value, decimal)

@@ -75,12 +75,12 @@
                 {% endif %}
                 <tr class="text-right">
                     {% for balance in data %}
-                        <td>{{ balance.expected_amount|currency|default:'---' }}</td>
+                        <td>{{ balance.expected_amount|currency:False|default:'---' }}</td>
                     {% endfor %}
                 </tr>
                 <tr class="text-right">
                     {% for balance in data %}
-                        <td>{{ balance.actual_amount|currency|default:'---' }}</td>
+                        <td>{{ balance.actual_amount|currency:False|default:'---' }}</td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
