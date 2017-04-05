@@ -130,13 +130,13 @@ TEMPLATES = [
 ]
 
 
-# Messages
+# Messages - use tags that are compatible w/ both django's admin and bootstrap alerts
 MESSAGE_TAGS = {
-    messages.DEBUG: 'alert-debug',
-    messages.INFO: 'alert-info',
-    messages.SUCCESS: 'alert-success',
-    messages.WARNING: 'alert-warning',
-    messages.ERROR: 'alert-danger',
+    messages.DEBUG: 'alert-debug debug',
+    messages.INFO: 'alert-info info',
+    messages.SUCCESS: 'alert-success success',
+    messages.WARNING: 'alert-warning warning',
+    messages.ERROR: 'alert-danger error',
 }
 
 # CELERY SETTINGS
