@@ -227,15 +227,15 @@ class DashboardView(ViewerMixin, TemplateView):
         # get instances
         invoices = [self.get_monthly_invoices(month) for month in self.fiscal_months]  # alreaady in dict form
         expenses = [self.get_monthly_instance(models.Expenses, month) for month in self.fiscal_months]
-        ft_payroll = [self.get_monthly_instance(models.FullTimePayroll, month) for month in self.fiscal_months]
-        pt_payroll = [self.get_monthly_instance(models.PartTimePayroll, month) for month in self.fiscal_months]
+        perm_payroll = [self.get_monthly_instance(models.PermanentPayroll, month) for month in self.fiscal_months]
+        temp_payroll = [self.get_monthly_instance(models.TemporaryPayroll, month) for month in self.fiscal_months]
         cash_balance = [self.get_monthly_instance(models.CashBalance, month) for month in self.fiscal_months]
 
         # avoid executing duplicate query for expected cash balance calculation.
         for i, _ in enumerate(self.fiscal_months):
             cash_balance[i].expenses = expenses[i]
-            cash_balance[i].fulltime_payroll = ft_payroll[i]
-            cash_balance[i].parttime_payroll = pt_payroll[i]
+            cash_balance[i].permanent_payroll = perm_payroll[i]
+            cash_balance[i].temporary_payroll = temp_payroll[i]
 
             if i > 0:
                 cash_balance[i].previous_cashbalance = cash_balance[i - 1]
@@ -244,8 +244,8 @@ class DashboardView(ViewerMixin, TemplateView):
         return OrderedDict([
             ('Invoices', invoices),
             ('Expenses', expenses),
-            ('Full-time Payroll', ft_payroll),
-            ('Part-time Payroll', pt_payroll),
+            ('Permanent Payroll', perm_payroll),
+            ('Temporary Payroll', temp_payroll),
             ('Cash Balance', cash_balance),
         ])
 
@@ -647,12 +647,3 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
-
-
-def calculatePayrollProjectedAmount(current_business_unit):
-    payroll_month_projected = Decimal('0.00')
-    for partTime in models.PartTime.objects.filter(business_unit=current_business_unit):
-        payroll_month_projected += partTime.hourly_amount * partTime.hours_work
-    for fullTime in models.FullTime.objects.filter(business_unit=current_business_unit):
-        payroll_month_projected += fullTime.salary_amount + fullTime.social_security_amount + fullTime.fed_health_insurance_amount + fullTime.retirement_amount + fullTime.medical_insurance_amount + fullTime.staff_benefits_amount + fullTime.fringe_amount
-    return payroll_month_projected

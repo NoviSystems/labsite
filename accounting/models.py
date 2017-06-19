@@ -263,7 +263,7 @@ class CashBalance(MonthlyBalance):
 
         # sum all expenses
         expenses = Decimal(0)
-        for inst in [self.expenses, self.fulltime_payroll, self.parttime_payroll]:
+        for inst in [self.expenses, self.permanent_payroll, self.temporary_payroll]:
             if inst is not None:
                 expenses += inst.expected_amount or 0
 
@@ -307,8 +307,8 @@ class CashBalance(MonthlyBalance):
 
     previous_cashbalance = property(**balance_property('CashBalance', 'previous_balance_kwargs'))
     expenses = property(**balance_property('Expenses', 'balance_kwargs'))
-    fulltime_payroll = property(**balance_property('FullTimePayroll', 'balance_kwargs'))
-    parttime_payroll = property(**balance_property('PartTimePayroll', 'balance_kwargs'))
+    permanent_payroll = property(**balance_property('PermanentPayroll', 'balance_kwargs'))
+    temporary_payroll = property(**balance_property('TemporaryPayroll', 'balance_kwargs'))
 
 
 class Expenses(MonthlyBalance):
@@ -317,13 +317,13 @@ class Expenses(MonthlyBalance):
     """
 
 
-class FullTimePayroll(MonthlyBalance):
+class PermanentPayroll(MonthlyBalance):
     """
     The full time payroll costs for a month.
     """
 
 
-class PartTimePayroll(MonthlyBalance):
+class TemporaryPayroll(MonthlyBalance):
     """
     The part time payroll costs for a month.
     """

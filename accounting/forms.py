@@ -171,8 +171,8 @@ class ActiveInvoiceUpdateForm(InvoiceForm):
 class MonthlyReconcileForm(forms.ModelForm):
     models = [
         models.Expenses,
-        models.FullTimePayroll,
-        models.PartTimePayroll,
+        models.PermanentPayroll,
+        models.TemporaryPayroll,
         models.CashBalance,
     ]
 
@@ -247,14 +247,14 @@ class BalanceField(forms.DecimalField):
 class MonthlyBalanceForm(forms.Form):
     headers = [
         'Misc. Expenses',
-        'Full-time Payroll',
-        'Part-time Payroll',
+        'Permanent Payroll',
+        'Temporary Payroll',
         'Cash Balance',
     ]
     models = OrderedDict((
         ('exp', models.Expenses),
-        ('ftp', models.FullTimePayroll),
-        ('ptp', models.PartTimePayroll),
+        ('tempp', models.PermanentPayroll),
+        ('permp', models.TemporaryPayroll),
         ('bal', models.CashBalance),
     ))
 
