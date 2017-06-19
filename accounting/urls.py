@@ -17,9 +17,6 @@ urlpatterns = [
     url(r'^(?P<business_unit>\d+)/reconcile/$', views.MonthlyReconcileView.as_view(), name='reconcile'),
     url(r'^(?P<business_unit>\d+)/reconcile/fy-(?P<fiscal_year>\d+)/$', views.MonthlyReconcileView.as_view(), name='reconcile'),
 
-    # Revenue Views
-    url(r'^(?P<business_unit>\d+)/revenue/$', views.RevenueView.as_view(), name='revenue'),
-
     # Contracts View
     url(r'^(?P<business_unit>\d+)/contracts/$', views.ContractsView.as_view(), name='contracts'),
 

@@ -384,16 +384,6 @@ class ContractsView(ViewerMixin, TemplateView):
             contract.delete()
 
 
-class RevenueView(ViewerMixin, TemplateView):
-    template_name = 'accounting/revenue.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        invoices = models.Invoice.objects.filter(contract__business_unit=self.current_business_unit)
-        context['invoices'] = invoices
-        return context
-
-
 class MonthlyReconcileView(ViewerMixin, FormView):
     template_name = 'accounting/monthly_reconcile.html'
     form_class = forms.MonthlyBalanceForm
