@@ -88,6 +88,12 @@ class Contract(models.Model):
     def __str__(self):
         return '%s: %s' % (self.contract_id, self.name)
 
+    def outstanding_amount(self):
+        total_received = self.invoice_set \
+            .filter(state=Invoice.STATES.RECEIVED) \
+            .aggregate(v=Coalesce(Sum('actual_amount'), V(Decimal(0))))['v']
+        return self.amount - total_received
+
     def get_invoices_expected_total(self):
         aggregate = models.Sum(
             'expected_amount',

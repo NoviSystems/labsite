@@ -9,7 +9,8 @@
 
         <small class="visible-md-inline visible-lg-inline">
             <ul class="list-inline" style="margin-left: 2em;">
-                <li><b>Amount:</b></li> <li>{{ contract.amount|currency }}</li>
+                <li><b>Contracted:</b></li> <li>{{ contract.amount|currency }}</li>
+                <li><b>Outstanding:</b></li> <li>{{ contract.outstanding_amount|currency }}</li>
                 <li><b>Start:</b></li>  <li>{{ contract.start_date }}</li>
                 <li><b>Type:</b></li>   <li>{{ contract.get_type_display }}</li>
             </ul>
@@ -38,7 +39,8 @@
     <div class="row">
         <div class="col-xs-12 visible-xs-block visible-sm-block">
             <table class="table">
-                <tr><th>Total Amount:</th>  <td>{{ contract.amount|currency }}</td></tr>
+                <tr><th>Total Contracted:</th>  <td>{{ contract.amount|currency }}</td></tr>
+                <tr><th>Outstanding:</th>   <td>{{ contract.outstanding_amount|currency }}</td>
                 <tr><th>Start Date:</th>    <td>{{ contract.start_date }}</td></tr>
                 <tr><th>Contract Type:</th> <td>{{ contract.get_type_display }}</td></tr>
             </table>
