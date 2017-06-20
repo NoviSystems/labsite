@@ -45,9 +45,12 @@ class ContractForm(BaseForm):
         fields = [
             'contract_id',
             'name',
+            'customer',
             'start_date',
             'amount',
             'type',
+            'description',
+            'notes',
         ]
 
 
