@@ -80,10 +80,13 @@ class Contract(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     contract_id = models.CharField(max_length=64, unique=True, verbose_name=_("contract ID"))
     name = models.CharField(max_length=255, verbose_name=_("contract name"))
+    customer = models.CharField(max_length=255, verbose_name=_("Customer"), blank=True)
+    description = models.CharField(max_length=255, verbose_name=_("Description"), blank=True)
     start_date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[validate_positive])
     state = FSMField(max_length=8, choices=STATES, default=STATES.NEW)
     type = models.CharField(max_length=8, choices=TYPES)
+    notes = models.TextField(verbose_name="Notes", blank=True)
 
     def __str__(self):
         return '%s: %s' % (self.contract_id, self.name)
