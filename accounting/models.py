@@ -306,12 +306,12 @@ class CashBalance(MonthlyBalance):
 
             setattr(self, name, value)
 
-        return {'fget': fget, 'fset': fset}
+        return property(**{'fget': fget, 'fset': fset})
 
-    previous_cashbalance = property(**balance_property('CashBalance', 'previous_balance_kwargs'))
-    expenses = property(**balance_property('Expenses', 'balance_kwargs'))
-    permanent_payroll = property(**balance_property('PermanentPayroll', 'balance_kwargs'))
-    temporary_payroll = property(**balance_property('TemporaryPayroll', 'balance_kwargs'))
+    previous_cashbalance = balance_property('CashBalance', 'previous_balance_kwargs')
+    expenses = balance_property('Expenses', 'balance_kwargs')
+    permanent_payroll = balance_property('PermanentPayroll', 'balance_kwargs')
+    temporary_payroll = balance_property('TemporaryPayroll', 'balance_kwargs')
 
 
 class Expenses(MonthlyBalance):
