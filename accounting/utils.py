@@ -49,8 +49,8 @@ class Month(namedtuple('Month', ['year', 'month'])):
     def offset(cls, date, months):
         month = date.month + months
 
-        year = date.year + ((month-1) // 12)
-        month = ((month-1) % 12) + 1
+        year = date.year + ((month - 1) // 12)
+        month = ((month - 1) % 12) + 1
 
         return Month(year, month)
 
@@ -88,11 +88,11 @@ class FiscalCalendar:
 
     @staticmethod
     def get_start_date(fiscal_year):
-        return date(fiscal_year, 7, 1)
+        return date(fiscal_year - 1, 7, 1)
 
     @staticmethod
     def get_end_date(fiscal_year):
-        return date(fiscal_year+1, 6, 30)
+        return date(fiscal_year, 6, 30)
 
     @classmethod
     def get_fiscal_year(cls, calendar_date):
