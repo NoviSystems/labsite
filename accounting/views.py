@@ -225,7 +225,7 @@ class DashboardView(ViewerMixin, TemplateView):
 
     def get_balances(self):
         # get instances
-        invoices = [self.get_monthly_invoices(month) for month in self.fiscal_months]  # alreaady in dict form
+        invoices = [self.get_monthly_invoices(month) for month in self.fiscal_months]  # already in dict form
         expenses = [self.get_monthly_instance(models.Expenses, month) for month in self.fiscal_months]
         perm_payroll = [self.get_monthly_instance(models.PermanentPayroll, month) for month in self.fiscal_months]
         temp_payroll = [self.get_monthly_instance(models.TemporaryPayroll, month) for month in self.fiscal_months]
@@ -382,6 +382,45 @@ class ContractsView(ViewerMixin, TemplateView):
         else:
             messages.success(self.request, "Contract '%s' was successfully deleted." % contract.name)
             contract.delete()
+
+
+class ProspectsView(ViewerMixin, TemplateView):
+    template_name = 'accounting/prospects.html'
+
+    def prospect_url_kwargs(self, prospect):
+        return {
+            'business_unit': self.current_business_unit.pk,
+            'prospect': prospect.pk
+        }
+
+    def make_prospect_context(self, prospect):
+        return {
+            'prospect': prospect,
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        prospects = models.Prospect.objects \
+            .filter(business_unit=self.current_business_unit) \
+            .order_by('id')
+        context.update({
+            'has_prospects': prospects.exists(),
+            'prospects': [self.make_prospect_context(prospect) for prospect in prospects.all()],
+        })
+        return context
+
+    def post(self, *args, **kwargs):
+        delete = self.request.POST.get('delete')
+
+        if delete is not None:
+            instance = models.Prospect.objects.get(pk=delete)
+            self.delete(instance)
+
+        return redirect('accounting:prospects', business_unit=self.current_business_unit.pk)
+
+    def delete(self, prospect):
+        messages.success(self.request, "Prospect '%s' was successfully deleted." % prospect.name)
+        prospect.delete()
 
 
 class MonthlyReconcileView(ViewerMixin, FormView):
@@ -545,6 +584,36 @@ class ContractCreateView(ContractMixin, CreateView):
 class ContractUpdateView(ContractMixin, UpdateView):
     template_name = 'accounting/base_form.html'
     form_class = forms.ContractForm
+
+
+################################################################
+# Prospects                                                    #
+################################################################
+class ProspectMixin(ManagerMixin):
+    model = models.Prospect
+    pk_url_kwarg = 'prospected_contract'
+    success_url_name = 'accounting:prospects'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cancel_url'] = self.get_success_url()
+
+        return context
+
+
+class ProspectCreateView(ProspectMixin, CreateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.ProspectForm
+
+    def form_valid(self, form):
+        form.instance.business_unit = self.current_business_unit
+
+        return super(ProspectCreateView, self).form_valid(form)
+
+
+class ProspectUpdateView(ProspectMixin, UpdateView):
+    template_name = 'accounting/base_form.html'
+    form_class = forms.ProspectForm
 
 
 ################################################################

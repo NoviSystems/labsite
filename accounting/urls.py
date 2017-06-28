@@ -20,6 +20,9 @@ urlpatterns = [
     # Contracts View
     url(r'^(?P<business_unit>\d+)/contracts/$', views.ContractsView.as_view(), name='contracts'),
 
+    # Prospects View
+    url(r'^(?P<business_unit>\d+)/prospects/$', views.ProspectsView.as_view(), name='prospects'),
+
     # Settings Views
     url(r'^(?P<business_unit>\d+)/settings/business_unit/$', views.BusinessUnitSettingsPageView.as_view(), name='business_unit_settings'),
     url(r'^(?P<business_unit>\d+)/settings/user_team_roles/$', views.UserTeamRolesSettingsPageView.as_view(), name='user_team_roles_settings'),
@@ -32,6 +35,9 @@ urlpatterns = [
     # Contracts Forms
     url(r'^(?P<business_unit>\d+)/contracts/create/$', views.ContractCreateView.as_view(), name='create_contract'),
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/update/$', views.ContractUpdateView.as_view(), name='update_contract'),
+
+    # Prospect Forms
+    url(r'^(?P<business_unit>\d+)/prospects/create/$', views.ProspectCreateView.as_view(), name='create_prospect'),
 
     # Invoice Forms
     url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/create/$', views.InvoiceCreateView.as_view(), name='create_invoice'),
