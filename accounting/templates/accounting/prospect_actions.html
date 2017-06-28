@@ -1,0 +1,14 @@
+{% if is_manager %}
+<form action="" method="post">
+    {% csrf_token %}
+
+    <div class="btn-group btn-group-{{ size|default:'sm' }}">
+        <a class="btn btn-{{ size|default:'sm' }} btn-danger" name="delete" value="{{ prospect.pk }}"
+         data-toggle="modal" data-target="#action-modal"
+         data-title="Confirm Deletion" data-body="Are you sure you want to delete <b>{{ prospect.name }}</b>?"
+         data-btn-class="btn-danger">
+            <i class="fa fa-trash"></i>
+        </a>
+    </div>
+</form>
+{% endif %}

@@ -1,0 +1,59 @@
+{% extends "accounting/base.html" %}
+{% load accounting_filters %}
+
+
+{% block styles %}
+<style>
+.panel-title .lead {
+    display: inline-block;
+
+    /* remove bottom margin from lead text */
+    margin-bottom: 10px;
+}
+
+.panel-title .list-inline {
+    display: inline-block;
+}
+
+.fa-chevron-down {
+    /* animate chevron when toggling rotate class */
+    transition: transform .2s linear;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "accounting/nav_tabs.html" with active="prospects" %}
+{% if is_manager %}
+<div class="page-header">
+    <a class="btn btn-primary" href="{% url 'accounting:create_prospect' business_unit=current_business_unit.pk %}">
+        New Prospective Contract <i class="fa fa-fw fa-plus"></i>
+    </a>
+    <h4 style="padding-top: 1em">End of Fiscal Year Cash Balance: $$$$$</h4>
+</div>
+{% endif %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Prospected Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for prospect_ctx in prospects %}
+        <li class="list-group-item">
+            {% include 'accounting/prospect_brief.html' with prospect_ctx=prospect_ctx %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$('.collapse').on('show.bs.collapse hide.bs.collapse', function(event) {
+    const id = event.target.getAttribute('id');
+    $(`[href="#${id}"] i`).toggleClass('fa-rotate-180');
+});
+</script>
+{% endblock %}

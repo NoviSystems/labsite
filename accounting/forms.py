@@ -54,6 +54,17 @@ class ContractForm(BaseForm):
         ]
 
 
+class ProspectForm(BaseForm):
+    class Meta:
+        model = models.Prospect
+        fields = [
+            'name',
+            'description',
+            'est_amount',
+            'probability',
+        ]
+
+
 class InvoiceForm(BaseForm):
 
     def __init__(self, *args, contract, **kwargs):

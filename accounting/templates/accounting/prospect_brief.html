@@ -1,0 +1,43 @@
+{% load accounting_filters %}
+
+{% with prospect=prospect_ctx.prospect %}
+
+<div class="row">
+    <div class="col-xs-2 col-md-3">
+        <h4>{{ prospect.name }}</h4>
+    </div>
+    <div class="col-xs-8 col-md-7" style="padding-top: 0.7em">
+        <div class="col-xs-7 col-md-6"><b>Estimated Amount: </b>{{ prospect.est_amount|currency }}</div>
+        <div class="col-xs-5 col-md-6"><b>Probability: %</b>{{ prospect.probability }}</div>
+    </div>
+    <div class="col-xs-2">
+        <div class="pull-right">
+            <ul class="list-inline pull-right">
+                <li>
+                    {% include 'accounting/prospect_actions.html' with prospect=prospect size='xs' %}
+                </li>
+                <li>
+                    <a role="button" data-toggle="collapse" href="#collapse-{{ prospect.pk }}" style="font-size: 14px;">
+                        <span class="fa-stack fa-sm text-primary">
+                            <i class="fa fa-circle-thin fa-stack-2x"></i>
+                            <i class="fa fa-chevron-down fa-stack-1x"></i>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="collapse-{{ prospect.pk }}" class="panel-collapse collapse" role="tabpanel">
+    <!-- Contract Details -->
+    <div class="row">
+        <div class="col-xs-12">
+            <br>
+            <table class="table">
+                <tr><th class="col-xs-2 col-md-1">Description:</th> <td>{{ prospect.description }}</td>
+            </table>
+        </div>
+    </div>
+</div>
+{% endwith %}

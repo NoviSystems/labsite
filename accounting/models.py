@@ -135,6 +135,21 @@ class Contract(models.Model):
         """
 
 
+class Prospect(models.Model):
+    TYPES = choices((
+        ('FIXED', _('Fixed')),
+        ('HOURLY', _('Hourly')),
+    ))
+    name = models.CharField(max_length=255, verbose_name=_('Name'))
+    business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
+    description = models.CharField(max_length=255, verbose_name=_("Description"))
+    est_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[validate_positive])
+    probability = models.DecimalField(max_digits=5, decimal_places=2, default=0, validators=[validate_positive])
+
+    def __str__(self):
+        return '%s: %s' % (self.id, self.name)
+
+
 class LineItem(models.Model):
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     expected_amount = models.DecimalField(max_digits=10, decimal_places=2)
