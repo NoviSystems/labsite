@@ -406,6 +406,8 @@ class ProspectsView(ViewerMixin, TemplateView):
         context.update({
             'has_prospects': prospects.exists(),
             'prospects': [self.make_prospect_context(prospect) for prospect in prospects.all()],
+            'proj_eofy_balance': self.projected_eofy_balance,
+
         })
         return context
 
@@ -421,6 +423,29 @@ class ProspectsView(ViewerMixin, TemplateView):
     def delete(self, prospect):
         messages.success(self.request, "Prospect '%s' was successfully deleted." % prospect.name)
         prospect.delete()
+
+    def get_monthly_instance(self, model, date):
+        try:
+            return model.objects \
+                .filter(business_unit=self.current_business_unit) \
+                .filter(year=date.year, month=date.month).get()
+        except model.DoesNotExist:
+            return model(
+                business_unit=self.current_business_unit,
+                year=date.year, month=date.month
+            )
+
+    @property
+    def ending_fiscal_month_balance(self):
+        return self.get_monthly_instance(models.CashBalance, self.fiscal_months[-1]) \
+            .expected_amount
+
+    @property
+    def projected_eofy_balance(self):
+        total = 0
+        for prospect in models.Prospect.objects.filter(business_unit=self.current_business_unit):
+            total += prospect.est_amount * prospect.probability
+        return total + self.ending_fiscal_month_balance
 
 
 class MonthlyReconcileView(ViewerMixin, FormView):

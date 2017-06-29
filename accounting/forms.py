@@ -64,6 +64,10 @@ class ProspectForm(BaseForm):
             'probability',
         ]
 
+    def clean_probability(self):
+        data = self.cleaned_data['probability']
+        return format(data, '1.2f')
+
 
 class InvoiceForm(BaseForm):
 

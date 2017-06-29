@@ -41,6 +41,11 @@ def validate_positive(value):
         raise ValidationError(_('Value must be a positive number.'))
 
 
+def validate_percentile(value):
+    if value is not None and value > 1:
+        raise ValidationError(_('Value must be less than or equal to 1'))
+
+
 class BusinessUnit(models.Model):
     name = models.CharField(max_length=64)
     account_number = models.CharField(max_length=12)
@@ -140,11 +145,11 @@ class Prospect(models.Model):
         ('FIXED', _('Fixed')),
         ('HOURLY', _('Hourly')),
     ))
-    name = models.CharField(max_length=255, verbose_name=_('Name'))
+    name = models.CharField(max_length=255, verbose_name=_("Name"))
     business_unit = models.ForeignKey(BusinessUnit, on_delete=models.CASCADE)
     description = models.CharField(max_length=255, verbose_name=_("Description"))
     est_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, validators=[validate_positive])
-    probability = models.DecimalField(max_digits=5, decimal_places=2, default=0, validators=[validate_positive])
+    probability = models.FloatField(default=0, validators=[validate_positive, validate_percentile])
 
     def __str__(self):
         return '%s: %s' % (self.id, self.name)
