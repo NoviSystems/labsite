@@ -19,6 +19,7 @@ urlpatterns = [
 
     # Contracts View
     url(r'^(?P<business_unit>\d+)/contracts/$', views.ContractsView.as_view(), name='contracts'),
+    url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/$', views.ContractDetailView.as_view(), name='contract_detail'),
 
     # Prospects View
     url(r'^(?P<business_unit>\d+)/prospects/$', views.ProspectsView.as_view(), name='prospects'),
