@@ -99,8 +99,8 @@ class FiscalCalendar:
         calendar_year = calendar_date.year
 
         # if the date is before the start of the fiscal year, then we're in the previous fiscal year
-        if calendar_date < cls.get_start_date(calendar_year):
-            return calendar_year - 1
+        if calendar_date > cls.get_end_date(calendar_year):
+            return calendar_year + 1
         return calendar_year
 
     @property

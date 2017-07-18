@@ -97,7 +97,7 @@ class AccountingMixin(LoginRequiredMixin):
                 .order_by('-year', '-month').first()
 
             if latest is not None:
-                latest_date = Month(latest).as_date()
+                latest_date = Month.next(latest).as_date()  # Need to operate on next available month
                 fiscal_year = FiscalCalendar.get_fiscal_year(latest_date)
 
         # if fiscal_year is none, will default to fiscal year for current date
