@@ -1,4 +1,6 @@
 
+{% with contract=contract_ctx.contract %}
+
 {% if is_manager %}
 <!-- New controls-->
 {% if contract.state == contract.STATES.NEW %}
@@ -24,7 +26,7 @@
 {% endif %}
 
 <!-- Active controls-->
-{% if contract_ctx.contract.state == contract.STATES.ACTIVE %}
+{% if contract.state == contract.STATES.ACTIVE %}
 <form action="" method="post">
     {% csrf_token %}
     <a class="btn btn-{{ size|default:'sm' }} btn-primary" name="complete" value="{{ contract.pk }}"
@@ -37,3 +39,5 @@
 {% endif %}
 
 {% endif %}
+
+{% endwith %}

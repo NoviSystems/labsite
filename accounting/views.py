@@ -179,6 +179,78 @@ class ManagerMixin(AccountingMixin, UserPassesTestMixin):
         return self.is_manager
 
 
+class ContractCtxMixin(object):
+    """
+    Contract context functions to retreive context data
+    """
+
+    def make_contract_context(self, contract):
+        return {
+            'contract': contract,
+            'invoices': [
+                self.make_invoice_context(invoice) for invoice
+                in models.Invoice.objects.filter(contract=contract).order_by('-expected_invoice_date')
+            ],
+            'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
+            'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
+            'detail_url': reverse('accounting:contract_detail', kwargs=self.contract_url_kwargs(contract)),
+        }
+
+    def make_invoice_context(self, invoice):
+        return {
+            'invoice': invoice,
+            'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+            'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+        }
+
+    def contract_url_kwargs(self, contract):
+        return {
+            'business_unit': self.current_business_unit.pk,
+            'contract': contract.pk
+        }
+
+    def invoice_url_kwargs(self, invoice):
+        kwargs = self.contract_url_kwargs(invoice.contract)
+        kwargs['invoice'] = invoice.pk
+
+        return kwargs
+
+    def activate(self, contract):
+        if not contract.has_invoice():
+            msg = "Contract %s not activated. Activation requires at least one invoice."
+            messages.error(self.request, msg % contract.contract_id)
+
+        elif not contract.amount_matches_invoices():
+            msg = "Contract %s not activated. Sum of invoice amounts (%s) do not equal contract amount (%s)."
+            messages.error(self.request, mark_safe(msg % (
+                contract.contract_id,
+                format_currency(contract.get_invoices_expected_total()),
+                format_currency(contract.amount),
+            )))
+
+        else:
+            contract.activate()
+            contract.save()
+
+    def complete(self, contract):
+        if not contract.all_invoices_received():
+            msg = "Contract %s not completed. Contract has unreceived invoices."
+            messages.error(self.request, msg % contract.contract_id)
+
+        else:
+            contract.complete()
+            contract.save()
+
+    def delete(self, contract):
+        if contract.state != contract.STATES.NEW:
+            msg = "Contract %s not deleted. Cannot delete active/completed contracts."
+            messages.error(self.request, msg % contract.contract_id)
+
+        else:
+            messages.success(self.request, "Contract '%s' was successfully deleted." % contract.name)
+            contract.delete()
+
+
 ################################################################
 # Dashboard Views                                              #
 ################################################################
@@ -270,38 +342,8 @@ class DashboardView(ViewerMixin, TemplateView):
         return context
 
 
-class ContractsView(ViewerMixin, TemplateView):
+class ContractsView(ViewerMixin, ContractCtxMixin, TemplateView):
     template_name = 'accounting/contracts.html'
-
-    def contract_url_kwargs(self, contract):
-        return {
-            'business_unit': self.current_business_unit.pk,
-            'contract': contract.pk
-        }
-
-    def invoice_url_kwargs(self, invoice):
-        kwargs = self.contract_url_kwargs(invoice.contract)
-        kwargs['invoice'] = invoice.pk
-
-        return kwargs
-
-    def make_contract_context(self, contract):
-        return {
-            'contract': contract,
-            'invoices': [
-                self.make_invoice_context(invoice) for invoice
-                in models.Invoice.objects.filter(contract=contract).order_by('-expected_invoice_date')
-            ],
-            'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
-            'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
-        }
-
-    def make_invoice_context(self, invoice):
-        return {
-            'invoice': invoice,
-            'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
-            'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
-        }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -347,41 +389,6 @@ class ContractsView(ViewerMixin, TemplateView):
             self.delete(instance)
 
         return redirect('accounting:contracts', business_unit=self.current_business_unit.pk)
-
-    def activate(self, contract):
-        if not contract.has_invoice():
-            msg = "Contract %s not activated. Activation requires at least one invoice."
-            messages.error(self.request, msg % contract.contract_id)
-
-        elif not contract.amount_matches_invoices():
-            msg = "Contract %s not activated. Sum of invoice amounts (%s) do not equal contract amount (%s)."
-            messages.error(self.request, mark_safe(msg % (
-                contract.contract_id,
-                format_currency(contract.get_invoices_expected_total()),
-                format_currency(contract.amount),
-            )))
-
-        else:
-            contract.activate()
-            contract.save()
-
-    def complete(self, contract):
-        if not contract.all_invoices_received():
-            msg = "Contract %s not completed. Contract has unreceived invoices."
-            messages.error(self.request, msg % contract.contract_id)
-
-        else:
-            contract.complete()
-            contract.save()
-
-    def delete(self, contract):
-        if contract.state != contract.STATES.NEW:
-            msg = "Contract %s not deleted. Cannot delete active/completed contracts."
-            messages.error(self.request, msg % contract.contract_id)
-
-        else:
-            messages.success(self.request, "Contract '%s' was successfully deleted." % contract.name)
-            contract.delete()
 
 
 class ProspectsView(ViewerMixin, TemplateView):
@@ -609,6 +616,34 @@ class ContractCreateView(ContractMixin, CreateView):
 class ContractUpdateView(ContractMixin, UpdateView):
     template_name = 'accounting/base_form.html'
     form_class = forms.ContractForm
+
+
+class ContractDetailView(ContractMixin, ContractCtxMixin, TemplateView):
+    template_name = "accounting/contract_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contract = models.Contract.objects.get(business_unit=self.current_business_unit, pk=self.kwargs['contract'])
+        contract_ctx = self.make_contract_context(contract)
+        context['contract_ctx'] = contract_ctx
+        return context
+
+    def post(self, *args, **kwargs):
+        activate = self.request.POST.get('activate')
+        complete = self.request.POST.get('complete')
+        delete = self.request.POST.get('delete')
+        instance = models.Contract.objects.get(pk=self.kwargs['contract'])
+
+        if activate is not None:
+            self.activate(instance)
+
+        elif complete is not None:
+            self.complete(instance)
+
+        elif delete is not None:
+            self.delete(instance)
+
+        return redirect('accounting:contracts', business_unit=self.current_business_unit.pk)
 
 
 ################################################################
