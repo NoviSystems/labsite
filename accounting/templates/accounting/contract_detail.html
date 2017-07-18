@@ -2,7 +2,6 @@
 {% load accounting_filters %}
 {% block content %}
 {% with contract=contract_ctx.contract %}
-<button class="btn btn-default pull-right" name="pdf" type="submit"></button>
 <a class="btn btn-primary" style="margin-bottom: 1em; font-family: 'Helvetica'" href="{% url 'accounting:contracts' business_unit=current_business_unit.pk %}"><span class="fa fa-arrow-circle-left"> Back</span></a>
 <div class="panel panel-default">
     <div class="panel-heading">
