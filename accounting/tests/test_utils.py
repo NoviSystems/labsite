@@ -1,5 +1,5 @@
-
-from accounting.utils import Month
+from datetime import date
+from accounting.utils import Month, FiscalCalendar
 from unittest import TestCase
 
 
@@ -34,3 +34,12 @@ class MonthTestCase(TestCase):
 
     def test_prev(self):
         self.assertEqual(Month.prev(self.base), Month(2015, 12))
+
+
+class FiscalCalendarTestCase(TestCase):
+    def test_get_fiscal_year(self):
+        self.assertEquals(FiscalCalendar.get_fiscal_year(date(2016, 7, 1)), 2017)
+        self.assertEquals(FiscalCalendar.get_fiscal_year(date(2016, 6, 1)), 2016)
+        self.assertEquals(FiscalCalendar.get_fiscal_year(date(2016, 1, 1)), 2016)
+        self.assertEquals(FiscalCalendar.get_fiscal_year(date(2016, 12, 1)), 2017)
+        self.assertEquals(FiscalCalendar.get_fiscal_year(date(2016, 8, 1)), 2017)
