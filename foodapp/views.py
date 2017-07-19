@@ -523,5 +523,5 @@ class BurritoProjectionView(LoginRequiredMixin, TemplateView):
             'months': '%d months' % months,
             'cost': total_cost or '-',
             'burritos': burrito_count or '-',
-            'price': '$%.2f' % (total_cost / burrito_count) if burrito_count else '-',
+            'price': '$%.2f' % (total_cost / burrito_count) if (total_cost and burrito_count) else '-',
         }
