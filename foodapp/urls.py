@@ -15,11 +15,11 @@ urlpatterns = [
     url(r'^billing/cards/update/(?P<card_id>\w+)/$', views.StripeCardUpdateView.as_view(), name='stripe_card_update'),
 
     url(r'^billing/invoices/$', views.StripeInvoiceView.as_view(), name='stripe_invoices'),
-    url(r'^billing/invoices/super/', views.SuperStripeInvoiceView.as_view(), name='super_invoices'),
 
-    url(r'^burrito-projections/', views.BurritoProjectionView.as_view(), name='burrito_projections'),
+    url(r'^burrito-projections/$', views.BurritoProjectionView.as_view(), name='burrito_projections'),
 
     url(r'^orders/$', views.OrderListView.as_view(), name='orders'),
+    url(r'^orders/unpaid/$', views.UnpaidOrdersView.as_view(), name='unpaid_orders'),
     url(r'^orders/user/(?P<username>\w+)/$', views.UserOrderView.as_view(), name='user_orders'),
     url(r'^orders/last_month/$', views.last_month_view, name='last_month_view'),
     url(r'^orders/leaderboard/$', views.LeaderboardView.as_view(), name='leaderboard'),

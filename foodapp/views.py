@@ -1,7 +1,6 @@
 import calendar
 import datetime
 from decimal import Decimal, ROUND_UP
-from multiprocessing import Pool
 
 from django.conf import settings
 
@@ -43,18 +42,6 @@ def uninvoiced_items_context(invoice_items):
         'invoice_items': invoice_items,
         'total_cost': '$%.2f' % (total_cost / 100.00),
         'total_count': total_count,
-    }
-
-
-def customer_super_context(customer_id):
-    customer = models.StripeCustomer.objects.get(pk=customer_id)
-    invoices = customer.get_invoices()
-
-    return {
-        'username': customer.user.username,
-        'amount_due': uninvoiced_items_context(customer.get_uninvoiced_items())['total_cost'],
-        'unpaid_invoices': any(not invoice.paid for invoice in invoices),
-        'payment_error': has_payment_error(invoices),
     }
 
 
@@ -235,25 +222,29 @@ class OrderListView(LoginRequiredMixin, ListView):
     template_name = 'foodapp/orders.html'
 
 
-class SuperStripeInvoiceView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = 'foodapp/super_invoice_view.html'
+class UnpaidOrdersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'foodapp/unpaid_invoices.html'
     raise_exception = True
 
     def test_func(self):
         return self.request.user.is_superuser
 
     def get_context_data(self, **kwargs):
-        context = super(SuperStripeInvoiceView, self).get_context_data(**kwargs)
-        context['customers'] = self.get_customer_data()
+        context = super(UnpaidOrdersView, self).get_context_data(**kwargs)
+
+        customers = User.objects.filter(is_active=True).order_by('username')
+        context['customers'] = [{
+            'username': user.username,
+            'amount_due': self.amount_due(user),
+        } for user in customers]
 
         return context
 
-    def get_customer_data(self):
-        customers = User.objects.filter(is_active=True)
-        customers = [get_stripe_customer(c) for c in customers]
-        customers = [c.pk for c in customers if c is not None]
+    def amount_due(self, user):
+        orders = user.orders.select_related('item') \
+            .filter(is_invoiceable=True, invoiceitem_id='')
 
-        return Pool().map(customer_super_context, customers)
+        return '$%.2f' % sum(order.item.cost * order.amount for order in orders)
 
 
 class UserOrderView(OrderListView):
