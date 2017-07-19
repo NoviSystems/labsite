@@ -223,7 +223,7 @@ class OrderListView(LoginRequiredMixin, ListView):
 
 
 class UnpaidOrdersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = 'foodapp/unpaid_invoices.html'
+    template_name = 'foodapp/unpaid_orders.html'
     raise_exception = True
 
     def test_func(self):
