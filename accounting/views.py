@@ -636,9 +636,11 @@ class ContractDetailView(ContractMixin, ContractCtxMixin, TemplateView):
 
         if activate is not None:
             self.activate(instance)
+            return redirect('accounting:contract_detail', business_unit=self.current_business_unit.pk, contract=kwargs['contract'])
 
         elif complete is not None:
             self.complete(instance)
+            return redirect('accounting:contract_detail', business_unit=self.current_business_unit.pk, contract=kwargs['contract'])
 
         elif delete is not None:
             self.delete(instance)
@@ -682,7 +684,13 @@ class ProspectUpdateView(ProspectMixin, UpdateView):
 class InvoiceMixin(ManagerMixin):
     model = models.Invoice
     pk_url_kwarg = 'invoice'
-    success_url_name = 'accounting:contracts'
+    success_url_name = 'accounting:contract_detail'
+
+    def get_success_url_kwargs(self):
+        return {
+            'business_unit': self.current_business_unit.pk,
+            'contract': self.kwargs['contract']
+        }
 
     @cached_property
     def current_contract(self):
