@@ -244,7 +244,7 @@ class UnpaidOrdersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         orders = user.orders.select_related('item') \
             .filter(is_invoiceable=True, invoiceitem_id='')
 
-        return '$%.2f' % sum(order.item.cost * order.amount for order in orders)
+        return '$ %.2f' % sum(order.item.cost * order.quantity for order in orders)
 
 
 class UserOrderView(OrderListView):
@@ -516,12 +516,13 @@ class BurritoProjectionView(LoginRequiredMixin, TemplateView):
             .aggregate(total=Sum('cost'))['total']
 
         burrito_count = models.Order.objects \
+            .filter(date__gte=start) \
             .filter(item__name__iexact='burrito') \
             .aggregate(total=Sum('quantity'))['total']
 
         return {
             'months': '%d months' % months,
-            'cost': total_cost or '-',
+            'cost': '$ %.2f' % total_cost if total_cost else '-',
             'burritos': burrito_count or '-',
-            'price': '$%.2f' % (total_cost / burrito_count) if (total_cost and burrito_count) else '-',
+            'price': '$ %.2f' % (total_cost / burrito_count) if (total_cost and burrito_count) else '-',
         }
