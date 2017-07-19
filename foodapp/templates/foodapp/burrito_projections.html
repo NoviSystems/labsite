@@ -1,0 +1,26 @@
+{% extends 'foodapp/base.html' %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Burrito Cost Projections</h3>
+        </div>
+
+        <table class="table table-bordered">
+            <tr>
+                <th class="col-xs-3">Number of months</th>
+                <th class="col-xs-3">Total monthly costs</th>
+                <th class="col-xs-3">Number of burritos</th>
+                <th class="col-xs-3">Price to break even</th>
+            </tr>
+            {% for p in projections %}
+            <tr>
+                <td>{{ p.months }}</td>
+                <td class="">{{ p.cost }}</td>
+                <td class="">{{ p.burritos }}</td>
+                <td class="">{{ p.price }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock content %}

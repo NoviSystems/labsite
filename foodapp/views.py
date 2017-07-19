@@ -1,3 +1,4 @@
+import calendar
 import datetime
 from decimal import Decimal, ROUND_UP
 from multiprocessing import Pool
@@ -490,3 +491,46 @@ class SuperMonthOrdersView(LoginRequiredMixin, TemplateView):
 
         context["user_to_orders_dict"] = user_to_orders_dict
         return context
+
+
+class BurritoProjectionView(LoginRequiredMixin, TemplateView):
+    template_name = 'foodapp/burrito_projections.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['projections'] = [
+            self.projection(3),
+            self.projection(6),
+            self.projection(12),
+        ]
+
+        return context
+
+    @staticmethod
+    def monthdelta(date, delta):
+        # https://stackoverflow.com/a/22443132/1103124
+        m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
+        if not m:
+            m = 12
+        d = min(date.day, calendar.monthrange(y, m)[1])
+        return date.replace(day=d, month=m, year=y)
+
+    def projection(self, months):
+        today = datetime.date.today()
+        start = self.monthdelta(today, -months)
+        start = start.replace(day=1)
+
+        total_cost = models.MonthlyCost.objects \
+            .filter(date__gte=start) \
+            .aggregate(total=Sum('cost'))['total']
+
+        burrito_count = models.Order.objects \
+            .filter(item__name__iexact='burrito') \
+            .aggregate(total=Sum('quantity'))['total']
+
+        return {
+            'months': '%d months' % months,
+            'cost': total_cost or '-',
+            'burritos': burrito_count or '-',
+            'price': '$%.2f' % (total_cost / burrito_count) if burrito_count else '-',
+        }

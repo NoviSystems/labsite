@@ -18,6 +18,7 @@
         <ul class="dropdown-menu">
             {% if user.is_superuser %}
             <li><a href="{% url 'foodapp:super_invoices' %}">All Invoices</a></li>
+            <li><a href="{% url 'foodapp:burrito_projections' %}">Burrito Cost Projections</a></li>
             {% endif %}
             <li><a href="{% url 'foodapp:stripe_invoices' %}">Invoices</a></li>
             <li><a href="{% url 'foodapp:stripe_card_list' %}">Card Management</a></li>
