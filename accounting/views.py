@@ -444,8 +444,15 @@ class ProspectsView(ViewerMixin, TemplateView):
 
     @property
     def ending_fiscal_month_balance(self):
-        return self.get_monthly_instance(models.CashBalance, self.fiscal_months[-1]) \
-            .expected_amount
+        latest_cashbalance = models.CashBalance.objects.first()
+        first_month = Month(latest_cashbalance)
+        months = Month.range(first_month, Month.next(self.fiscal_months[-1]))
+        cash_balances = [self.get_monthly_instance(models.CashBalance, month) for month in months]
+        for i, _ in enumerate(months):
+            if i > 0:
+                cash_balances[i].previous_cashbalance = cash_balances[i - 1]
+                # print(self.get_monthly_instance(models.CashBalance, months[i - 1]).expected_amount)
+        return cash_balances[-1].expected_amount
 
     @property
     def projected_eofy_balance(self):
