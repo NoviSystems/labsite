@@ -295,6 +295,12 @@ class DashboardView(ViewerMixin, TemplateView):
                 business_unit=self.current_business_unit,
                 year=date.year, month=date.month)
 
+    def get_invoice_groups(self, date):
+        return models.Invoice.objects \
+            .exclude(contract__state=models.Contract.STATES.NEW) \
+            .filter(business_unit=self.current_business_unit) \
+            .filter(expected_payment_date__year=date.year, expected_payment_date__month=date.month)
+
     def get_balances(self):
         # get instances
         invoices = [self.get_monthly_invoices(month) for month in self.fiscal_months]  # already in dict form
@@ -324,14 +330,17 @@ class DashboardView(ViewerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        invoice_groups = [self.get_invoice_groups(month) for month in self.fiscal_months]
         balances = self.get_balances()
         cash_balances = balances['Cash Balance']
+        invoice_groups_and_totals = list(zip(invoice_groups, balances['Invoices']))
 
         context.update({
             'next_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
             'prev_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
             'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
 
+            'invoice_groups_and_totals': invoice_groups_and_totals,
             'billing_month': self.current_billing_month,
             'fiscal_months': self.fiscal_months,
             'balances': balances,
