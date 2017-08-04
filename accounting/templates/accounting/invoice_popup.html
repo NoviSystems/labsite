@@ -1,15 +1,20 @@
 {% load accounting_filters %}
 
+<style>
+th {
+	padding-right: 1em;
+}
+</style>
 
  <tr class="text-right">
     {% for invoices, balance in invoice_groups_and_totals %}
-        <td id="balance" {% if balance.expected_amount %} class="cell_popover" {% endif %}>{{ balance.expected_amount|currency:False|default:'---' }}
+        <td id="balance" {% if balance.expected_amount %} class="cell-popover" {% endif %}>{{ balance.expected_amount|currency:False|default:'---' }}
     	<div class="hide popoverContent">
 	    	{% for invoice in invoices %}
 				<table>
-					<tr><th style="padding-right: 1em">Contract:</th><td class="text-right clean"><a href="{% url 'accounting:contract_detail' invoice.business_unit_id invoice.contract_id %}">{{ invoice.contract.name }}</a></td></tr>
-					<tr><th style="padding-right: 1em">Amount:</th><td class="text-right">{{ invoice.expected_amount|currency }}</td></tr>
-					<tr><th style="padding-right: 1em">Pay Date:</th><td class="text-right">{{ invoice.expected_payment_date }}</td></tr>
+					<tr><th>Contract:</th><td class="text-right clean"><a href="{% url 'accounting:contract_detail' invoice.business_unit_id invoice.contract_id %}">{{ invoice.contract.name }}</a></td></tr>
+					<tr><th>Amount:</th><td class="text-right">{{ invoice.expected_amount|currency }}</td></tr>
+					<tr><th>Pay Date:</th><td class="text-right">{{ invoice.expected_payment_date }}</td></tr>
 				</table>
 				{% if not forloop.last %}<br>{% endif %}
 			{% endfor %}
