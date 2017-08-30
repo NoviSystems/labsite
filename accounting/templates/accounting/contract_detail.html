@@ -4,13 +4,16 @@
 {% with contract=contract_ctx.contract %}
 <a class="btn btn-primary" style="margin-bottom: 1em;" href="{% url 'accounting:contracts' business_unit=current_business_unit.pk %}"><span class="fa fa-arrow-circle-left"> Contracts</span></a>
 <div class="panel panel-default">
+<input class="btn btn-danger pull-right" size=4 value="Print" readonly="True" onClick="printDiv()"/>
+
+<div class="panel panel-default" id="content">
     <div class="panel-heading">
     	<div class="row">
 	        <h3 style="margin: auto" class="col-xs-8 col-md-10">{{ contract.name }}</h3>
 	        <div class="pull-right">{% include 'accounting/contract_actions.html' with size='xs' %}</div>
         </div>
     </div>
-    <table class="table">
+    <table class="table" id="contractTable">
 	    <tr>
 	    	<td class="col-xs-4"><b>Contracted: </b>{{ contract.amount|currency }}</td>
 	    	<td class="col-xs-4"><b>Outstanding: </b>{{ contract.outstanding_amount|currency }}</td>
@@ -31,7 +34,7 @@
             <p class="text-center"><b>No invoices for this contract.</b></p>
             {% endif %}
             {% if contract_ctx.invoices %}
-            <table class="table table-hover">
+            <table class="table table-hover" id="invoiceTable">
                 <thead>
                 <tr>
                     <th class="col-xs-2 no-wrap">Invoice ID</th>
@@ -42,7 +45,7 @@
                     <th class="col-xs-1 no-wrap">Actual Pay. Date</th>
                     <th class="col-xs-1 no-wrap">Expected Amount</th>
                     <th class="col-xs-1 no-wrap">Actual Amount</th>
-                    <th class="col-xs-2 no-wrap">Actions</th>
+                    <th class="col-xs-2 no-wrap" id="noPrint">Actions</th>
                 </tr>
                 </thead>
 
@@ -97,4 +100,42 @@
 </div>
 {% endwith %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+function printDiv() {
+    var divPrint = document.getElementById('content');
+    var htmlToPrint = '' +
+        '<style type="text/css">' +
+        'h3 {' +
+        'font-size: 25px' +
+        '}' +
+        '#noPrint, a {' +
+        'display: none;' +
+        '}' +
+        '#contractTable td {' +
+        'width: 250px;' +
+        '}' +
+        '#invoiceTable {' +
+        'border-collapse: collapse;' +
+        'font-size: 0.8em;' +
+        '}' +
+        '#invoiceTable td, #invoiceTable tr {' +
+        'border-left: 1px solid #bbb;' +
+        'border-bottom: 1px solid #bbb;' +
+        'text-align: center;' +
+        '}' +
+        '#invoiceTable th {' +
+        'border: 1px solid black;' +
+        'border-radius: 2px;' +
+        '}' +
+        '</style>';
+    htmlToPrint += divPrint.outerHTML;
+    newWin = window.open();
+    newWin.document.write(htmlToPrint);
+    newWin.print();
+    newWin.close();
+}
+</script>
 {% endblock %}
