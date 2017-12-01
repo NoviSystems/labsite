@@ -4,16 +4,13 @@
 {% with contract=contract_ctx.contract %}
 <a class="btn btn-primary" style="margin-bottom: 1em;" href="{% url 'accounting:contracts' business_unit=current_business_unit.pk %}"><span class="fa fa-arrow-circle-left"> Contracts</span></a>
 <div class="panel panel-default">
-<input class="btn btn-danger pull-right" size=4 value="Print" readonly="True" onClick="printDiv()"/>
-
-<div class="panel panel-default" id="content">
     <div class="panel-heading">
     	<div class="row">
 	        <h3 style="margin: auto" class="col-xs-8 col-md-10">{{ contract.name }}</h3>
 	        <div class="pull-right">{% include 'accounting/contract_actions.html' with size='xs' %}</div>
         </div>
     </div>
-    <table class="table" id="contractTable">
+    <table class="table">
 	    <tr>
 	    	<td class="col-xs-4"><b>Contracted: </b>{{ contract.amount|currency }}</td>
 	    	<td class="col-xs-4"><b>Outstanding: </b>{{ contract.outstanding_amount|currency }}</td>
@@ -34,7 +31,7 @@
             <p class="text-center"><b>No invoices for this contract.</b></p>
             {% endif %}
             {% if contract_ctx.invoices %}
-            <table class="table table-hover" id="invoiceTable">
+            <table class="table table-hover">
                 <thead>
                 <tr>
                     <th class="col-xs-2 no-wrap">Invoice ID</th>
@@ -45,22 +42,21 @@
                     <th class="col-xs-1 no-wrap">Actual Pay. Date</th>
                     <th class="col-xs-1 no-wrap">Expected Amount</th>
                     <th class="col-xs-1 no-wrap">Actual Amount</th>
-                    <th class="col-xs-2 no-wrap" id="noPrint">Actions</th>
+                    <th class="col-xs-2 no-wrap">Actions</th>
                 </tr>
                 </thead>
 
                 {% for invoice_ctx in contract_ctx.invoices %}
                 {% with invoice=invoice_ctx.invoice %}
-                <tr>
-                    <td class="no-wrap">{{ invoice.invoice_id|default:"---------" }}</td>
-                    <td class="no-wrap">{{ invoice.get_state_display }}</td>
-                    <td class="no-wrap">{{ invoice.expected_invoice_date|date:"DATE_FORMAT" }}</td>
-                    <td class="no-wrap">{{ invoice.actual_invoice_date|date:"DATE_FORMAT"|default:"---------" }}</td>
-                    <td class="no-wrap">{{ invoice.expected_payment_date|date:"DATE_FORMAT" }}</td>
-                    <td class="no-wrap">{{ invoice.actual_payment_date|date:"DATE_FORMAT"|default:"---------" }}</td>
-                    <td class="no-wrap">{{ invoice.expected_amount|currency }}</td>
-                    <td class="no-wrap">{{ invoice.actual_amount|currency|default:"---------" }}
-                    </td>
+                <tr id="invoice-{{invoice.invoice_id}}">
+                    <td class="no-wrap" id="id">{{ invoice.invoice_id|default:"---------" }}</td>
+                    <td class="no-wrap" id="state">{{ invoice.get_state_display }}</td>
+                    <td class="no-wrap" id="exp-invoice-date">{{ invoice.expected_invoice_date|date:"DATE_FORMAT" }}</td>
+                    <td class="no-wrap" id="act-invoice-date">{{ invoice.actual_invoice_date|date:"DATE_FORMAT"|default:"---------" }}</td>
+                    <td class="no-wrap" id="exp-payment-date">{{ invoice.expected_payment_date|date:"DATE_FORMAT" }}</td>
+                    <td class="no-wrap" id="act-payment-date">{{ invoice.actual_payment_date|date:"DATE_FORMAT"|default:"---------" }}</td>
+                    <td class="no-wrap" id="exp-amount">{{ invoice.expected_amount|currency }}</td>
+                    <td class="no-wrap" id="act-amount">{{ invoice.actual_amount|currency|default:"---------" }}</td>
                     {% if is_manager %}
                     <td>
                         <form action="{{ invoice_ctx.delete_url }}" method="post">
@@ -80,6 +76,7 @@
                                     <i class="fa fa-trash"></i>
                                 </a>
                                 {% endif %}
+                                <button class="btn btn-primary" type="button" onClick="printInvoice('invoice-{{invoice.invoice_id}}', '{{contract.name}}')"><i id="button" class="fa fa-print"></i></button>
                             </div>
                         </form>
                     </td>
@@ -104,34 +101,59 @@
 
 {% block scripts %}
 <script>
-function printDiv() {
-    var divPrint = document.getElementById('content');
-    var htmlToPrint = '' +
-        '<style type="text/css">' +
-        'h3 {' +
-        'font-size: 25px' +
-        '}' +
-        '#noPrint, a {' +
-        'display: none;' +
-        '}' +
-        '#contractTable td {' +
-        'width: 250px;' +
-        '}' +
-        '#invoiceTable {' +
-        'border-collapse: collapse;' +
-        'font-size: 0.8em;' +
-        '}' +
-        '#invoiceTable td, #invoiceTable tr {' +
-        'border-left: 1px solid #bbb;' +
-        'border-bottom: 1px solid #bbb;' +
-        'text-align: center;' +
-        '}' +
-        '#invoiceTable th {' +
-        'border: 1px solid black;' +
-        'border-radius: 2px;' +
-        '}' +
-        '</style>';
-    htmlToPrint += divPrint.outerHTML;
+function printInvoice(tr, contract) {
+    //var tr = document.getElementById(divID);
+    //const td = tr.getElementsByTagName("td");
+    const td = document.getElementById(tr).getElementsByTagName("td");
+    const id = td[0].innerHTML;
+    const state = td[1].innerHTML;
+    const expInvoiceDate = td[2].innerHTML;
+    const actInvoiceDate = td[3].innerHTML;
+    const expPaymentDate = td[4].innerHTML;
+    const actPaymentDate = td[5].innerHTML;
+    const expAmount = td[6].innerHTML;
+    const actAmount = td[7].innerHTML;
+    const htmlToPrint = `
+        <style>
+            tr {
+                font-size: 20px;
+                height: 50px;
+            }
+            tr td{
+                border-bottom:1pt solid gray;
+            }
+            h1 {
+                font-size: 30px;
+            }
+        </style>
+        <h1>${contract}</h1>
+        <table>
+            <tr>
+                <td width=200><b>Invoice ID:</b></td><td>${id}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Status:</b></td><td>${state}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Expected Inv. Date:</b></td><td>${expInvoiceDate}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Actual Inv. Date:</b></td><td>${actInvoiceDate}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Expected Pay. Date:</b></td><td>${expPaymentDate}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Actual Pay. Date:</b></td><td>${actPaymentDate}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Expected Amount:</b></td><td>${expAmount}</td>
+            </tr>
+            <tr>
+                <td width=200><b>Actual Amount:</b></td><td>${actAmount}</td>
+            </tr>
+        </table>
+    `;
     newWin = window.open();
     newWin.document.write(htmlToPrint);
     newWin.print();
