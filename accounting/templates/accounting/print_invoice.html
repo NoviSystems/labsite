@@ -1,0 +1,81 @@
+{% extends "accounting/base.html" %}
+
+{% block styles %}
+<style>
+	textarea {
+		resize: none;
+	}
+</style>
+{% endblock %}
+{% block content %}
+<a class="btn btn-primary" href="{% url 'accounting:contract_detail' contract=contract.pk business_unit=current_business_unit.pk %}"><span class="fa fa-arrow-circle-left"> {{ contract.name }}</span></a>
+<button class="btn btn-success" type="button" onClick="printInvoice()"">Print Invoice</button>
+
+<div id="print">
+	<table width="100%">
+		<tr>
+			<td width="50%"><img src="/static/NCSU_header.png" alt="NCSU_header"></td>
+			<td style="font-size:4em; text-align:right; padding-right:2em" colspan="2">INVOICE</td>
+		</tr>
+		<tr>
+			<td><b>Institute for Next Generation IT Systems</b></td>
+		</tr>
+		<tr>
+			<td>900 Main Campus Drive</td>
+			<td style="text-align:right">INVOICE NO.</td>
+			<td style="padding-left:1em">{{ invoice.invoice_id }}</td>
+		</tr>
+		<tr>
+			<td>Raleigh, NC 27606</td>
+			<td style="text-align:right">DATE</td>
+			<td style="padding-left:1em">{{ invoice.expected_payment_date }}</td>
+		</tr>
+		<tr height="100px">
+			<td valign="bottom" style="padding-left:2em">TO</td>
+			<td valign="bottom" style="text-align:right">Remit To:</td>
+		</tr>
+		<tr>
+			<td style="padding-left:4em">{{ contract.customer }}</td>
+		</tr>
+		<tr>
+			<td style="padding-left:4em"><textarea wrap="off" placeholder="Recipient Information" cols="40" rows="5"></textarea></td>
+			<td></td>
+			<td colspan="2"><textarea wrap="off" placeholder="Remit Information" cols="40" rows="5"></textarea></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td style="text-align:right">TERMS</td>
+		</tr>
+		<tr>
+			<td></td><td></td>
+			<td colspan="2"><input type="text"></td>
+		</tr>
+	</table>
+	<hr>
+	<table border="1px" width="100%">
+		<tr bgcolor="red">
+			<th width="60%">Item/Description</th>
+			<th width="15%">Contract No.</th>
+			<th width="25%" style="text-align:center">Amount</th>
+		</tr>
+		<tr>
+			<td width="60%">{{ contract.description }}</td>
+			<td width="15%">{{ contract.contract_id }}</td>
+			<td width="25%" style="text-align:right">${{ invoice.expected_amount }}</td>
+		</tr>
+	</table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+	function printInvoice() {
+		html = document.getElementById("print");
+		win = window.open()
+		win.document.write(html.innerHTML);
+    	win.print();
+    	win.close();
+	}
+</script>
+{% endblock %}

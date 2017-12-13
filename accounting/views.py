@@ -201,6 +201,7 @@ class ContractCtxMixin(object):
             'invoice': invoice,
             'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
             'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+            'print_url': reverse('accounting:print_invoice', kwargs=self.invoice_url_kwargs(invoice)),
         }
 
     def contract_url_kwargs(self, contract):
@@ -744,6 +745,17 @@ class InvoiceUpdateView(InvoiceMixin, UpdateView):
             STATES.NEW: forms.NewInvoiceUpdateForm,
             STATES.ACTIVE: forms.ActiveInvoiceUpdateForm,
         }[self.current_contract.state]
+
+
+class InvoicePrintView(ViewerMixin, TemplateView):
+    template_name = 'accounting/print_invoice.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['contract'] = models.Contract.objects.filter(pk=self.kwargs['contract']).first()
+        context['invoice'] = models.Invoice.objects.filter(pk=self.kwargs['invoice']).first()
+        return context
 
 
 class InvoiceDeleteView(InvoiceMixin, DeleteView):

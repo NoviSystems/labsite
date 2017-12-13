@@ -76,7 +76,10 @@
                                     <i class="fa fa-trash"></i>
                                 </a>
                                 {% endif %}
-                                <button class="btn btn-primary" type="button" onClick="printInvoice('invoice-{{invoice.invoice_id}}', '{{contract.name}}')"><i id="button" class="fa fa-print"></i></button>
+<!--                                 <button class="btn btn-primary" type="button" onClick="printInvoice('invoice-{{invoice.invoice_id}}', '{{contract.name}}')"><i id="button" class="fa fa-print"></i></button> -->
+                                <a class="btn btn-primary" href="{{ invoice_ctx.print_url }}">
+                                    <i class="fa fa-print"></i>
+                                </a>
                             </div>
                         </form>
                     </td>
