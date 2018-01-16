@@ -1,0 +1,51 @@
+textarea {
+	resize: vertical;
+}
+@media print {
+	#no-print {
+		display: none !important;
+	}
+	textarea, input {
+		border: none !important;
+		overflow: hidden;
+		resize: none;
+	}
+	::-webkit-input-placeholder { /* WebKit browsers */
+	    color: transparent;
+	}
+	:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+	    color: transparent;
+    }
+	::-moz-placeholder { /* Mozilla Firefox 19+ */
+	    color: transparent;
+	}
+	:-ms-input-placeholder { /* Internet Explorer 10+ */
+	    color: transparent;
+	}
+	tr.invoice-heading {
+		background-color: red !important;
+		-webkit-print-color-adjust: exact;
+	}
+	td {
+		white-space: nowrap;
+	}
+}
+.invoice-heading {
+	background-color: red;
+}
+.fill-input {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.fill-input-amount {
+	display: block;
+	width: 100%;
+	height: 100%;
+	text-align: right;
+}
+.small-button {
+	height: 25px;
+	width: 25px;
+	padding: 0px;
+}

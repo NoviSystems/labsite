@@ -755,6 +755,7 @@ class InvoicePrintView(ViewerMixin, TemplateView):
 
         context['contract'] = models.Contract.objects.filter(pk=self.kwargs['contract']).first()
         context['invoice'] = models.Invoice.objects.filter(pk=self.kwargs['invoice']).first()
+        context['current_date'] = date.today()
         return context
 
 

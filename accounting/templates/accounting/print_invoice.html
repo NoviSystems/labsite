@@ -1,93 +1,79 @@
 {% extends "accounting/base.html" %}
 
-{% block styles %}
-<style>
-	textarea {
-		resize: none;
-	}
-	@media print {
-		#no-print {
-			display: none !important;
-		}
-		#hide-border {
-			border: none !important;
-		}
-		::-webkit-input-placeholder { /* WebKit browsers */
-		    color: transparent;
-		}
-		:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-		    color: transparent;
-	    }
-		::-moz-placeholder { /* Mozilla Firefox 19+ */
-		    color: transparent;
-		}
-		:-ms-input-placeholder { /* Internet Explorer 10+ */
-		    color: transparent;
-		}
-		tr.invoice-heading {
-			background-color: red !important;
-			-webkit-print-color-adjust: exact;
-		}
-	}
-</style>
+{% load staticfiles %}
+
+{% block app-styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/accounting/invoice-styles.css' %}"/>
 {% endblock %}
 {% block content %}
-<a id="no-print" class="btn btn-primary" href="{% url 'accounting:contract_detail' contract=contract.pk business_unit=current_business_unit.pk %}"><span class="fa fa-arrow-circle-left"> {{ contract.name }}</span></a>
-<button id="no-print" class="btn btn-success" type="button" onClick="printInvoice()"">Print Invoice</button>
+<a id="no-print" class="btn btn-primary" href="{% url 'accounting:contract_detail' contract=contract.pk business_unit=current_business_unit.pk %}">
+	<span class="fa fa-arrow-circle-left"> {{ contract.name }}</span>
+</a>
+<button id="no-print" class="btn btn-success" type="button" onClick="printInvoice()">Print Invoice</button>
 
-<div id="print">
-	<table width="100%">
-		<tr>
-			<td width="50%"><img src="/static/NCSU_header.png" alt="NCSU_header"></td>
-			<td style="font-size:4em; text-align:right; padding-right:2em" colspan="2">INVOICE</td>
-		</tr>
-		<tr>
-			<td><b>Institute for Next Generation IT Systems</b></td>
-		</tr>
-		<tr>
-			<td>900 Main Campus Drive</td>
-			<td style="text-align:right">INVOICE NO.</td>
-			<td style="padding-left:1em">{{ invoice.invoice_id }}</td>
-		</tr>
-		<tr>
-			<td>Raleigh, NC 27606</td>
-			<td style="text-align:right">DATE</td>
-			<td style="padding-left:1em">{{ invoice.expected_payment_date }}</td>
-		</tr>
-		<tr height="100px">
-			<td valign="bottom" style="padding-left:2em">TO</td>
-			<td valign="bottom" style="text-align:right">Remit To:</td>
-		</tr>
-		<tr>
-			<td style="padding-left:4em"><textarea id="hide-border" wrap="off" placeholder="Recipient Information" cols="40" rows="5">{{ contract.customer }}</textarea></td>
-			<td></td>
-			<td id="hide-border" colspan="2" rowspan="2"><textarea id="hide-border" wrap="off" placeholder="Remit Information" cols="40" rows="5"></textarea></td>
-		</tr>
-		<tr>
 
-		</tr>
-		<tr>
-			<td></td>
-			<td style="text-align:right">TERMS</td>
-		</tr>
-		<tr>
-			<td></td><td></td>
-			<td colspan="2"><input id="hide-border" type="text"></td>
-		</tr>
-	</table>
-	<hr>
-	<table border="1px" width="100%">
-		<tr class="invoice-heading" style="background-color: red">
-			<th width="60%">Item/Description</th>
-			<th width="15%">Contract No.</th>
-			<th width="25%" style="text-align:center">Amount</th>
-		</tr>
-		<tr>
-			<td width="60%">{{ contract.description }}</td>
-			<td width="15%">{{ contract.contract_id }}</td>
-			<td width="25%" style="text-align:right">${{ invoice.expected_amount }}</td>
-		</tr>
-	</table>
+<table width="100%">
+	<tr>
+		<td width="50%"><img src="/static/NCSU_header.png" alt="NCSU_header"></td>
+		<td style="font-size:4em; text-align:right; padding-right:2em" colspan="2">INVOICE</td>
+	</tr>
+	<tr>
+		<td><b>Institute for Next Generation IT Systems</b></td>
+	</tr>
+	<tr>
+		<td>900 Main Campus Drive</td>
+		<td style="text-align:right">INVOICE NO.</td>
+		<td style="padding-left:1em">{{ invoice.invoice_id }}</td>
+	</tr>
+	<tr>
+		<td>Raleigh, NC 27606</td>
+		<td style="text-align:right">DATE</td>
+		<td style="padding-left:1em"><input value="{{ current_date }}"></td>
+	</tr>
+	<tr height="100px">
+		<td valign="bottom" style="padding-left:2em">TO</td>
+		<td valign="bottom" style="text-align:right">Remit To:</td>
+	</tr>
+	<tr>
+		<td style="padding-left:4em; vertical-align:top" rowspan="3">
+			<textarea placeholder="Recipient Information" cols="50" rows="5">{{ contract.customer }}</textarea>
+		</td>
+		<td></td>
+		<td style="vertical-align:top;"><textarea placeholder="Remit Information" cols="50" rows="5"></textarea></td>
+	</tr>
+	<tr>
+		<td style="text-align:right">TERMS</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td colspan="2"><input type="text"></td>
+	</tr>
+</table>
+
+<hr>
+<div class="pull-right" style="padding-bottom: 1px">
+	<button id="no-print" class="btn small-button" style="background-color: lightblue" type="button" onClick="addRow()"><span class="fa fa-plus"></span></button>
+	<button id="no-print" class="btn small-button" style="background-color: pink" type="button" onClick="deleteRow()"><span class="fa fa-minus"></span></button>
+	<button id="no-print" class="btn small-button" type="button" onClick="tableTotal()"><span class="fa fa-refresh"></span></button>
+</div>
+<table id="invoiceTable" border="1px" width="100%">
+	<tr class="invoice-heading">
+		<th width="60%">Item/Description</th>
+		<th width="15%">Contract No.</th>
+		<th width="25%" style="text-align:center">Amount</th>
+	</tr>
+
+	<tr>
+		<td width="60%"><input class="fill-input" value="{{ contract.description }}"></td>
+		<td width="15%"><input class="fill-input" value="{{ contract.contract_id }}"></td>
+		<td width="25%"><input id="amount" class="fill-input-amount" value="{{ invoice.expected_amount }}"></td>
+	</tr>
+</table>
+<div class="pull-right">
+	<strong>Total: $
+	<span id="total">
+		{{ invoice.expected_amount }}</strong>
+	</span>
 </div>
 {% endblock %}
 
@@ -95,6 +81,47 @@
 <script>
 	function printInvoice() {
        	window.self.print();
+	}
+	function addRow() {
+		var table = document.getElementById("invoiceTable");
+		var row = table.insertRow();
+		var data1 = row.insertCell(0);
+		data1.innerHTML = '<input class="fill-input">';
+		var data2 = row.insertCell(1);
+		data2.innerHTML = '<input class="fill-input">';
+		var data3 = row.insertCell(2);
+		data3.style = "text-align: center";
+		data3.innerHTML = '<input class="fill-input-amount">';
+	}
+	function deleteRow() {
+		var table = document.getElementById("invoiceTable");
+		if (table.rows.length > 1) {
+			table.deleteRow(table.rows.length - 1);
+		}
+	}
+	function tableTotal() {
+		var input = document.getElementsByClassName("fill-input-amount");
+		var sum = 0;
+		var next;
+		var triggered;
+		for (var i = 0; i < input.length; i++) {
+			next = parseFloat(input[i].value)
+			if (input[i].value == "") {
+				input[i].style.backgroundColor = "white";
+			} else if (isNaN(next)) {
+				input[i].style.backgroundColor = "pink";
+				triggered = true;
+			} else {
+				input[i].style.backgroundColor = "white";
+				input[i].value = next.toFixed(2);
+		    	sum += next;
+		    }
+		}
+		if (triggered) {
+			alert("One or more Amount values were not valid and are not reflected in the Total amount.");
+		}
+		var total = document.getElementById("total");
+		total.innerHTML = sum.toFixed(2);
 	}
 </script>
 {% endblock %}
