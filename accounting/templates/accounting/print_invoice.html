@@ -6,10 +6,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/accounting/invoice-styles.css' %}"/>
 {% endblock %}
 {% block content %}
-<a id="no-print" class="btn btn-primary" href="{% url 'accounting:contract_detail' contract=contract.pk business_unit=current_business_unit.pk %}">
+<a class="btn btn-primary" href="{% url 'accounting:contract_detail' contract=contract.pk business_unit=current_business_unit.pk %}">
 	<span class="fa fa-arrow-circle-left"> {{ contract.name }}</span>
 </a>
-<button id="no-print" class="btn btn-success" type="button" onClick="printInvoice()">Print Invoice</button>
+<button id="print-button" class="btn btn-success" type="button" onClick="printInvoice()">Print Invoice</button>
 
 
 <table width="100%">
@@ -18,15 +18,14 @@
 		<td style="font-size:4em; text-align:right; padding-right:2em" colspan="2">INVOICE</td>
 	</tr>
 	<tr>
-		<td><b>Institute for Next Generation IT Systems</b></td>
-	</tr>
-	<tr>
-		<td>900 Main Campus Drive</td>
+		<td rowspan="2"><b>Institute for Next Generation IT Systems</b><br>
+			900 Main Campus Drive<br>
+			Raleigh, NC 27606
+		</td>
 		<td style="text-align:right">INVOICE NO.</td>
-		<td style="padding-left:1em">{{ invoice.invoice_id }}</td>
+		<td style="padding-left:1em"><input value="{{ invoice.invoice_id }}"></td>
 	</tr>
 	<tr>
-		<td>Raleigh, NC 27606</td>
 		<td style="text-align:right">DATE</td>
 		<td style="padding-left:1em"><input value="{{ current_date }}"></td>
 	</tr>
@@ -46,15 +45,18 @@
 	</tr>
 	<tr>
 		<td></td>
-		<td colspan="2"><input type="text"></td>
+		<td colspan="2"><textarea style="height: 2em"></textarea></td>
 	</tr>
 </table>
 
 <hr>
 <div class="pull-right" style="padding-bottom: 1px">
-	<button id="no-print" class="btn small-button" style="background-color: lightblue" type="button" onClick="addRow()"><span class="fa fa-plus"></span></button>
-	<button id="no-print" class="btn small-button" style="background-color: pink" type="button" onClick="deleteRow()"><span class="fa fa-minus"></span></button>
-	<button id="no-print" class="btn small-button" type="button" onClick="tableTotal()"><span class="fa fa-refresh"></span></button>
+	<button class="btn small-button" style="background-color: lightblue" data-toggle="tooltip"
+		title="Add Row At Bottom" type="button" onClick="addRow()"><span class="fa fa-plus"></span></button>
+	<button class="btn small-button" style="background-color: pink" data-toggle="tooltip"
+		title="Delete Row From Bottom" type="button" onClick="deleteRow()"><span class="fa fa-minus"></span></button>
+	<button class="btn small-button" data-toggle="tooltip" title="Refresh Total"
+		type="button" onClick="tableTotal()"><span class="fa fa-refresh"></span></button>
 </div>
 <table id="invoiceTable" border="1px" width="100%">
 	<tr class="invoice-heading">
@@ -64,16 +66,13 @@
 	</tr>
 
 	<tr>
-		<td width="60%"><input class="fill-input" value="{{ contract.description }}"></td>
-		<td width="15%"><input class="fill-input" value="{{ contract.contract_id }}"></td>
-		<td width="25%"><input id="amount" class="fill-input-amount" value="{{ invoice.expected_amount }}"></td>
+		<td width="60%"><textarea class="fill-input">{{ contract.description }}</textarea></td>
+		<td width="15%"><textarea class="fill-input">{{ contract.contract_id }}</textarea></td>
+		<td width="25%"><textarea id="amount" class="fill-input-amount">{{ invoice.expected_amount }}</textarea></td>
 	</tr>
 </table>
 <div class="pull-right">
-	<strong>Total: $
-	<span id="total">
-		{{ invoice.expected_amount }}</strong>
-	</span>
+	<strong>Total: $<span id="total">{{ invoice.expected_amount }}</span></strong>
 </div>
 {% endblock %}
 
@@ -86,12 +85,12 @@
 		var table = document.getElementById("invoiceTable");
 		var row = table.insertRow();
 		var data1 = row.insertCell(0);
-		data1.innerHTML = '<input class="fill-input">';
+		data1.innerHTML = '<textarea class="fill-input"></textarea>';
 		var data2 = row.insertCell(1);
-		data2.innerHTML = '<input class="fill-input">';
+		data2.innerHTML = '<textarea class="fill-input"></textarea>';
 		var data3 = row.insertCell(2);
 		data3.style = "text-align: center";
-		data3.innerHTML = '<input class="fill-input-amount">';
+		data3.innerHTML = '<textarea class="fill-input-amount"></textarea>';
 	}
 	function deleteRow() {
 		var table = document.getElementById("invoiceTable");
@@ -101,9 +100,11 @@
 	}
 	function tableTotal() {
 		var input = document.getElementsByClassName("fill-input-amount");
+		var printButton = document.getElementById("print-button");
 		var sum = 0;
 		var next;
 		var triggered;
+		printButton.disabled = false;
 		for (var i = 0; i < input.length; i++) {
 			next = parseFloat(input[i].value)
 			if (input[i].value == "") {
@@ -119,9 +120,13 @@
 		}
 		if (triggered) {
 			alert("One or more Amount values were not valid and are not reflected in the Total amount.");
+			printButton.disabled = true;
 		}
 		var total = document.getElementById("total");
 		total.innerHTML = sum.toFixed(2);
 	}
+	$(function () {
+		$('[data-toggle="tooltip"]').tooltip()
+	})
 </script>
 {% endblock %}
