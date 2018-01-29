@@ -24,8 +24,6 @@
 	tr.invoice-heading th {
 		color: white !important;
 		background-color: #CD0000 !important;
-		/*-webkit-print-color-adjust: exact;*/
-		/*color: white !important;*/
 	}
 }
 textarea {
