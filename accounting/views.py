@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
@@ -201,6 +201,7 @@ class ContractCtxMixin(object):
             'invoice': invoice,
             'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
             'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+            'print_url': reverse('accounting:print_invoice', kwargs=self.invoice_url_kwargs(invoice)),
         }
 
     def contract_url_kwargs(self, contract):
@@ -744,6 +745,18 @@ class InvoiceUpdateView(InvoiceMixin, UpdateView):
             STATES.NEW: forms.NewInvoiceUpdateForm,
             STATES.ACTIVE: forms.ActiveInvoiceUpdateForm,
         }[self.current_contract.state]
+
+
+class InvoicePrintView(ViewerMixin, TemplateView):
+    template_name = 'accounting/print_invoice.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['contract'] = get_object_or_404(models.Contract, pk=self.kwargs['contract'])
+        context['invoice'] = get_object_or_404(models.Invoice, pk=self.kwargs['invoice'])
+        context['current_date'] = date.today()
+        return context
 
 
 class InvoiceDeleteView(InvoiceMixin, DeleteView):

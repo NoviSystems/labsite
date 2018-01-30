@@ -1,0 +1,130 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+
+{% block app-styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/accounting/invoice-styles.css' %}"/>
+{% endblock %}
+{% block content %}
+<a class="btn btn-primary" href="{% url 'accounting:contract_detail' contract=contract.pk business_unit=current_business_unit.pk %}">
+    <span class="fa fa-arrow-circle-left"> {{ contract.name }}</span>
+</a>
+<button id="print-button" class="btn btn-success" type="button" onClick="printInvoice()">Print Invoice</button>
+
+
+<table width="100%">
+    <tr>
+        <td width="50%"><img src="{% static 'NCSU_header.png' %}" alt="NCSU_header"></td>
+        <td class="header text-right pad-right" colspan="2">INVOICE</td>
+    </tr>
+    <tr>
+        <td rowspan="2"><b>Institute for Next Generation IT Systems</b><br>
+            900 Main Campus Drive<br>
+            Raleigh, NC 27606
+        </td>
+        <td class="text-right" nowrap>INVOICE NO.</td>
+        <td class="pad-left"><input value="{{ invoice.invoice_id }}"></td>
+    </tr>
+    <tr>
+        <td class="text-right">DATE</td>
+        <td class="pad-left"><input value="{{ current_date }}"></td>
+    </tr>
+    <tr height="100px">
+        <td class="pad-left" valign="bottom">TO</td>
+        <td class="text-right" valign="bottom">Remit To:</td>
+    </tr>
+    <tr>
+        <td class="recipient-box" rowspan="3">
+            <textarea placeholder="Recipient Information" cols="50" rows="5">{{ contract.customer }}</textarea>
+        </td>
+        <td></td>
+        <td class="textbox-align-top"><textarea placeholder="Remit Information" cols="50" rows="5"></textarea></td>
+    </tr>
+    <tr>
+        <td class="text-right">TERMS</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td colspan="2"><textarea class="narrow"></textarea></td>
+    </tr>
+</table>
+
+<hr>
+<div class="pull-right">
+    <button class="btn small-button blue-bg" data-toggle="tooltip"
+        title="Add Row At Bottom" type="button" onClick="addRow()"><span class="fa fa-plus"></span></button>
+    <button class="btn small-button pink-bg" data-toggle="tooltip"
+        title="Delete Row From Bottom" type="button" onClick="deleteRow()"><span class="fa fa-minus"></span></button>
+    <button class="btn small-button" data-toggle="tooltip" title="Refresh Total"
+        type="button" onClick="tableTotal()"><span class="fa fa-refresh"></span></button>
+</div>
+<table id="invoiceTable" border="1px" width="100%">
+    <tr class="invoice-heading">
+        <th width="60%">Item/Description</th>
+        <th width="15%">Contract No.</th>
+        <th width="25%" class="center">Amount</th>
+    </tr>
+
+    <tr>
+        <td width="60%"><textarea class="fill-input">{{ contract.description }}</textarea></td>
+        <td width="15%"><textarea class="fill-input">{{ contract.contract_id }}</textarea></td>
+        <td width="25%"><textarea class="fill-input-amount">{{ invoice.expected_amount }}</textarea></td>
+    </tr>
+</table>
+<div class="pull-right">
+    <strong>Total: $<span id="total">{{ invoice.expected_amount }}</span></strong>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function printInvoice() {
+        window.self.print();
+    }
+    function addRow() {
+        const table = document.getElementById("invoiceTable");
+        var row = table.insertRow(-1);
+        row.innerHTML = `
+            <td width="60%"><textarea class="fill-input"></textarea></td>
+            <td width="15%"><textarea class="fill-input"></textarea></td>
+            <td width="25%"><textarea class="fill-input-amount"></textarea></td>
+        `;
+    }
+    function deleteRow() {
+        const table = document.getElementById("invoiceTable");
+        if (table.rows.length > 1) {
+            table.deleteRow(-1);
+        }
+    }
+    function tableTotal() {
+        const input = document.getElementsByClassName("fill-input-amount");
+        const printButton = document.getElementById("print-button");
+        let sum = 0;
+        let next;
+        let triggered;
+        printButton.disabled = false;
+        for (let i = 0; i < input.length; i++) {
+            next = parseFloat(input[i].value)
+            if (input[i].value == "") {
+                input[i].style.backgroundColor = "white";
+            } else if (isNaN(next)) {
+                input[i].style.backgroundColor = "pink";
+                triggered = true;
+            } else {
+                input[i].style.backgroundColor = "white";
+                input[i].value = next.toFixed(2);
+                sum += next;
+            }
+        }
+        if (triggered) {
+            alert("One or more Amount values were not valid and are not reflected in the Total amount.");
+            printButton.disabled = true;
+        }
+        var total = document.getElementById("total");
+        total.innerHTML = sum.toFixed(2);
+    }
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
+{% endblock %}

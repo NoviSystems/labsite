@@ -49,4 +49,7 @@ urlpatterns = [
     url(r'^(?P<business_unit>\d+)/user_team_role/create/$', views.UserTeamRoleCreateView.as_view(), name='create_user_team_role'),
     url(r'^(?P<business_unit>\d+)/user_team_role/(?P<user_team_role>\d+)/update/$', views.UserTeamRoleUpdateView.as_view(), name='update_user_team_role'),
     url(r'^(?P<business_unit>\d+)/user_team_role/(?P<user_team_role>\d+)/delete/$', views.UserTeamRoleDeleteView.as_view(), name='delete_user_team_role'),
+
+    # Invoice Print Page
+    url(r'^(?P<business_unit>\d+)/contracts/(?P<contract>\d+)/invoice/(?P<invoice>\d+)/print/$', views.InvoicePrintView.as_view(), name='print_invoice'),
 ]
