@@ -1,54 +1,77 @@
 @media print {
-	button.btn, a.btn {
-		display: none;
-	}
-	textarea, input {
-		border: none;
-		overflow: hidden;
-		resize: none !important;
-	}
-	::-webkit-input-placeholder { /* WebKit browsers */
-	    color: transparent;
-	}
-	:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-	    color: transparent;
+    button.btn, a.btn {
+        display: none;
     }
-	::-moz-placeholder { /* Mozilla Firefox 19+ */
-	    color: transparent;
-	}
-	:-ms-input-placeholder { /* Internet Explorer 10+ */
-	    color: transparent;
-	}
-	tr.invoice-heading {
-	}
-	tr.invoice-heading th {
-		color: white !important;
-		background-color: #CD0000 !important;
-	}
+    textarea, input {
+        border: none;
+        overflow: hidden;
+        resize: none !important;
+    }
+    ::-webkit-input-placeholder {  /* WebKit browsers */
+        color: transparent;
+    }
+    tr.invoice-heading th {
+        color: white !important;
+        background-color: #CD0000 !important;
+    }
 }
 textarea {
-	resize: vertical;
+    resize: vertical;
 }
 th {
-	padding-left: 5px;
+    padding-left: 5px;
+}
+.center {
+    text-align: center;
+}
+.header {
+    font-size: 4em;
+}
+.pad-bottom {
+    padding-bottom: 1em;
+}
+.pad-right {
+    padding-right: 2em;
+}
+.pad-left{
+    padding-left: 1em;
+}
+.recipient-box {
+    padding-left: 3em;
+    vertical-align: top;
+}
+.textbox-align-top {
+    vertical-align: top;
+}
+.text-right {
+    text-align: right;
+}
+.narrow {
+    height: 2em;
+}
+.btn.small-button.blue-bg {
+    background-color: lightblue;
+}
+.btn.small-button.pink-bg {
+    background-color: pink;
 }
 .invoice-heading {
-	background-color: #CD0000;
-	color: white;
+    background-color: #CD0000;
+    color: white;
 }
 .fill-input {
-	display: block;
-	width: 100%;
-	height: 2em;
+    display: block;
+    width: 100%;
+    height: 2em;
 }
 .fill-input-amount {
-	display: block;
-	width: 100%;
-	height: 2em;
-	text-align: right;
+    display: block;
+    width: 100%;
+    height: 2em;
+    text-align: right;
 }
 .small-button {
-	height: 25px;
-	width: 25px;
-	padding: 0px;
+    height: 25px;
+    width: 25px;
+    padding: 0px;
 }

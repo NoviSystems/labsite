@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
@@ -753,8 +753,8 @@ class InvoicePrintView(ViewerMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['contract'] = models.Contract.objects.filter(pk=self.kwargs['contract']).first()
-        context['invoice'] = models.Invoice.objects.filter(pk=self.kwargs['invoice']).first()
+        context['contract'] = get_object_or_404(models.Contract, pk=self.kwargs['contract'])
+        context['invoice'] = get_object_or_404(models.Invoice, pk=self.kwargs['invoice'])
         context['current_date'] = date.today()
         return context
 
