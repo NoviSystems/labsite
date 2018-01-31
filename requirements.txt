@@ -5,7 +5,7 @@ gunicorn
 psycopg2
 raven
 pytz
-git+git://github.com/ITNG/ng-utils.git
+git+git://github.com/ITNG/ng-utils.git#93d6787ecfb3aa76cd522d995aca7970ffcad076
 # git+git://github.com/ITNG/foodapp.git
 # git+git://github.com/ITNG/worklog.git
 # git+git://github.com/ITNG/accounting.git
