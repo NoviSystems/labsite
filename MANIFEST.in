@@ -1,4 +1,0 @@
-include README.md
-include MANIFEST.in
-recursive-include accounting/static *
-recursive-include accounting/templates *
