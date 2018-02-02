@@ -2,19 +2,12 @@
 *.pyc
 *.db
 *.swp
-runserver
-runtests
-django-admin
 local_settings.py
 secrets.py
 *.sqlite3
 .apps/
 .env/
 .vagrant/
-
-foodapp
-worklog
-accounting
 
 project/settings.py
 
