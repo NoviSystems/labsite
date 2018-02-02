@@ -1,0 +1,83 @@
+{% extends 'foodapp/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        {% if title %}
+        <h3 class="panel-title">{{ title }}</h3>
+        {% else %}
+        <h3 class="panel-title">{{ user }}'s Stripe Card ID's</h3>
+        {% endif %}
+    </div>
+
+    <table class="table table-striped">
+    <tbody>
+    {% if customer_exists %}
+    {% if cards %}
+        {% for id, last4, primary in cards %}
+            <tr>
+                <td style="font-size: 1.5em;">
+                {% if primary %} PRIMARY: {% endif %}•••• {{ last4 }}
+             <form method="POST" action={% url 'foodapp:stripe_card_delete' id %} id="delete-form" style="margin-top: -30px;">
+            	    {% csrf_token %}
+		    	    <button class="btn btn-danger" style="float: right; margin-left: 5px;">
+                		<i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i>
+                	</button>
+                </form>
+            {% if not primary %}
+            <form method="POST" action={% url 'foodapp:stripe_card_update' id %} id="delete-form" style="margin-top: -30px;">
+            	{% csrf_token %}
+		    	<button class="btn btn-info" style="float: right;">
+                	Set Primary <i class="fa fa-level-up" title="SetPrimary" aria-hidden="true"></i>
+                </button>
+            </form>
+            {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% if error %}
+        <h4 class="errorlist">{{ error }}</h4>
+        {% endif %}
+        {% else %}
+            <tr>
+            <td>
+            <h4>No stripe cards associated with this account. Add one!</h4>
+            </td>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>
+                <div class="col-xs-12 col-centered" style="text-align: center;">
+                        <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                            Add Card
+                            <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                        </button>
+                        </a>
+                </div>
+            </td>
+        </tr>
+    {% else %}
+    <tr>
+        <td>
+            <h4>No Stripe Customer Associated with this account. Create one!</h4>
+        </td>
+    </tr>
+   <tr>
+        <td>
+            <div class="col-xs-12 col-centered" style="text-align: center;">
+                    <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                        Create Stripe Customer
+                        <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                    </button>
+                </a>
+            </div>
+        </td>
+    </tr>
+    {% endif %}
+    </tbody>
+    </table>
+    </div>
+
+{% endblock content %}

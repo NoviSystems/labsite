@@ -1,0 +1,148 @@
+{% extends 'foodapp/base.html' %}
+
+{% block content %}
+
+<!-- Create New Invoice -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        {% if title %}
+        <h3 class="panel-title" style="font-size: 2em">{{ title }}</h3>
+        {% else %}
+        <h3 class="panel-title" style="font-size: 2em">Uninvoiced Items</h3>
+        {% endif %}
+    </div>
+
+    <table class="table table-striped">
+        <tbody>
+        {% if customer_exists %}
+            {% if invoice_items %}
+                {% for item in invoice_items %}
+                    <tr>
+                        <td>
+                            <p>Purchased {{ item.quantity }} {{ item.description }} on {{ item.date }} for {{ item.amount_usd }}</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>
+                       <p style="font-size: 1.5em">{{ total_count }} items purchased, for a total of {{ total_cost }}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <form method="POST" id="invoice-form" action="{% url 'foodapp:stripe_invoices' %}">
+                            {% csrf_token %}
+                            <button class="btn btn-primary">Pay Up!</button>
+                        </form>
+                    </td>
+                </tr>
+
+                {% if error %}
+                <h4 class="errorlist">{{ error }}</h4>
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td>
+                        <h4>No unpaid orders this week!</h4>
+                    </td>
+                </tr>
+            {% endif %}
+        {% else %}
+        <tr>
+            <td>
+                <h4>No Stripe Customer Associated with this account. Create one!</h4>
+            </td>
+        </tr>
+       <tr>
+            <td>
+                <div class="col-xs-12 col-centered" style="text-align: center;">
+                        <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                            Create Stripe Customer
+                            <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                        </button>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- List Invoices -->
+<div class="panel panel-default" style="margin-top:35px;">
+    <div class="panel-heading">
+        {% if title %}
+            <h3 class="panel-title" style="font-size: 2em">{{ title }}</h3>
+        {% else %}
+            <h3 class="panel-title" style="font-size: 2em">Previous Invoices</h3>
+        {% endif %}
+    </div>
+
+   {% if customer_exists %}
+        {% if invoices %}
+            <div class="list-group" id="invoices">
+                {% if payment_error %}
+                    <div class="list-group-item">
+                    <h4 class='text-danger'>
+                        Warning: One of your recent invoice payments has failed, possibly due to incorrect or out of date card information, or low balance.  Please check this information and consult the lab administrator.
+                    </h4>
+                    </div>
+                {% endif %}
+                {% for invoice in invoices %}
+                    <h4>
+                        <a class="list-group-item accordion-toggle" href="#{{ invoice.id }}" data-toggle="collapse">{{ invoice.date|date:"l, M d Y" }}:&nbsp;&nbsp;<strong>{{ invoice.total_usd }}</strong> - <strong>{% if invoice.paid %}<span class='text-success'>Paid</span>{% else %}<span class='text-danger'>Unpaid</span>{% endif %}</strong></a>
+                    </h4>
+
+                    <ul class="list-group collapse out" id="{{ invoice.id }}">
+                        {% for item in invoice.items %}
+                            <li class="list-group-item">
+                                <p>{{ item.quantity }} {{ item.description }}{% if quantity > 1 %}s{% endif %} on {{ item.date }} costing {{ item.amount_usd }}</p>
+                            </li>
+                        {% endfor %}
+                        </li>
+                    </ul>
+                {% endfor %}
+            </div>
+        {% if error %}
+        <h4 class="errorlist">{{ error }}</h4>
+        {% endif %}
+
+    {% else %}
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <td>
+                        <h4>No previous invoices!</h4>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% else %}
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <td>
+                        <h4>No Stripe Customer Associated with this account. Create one!</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="col-xs-12 col-centered" style="text-align: center;">
+                            <a href={% url 'foodapp:stripe_card_create' %} ><button class="btn btn-primary">
+                                Create Stripe Customer
+                                <i class="fa fa-plus-square" title="Add" style="float: center;" aria-hidden="true"></i>
+                                </button>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+</div>
+
+{% endblock content %}
