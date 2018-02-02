@@ -1,0 +1,18 @@
+{% extends "admin/change_list.html" %}
+
+
+{% block result_list %}
+    {{ block.super }}
+    {# This is a hack, but prevents duplicating the 'admin/actions.html' template #}
+    <script>
+    (function($) {
+        $(document).ready(function() {
+            $('.actions').append($(`
+                <span style="position: relative; margin-right: 2em; float: right;">
+                    <strong>Total Hours: {{ hours__sum }}</strong>
+                </span>`
+            ));
+        });
+    })(django.jQuery);
+    </script>
+{% endblock %}

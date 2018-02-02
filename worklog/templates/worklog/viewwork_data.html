@@ -1,0 +1,30 @@
+
+{% if items %}
+<table class="table table-bordered">
+    <thead>
+        <th class="col-xs-1">User</th>
+        <th class="col-xs-2">Date</th>
+        <th class="col-xs-2">Job</th>
+        <th class="col-xs-1">Hours</th>
+        <th class="col-xs-1">Repo</th>
+        <th class="col-xs-1">Issue</th>
+        <th class="col-xs-4">Text</th>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.user }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.hours }}</td>
+            <td>{{ item.job }}</td>
+            <td>{{ item.repo }}</td>
+            <td>{{ item.issue }}</td>
+            <td>{{ item.text }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+<p>No work accomplished... this is terrible!</p>
+{% endif %}
