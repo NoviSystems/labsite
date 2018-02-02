@@ -1,0 +1,15 @@
+<div class="row text-center">
+    <div class="col-md-3 col-sm-12">
+        <div class="btn-group btn-group-sm" role="group" aria-label="...">
+            <a class="btn btn-sm btn-default" href="{{ prev_url }}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+            <a class="btn btn-sm btn-default" href="{{ current_url }}">Current</a>
+            <a class="btn btn-sm btn-default" href="{{ next_url }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <h4 class="">
+            FY {{ fiscal_year }}
+            <small>({{ fiscal_start|date:"DATE_FORMAT" }} - {{ fiscal_end|date:"DATE_FORMAT" }})</small>
+        </h4>
+    </div>
+</div>

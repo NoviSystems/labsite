@@ -1,0 +1,12 @@
+
+<div class="well nav-well">
+<ul class="nav nav-tabs">
+    <li {% if active == "dashboard" %}class="active"{% endif %}><a href={% url 'accounting:dashboard' business_unit=current_business_unit.pk %}>Dashboard</a></li>
+    <li {% if active == "contracts" %}class="active"{% endif %}><a href={% url 'accounting:contracts' business_unit=current_business_unit.pk %}>Contracts</a></li>
+    <li {% if active == "prospects" %}class="active"{% endif %}><a href={% url 'accounting:prospects' business_unit=current_business_unit.pk %}>Prospects</a></li>
+    <li {% if active == "reconcile" %}class="active"{% endif %}><a href={% url 'accounting:reconcile' business_unit=current_business_unit.pk %}>Monthly Reconcile</a></li>
+    {% if is_manager %}
+        <li {% if active == "settings" %}class="active"{% endif %}><a href={% url 'accounting:business_unit_settings' business_unit=current_business_unit.pk %}>Settings</a></li>
+    {% endif %}
+</ul>
+</div>

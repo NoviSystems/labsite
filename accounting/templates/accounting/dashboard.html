@@ -1,0 +1,190 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+{% load accounting_filters %}
+
+{% block styles %}
+<style>
+.clear-gutter-l {
+    padding-left: 0;
+}
+.clear-gutter-r {
+    padding-right: 0;
+}
+.clean {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+.cell-popover {
+    position: relative;
+}
+.cell-popover:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    display: block;
+    border-left: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-top: 6px solid;
+}
+.popover {
+    white-space: nowrap;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% include "accounting/nav_tabs.html" with active="dashboard" %}
+
+{% include "accounting/year_picker.html" with active="dashboard" %}
+
+<div clas="row">
+    <div id="chart" class="col-xs-12" height="400"></div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <br><br>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-2 clear-gutter-r">
+        <table class="table table-responsive">
+            <thead>
+                <tr><th>&nbsp;</th></tr>
+                <tr><th colspan="2" class="text-right">Date</th></tr>
+            </thead>
+            {% for title in balances %}
+            {% if forloop.last %}<tbody>{% endif %}
+            <tr>
+                <th rowspan="2">{{ title }}</th>
+                <th>Expected</th>
+            </tr>
+            <tr>
+                <th>Actual</th>
+            </tr>
+            {% if forloop.last %}</tbody>{% endif %}
+            {% endfor %}
+        </table>
+    </div>
+    <div class="col-xs-10 clear-gutter-l">
+        <table class="table table-responsive">
+            <thead>
+                {% regroup fiscal_months by year as years %}
+                <tr>
+                    {% for year in years %}
+                    <th class="text-right">{{ year.grouper }}</th>
+                    <th colspan="{{ year.list|length|add:-1 }}"></th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for month in fiscal_months %}
+                        <th class="col-xs-1 text-right{% if month == billing_month %} billing-month{% endif %}">{{ month.get_month_display }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for data in balances.values %}
+                {% if forloop.first %}
+                    {% include "accounting/invoice_popup.html" %}
+                {% else %}
+                {% if forloop.last %}
+            </tbody>
+            <tbody>
+                {% endif %}
+                <tr class="text-right">
+                    {% for balance in data %}
+                        <td>{{ balance.expected_amount|currency:False|default:'---' }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="text-right">
+                    {% for balance in data %}
+                        <td>{{ balance.actual_amount|currency:False|default:'---' }}</td>
+                    {% endfor %}
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{% static 'js/vendor/highcharts.js' %}"></script>
+<script src="{% static 'js/vendor/highcharts-grouped.js' %}"></script>
+<script>
+{% regroup fiscal_months by year as years %}
+const categories = [{% for year in years %}
+    {
+        name: '{{ year.grouper }}',
+        categories: [{% for month in year.list %}
+        '{{ month.get_month_display }}', {% endfor %}
+        ],
+    },{% endfor %}
+];
+
+Highcharts.setOptions({
+    lang: {thousandsSep: ","},
+});
+
+Highcharts.chart('chart', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Cash Balance by Month'
+    },
+    xAxis: {
+        categories: categories
+    },
+    credits: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '${y:.0f}',
+            },
+            tooltip: {
+                valueDecimals: 0,
+                valuePrefix: '$',
+            },
+        },
+    },
+    series: [{
+        name: 'Expected',
+        data: {{ expected_totals | safe }},
+    }, {
+        name: 'Actual',
+        data: {{ actual_totals | safe }},
+    }]
+});
+</script>
+
+<script>
+$('[class="cell-popover"]').each(function() {
+    var $elem = $(this);
+    $elem.popover({
+        content: function() {return $(this).find('.popoverContent').html()},
+        title: "Invoice Details",
+        placement: 'top',
+        trigger: 'hover',
+        html: true,
+        container: $elem,
+        delay: {'show': 0, 'hide': 50},
+    });
+});
+</script>
+{% endblock %}

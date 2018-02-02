@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Accounting{% endblock %}
+
+{% load staticfiles %}
+
+{% block app-styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/accounting/styles.css' %}"/>
+{% endblock %}
+
+{% block nav-links-left %}
+{% if business_units %}
+    <ul class="nav navbar-nav">
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                {% if current_business_unit %}
+                {{ current_business_unit.name }}
+                {% else %}Select Business Unit{% endif %}
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                {% for business_unit in business_units %}
+                    {% if business_unit.pk != current_business_unit.pk %}
+                        <li><a href="{% url 'accounting:dashboard' business_unit=business_unit.pk %}">{{ business_unit.name }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if business_units|length == 1 and not current_business_unit.name %}<li class="divider"></li>
+                {% elif business_units|length > 1 %}<li class="divider"></li>{% endif %}
+                <li><a href="{% url 'accounting:create_business_unit' %}">Create Business Unit</a></li>
+            </ul>
+        </li>
+    </ul>
+{% endif %}
+{% endblock %}
+
+{% block app-scripts %}
+    {% include "accounting/action_modal.html" %}
+    <script src="{% static 'js/accounting/modal-populate.js' %}"></script>
+{% endblock %}

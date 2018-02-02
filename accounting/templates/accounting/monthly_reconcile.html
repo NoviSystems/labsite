@@ -1,0 +1,157 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+
+{% block styles %}
+{{ form.media.css }}
+<style>
+/*tr.billing-month {
+    border-top: 4px solid #2e6da4;
+}*/
+
+th.year-header {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+th.year-header div {
+    transform: rotate(270deg);
+}
+
+.btn-sq {
+    width: 19px;
+    height: 19px;
+    padding: 0;
+}
+
+.has-error .errors {
+    line-height: 1.42857143;
+    float: left;
+
+    /* text-danger */
+    color: #a94442;
+}
+</style>
+{% endblock styles %}
+
+{% block content %}
+{% include "accounting/nav_tabs.html" with active="reconcile" %}
+{% include "accounting/year_picker.html" with active="reconcile" %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="row" id="reconcile">
+        <div class="col-xs-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th colspan="2" rowspan="2" class="col-xs-2 year-header">
+                            FY {{ fiscal_year }}
+                        </th>
+
+                        {% for header in form.headers %}
+                        <th colspan="2" class="text-center">{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+
+                    <tr>
+                        {% for header in form.headers %}
+                        <th class="text-center col-xs-1">Expected</th>
+                        <th class="text-center col-xs-1">Actual</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+
+                {% regroup form.month_data by month.year as years %}
+                {% for year in years %}
+                <tbody>
+                    <tr>
+                        <th rowspan="{{ year.list|length|add:1 }}" class="year-header"><div>{{ year.grouper }}</div></th>
+                    </tr>
+
+                    {% for month_data in year.list %}
+                    {% with month=month_data.month fields=month_data.fields %}
+                    <tr class="no-wrap text-right{% if month == form.billing_month %} billing-month{% endif %}">
+                        {% if month == form.billing_month %}
+                        <th class="info">
+                            {{ month.get_month_display }}
+                            <button class="btn btn-xs btn-sq btn-primary pull-right"
+                                    type="submit"
+                                    name="reconcile"
+                                    :disabled="reconcileDisabled">R
+                            </button>
+                        </th>
+                        {% else %}
+                        <th>{{ month.get_month_display }}</th>
+                        {% endif %}
+
+                        {# field may either be a form field or a formatted value #}
+                        {% for field in fields %}
+                        <td {% if field.errors %}class="has-error"{% endif %}>
+                            {% if field.errors %}
+                            <i class="fa fa-fw fa-warning errors pull-left"
+                               data-toggle="popover"
+                               data-placement="top"
+                               data-content="{% for error in field.errors %}{{ error }}<br>{% endfor %}">
+                            </i>
+                            {% endif %}
+                            {{ field }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endwith %}
+                    {% endfor %}
+                </tbody>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary pull-right">Save Changes</button>
+</form>
+
+<script src="{% static 'js/vendor/vue.js' %}"></script>
+<script src="{% static 'js/accounting/utils.js' %}"></script>
+
+{{ form.media.js }}
+
+<script>
+new Vue({
+    el: '#reconcile',
+    components: {
+        // imported via form media
+        'balance-input': BalanceInput,
+    },
+
+    data: {
+        reconcileDisabled: false,
+    },
+
+    mounted() {
+        const today = new Date();
+        const prefix = '{{ billing_prefix }}';
+        const [year, month] = prefix.split('_');
+
+        for (const child of this.$children) {
+            if (child.name.startsWith(prefix) && child.initial === '') {
+                this.reconcileDisabled = true;
+                break;
+            }
+        }
+
+        // only enable reconcile once the billing month has passed.
+        if ((Number(year) >= today.getFullYear())
+         && (Number(month) >= (today.getMonth() + 1) ))
+            this.reconcileDisabled = true;
+    },
+});
+
+
+$(function popovers() {
+    $('[data-toggle="popover"]').popover({
+        trigger: "hover",
+        html: true,
+    });
+})
+</script>
+{% endblock %}

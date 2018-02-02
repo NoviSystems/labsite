@@ -1,0 +1,32 @@
+{% extends "accounting/base.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/accounting/settings.css' %}"/>
+
+    {% include "accounting/nav_tabs.html" with active="settings" %}
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{ current_business_unit }} Settings</h3>
+                    </div>
+                    {% block settings_nav %}
+                    {% endblock %}
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                {% block settings_content %}
+
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "accounting/base.html" %}
+
+
+{% block styles %}
+<style>
+.panel-title .lead {
+    display: inline-block;
+
+    /* remove bottom margin from lead text */
+    margin-bottom: 10px;
+}
+
+.panel-title .list-inline {
+    display: inline-block;
+}
+
+.btn-small{
+    width:80px;
+    height:30px;
+    text-align: center;
+    line-height: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "accounting/nav_tabs.html" with active="contracts" %}
+
+{% if is_manager %}
+<div class="page-header">
+    <a class="btn btn-primary" href="{% url 'accounting:create_contract' business_unit=current_business_unit.pk %}">
+        New Contract <i class="fa fa-fw fa-plus"></i>
+    </a>
+</div>
+{% endif %}
+
+
+<!-- New Contracts -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">New Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for contract_ctx in new_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx%}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Active Contracts -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Active Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for contract_ctx in active_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Completed Contracts -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Completed Contracts</h3>
+    </div>
+    <ul class="list-group">
+        {% for contract_ctx in completed_contracts %}
+        <li class="list-group-item">
+            {% include 'accounting/contract_brief.html' with contract_ctx=contract_ctx %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center"><samp>&dash;*&dash;</samp></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- No contracts-->
+{% if not has_contracts %}
+<div class="panel panel-default">
+    <div class="panel-body text-center">
+        <h4>No contracts for this business unit.</h4>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+

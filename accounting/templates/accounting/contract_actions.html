@@ -1,0 +1,43 @@
+
+{% with contract=contract_ctx.contract %}
+
+{% if is_manager %}
+<!-- New controls-->
+{% if contract.state == contract.STATES.NEW %}
+<form action="" method="post">
+    {% csrf_token %}
+    <a class="btn btn-{{ size|default:'sm' }} btn-primary" name="activate" value="{{ contract.pk }}"
+     data-toggle="modal" data-target="#action-modal"
+     data-title="Confirm Activation" data-body="Are you sure you want to activate <b>{{ contract.contract_id }}: {{ contract.name }}</b>?"
+     data-btn-class="btn-primary">
+        Activate
+    </a>
+
+    <div class="btn-group btn-group-{{ size|default:'sm' }}">
+        <a class="btn btn-{{ size|default:'sm' }} btn-primary" href="{{ contract_ctx.update_url }}">Update Contract</a>
+        <a class="btn btn-{{ size|default:'sm' }} btn-danger" name="delete" value="{{ contract.pk }}"
+         data-toggle="modal" data-target="#action-modal"
+         data-title="Confirm Deletion" data-body="Are you sure you want to delete <b>{{ contract.contract_id }}: {{ contract.name }}</b>?"
+         data-btn-class="btn-danger">
+            <i class="fa fa-trash"></i>
+        </a>
+    </div>
+</form>
+{% endif %}
+
+<!-- Active controls-->
+{% if contract.state == contract.STATES.ACTIVE %}
+<form action="" method="post">
+    {% csrf_token %}
+    <a class="btn btn-{{ size|default:'sm' }} btn-primary" name="complete" value="{{ contract.pk }}"
+     data-toggle="modal" data-target="#action-modal"
+     data-title="Confirm Completion" data-body="Are you sure you want to mark <b>{{ contract.contract_id }}: {{ contract.name }}</b> as complete?"
+     data-btn-class="btn-primary">
+        Complete
+    </a>
+</form>
+{% endif %}
+
+{% endif %}
+
+{% endwith %}

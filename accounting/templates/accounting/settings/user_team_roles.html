@@ -1,0 +1,59 @@
+{% extends "accounting/settings.html" %}
+
+{% load staticfiles %}
+
+{% block settings_nav %}
+    {% include "accounting/settings/settings_nav.html" with active="user_team_roles" %}
+{% endblock %}
+
+{% block settings_content %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">User Team Role</h3>
+    </div>
+    <div class="panel-body">
+        <a class="btn btn-primary" href={% url 'accounting:create_user_team_role' business_unit=current_business_unit.pk %}>Create New User Team Role</a>
+
+        <h3>Managers</h3>
+        <hr>
+        <ul class="list-group">
+        {% for manager in managers %}
+            <li class="list-group-item model-display">
+                <form action="{% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}" method="post">
+                    {% csrf_token %}
+                    {{ manager.user.username }} -
+                    <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=manager.pk %}>Update</a> |
+                    <a data-toggle="modal" data-target="#action-modal"
+                       data-title="Remove manager"
+                       data-body="Are you sure you want to remove <b>{{ manager.user.username }}</b> as a manager from <b>{{ current_business_unit }}</b>?"
+                       data-btn-class="btn-danger">
+                        Delete
+                    </a>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h3>Viewers</h3>
+        <hr>
+        <ul class="list-group">
+        {% for viewer in viewers %}
+            <li class="list-group-item model-display">
+                <form action="{% url 'accounting:delete_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}" method="post">
+                    {% csrf_token %}
+                    {{ viewer.user.username }} -
+                    <a href={% url 'accounting:update_user_team_role' business_unit=current_business_unit.pk user_team_role=viewer.pk %}>Update</a> |
+                    <a data-toggle="modal" data-target="#action-modal"
+                       data-title="Remove viewer"
+                       data-body="Are you sure you want to remove <b>{{ manager.user.username }}</b> as a viewer from <b>{{ current_business_unit }}</b>?"
+                       data-btn-class="btn-danger">
+                        Delete
+                    </a>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
