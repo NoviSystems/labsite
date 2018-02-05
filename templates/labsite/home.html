@@ -6,7 +6,22 @@
 
 <style>
 p {
-    font-size:25px;
+    font-size: 25px;
+}
+.fa.card {
+    font-size: 15em;
+}
+.card-success {
+    color: #5cb85c;
+}
+.card-danger {
+    color: #d9534f;
+}
+.card-warning {
+    color: #f0ad4e;
+}
+.fa-beer {
+    margin-right: 30px;
 }
 </style>
 
@@ -16,19 +31,9 @@ p {
     <div class="row">
      {% for apps in labsite_apps %}
           <div class="col-md-4">
-            <a class='btn btn-default btn-block well' href='{{ apps.url }}'
-                {% if apps.new_tab == 'true' %}target="_blank"{% endif %}>
-                <i 
-                    class="fa {{ apps.font_image }}"
-                    style="font-size:15em; 
-                    {% if apps.margin > 0 %}
-                        margin-right: {{apps.margin}}px;
-                    {% endif %}
-                    color: {{ apps.color }};">
-                </i>
-                <p>
-                    {{ apps.display_name }}
-                </p>
+            <a class="btn btn-default btn-block well" href="{{ apps.url }}">
+                <i class="fa {{ apps.icon }} card card-{{ apps.style }}"></i>
+                <p>{{ apps.display_name }}</p>
             </a>
         </div>
     {% endfor %}

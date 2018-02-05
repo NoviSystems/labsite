@@ -39,21 +39,18 @@
                         <span class="icon-bar"></span>
                     </button>
                     {% if current_app %}
-                        {% for app in labsite_apps %}
-                                {% if current_app == app.app_name %}
-                                    <a class="navbar-brand" href="{{ app.url }}">
-                                        <span class="label" style="background-color:{{ app.color }}">
-                                            {{ app.display_name }} <i class="fa {{ app.font_image }} "></i>
-                                        </span>
-                                    </a>
-                                {% endif %}
-                        {% endfor %}
+                    <a class="navbar-brand" href="{{ current_app.url }}">
+                        <span class="label label-{{ current_app.style }}">
+                            {{ current_app.display_name }}
+                            <i class="fa fa-fw {{ current_app.icon }} "></i>
+                        </span>
+                    </a>
                     {% else %}
-                        <a class="navbar-brand" href="/">
-                            <span class="label label-primary">
-                                Labsite <i class="fa fa-cloud"></i>
-                            </span>
-                        </a>
+                    <a class="navbar-brand" href="/">
+                        <span class="label label-primary">
+                            Labsite <i class="fa fa-fw fa-cloud"></i>
+                        </span>
+                    </a>
                     {% endif %}
                 </div>
 
@@ -75,17 +72,15 @@
                                     <li><a href="{% url 'password_change' %}">Change Password</a></li>
                                 </ul>
                             </li>
-                            {% block page-links %}
-                                {% for app in labsite_apps %}
-                                    {% if current_app != app.app_name %}
-                                        <li>
-                                            <a href="{{ app.url }}">
-                                                <span class="label" style="background-color:{{ app.color }}">{{ app.display_name }}</span>
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endblock %}
+                            {% for app in labsite_apps %}
+                                {% if current_app.app_name != app.app_name %}
+                                <li>
+                                    <a href="{{ app.url }}">
+                                        <span class="label label-{{ app.style }}">{{ app.display_name }}</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
                             <li>
                                 <a href="{% url 'logout' %}"><i class="fa fa-sign-out"></i></a>
                             </li>
