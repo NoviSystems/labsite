@@ -24,7 +24,7 @@ urlpatterns = [
     url(___password_reset_confirm,      views.PasswordResetConfirmView.as_view(),   name='password_reset_confirm'),
     url(r'^reset/done/$',               views.PasswordResetCompleteView.as_view(),  name='password_reset_complete'),
 
-    url(r'^accounts/', include('itng.registration.backends.invite.urls.activation')),
+    url(r'^accounts/', include('registration_invite.urls.activation')),
 
     # App urls
     url(r'^lunch/', include('foodapp.urls')),

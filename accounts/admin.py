@@ -1,12 +1,10 @@
-
 from django.contrib import admin
 from django.contrib.auth import models
-from django.contrib.auth.admin import UserAdmin
 
-from itng.registration.backends.invite.admin import UserInvitationAdmin
+from registration_invite.admin import UserInvitationAdmin
 
 
-class InviteUserAdmin(UserAdmin, UserInvitationAdmin):
+class InviteUserAdmin(UserInvitationAdmin):
     pass
 
 
