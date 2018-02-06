@@ -43,13 +43,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.forms',
+    'template_forms',
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'rangefilter',
     'accounts',
     'itng.common',
     'itng.registration.backends.invite',
-    'itng.registration.templates',
     'worklog',
     'foodapp',
     'accounting',
@@ -121,13 +122,14 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-                'itng.registration.templates.context_processors.auth_base',
                 'itng.common.context_processors.debug',
                 'project.context_processors.navbar_context',
             ],
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 
 # Messages - use tags that are compatible w/ both django's admin and bootstrap alerts

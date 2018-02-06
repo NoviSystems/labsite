@@ -1,19 +1,29 @@
-from django.contrib.auth.views import login as auth_login, logout as auth_logout
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from project.views import HomepageView
+from project import views
 
+
+___password_reset_confirm = r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$'
 
 urlpatterns = [
-    url(r'^$', HomepageView.as_view()),
+    url(r'^$', views.HomepageView.as_view()),
 
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^accounts/login/$', auth_login, name='login'),
-    url(r'^accounts/logout/$', auth_logout, {'next_page': '/accounts/login'}, name='logout'),
-    url(r'^accounts/', include('itng.registration.auth_urls')),
+    # Auth urls
+    url(r'^login/$',                    views.LoginView.as_view(),                  name='login'),
+    url(r'^logout/$',                   views.LogoutView.as_view(),                 name='logout'),
+
+    url(r'^password_change/$',          views.PasswordChangeView.as_view(),         name='password_change'),
+    url(r'^password_change/done/$',     views.PasswordChangeDoneView.as_view(),     name='password_change_done'),
+
+    url(r'^password_reset/$',           views.PasswordResetView.as_view(),          name='password_reset'),
+    url(r'^password_reset/done/$',      views.PasswordResetDoneView.as_view(),      name='password_reset_done'),
+    url(___password_reset_confirm,      views.PasswordResetConfirmView.as_view(),   name='password_reset_confirm'),
+    url(r'^reset/done/$',               views.PasswordResetCompleteView.as_view(),  name='password_reset_complete'),
+
     url(r'^accounts/', include('itng.registration.backends.invite.urls.activation')),
 
     # App urls
