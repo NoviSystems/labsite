@@ -50,7 +50,6 @@ INSTALLED_APPS = (
     'registration',
     'registration_invite',
     'rangefilter',
-    'accounts',
     'worklog',
     'foodapp',
     'accounting',

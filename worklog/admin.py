@@ -16,8 +16,6 @@ from django.utils.translation import ugettext_lazy as _
 from rangefilter.filter import DateRangeFilter
 
 from worklog.models import WorkItem, Job, BillingSchedule, Funding, GithubAlias, Employee, Holiday, WorkPeriod
-from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin
 
 
 class RelatedFieldListFilter(admin.RelatedFieldListFilter):
@@ -42,17 +40,6 @@ class DefaultYesFilter(SimpleListFilter):
                 }, []),
                 'display': title,
             }
-
-
-class UserIsActiveFilter(DefaultYesFilter):
-    title = _('active status')
-    parameter_name = 'active'
-
-    def queryset(self, request, queryset):
-        if self.value() == 'all':
-            return queryset.all()
-        # Defaults to show Active Users when all query strings not equal to 'No' or 'All' are passed
-        return queryset.filter(is_active=(self.value() != 'no'))
 
 
 class OpenJobsFilter(DefaultYesFilter):
@@ -239,11 +226,6 @@ class FundingInline(admin.StackedInline):
     model = Funding
 
 
-class CustomUserAdmin(UserAdmin):
-    list_display = UserAdmin.list_display + ('is_active', )
-    list_filter = ('is_staff', 'is_superuser', UserIsActiveFilter, 'groups')
-
-
 class JobAdmin(admin.ModelAdmin):
     list_display = ('name', 'open_date', 'close_date', 'is_open', 'invoiceable')
     list_filter = (OpenJobsFilter,)
@@ -277,8 +259,6 @@ class HolidayAdmin(admin.ModelAdmin):
 admin.site.register(WorkItem, WorkItemAdmin)
 admin.site.register(Job, JobAdmin)
 admin.site.register(GithubAlias, GithubAliasAdmin)
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
 
 admin.site.register(Employee)
 admin.site.register(WorkPeriod, WorkPeriodAdmin)

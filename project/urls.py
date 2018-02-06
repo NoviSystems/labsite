@@ -9,7 +9,7 @@ ___password_reset_confirm = r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A
 urlpatterns = [
     url(r'^$', views.HomepageView.as_view()),
 
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
     # Auth urls
