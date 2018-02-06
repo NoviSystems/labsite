@@ -9,7 +9,8 @@ from django.db.models import Q, Value as V, Sum
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
-from itng.common.utils import choices
+
+from project.utils import choices
 
 from accounting.utils import Month, get_or_none
 
