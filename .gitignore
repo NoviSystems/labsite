@@ -1,17 +1,43 @@
+# User files
 .DS_Store
-*.pyc
-*.db
 *.swp
-local_settings.py
-secrets.py
-*.sqlite3
-.apps/
-.env/
+
+# Application
 .vagrant/
+bundles/
+*.sqlite3
 
-project/settings.py
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-deploy/project_backup/
-deploy/commit_and_push.sh
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
 
-lab-prod_data.bu
+# Translations
+*.mo
+*.pot
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
+.venv/
+.env/
+venv/
+env/
