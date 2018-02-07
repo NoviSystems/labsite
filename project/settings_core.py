@@ -121,7 +121,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-                'project.context_processors.navbar_context',
+                'project.utils.context_processors.navbar_context',
             ],
         },
     },
