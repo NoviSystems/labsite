@@ -35,6 +35,7 @@ env = Env(
     DEBUG=(bool, False),
     SECRET_KEY=str,
     HOST_NAME=str,
+    BROKER_URL=str,
 
     WORKLOG_SEND_REMINDERS=bool,
     GITHUB_USER=str,
