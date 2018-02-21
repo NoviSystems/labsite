@@ -5,6 +5,11 @@
 .gold {
     color: #f4c542;
 }
+.panel-heading abbr {
+    text-decoration: none;
+    border-bottom: none;
+    cursor: text;
+}
 </style>
 
 <div class="container-fluid">
@@ -12,10 +17,10 @@
         <div class="col-xs-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title text-center">Rookie: Employed after {{ rookie_start }}</h3>
+                    <h3 class="panel-title text-center"><abbr title="Employed after {{ rookie_start }}">Rookie of the Year</abbr></h3>
                 </div>
                 <div class="panel-body text-center">
-                    <h4>MVP: <i class="glyphicon glyphicon-star gold gold"></i> {{ rookie_mvp }} <i class="glyphicon glyphicon-star gold gold"></i></h4>
+                    <h4>MVP: <i class="glyphicon glyphicon-star gold"></i> {{ rookie_mvp }} <i class="glyphicon glyphicon-star gold"></i></h4>
                 </div>
 
                 <table class="table table-striped text-center">
