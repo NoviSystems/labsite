@@ -4,6 +4,8 @@
 {% block content %}
 <!-- Stripe.js -->
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<!-- Cleave.js -->
+<script type="text/javascript" src="{% static 'js/foodapp/cleave.min.js' %}"></script>
 
 <script type="text/javascript">
 
@@ -35,42 +37,6 @@
         return false;
       });
     });
-
-    // Function for formatting card number during input
-    var formatCardNumber = function(e) {
-      // Define a variable for getting the pressed input key
-      let keyPressed;
-      if (window.event) {
-        keyPressed = e.keyCode; // IE
-      } else if (e.which) {
-        keyPressed = e.which; // Netscape/Firefox/Oracle
-      }
-      // Card number as typed so far, with spaces taken out
-      let cardNumber = document.getElementById("card-number").value.toString().replace(/\s+/g, '');
-      // Don't allow input to exceed 16 characters (max card number size)
-      if (cardNumber.length > 16) {
-        cardNumber = cardNumber.substring(0, 16);
-      }
-      // Set up formatted card number to begin with first character of card number or space if no
-      // number has been fully deleted from field before this function call
-      let formattedNumber = cardNumber[0] !== undefined ? cardNumber[0] : "";
-
-      // Iterate through original number, adding spaces every 4 characters and deleting spaces if they are
-      // trailing at end of input
-      for (let i = 1; i < cardNumber.length; i++) {
-        formattedNumber += cardNumber[i];
-        if (i === 3 || i === 7 || i === 11) {
-          if (keyPressed === 8 && i === cardNumber.length - 1) {
-            // Dont add space to string
-          } else {
-          formattedNumber += " ";
-          }
-        }
-      }
-      // Overwrite pre-existing card number in input field
-      document.getElementById("card-number").value = formattedNumber;
-    };
-
 </script>
 
 <div class="container">
@@ -93,7 +59,7 @@
             <div class="panel-body">
               <h4>{{ user }}</h4>
               <div class="input-group" style="margin-bottom: 5px;">
-                <input id="card-number" type="text" class="form-control" onkeyup="formatCardNumber(event)" placeholder="Credit Card Number" size="19" maxlength="19"
+                <input id="card-number" type="text" class="form-control" placeholder="Credit Card Number" size="19" maxlength="19"
                   data-stripe="number"/>
                 <span class="input-group-addon"><i class="fa fa-credit-card"></i></span>
               </div>
@@ -120,4 +86,9 @@
     </div>
 </div>
 
+<script>
+let cleave = new Cleave('#card-number', {
+  creditCard: true,
+});
+</script>
 {% endblock %}
