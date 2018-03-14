@@ -20,6 +20,9 @@
     -ms-transform: scale(1);
     transform: scale(1);
   }
+  .cards {
+    padding-top: 5px;
+  }
 </style>
 <!-- Stripe.js -->
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
@@ -93,19 +96,19 @@
                   <input type="text" class="form-control col-sm-2" placeholder="CVC" data-stripe="cvc">
                 </div>
               </div>
+              <div class="row cards">
+                <div class="col-xs-4"><span class="card"><img id="amex" src="{% static 'img/amex.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="discover" src="{% static 'img/discover.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="jcb" src="{% static 'img/jcb.png' %}"></span></div>
+              </div>
+              <div class="row cards">
+                <div class="col-xs-4"><span class="card"><img id="diners" src="{% static 'img/diners.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="mastercard" src="{% static 'img/mastercard.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="visa" src="{% static 'img/visa.png' %}"></span></div>
+              </div>
             </div>
           </div>
           <button class="col-xs-12 center-block btn btn-success btn-lg" type="submit">Add Card</button>
-        </div>
-        <div class="col-xs-4 credit-cards">
-          <span class="card"><img id="amex" src="{% static 'img/amex.png' %}"></span>
-          <span class="card"><img id="discover" src="{% static 'img/discover.png' %}"></span>
-          <span class="card"><img id="jcb" src="{% static 'img/jcb.png' %}"></span>
-        </div>
-        <div class="col-xs-4 credit-cards">
-          <span class="card"><img id="diners" src="{% static 'img/diners.png' %}"></span>
-          <span class="card"><img id="mastercard" src="{% static 'img/mastercard.png' %}"></span>
-          <span class="card"><img id="visa" src="{% static 'img/visa.png' %}"></span>
         </div>
 
       </form>
