@@ -157,9 +157,10 @@ class WorkItem(models.Model):
             user=self.user, date=self.date, hours=self.hours, job=self.job, item=self.text)
 
     def save(self, *args, **kwargs):
-        if(not self.job.available_all_users):
-            if(not self.job.users.filter(id=self.user.id).exists()):
-                raise ValueError("Specified job is not available to {user}".format(user=str(self.user)))
+        if(not self.user.is_superuser):
+            if(not self.job.available_all_users):
+                if(not self.job.users.filter(id=self.user.id).exists()):
+                    raise ValueError("Specified job is not available to {user}".format(user=str(self.user)))
 
         commit, sha, text = ['', '', '']
 
