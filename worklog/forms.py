@@ -44,10 +44,7 @@ class WorkItemForm(ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user")
         super(WorkItemForm, self).__init__(*args, **kwargs)
-
-        queryset = Job.get_jobs_open_on(datetime.date.today())
-
-        queryset = queryset.filter(Q(available_all_users=True) | Q(users__id=user.id)).distinct()
+        queryset = Job.get_available_jobs_for_user(user);
         queryset = queryset.order_by('name')
         self.fields["job"].queryset = queryset
 
