@@ -101,6 +101,11 @@ class WorkItemSerializer(serializers.ModelSerializer):
 
         issue = data['issue']
         repo = data['repo']
+        user = data['user']
+        job = data['job']
+
+        if (not Job.get_available_jobs_for_user(user).filter(name=job.name).exists()):
+            raise serializers.ValidationError("Job not available to user")
 
         if issue and issue.repo != repo:
             raise serializers.ValidationError("Issue does not belong to repo.")
