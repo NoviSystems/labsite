@@ -29,7 +29,7 @@ def has_payment_error(invoices):
     Determines if the stripe customer has an unresolved stripe invoice payment error
     """
     return any(
-        invoice.paid and invoice.attempted and not invoice.forgiven
+        invoice.attempted and not invoice.paid and not invoice.forgiven
         for invoice in invoices
     )
 
