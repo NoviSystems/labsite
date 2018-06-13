@@ -114,8 +114,10 @@ function WorkItemDisplayTable(rowTemplate) {
     this.addWorkItem = function(workItem) {
         
         var context = WorkItemDisplayTable.buildContext(workItem);
-
-        $(this.rowTemplate(context)).appendTo('#display-table tbody').hide().fadeIn('slow');
+        $('#submit').attr('disabled', true);
+        $(this.rowTemplate(context)).appendTo('#display-table tbody').hide().fadeIn('slow', function() {
+            $('#submit').removeAttr('disabled');
+        });
         if ($(window).width() < 600)
             $('#' + workItem.id + ' .edit').attr('data-toggle', 'modal');
     };
