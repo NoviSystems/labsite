@@ -308,16 +308,21 @@ class LeaderboardView(LoginRequiredMixin, TemplateView):
     def annotate_user_orders(self, orders):
         return orders.annotate(b_count=Sum('orders__quantity')).order_by('-b_count')
 
-    def get_burrito_eater_diet(self, year=None, month=None):
-        if month is None and year is not None:
+    def get_burrito_eater_diet(self, year=None, month=None, rookie=False):
+        if rookie is True:
+            return User.objects.filter(orders__item__name__iexact="Burrito", date_joined__year__gte=year, date_joined__month__gte=month)
+        elif month is None and year is not None:
             return User.objects.filter(orders__item__name__iexact="Burrito", orders__date__year=year)
         elif month is not None and year is not None:
             return User.objects.filter(orders__item__name__iexact="Burrito", orders__date__year=year, orders__date__month=month)
+
         return User.objects.filter(orders__item__name__iexact="Burrito")
+
 
     def get_context_data(self, **kwargs):
         context = super(LeaderboardView, self).get_context_data(**kwargs)
         now = datetime.date.today()
+        one_year_ago = datetime.date.today() - datetime.timedelta(days=365)
         user = self.request.user
 
         last_month_date = now - datetime.timedelta(days=now.day + 1)
@@ -325,31 +330,43 @@ class LeaderboardView(LoginRequiredMixin, TemplateView):
 
         all_time_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet())
         last_year_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_year_date.year))
+        this_year_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year))
         last_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_month_date.year, month=last_month_date.month))
         current_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year, month=now.month))
+        rookie_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year - 1, month=now.month, rookie=True))
 
         sorted_alltime = []
         sorted_year = []
+        sorted_this_year = []
         sorted_month = []
         sorted_current = []
+        sorted_rookie = []
 
         month_mvp = self.helper(sorted_month, last_month_burrito_eaters_score, 5)
         year_mvp = self.helper(sorted_year, last_year_burrito_eaters_score, 5)
+        this_year_mvp = self.helper(sorted_this_year, this_year_burrito_eaters_score, 5)
         alltime_mvp = self.helper(sorted_alltime, all_time_burrito_eaters_score, 5)
         current_mvp = self.helper(sorted_current, current_month_burrito_eaters_score, 5)
+        rookie_mvp = self.helper(sorted_rookie, rookie_burrito_eaters_score, 5)
 
         context['last_month_month'] = last_month_date.strftime('%B')
         context['current_month_month'] = now.strftime('%B')
         context['last_year'] = last_year_date.year
+        context['rookie_start'] = str(one_year_ago)
+        context['this_year'] = now.year
         context['alltime_dict'] = sorted_alltime
         context['year_dict'] = sorted_year
+        context['this_year_dict'] = sorted_this_year
         context['month_dict'] = sorted_month
         context['current_dict'] = sorted_current
+        context['rookie_dict'] = sorted_rookie
         context['current_user'] = str(user)
         context['month_mvp'] = month_mvp
         context['year_mvp'] = year_mvp
+        context['this_year_mvp'] = this_year_mvp
         context['alltime_mvp'] = alltime_mvp
         context['current_mvp'] = current_mvp
+        context['rookie_mvp'] = rookie_mvp
 
         return context
 
