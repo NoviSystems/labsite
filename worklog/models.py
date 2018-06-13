@@ -64,11 +64,18 @@ class JobQuerySet(models.QuerySet):
             output_field=models.BooleanField(),
         ))
 
+    def open_on(self, date=None):
+        return self.annotate_is_open(date).filter(is_open=True)
+
+    def available_to(self, user):
+        if (user.is_superuser):
+            return self
+        return self.filter(Q(users__id=user.pk) | Q(available_all_users=True)).distinct()
+
 
 class JobManager(models.Manager.from_queryset(JobQuerySet)):
     def get_queryset(self):
-        qs = super().get_queryset()
-        return qs.annotate_is_open()
+        return super().get_queryset().annotate_is_open()
 
 
 class Job(models.Model):
@@ -88,19 +95,6 @@ class Job(models.Model):
 
     def __str__(self):
         return self.name
-
-    @classmethod
-    def get_jobs_open_on(cls, date):
-        return cls.objects \
-            .annotate_is_open(date) \
-            .filter(is_open=True)
-
-    @classmethod
-    def get_available_jobs_for_user(cls, user):
-        qs = cls.get_jobs_open_on(date=datetime.datetime.today())
-        if (user.is_superuser):
-            return qs
-        return qs.filter(Q(users__id=user.pk) | Q(available_all_users=True)).distinct()
 
     def hasFunding(self):
         return len(self.funding.all()) != 0
@@ -164,8 +158,11 @@ class WorkItem(models.Model):
             user=self.user, date=self.date, hours=self.hours, job=self.job, item=self.text)
 
     def save(self, *args, **kwargs):
-        if (not Job.get_available_jobs_for_user(self.user).filter(name=self.job.name).exists()):
+        if (not Job.objects.available_to(self.user).filter(name=self.job.name).exists()):
             raise ValueError("Specified job is not available to {user}".format(user=str(self.user)))
+
+        if (not Job.objects.open_on(self.date).filter(name=self.job.name).exists()):
+            raise ValueError("Specified job is not open on {date}".format(date=self.date.isoformat()))
 
         commit, sha, text = ['', '', '']
 

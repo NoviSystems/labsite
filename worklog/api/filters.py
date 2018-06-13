@@ -1,8 +1,8 @@
-
+from django.contrib.auth import get_user_model
 import rest_framework_filters as filters
 from worklog import models
-from django.db.models import Q
-from django.contrib.auth import get_user_model
+
+
 User = get_user_model()
 
 
@@ -33,15 +33,14 @@ class WorkItemFilter(filters.FilterSet):
 
 
 class JobFilter(filters.FilterSet):
-
     user = filters.ModelChoiceFilter(method='filter_user', queryset=User.objects.all())
     date = filters.DateFilter(method='filter_date')
 
     def filter_date(self, qs, name, value):
-        return qs.filter(open_date__lte=value).filter(Q(close_date__gte=value) | Q(close_date=None))
+        return qs.open_on(value)
 
     def filter_user(self, qs, name, value):
-        return models.Job.get_available_jobs_for_user(value);
+        return qs.available_to(value)
 
     class Meta:
         model = models.Job

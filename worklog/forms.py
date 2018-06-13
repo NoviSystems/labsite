@@ -3,7 +3,6 @@ import datetime
 import random
 
 from django import forms
-from django.db.models import Q
 from django.forms import ModelForm
 from django.forms.formsets import BaseFormSet
 
@@ -44,7 +43,7 @@ class WorkItemForm(ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user")
         super(WorkItemForm, self).__init__(*args, **kwargs)
-        queryset = Job.get_available_jobs_for_user(user);
+        queryset = Job.objects.available_to(user) & Job.objects.open_on(datetime.date.today())
         queryset = queryset.order_by('name')
         self.fields["job"].queryset = queryset
 
