@@ -41,10 +41,7 @@ class JobFilter(filters.FilterSet):
         return qs.filter(open_date__lte=value).filter(Q(close_date__gte=value) | Q(close_date=None))
 
     def filter_user(self, qs, name, value):
-        if value.is_superuser:
-            return qs
-
-        return qs.filter(Q(users__id=value.pk) | Q(available_all_users=True)).distinct()
+        return models.Job.get_available_jobs_for_user(value);
 
     class Meta:
         model = models.Job

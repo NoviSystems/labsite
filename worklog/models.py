@@ -95,6 +95,13 @@ class Job(models.Model):
             .annotate_is_open(date) \
             .filter(is_open=True)
 
+    @classmethod
+    def get_available_jobs_for_user(cls, user):
+        qs = cls.get_jobs_open_on(date=datetime.datetime.today())
+        if (user.is_superuser):
+            return qs
+        return qs.filter(Q(users__id=user.pk) | Q(available_all_users=True)).distinct()
+
     def hasFunding(self):
         return len(self.funding.all()) != 0
 
@@ -157,9 +164,8 @@ class WorkItem(models.Model):
             user=self.user, date=self.date, hours=self.hours, job=self.job, item=self.text)
 
     def save(self, *args, **kwargs):
-        if(not self.job.available_all_users):
-            if(not self.job.users.filter(id=self.user.id).exists()):
-                raise ValueError("Specified job is not available to {user}".format(user=str(self.user)))
+        if (not Job.get_available_jobs_for_user(self.user).filter(name=self.job.name).exists()):
+            raise ValueError("Specified job is not available to {user}".format(user=str(self.user)))
 
         commit, sha, text = ['', '', '']
 
