@@ -1,12 +1,8 @@
 "use strict";
 
 var jobList = [];
-var repoList = [];
-var issueList = [];
 
 var jobs = {};
-var repos = {};
-var issues = {};
 var workItems = {};
 
 var formTable = null;
@@ -29,54 +25,7 @@ API.getJobs = function() {
             var key = jobList[i].id;
             jobs[key.toString()] = jobList[i];
         }
-    });  
-};
-
-API.getRepos = function() { 
-    return $.getJSON('/worklog/api/repos/', null, function(data, status) {
-        repoList = data;
-        repoList.sort(function(a, b) {
-            if (a.name < b.name)
-                return -1;
-            if (a.name > b.name)
-                return 1;
-            return 0;
-        });
-        for (var i = 0; i < repoList.length; i++) {
-            var key = repoList[i].github_id;
-            repos[key.toString()] = repoList[i];
-        }
     });
-};
-
-API.getIssues = function() {
-    return $.getJSON('/worklog/api/issues/', null, function(data, status) {
-        issueList = data;
-        for (var i = 0; i < issueList.length; i++) {
-            var key = issueList[i].github_id;
-            issues[key.toString()] = issueList[i];
-        }
-
-        for (var i = 0; i < repoList.length; i++) {
-            repoList[i].issues = [];
-            for (var j = 0; j < issueList.length; j++) {
-                if (repoList[i].github_id == issueList[j].repo) {
-                    repoList[i].issues.push(issueList[j]);
-                }
-            }
-        }
-    });
-};
-
-API.assignIssuesToRepos = function() {
-    for (var i = 0; i < repoList.length; i++) {
-        repoList[i].issues = [];
-        for (var j = 0; j < issueList.length; j++) {
-            if (repoList[i].github_id == issueList[j].repo) {
-                repoList[i].issues.push(issueList[j]);
-            }
-        }
-    }  
 };
 
 API.getWorkDay = function() {
@@ -84,7 +33,7 @@ API.getWorkDay = function() {
         if (data[0]) {
             if (data[0].reconciled) {
                 $('#reconcile').attr('disabled', 'disabled');
-            }            
+            }
         }
     });
 };
@@ -99,15 +48,6 @@ function WorkItem(workItemJSON) {
         name: null,
     };
     this.hours = null;
-    this.repo = {
-        github_id: null,
-        name: null
-    };
-    this.issue = {
-        github_id: null,
-        title: null,
-        number: null
-    };
     this.text = null;
 
     if (workItemJSON) {
@@ -118,15 +58,6 @@ function WorkItem(workItemJSON) {
         if (jobs[workItemJSON.job.toString()])
             this.job.name = jobs[workItemJSON.job.toString()].name;
         this.hours = workItemJSON.hours;
-        if (workItemJSON.repo) {
-            this.repo.github_id = workItemJSON.repo;
-            this.repo.name = repos[workItemJSON.repo.toString()].name;             
-        }
-        if (workItemJSON.issue) { 
-            this.issue.github_id = workItemJSON.issue;
-            this.issue.title = issues[workItemJSON.issue.toString()].title;
-            this.issue.number = issues[workItemJSON.issue.toString()].number;
-        }
         this.text = workItemJSON.text;
 
         workItems[this.id] = this;
@@ -139,8 +70,6 @@ function WorkItem(workItemJSON) {
             date: this.date,
             job: this.job.id,
             hours: this.hours,
-            repo: this.repo.github_id,
-            issue: this.issue.github_id,
             text: this.text
         }
     }
@@ -182,7 +111,7 @@ function Session(csrftoken) {
                     xhr.setRequestHeader("X-CSRFToken", csrftoken);
                 }
             }
-        });         
+        });
     }
 }
 
@@ -195,11 +124,9 @@ $(document).ready(function() {
     var currentSession = new Session($.cookie('csrftoken'));
     currentSession.setupAJAX();
 
-    var promise = $.when(API.getJobs(), API.getRepos(), API.getIssues(), API.getWorkDay());
+    var promise = $.when(API.getJobs(), API.getWorkDay());
 
     promise.done(function() {
-
-        API.assignIssuesToRepos();
 
         var rowSource = $('#row-template').html();
         var rowTemplate = Handlebars.compile(rowSource);
@@ -207,15 +134,9 @@ $(document).ready(function() {
         var formRowSource = $('#modal-form-template').html();
         var formRowTemplate = Handlebars.compile(formRowSource);
 
-        displayTable = new WorkItemDisplayTable(rowTemplate);        
+        displayTable = new WorkItemDisplayTable(rowTemplate);
         formTable = new WorkItemFormTable(rowTemplate);
-        
 
-        $('.table tbody').on('change', '.repo', function() {
-            var form = $(this).data('row');
-            var repo = $(this).val();
-            workItemFormSet.forms[form].populateIssues(repo);
-        });
 
         $('#form-table tbody').on('click', '.delete', function() {
             var selector = $(this).data('row');
@@ -253,24 +174,14 @@ $(document).ready(function() {
                         id: 'modal-' + workItem,
                         job: newForm.job.toHtml(),
                         hours: newForm.hours.toHtml(),
-                        repo: newForm.repo.toHtml(),
-                        issue: newForm.issue.toHtml(),
                         text: newForm.text.toHtml()
                     }
                 };
                 $(formRowTemplate(context)).appendTo('.bs-edit-modal-sm .modal-body');
                 $('.bs-edit-modal-sm #save').attr('data-workitem', $(this).data('workitem'));
-
-                $('.bs-edit-modal-sm .table').on('change', '.repo', function() {
-                    var form = $(this).data('row');
-                    var repo = $(this).val();
-                    workItemFormSet.forms[form].populateIssues(repo);
-                });
-
                 newForm.populateJobs();
-                newForm.populateRepos();
             } else {
-                displayTable.editRow($(this).data('workitem'));            
+                displayTable.editRow($(this).data('workitem'));
             }
         });
 
@@ -293,7 +204,7 @@ $(document).ready(function() {
         });
 
         $('.bs-edit-modal-sm').on('click', '.close', function() {
-            $('.bs-edit-modal-sm .modal-body').children().remove();  
+            $('.bs-edit-modal-sm .modal-body').children().remove();
         });
 
         $('#display-table tbody').on('click', ' .save', function() {
@@ -321,7 +232,7 @@ $(document).ready(function() {
                 url: '/worklog/api/workdays/',
                 cache: false,
                 data: data,
-                dataType: 'text' 
+                dataType: 'text'
             });
         });
     });

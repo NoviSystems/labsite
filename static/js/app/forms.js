@@ -4,7 +4,7 @@ function Form(properties) {
 
     if (properties) {
         this.fields = properties['fields'];
-        this.selector = properties['selector'];        
+        this.selector = properties['selector'];
     }
 
     this.submit = function() {
@@ -20,8 +20,6 @@ function WorkItemForm(workItem, selector, formset) {
 
     this.job = new SelectField('job', workItem.job.id, this.selector);
     this.hours = new WorkItemInputField('hours', workItem.hours, 'text', this.selector);
-    this.repo = new SelectField('repo', workItem.repo.github_id, this.selector);
-    this.issue = new IssueSelectField('issue', workItem.issue.github_id, this.selector);
     this.text = new WorkItemTextareaField('text', workItem.text, this.selector);
     this.button = new ButtonField(new DeleteFormButton(this.selector));
 
@@ -32,8 +30,6 @@ function WorkItemForm(workItem, selector, formset) {
     var fields = {
         job: this.job,
         hours: this.hours,
-        repo: this.repo,
-        issue: this.issue,
         text: this.text,
         button: this.button
     };
@@ -47,14 +43,6 @@ function WorkItemForm(workItem, selector, formset) {
         hours: {
             class: 'col-md-2',
             value: this.hours.toHtml()
-        },
-        repo: {
-            class: 'col-md-2',
-            value: this.repo.toHtml()
-        },
-        issue: {
-            class: 'col-md-2',
-            value: this.issue.toHtml()
         },
         text: {
             class: 'col-md-4',
@@ -79,64 +67,12 @@ function WorkItemForm(workItem, selector, formset) {
         }
     }
 
-    this.populateRepos = function() {
-
-        for (var i in repoList) {
-            this.repo.addOption(repoList[i].github_id, repoList[i].name);
-            $(this.selector + ' .repo').append(this.repo.options[i].toHtml());
-        }
-
-        if (this.repo.value) {
-            $(this.selector + ' .repo').val(this.repo.value);
-            $(this.selector + ' .repo').change();
-        }
-    }
-
-    this.populateIssues = function(repo) {
-        $(this.selector + ' .issue').empty();
-        this.issue.options = [];
-        $(this.selector + ' .issue').append('<option value="" selected="selected">None</option>');
-        if (repo) {
-
-            var issues = repos[repo].issues;
-
-            issues.sort(function (a, b) {
-                if (a.number < b.number)
-                    return -1;
-                if (a.number > b.number)
-                    return 1;
-                return 0;
-            });
-
-            for (var i in issues) {
-                this.issue.addOption(issues[i].github_id, issues[i].title, issues[i].number);
-                $(this.selector + ' .issue').append(this.issue.options[i].toHtml());
-            }
-            if (this.issue.value) {
-
-                var value = this.issue.value;
-                var valueInList = $.grep(issues, function(issue) {
-                    return issue.github_id === value;
-                });
-
-                if (valueInList.length > 0) {
-                    $(this.selector + ' .issue').val(this.issue.value);                    
-                } else {
-                    $(this.selector + ' .issue').val('');
-                    this.issue.value = null;
-                }
-            }
-        }
-    }
-
     this.buildWorkItem = function() {
         this.workItem.user = worklog.userid;
         if (!this.workItem.date)
             this.workItem.date = worklog.date;
         this.workItem.job.id = $(this.selector + ' .job').val();
         this.workItem.hours = $(this.selector + ' .hours').val();
-        this.workItem.repo.github_id = $(this.selector + ' .repo').val();
-        this.workItem.issue.github_id = $(this.selector + ' .issue').val();
         this.workItem.text = $(this.selector + ' .text').val();
     }
 
@@ -167,7 +103,7 @@ function WorkItemForm(workItem, selector, formset) {
                     });
                 }
             },
-            dataType: 'text' 
+            dataType: 'text'
         });
     }
 
@@ -199,7 +135,7 @@ function WorkItemForm(workItem, selector, formset) {
                             });
                         });
                     });
-                }                
+                }
             }
         }
 
@@ -229,7 +165,7 @@ function WorkItemForm(workItem, selector, formset) {
                             }, 2000);
                         });
                     });
-                });                                        
+                });
             },
             error: function(data) {
                 var response = $.parseJSON(data.responseText);
@@ -250,14 +186,14 @@ function WorkItemForm(workItem, selector, formset) {
                             });
                         });
                     });
-                }  
+                }
             },
             dataType: 'text'
         });
     }
 
     this.delete = function() {
-        
+
     }
 
     this.appendErrorMessageToField = function(message, field) {
@@ -270,7 +206,7 @@ function WorkItemForm(workItem, selector, formset) {
         } else {
             $(erroneousField).after('<label class="control-label" for="' + erroneousField + '" id="label-' + this.selector[13] + '">' + message + '</label>');
         }
-    } 
+    }
 }
 
 WorkItemForm.prototype = new Form();

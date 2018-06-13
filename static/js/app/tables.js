@@ -33,8 +33,6 @@ function WorkItemFormTable(rowTemplate) {
             id: 'new-workitem-0',
             job: newForm.job.toHtml(),
             hours: newForm.hours.toHtml(),
-            repo: newForm.repo.toHtml(),
-            issue: newForm.issue.toHtml(),
             text: newForm.text.toHtml()
         }
     };
@@ -47,8 +45,7 @@ function WorkItemFormTable(rowTemplate) {
 
     if ($(window).width() < 600) {
         newForm.populateJobs();
-        newForm.populateRepos(); 
-        workItemFormSet.addForm(newForm);  
+        workItemFormSet.addForm(newForm);
     }
 
 
@@ -63,7 +60,6 @@ function WorkItemFormTable(rowTemplate) {
         $(rowTemplate(newForm.context)).appendTo('#form-table tbody').hide().fadeIn('fast');
 
         newForm.populateJobs();
-        newForm.populateRepos();
     };
 
     if ($(window).width() > 600)
@@ -74,12 +70,10 @@ function WorkItemFormTable(rowTemplate) {
             workItemFormSet.removeForm(selector);
             $(selector).fadeOut(speed, function() {
                 $(selector).remove();
-            });            
+            });
         } else {
             $('.job').val('');
             $('.hours').val('');
-            $('.repo').val('');
-            $('.issue').val('');
             $('.text').val('');
         }
     };
@@ -107,12 +101,12 @@ function WorkItemDisplayTable(rowTemplate) {
             var $editButtonList = $('#display-table tbody .edit');
             for (var i = 0; i < $editButtonList.length; i++) {
                 $($editButtonList[i]).attr('data-toggle', 'modal');
-            }            
+            }
         }
     });
 
     this.addWorkItem = function(workItem) {
-        
+
         var context = WorkItemDisplayTable.buildContext(workItem);
         $('#submit').attr('disabled', true);
         $(this.rowTemplate(context)).appendTo('#display-table tbody').hide().fadeIn('slow', function() {
@@ -144,9 +138,6 @@ function WorkItemDisplayTable(rowTemplate) {
         $('#' + selector).replaceWith((this.rowTemplate(newForm.context)));
 
         newForm.populateJobs();
-        newForm.populateRepos();
-        if (workItemObj.repo)
-            newForm.populateIssues(workItemObj.repo.github_id);
     };
 
     this.restoreRow = function(workItem) {
@@ -193,7 +184,7 @@ WorkItemDisplayTable.buildContext = function(workItem) {
     return {
         id: workItem.id,
         job: {
-            class: 'col-md-2 job',
+            class: 'col-md-3 job',
             value: workItem.job.name,
             name: workItem.job.id
         },
@@ -201,23 +192,13 @@ WorkItemDisplayTable.buildContext = function(workItem) {
             class: 'col-md-2 hours',
             value: workItem.hours,
         },
-        repo: {
-            class: 'col-md-2 repo',
-            value: (workItem.repo.github_id ? workItem.repo.name : 'None'),
-            name: (workItem.repo.github_id ? workItem.repo.github_id : ''),
-        },
-        issue: {
-            class: 'col-md-2 issue',
-            value: (workItem.issue.github_id ? workItem.issue.number + ': ' + workItem.issue.title : 'None'),
-            name: (workItem.issue.github_id ? workItem.issue.github_id : ''),
-        },
         text: {
-            class: 'col-md-3 preserve-newLine text',
+            class: 'col-md-6 preserve-newLine text',
             value: workItem.text
         },
         button: {
             class: 'controls',
             value: (new EditWorkItemButton(workItem.id)).toHtml() + (new DeleteWorkItemButton(workItem.id)).toHtml(),
         }
-    };  
+    };
 };

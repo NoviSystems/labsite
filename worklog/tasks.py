@@ -9,8 +9,7 @@ from django.template import Template, Context
 
 from celery import shared_task
 
-from worklog.gh_connect import GitHubConnector
-from worklog.models import Employee, WorkItem, Job, WorkDay, GithubAlias, Repo, Issue
+from worklog.models import Employee, WorkItem, Job, WorkDay
 
 
 email_msg = Template("""
@@ -247,33 +246,3 @@ def test_send_reminder_email(username, date=datetime.date.today()):
     date_list = get_reminder_dates_for_user(user)
     email = create_reminder_email(user.email, date, date_list)
     email.send()
-
-
-@shared_task
-def reconcile_db_with_gh(*args, **kwargs):
-    ghc = GitHubConnector()
-    repos = ghc.get_all_repos()
-    issues = ghc.get_all_issues()
-
-    for repo in repos:
-        r = Repo(github_id=repo.id, name=repo.name, url=repo.html_url)
-        r.save()
-
-    for issue in issues:
-        i = Issue(github_id=issue.id)
-        i.title = issue.title
-        i.number = issue.number
-        i.repo = Repo.objects.get(name=issue.repository[1])
-        i.open = not issue.is_closed()
-        i.url = issue.html_url
-        if issue.assignee:
-            try:
-                i.assignee = GithubAlias.objects.get(github_name=issue.assignee).user
-            except GithubAlias.DoesNotExist:
-                print("No GithubAlias with github_name '%s' exists" % issue.assignee)
-        else:
-            i.assignee = None
-        i.body = issue.body
-        i.save()
-
-    print("Not only did your task run successfully, but you're damned good looking too.")

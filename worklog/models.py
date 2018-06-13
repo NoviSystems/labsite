@@ -4,8 +4,6 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q, Case, When
 
-from worklog.gh_connect import GitHubConnector
-
 User = settings.AUTH_USER_MODEL
 
 
@@ -14,11 +12,6 @@ class Employee(models.Model):
 
     def __str__(self):
         return '%s' % self.user.get_full_name()
-
-
-class GithubAlias(models.Model):
-    user = models.ForeignKey(User)
-    github_name = models.CharField(max_length=39, null=True, blank=True)  # 39 is github max
 
 
 class Holiday(models.Model):
@@ -103,29 +96,6 @@ class Job(models.Model):
         return len(WorkItem.objects.filter(job=self)) != 0
 
 
-class Repo(models.Model):
-    github_id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=256)
-    url = models.URLField(null=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Issue(models.Model):
-    github_id = models.IntegerField(primary_key=True)
-    title = models.CharField(max_length=256, null=True)
-    body = models.TextField(null=True)
-    number = models.IntegerField()
-    repo = models.ForeignKey(Repo, related_name='issues')
-    open = models.BooleanField(default=False)
-    assignee = models.ForeignKey(User, null=True)
-    url = models.URLField(null=True)
-
-    def __str__(self):
-        return '%d: %s' % (self.number, self.title)
-
-
 class BillingSchedule(models.Model):
     job = models.ForeignKey(Job, related_name='billing_schedule')
     date = models.DateField()
@@ -149,8 +119,6 @@ class WorkItem(models.Model):
     hours = models.FloatField()
     text = models.TextField(verbose_name="Tasks")
     job = models.ForeignKey(Job)
-    repo = models.ForeignKey(Repo, null=True, blank=True)
-    issue = models.ForeignKey(Issue, null=True, blank=True)
     invoiced = models.BooleanField(default=False)
 
     def __str__(self):
@@ -163,29 +131,5 @@ class WorkItem(models.Model):
 
         if (not Job.objects.open_on(self.date).filter(name=self.job.name).exists()):
             raise ValueError("Specified job is not open on {date}".format(date=self.date.isoformat()))
-
-        commit, sha, text = ['', '', '']
-
-        text_string = self.text.split()
-
-        if len(text_string) == 2:
-            commit = text_string[0]
-            sha = text_string[1]
-        elif len(text_string) == 1:
-            commit = text_string[0]
-        else:
-            commit, sha, text = self.text.split(None, 2)
-
-        # If the text begins with "commit <sha1>", we'll sub in the actual commit message
-        if (commit == "commit" and self.repo):
-
-            ghc = GitHubConnector()
-            repos = ghc.get_all_repos()
-
-            for repo in repos:
-                if repo.id == self.repo.github_id:
-                    msg = repo.commit(sha).commit.message
-                    self.text = '%s %s' % (msg, text)
-                    break
 
         super(WorkItem, self).save(*args, **kwargs)

@@ -3,7 +3,7 @@
 
 {% block content %}
     <div class="row">
-        <div id="work-pane" class="col-sm-6">
+        <div id="work-pane" class="col-sm-offset-3 col-sm-6">
             <div class="panel panel-default">
                 <div class="panel-heading">Work</div>
                 <div class="panel-body">
@@ -24,38 +24,6 @@
                         </tr>
                     {% endfor %}
                 </table>
-            </div>
-        </div>
-        <div id="github-pane" class="col-sm-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">Github Issues</div>
-                    {% if repos_with_issues %}
-                        <div class="list-group" id="repos">
-                            {% for repo, issues in repos_with_issues.items %}
-                                <div class="list-group-item accordion-toggle">
-                                    <h4>
-                                        <a href='#{{ repo }}_issues' data-toggle="collapse">{{ repo.name }}</a>
-                                        <small>&nbsp;&nbsp;(<a href="{{ repo.url }}">github</a>)</small>
-                                        <span href="#" class="badge" style="float: right">{{ issues|length }}</span>
-                                    </h4>
-
-                                    <div class="list-group collapse out" id="{{ repo }}_issues">
-                                        {% for issue in issues %}
-                                            <li class="list-group-item">
-                                                <h4><span class="text-muted">#{{ issue.number }}</span>&nbsp;&nbsp;<a href="{{ issue.url }}">{{ issue.title }}</a></h4>
-                                                <p>{{ issue.body|truncatewords:35 }}</p>
-                                            </li>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <li class="list-group-item">
-                            <h3 class="text-center">No open issues assigned</h3>
-                        </li>
-                    {% endif %}
-                </div>
             </div>
         </div>
     </div>

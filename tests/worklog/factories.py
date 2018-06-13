@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 
-from worklog.models import WorkItem, Job, Issue, Repo
+from worklog.models import WorkItem, Job
 
 import random
 import factory
@@ -45,29 +45,6 @@ class JobFactory(DjangoModelFactory):
                 self.users.add(user)
 
 
-class RepoFactory(DjangoModelFactory):
-
-    class Meta:
-        model = Repo
-
-    github_id = factory.Sequence(lambda n: '%04d' % n)
-    name = factory.LazyAttribute(lambda p: faker.name())
-
-
-class IssueFactory(DjangoModelFactory):
-
-    class Meta:
-        model = Issue
-
-    github_id = factory.Sequence(lambda n: '%04d' % n)
-    title = factory.LazyAttribute(lambda p: faker.name())
-    body = factory.LazyAttribute(lambda p: faker.text())
-    open = factory.LazyAttribute(lambda p: faker.boolean())
-    assignee = factory.SubFactory(UserFactory)
-    number = factory.LazyAttribute(lambda p: random.randint(0, 500))
-    repo = factory.SubFactory(RepoFactory)
-
-
 class WorkItemFactory(DjangoModelFactory):
 
     class Meta:
@@ -77,6 +54,4 @@ class WorkItemFactory(DjangoModelFactory):
     date = factory.LazyAttribute(lambda p: faker.date_time_between(start_date='-1y'))
     job = factory.SubFactory(JobFactory, available_all_users=True)
     hours = factory.LazyAttribute(lambda p: random.randint(1, 24))
-    repo = factory.SubFactory(RepoFactory)
-    issue = factory.SubFactory(IssueFactory, repo=factory.SelfAttribute('..repo'))
     text = factory.LazyAttribute(lambda p: faker.sentence())

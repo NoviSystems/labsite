@@ -1,4 +1,4 @@
-from worklog.models import WorkDay, WorkItem, Job, Repo, Issue
+from worklog.models import WorkDay, WorkItem, Job
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -18,20 +18,6 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = ['id', 'name']
-
-
-class IssueSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Issue
-        fields = ['github_id', 'title', 'body', 'number', 'repo', 'open', 'assignee', 'url']
-
-
-class RepoSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Repo
-        fields = ['github_id', 'name', 'url']
 
 
 class WorkDaySerializer(serializers.ModelSerializer):
@@ -54,7 +40,7 @@ class WorkItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WorkItem
-        fields = ['id', 'user', 'date', 'hours', 'text', 'job', 'repo', 'issue']
+        fields = ['id', 'user', 'date', 'hours', 'text', 'job']
 
     def validate_job(self, value):
 
@@ -99,15 +85,10 @@ class WorkItemSerializer(serializers.ModelSerializer):
         if not data:
             raise serializers.ValidationError("Data is null.")
 
-        issue = data['issue']
-        repo = data['repo']
         user = data['user']
         job = data['job']
 
         if (not Job.objects.available_to(user).filter(name=job.name).exists()):
             raise serializers.ValidationError("Job not available to user.")
-
-        if issue and issue.repo != repo:
-            raise serializers.ValidationError("Issue does not belong to repo.")
 
         return data

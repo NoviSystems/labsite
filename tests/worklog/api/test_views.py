@@ -10,10 +10,10 @@ from rest_framework.test import APITestCase, APIRequestFactory
 
 from faker.factory import Factory as FakeFactory
 
-from worklog.models import WorkItem, Job, Repo, Issue
-from tests import factories, WorklogTestCaseBase
+from worklog.models import WorkItem, Job
+from tests.worklog import factories, WorklogTestCaseBase
 
-from worklog.api.views import WorkItemViewSet, JobViewSet, RepoViewSet, IssueViewSet
+from worklog.api.views import WorkItemViewSet, JobViewSet
 from random import randrange
 
 
@@ -33,8 +33,6 @@ class ViewSetBaseTestCase(APITestCase):
         self.user_pks = list(User.objects.all().values_list('pk', flat=True))
         self.workitem_pks = list(WorkItem.objects.all().values_list('pk', flat=True))
         self.job_pks = list(Job.get_jobs_open_on(datetime.date.today()).values_list('pk', flat=True))
-        self.repo_pks = list(Repo.objects.all().values_list('pk', flat=True))
-        self.issue_pks = list(Issue.objects.all().values_list('pk', flat=True))
 
         auth_user = User.objects.get(pk=self.user_pks[0])
         self.client.force_authenticate(user=auth_user)
@@ -43,8 +41,6 @@ class ViewSetBaseTestCase(APITestCase):
 
         WorkItem.objects.all().delete()
         Job.objects.all().delete()
-        Repo.objects.all().delete()
-        Issue.objects.all().delete()
 
     def get_queryset(self, query_params=None):
 
@@ -110,8 +106,6 @@ class WorkItemViewSetTestCase(ViewSetBaseTestCase):
             'job': self.job_pks[0],
             'hours': 2,
             'text': 'Dieses feld ist erforderlich',
-            'repo': '',
-            'issue': '',
         }
 
         response = self.client.post('/worklog/api/workitems/', data, format='json')
@@ -126,8 +120,6 @@ class WorkItemViewSetTestCase(ViewSetBaseTestCase):
             'job': self.job_pks[0],
             'hours': 9,
             'text': 'testing severythin news',
-            'repo': '',
-            'issue': '',
         }
 
         # print "WorkItem Count", WorkItem.objects.values_list("pk", flat=True)
@@ -263,132 +255,6 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
 
         for job in self.job_pks:
             response = self.client.get('/worklog/api/jobs/' + str(job) + '/')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    @property
-    def viewset(self):
-        return self._viewset
-
-
-class RepoViewSetTestCase(ViewSetBaseTestCase):
-
-    def setUp(self):
-
-        self._viewset = RepoViewSet()
-
-        super(RepoViewSetTestCase, self).setUp()
-
-    def test_get_queryset(self):
-
-        repo_names = Repo.objects.all().values_list('name', flat=True)
-
-        for name in repo_names:
-            expected_qs = Repo.objects.filter(name=name)
-            response = self.client.get('/worklog/api/repos/', {'name': name})
-            actual_qs = [value["github_id"] for value in response.data]
-            expected_qs = [value.github_id for value in expected_qs]
-            self.assertEqual(list(actual_qs), list(expected_qs))
-
-    def test_post(self):
-
-        for pk in self.repo_pks:
-            data = {
-                'github_id': pk,
-                'name': 'bucket o bits'
-            }
-
-            response = self.client.post('/worklog/api/repos/' + str(pk) + '/', data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_put(self):
-
-        for pk in self.repo_pks:
-            data = {
-                'github_id': pk,
-                'name': 'renegade nuns on wheels'
-            }
-
-            response = self.client.put('/worklog/api/repos/' + str(pk) + '/', data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_patch(self):
-
-        for pk in self.repo_pks:
-            data = {
-                'github_id': pk,
-                'name': 'beleted'
-            }
-
-            response = self.client.patch('/worklog/api/repos/' + str(pk) + '/', data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_get(self):
-
-        for pk in self.repo_pks:
-            response = self.client.get('/worklog/api/repos/' + str(pk) + '/')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    @property
-    def viewset(self):
-        return self._viewset
-
-
-class IssueViewSetTestCase(ViewSetBaseTestCase):
-
-    def setUp(self):
-
-        self._viewset = IssueViewSet()
-
-        super(IssueViewSetTestCase, self).setUp()
-
-    def test_get_queryset(self):
-
-        repos = Repo.objects.all().values_list('github_id', flat=True)
-
-        for repo in repos:
-            expected_qs = Issue.objects.filter(repo=repo).order_by('pk')
-            response = self.client.get('/worklog/api/issues/', {'repo': repo})
-            actual_qs = [value["github_id"] for value in response.data]
-            expected_qs = [value.github_id for value in expected_qs]
-            self.assertEqual(list(actual_qs), list(expected_qs))
-
-    def test_post(self):
-
-        for pk in self.issue_pks:
-            data = {
-                'github_id': pk,
-                'name': 'bucket o bits'
-            }
-
-            response = self.client.post('/worklog/api/issues/' + str(pk) + '/', data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_put(self):
-
-        for pk in self.issue_pks:
-            data = {
-                'github_id': pk,
-                'name': 'renegade nuns on wheels'
-            }
-
-            response = self.client.put('/worklog/api/issues/' + str(pk) + '/', data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_patch(self):
-
-        for pk in self.issue_pks:
-            data = {
-                'github_id': pk,
-                'name': 'beleted'
-            }
-
-            response = self.client.patch('/worklog/api/issues/' + str(pk) + '/', data, format='json')
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_get(self):
-
-        for pk in self.issue_pks:
-            response = self.client.get('/worklog/api/issues/' + str(pk) + '/')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @property

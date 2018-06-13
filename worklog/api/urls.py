@@ -9,8 +9,6 @@ router.register(r'workdays', views.WorkDayViewSet)
 router.register(r'workitems', views.WorkItemViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'jobs', views.JobViewSet)
-router.register(r'repos', views.RepoViewSet)
-router.register(r'issues', views.IssueViewSet)
 
 
 urlpatterns = [

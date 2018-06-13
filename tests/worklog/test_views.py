@@ -1,9 +1,9 @@
 from django_webtest import WebTest
 from django.core.urlresolvers import reverse
 from datetime import date
-from factories import UserFactory, IssueFactory, RepoFactory, WorkItemFactory, JobFactory
 from worklog.views import get_past_n_days, find_previous_saturday, get_total_hours_from_workitems
 from worklog.models import WorkItem
+from tests.worklog.factories import UserFactory, WorkItemFactory, JobFactory
 
 
 class HomepageViewTestCase(WebTest):
@@ -12,11 +12,6 @@ class HomepageViewTestCase(WebTest):
         self.user = UserFactory(username="test_user")
         self.today = date.today()
         self.workitem1 = WorkItemFactory.create(user=self.user, date=self.today, hours=7.75)
-        # create 2 new repos
-        self.repos = RepoFactory.create_batch(2)
-        # create 2 new issues assigned to the user for each repo
-        self.issues_for_repo_1 = IssueFactory.create_batch(2, assignee=self.user, open=True, repo=self.repos[0])
-        self.issues_for_repo_2 = IssueFactory.create_batch(2, assignee=self.user, open=True, repo=self.repos[1])
 
     def test_access(self):
         # Login redirect
@@ -27,15 +22,8 @@ class HomepageViewTestCase(WebTest):
     def test_content(self):
         response = self.app.get(reverse("worklog:home"), user=self.user)
 
-        ###### Test Work pane ######
-        # response.mustcontain("hours worked")  # based on self.workitem1
-
-        ###### Test Github pane ######
-        # it is possible that the body might get chopped off if to long.  Therefore, only use first 25 chars
-        response.mustcontain(self.issues_for_repo_1[0].body[:25])
-        response.mustcontain(self.issues_for_repo_1[1].body[:25])
-        response.mustcontain(self.issues_for_repo_2[0].body[:25])
-        response.mustcontain(self.issues_for_repo_2[1].body[:25])
+        # Test Work pane
+        response.mustcontain("hours worked")  # based on self.workitem1
 
 
 class WorklogViewTestCase(WebTest):
@@ -44,9 +32,9 @@ class WorklogViewTestCase(WebTest):
         self.user = UserFactory(username="tester")
         self.user2 = UserFactory(username="testre")
         self.job = JobFactory(name="test1", available_all_users=True)
-        self.workitemJ = WorkItemFactory.create(user=self.user, job=self.job, date=date(2015,01,13), hours=8.0)
-        self.workitemJ2 = WorkItemFactory.create(user=self.user2, job=self.job, date=date(2015, 01, 13), hours=1.0)
-        self.workitemD = WorkItemFactory.create(user=self.user, job=self.job, date=date(2014,12,30), hours=7.0)
+        self.workitemJ = WorkItemFactory.create(user=self.user, job=self.job, date=date(2015, 1, 13), hours=8.0)
+        self.workitemJ2 = WorkItemFactory.create(user=self.user2, job=self.job, date=date(2015, 1, 13), hours=1.0)
+        self.workitemD = WorkItemFactory.create(user=self.user, job=self.job, date=date(2014, 12, 30), hours=7.0)
         self.workitemD2 = WorkItemFactory.create(user=self.user2, job=self.job, date=date(2014, 12, 30), hours=2.0)
         self.workitemT = WorkItemFactory.create(user=self.user, job=self.job, date=date.today(), hours=3.0)
         self.workitemT2 = WorkItemFactory.create(user=self.user2, job=self.job, date=date.today(), hours=3.5)

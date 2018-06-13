@@ -27,8 +27,6 @@ class WorkItemFilter(filters.FilterSet):
                 'exact', 'in', 'lt', 'lte', 'gt', 'gte', 'range',
             ],
             'job': ['exact', 'in', ],
-            'repo': ['exact', 'in', 'isnull', ],
-            'issue': ['exact', 'in', 'isnull', ],
         }
 
 
@@ -47,17 +45,3 @@ class JobFilter(filters.FilterSet):
         fields = {
             'name': ['exact', 'in', ],
         }
-
-
-class RepoFilter(filters.FilterSet):
-    class Meta:
-        model = models.Repo
-        fields = ['name', ]
-
-
-class IssueFilter(filters.FilterSet):
-    repo = filters.RelatedFilter(RepoFilter, name='repo')
-
-    class Meta:
-        model = models.Issue
-        fields = ['repo', ]

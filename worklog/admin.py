@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from rangefilter.filter import DateRangeFilter
 
-from worklog.models import WorkItem, Job, BillingSchedule, Funding, GithubAlias, Employee, Holiday, WorkPeriod
+from worklog.models import WorkItem, Job, BillingSchedule, Funding, Employee, Holiday, WorkPeriod
 
 
 class RelatedFieldListFilter(admin.RelatedFieldListFilter):
@@ -241,11 +241,6 @@ class JobAdmin(admin.ModelAdmin):
     is_open.admin_order_field = 'is_open'
 
 
-class GithubAliasAdmin(admin.ModelAdmin):
-    list_display = ('user', 'github_name')
-    ordering = ['user']
-
-
 class WorkPeriodAdmin(admin.ModelAdmin):
     list_display = ('payroll_id', 'start_date', 'end_date',)
     list_filter = ('start_date', 'end_date',)
@@ -258,7 +253,6 @@ class HolidayAdmin(admin.ModelAdmin):
 
 admin.site.register(WorkItem, WorkItemAdmin)
 admin.site.register(Job, JobAdmin)
-admin.site.register(GithubAlias, GithubAliasAdmin)
 
 admin.site.register(Employee)
 admin.site.register(WorkPeriod, WorkPeriodAdmin)

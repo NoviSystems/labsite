@@ -23,7 +23,6 @@ django==1.11.10
 djangorestframework-filters==0.10.2
 djangorestframework==3.7.7
 first==2.0.1              # via pip-tools
-github3.py==1.0.0a4
 gunicorn==19.7.1
 idna==2.6                 # via requests
 kombu==4.1.0              # via celery
@@ -32,10 +31,8 @@ psycopg2==2.7.3.2
 pytz==2017.3
 raven==6.5.0
 redis==2.10.6             # via celery
-requests==2.18.4          # via github3.py, stripe
+requests==2.18.4          # via stripe
 six==1.11.0               # via django-environ, pip-tools
 stripe==1.77.1
-uritemplate.py==3.0.2     # via github3.py
-uritemplate==3.0.0        # via uritemplate.py
 urllib3==1.22             # via requests
 vine==1.1.4               # via amqp

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from worklog.models import WorkDay, WorkItem, Job
 
 import worklog.tasks as tasks
-from tests import WorklogTestCaseBase
+from tests.worklog import WorklogTestCaseBase
 
 
 class SendReminderEmailsTestCase(WorklogTestCaseBase):
@@ -38,7 +38,7 @@ class SendReminderEmailsTestCase(WorklogTestCaseBase):
             (self.user3, self.yesterday, 9, "item9", Job.objects.filter(name="Job_Today")[0]),
             (self.user4, self.last_week, 10, "item10", Job.objects.filter(name="Job_Today")[0]),
             (self.user5, self.tomorrow, 11, "item11", Job.objects.filter(name="Job_Today")[0]),
-            ]
+        ]
         for item in items:
             wi = WorkItem.objects.create(user=item[0], date=item[1], hours=item[2], text=item[3], job=item[4])
             wi.save()

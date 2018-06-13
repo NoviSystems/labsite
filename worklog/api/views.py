@@ -28,15 +28,3 @@ class JobViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Job.objects.all()
     serializer_class = serializers.JobSerializer
     filter_class = filters.JobFilter
-
-
-class RepoViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = models.Repo.objects.all()
-    serializer_class = serializers.RepoSerializer
-    filter_class = filters.RepoFilter
-
-
-class IssueViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = models.Issue.objects.all()
-    serializer_class = serializers.IssueSerializer
-    filter_class = filters.IssueFilter

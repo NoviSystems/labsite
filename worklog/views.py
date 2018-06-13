@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View, TemplateView, RedirectView
 
 from worklog.forms import WorkItemForm, WorkItemBaseFormSet
-from worklog.models import WorkItem, Job, Funding, Holiday, Issue
+from worklog.models import WorkItem, Job, Funding, Holiday
 from worklog.tasks import generate_invoice, get_reminder_dates_for_user
 
 
@@ -28,8 +28,6 @@ _column_layout = [
     ('date', 'Date'),
     ('hours', 'Hours'),
     ('job', 'Job'),
-    ('repo', 'Repo'),
-    ('issue', 'Issue'),
     ('text', 'Task'),
 ]
 
@@ -95,18 +93,9 @@ class HomepageView(LoginRequiredMixin, TemplateView):
         # totals up the hours from last sunday to today for [user] (different from last 7 days)
         total_hours = get_total_hours_from_workitems(
             WorkItem.objects.filter(user=user, date__range=(find_previous_saturday(today), today)))
-        # all issues assigned to [user] which are currently open
-        open_user_issues = Issue.objects.select_related('repo').filter(assignee=user, open=True)
-        # filter the issues into a dictionary of {repo: [associated issues]}
-        repos_with_issues = {}
-        for issue in open_user_issues:
-            if issue.repo not in repos_with_issues:
-                repos_with_issues[issue.repo] = []
-            repos_with_issues[issue.repo].append(issue)
 
         context.update({'past_seven_days': past_seven_days})
         context.update({'total_hours': total_hours})
-        context.update({'repos_with_issues': repos_with_issues})
         return context
 
 

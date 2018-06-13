@@ -7,7 +7,6 @@ django-template-forms
 django-admin-rangefilter
 djangorestframework<3.8
 djangorestframework-filters<1
-github3.py>=1.0a
 celery[redis]
 colorlog
 gunicorn

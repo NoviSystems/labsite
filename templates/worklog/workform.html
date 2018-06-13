@@ -21,8 +21,6 @@
                     <tr>
                         <th>Job</th>
                         <th>Hours</th>
-                        <th>Repo</th>
-                        <th>Issue</th>
                         <th>Task</th>
                         <th></th>
                     </tr>
@@ -86,14 +84,6 @@
                     <td class="col-xs-15">{{{row.hours}}}</td>
                 </tr>
                 <tr>
-                    <td class="col-xs-3">Repo</td>
-                    <td class="col-xs-15">{{{row.repo}}}</td>
-                </tr>
-                <tr>
-                    <td class="col-xs-3">Issue</td>
-                    <td class="col-xs-15">{{{row.issue}}}</td>
-                </tr>
-                <tr>
                     <td class="col-xs-3">Description</td>
                     <td class="col-xs-15">{{{row.text}}}</td>
                 </tr>
@@ -101,11 +91,9 @@
         {{else}}
             <thead>
                 <tr>
-                    <th class="col-md-2">Job</th>
+                    <th class="col-md-3">Job</th>
                     <th class="col-md-2">Hours</th>
-                    <th class="col-md-2">Repo</th>
-                    <th class="col-md-2">Issue</th>
-                    <th class="col-md-4">Description</th>
+                    <th class="col-md-7">Description</th>
                     <th id="button-head">
                         <button class="btn btn-primary btn-xs" type="button" id="add-form">+</button>
                     </th>
@@ -122,8 +110,6 @@
         <tr id={{id}}>
             <td class={{job.class}}{{#if job.name}} name={{job.name}}{{/if}}>{{{job.value}}}</td>
             <td class={{hours.class}}{{#if hours.name}} name={{hours.name}}{{/if}}>{{{hours.value}}}</td>
-            <td class={{repo.class}}{{#if repo.name}} name={{repo.name}}{{/if}}>{{{repo.value}}}</td>
-            <td class={{issue.class}}{{#if issue.name}} name={{issue.name}}{{/if}}>{{{issue.value}}}</td>
             <td class="{{text.class}}"{{#if text.name}} name={{text.name}}{{/if}}>{{{text.value}}}</td>
             <td{{#if button.class}} class={{button.class}}{{/if}}>{{{button.value}}}</td>
         </tr>
@@ -146,14 +132,6 @@
                 <tr>
                     <td class="col-xs-3">Hours</td>
                     <td class="col-xs-15">{{{row.hours}}}</td>
-                </tr>
-                <tr>
-                    <td class="col-xs-3">Repo</td>
-                    <td class="col-xs-15">{{{row.repo}}}</td>
-                </tr>
-                <tr>
-                    <td class="col-xs-3">Issue</td>
-                    <td class="col-xs-15">{{{row.issue}}}</td>
                 </tr>
                 <tr>
                     <td class="col-xs-3">Description</td>

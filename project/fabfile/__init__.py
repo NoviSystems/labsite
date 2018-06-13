@@ -19,14 +19,11 @@ PG_VERSION = '9.4'
 
 
 secrets.register('application', OrderedDict([
-        ('SECRET_KEY',  partial(get_random_string, 50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')),
-        ('GITHUB_USER', partial(prompt, "Worklog GitHub username:")),
-        ('GITHUB_PASS', partial(prompt, "Worklog GitHub password:")),
-        ('SENTRY_DSN',  partial(prompt, "Sentry DSN:")),
-        ('STRIPE_API_SECRET_KEY',  partial(prompt, "Stripe secret key:")),
-        ('STRIPE_API_PUBLISHABLE_KEY',  partial(prompt, "Stripe publishable key:")),
-    ])
-)
+    ('SECRET_KEY',  partial(get_random_string, 50, 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')),
+    ('SENTRY_DSN',  partial(prompt, "Sentry DSN:")),
+    ('STRIPE_API_SECRET_KEY',  partial(prompt, "Stripe secret key:")),
+    ('STRIPE_API_PUBLISHABLE_KEY',  partial(prompt, "Stripe publishable key:")),
+]))
 
 env.forward_agent = True
 

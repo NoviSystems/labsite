@@ -58,35 +58,6 @@ JobSelectField.prototype = new SelectField();
 JobSelectField.prototype.constructor = JobSelectField;
 
 
-function RepoSelectField(value, data) {
-    SelectField.call(this, 'repo', value, data);
-}
-
-RepoSelectField.prototype = new RepoSelectField();
-RepoSelectField.prototype.constructor = RepoSelectField;
-
-function IssueSelectField(name, value, data) {
-    SelectField.call(this, name, value, data);
-
-    this.addOption = function(value, text, number) {
-        this.options.push(new Option(value, text, number));
-    }
-
-    function Option(value, text, number) {
-        this.value = value;
-        this.text = text;
-        this.number = number;
-
-        this.toHtml = function() {
-            return '<option value=' + this.value + '>' + this.number + ': ' + this.text + '</option>';
-        }
-    }
-}
-
-IssueSelectField.prototype = new SelectField();
-IssueSelectField.prototype.constructor = IssueSelectField;
-
-
 function InputField(name, value, type) {
     Field.call(this, name, value);
     this.type = type;
@@ -132,7 +103,7 @@ WorkItemInputField.prototype.constructor = WorkItemInputField;
 
 function WorkItemTextareaField(name, value, data) {
     TextareaField.call(this, name, value);
-    
+
     this.toHtml = function() {
         return '<div class="form-group">\
                     <textarea class="form-control input-sm ' + name + '" cols="40" placeholder="Work Description" rows="1" data-row="' + data + '">' + (value ? value : '') + '</textarea>\

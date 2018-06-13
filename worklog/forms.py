@@ -7,7 +7,7 @@ from django.forms import ModelForm
 from django.forms.formsets import BaseFormSet
 
 
-from worklog.models import WorkItem, Job, Repo, Issue
+from worklog.models import WorkItem, Job
 
 
 class WorkItemBaseFormSet(BaseFormSet):
@@ -29,16 +29,12 @@ class BadWorkItemForm(Exception):
 class WorkItemForm(ModelForm):
 
     job = forms.ModelChoiceField(queryset=Job.objects.none(), empty_label="None")  # empty queryset, overridden in ctor
-    repo = forms.ModelChoiceField(queryset=Repo.objects.all(), empty_label="None", required=False)
-    issue = forms.ModelChoiceField(queryset=Issue.objects.all(), empty_label="None", required=False)
 
     job.widget.attrs['class'] = 'form-control'
-    repo.widget.attrs['class'] = 'form-control'
-    issue.widget.attrs['class'] = 'form-control'
 
     class Meta:
         model = WorkItem
-        fields = ('job', 'repo', 'hours', 'issue', 'text')
+        fields = ['job', 'hours', 'text']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user")
@@ -54,17 +50,6 @@ class WorkItemForm(ModelForm):
         self.fields["text"].widget.attrs['placeholder'] = 'Work Description'
 
         self.fields["text"].widget.attrs['rows'] = '6'
-
-        if args:
-            data = args[0]
-        else:
-            data = kwargs.get('data')
-
-        if data:
-            repo_id = data.get('repo')
-            if repo_id:
-                repo = Repo.objects.get(github_id=repo_id)
-                self.fields["issue"].queryset = Issue.objects.filter(repo=repo)
 
     def clean(self):
         cleaned_data = super(WorkItemForm, self).clean()
@@ -82,14 +67,6 @@ class WorkItemForm(ModelForm):
             job = cleaned_data["job"]
         except KeyError:
             job = None
-
-        try:
-            issue = cleaned_data["issue"]
-            if issue == "":
-                issue = None
-
-        except KeyError:
-            issue = None
 
         # Only allows non-zero, non-negative hours to be entered in half hour increments.
         if (hours % 1 != 0) and (hours % 1 % .25 != 0):
