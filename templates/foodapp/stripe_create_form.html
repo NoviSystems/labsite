@@ -2,8 +2,32 @@
 {% load staticfiles %}
 
 {% block content %}
+<style>
+  img {
+    transition: all 0.3s ease;
+  }
+  img {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+    -webkit-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+  img.active {
+    -webkit-filter: grayscale(0%);
+    filter: grayscale(0%);
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+  }
+  .cards {
+    padding-top: 5px;
+  }
+</style>
 <!-- Stripe.js -->
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<!-- Cleave.js -->
+<script type="text/javascript" src="{% static 'js/foodapp/cleave.min.js' %}"></script>
 
 <script type="text/javascript">
 
@@ -35,7 +59,6 @@
         return false;
       });
     });
-
 </script>
 
 <div class="container">
@@ -53,12 +76,13 @@
     {% endif %}
         {% csrf_token %}
         <div class="col-xs-12 col-md-4 col-md-offset-4 payment-errors"></div>
-        <div class="col-xs-12 col-md-4 col-md-offset-4">
+        <div class="col-xs-8 col-md-4 col-md-offset-4">
           <div class="panel" style="background-color: #B9D1E1;">
             <div class="panel-body">
               <h4>{{ user }}</h4>
               <div class="input-group" style="margin-bottom: 5px;">
-                <input type="text" class="form-control" placeholder="Credit Card Number" size="16" maxlength="16" data-stripe="number"/>
+                <input id="card-number" type="text" class="form-control" placeholder="Credit Card Number" size="19" maxlength="19"
+                  data-stripe="number"/>
                 <span class="input-group-addon"><i class="fa fa-credit-card"></i></span>
               </div>
               <div class="row">
@@ -71,17 +95,54 @@
                 <div class="col-xs-4">
                   <input type="text" class="form-control col-sm-2" placeholder="CVC" data-stripe="cvc">
                 </div>
-                <div class="col-xs-4" style="text-align: right;">
-                  <!-- Have picture of whatever card they are using here -->
-                </div>
+              </div>
+              <div class="row cards">
+                <div class="col-xs-4"><span class="card"><img id="amex" src="{% static 'img/amex.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="discover" src="{% static 'img/discover.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="jcb" src="{% static 'img/jcb.png' %}"></span></div>
+              </div>
+              <div class="row cards">
+                <div class="col-xs-4"><span class="card"><img id="diners" src="{% static 'img/diners.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="mastercard" src="{% static 'img/mastercard.png' %}"></span></div>
+                <div class="col-xs-4"><span class="card"><img id="visa" src="{% static 'img/visa.png' %}"></span></div>
               </div>
             </div>
           </div>
-          <button class="col-xs-12 cold-md-4 center-block btn btn-success btn-lg" type="submit">Add Card</button>
+          <button class="col-xs-12 center-block btn btn-success btn-lg" type="submit">Add Card</button>
         </div>
 
       </form>
     </div>
 </div>
 
+<script>
+let cleave = new Cleave('#card-number', {
+  creditCard: true,
+  onCreditCardTypeChanged: function(type) {
+    switch(type) {
+      case 'visa':
+        document.getElementById('visa').classList.add("active");
+        break;
+      case 'amex':
+        document.getElementById('amex').classList.add("active");
+        break;
+      case 'mastercard':
+        document.getElementById('mastercard').classList.add("active");
+        break;
+      case 'discover':
+        document.getElementById('discover').classList.add("active");
+        break;
+      case 'jcb':
+        document.getElementById('jcb').classList.add("active");
+        break;
+      case 'diners':
+        document.getElementById('diners').classList.add("active");
+        break;
+      case 'unknown':
+        $('.card').children().removeClass("active");
+
+    }
+  }
+});
+</script>
 {% endblock %}
