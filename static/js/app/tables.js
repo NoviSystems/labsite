@@ -210,7 +210,7 @@ WorkItemDisplayTable.buildContext = function(workItem) {
             name: (workItem.issue.github_id ? workItem.issue.github_id : ''),
         },
         text: {
-            class: 'col-md-3 text',
+            class: 'col-md-3 preserve-newLine text',
             value: workItem.text
         },
         button: {

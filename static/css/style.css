@@ -11,3 +11,6 @@ tr.workitem-fade  td{
     -o-transition: background-color 1s ease-in-out;
     transition: background-color 1s ease-in-out;
 }
+.preserve-newLine {
+    white-space: pre;
+}
