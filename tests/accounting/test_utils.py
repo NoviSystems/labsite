@@ -1,6 +1,7 @@
 from datetime import date
-from accounting.utils import Month, FiscalCalendar
 from unittest import TestCase
+
+from accounting.utils import FiscalCalendar, Month
 
 
 class MonthTestCase(TestCase):

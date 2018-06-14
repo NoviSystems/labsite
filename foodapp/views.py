@@ -1,17 +1,16 @@
 import calendar
 import datetime
-from decimal import Decimal, ROUND_UP
+from decimal import ROUND_UP, Decimal
 
 from django.conf import settings
-
-from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import CreateView, ListView, TemplateView
-from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
-from django.shortcuts import redirect
 from django.db.models import Sum
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.utils.functional import cached_property
+from django.views.generic import CreateView, ListView, TemplateView
 
 from foodapp import forms, models
 

@@ -1,10 +1,10 @@
-
 from celery import shared_task
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.template import Template, Context
+from django.template import Context, Template
 
 from foodapp import models
+
 
 PAYMENT_REQUIRED_BODY = Template("""
 This is your friendly reminder to submit payment for your

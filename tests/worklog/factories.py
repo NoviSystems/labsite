@@ -1,14 +1,14 @@
-from django.contrib.auth import get_user_model
-
-from worklog.models import WorkItem, Job
-
 import random
+
 import factory
+from django.contrib.auth import get_user_model
 from factory.django import DjangoModelFactory
 from faker.factory import Factory as FakeFactory
 
+from worklog.models import Job, WorkItem
+
+
 User = get_user_model()
-# users = tuple(User.objects.all())
 faker = FakeFactory.create()
 
 

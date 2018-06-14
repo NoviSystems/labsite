@@ -1,9 +1,13 @@
-from django_webtest import WebTest
-from django.core.urlresolvers import reverse
 from datetime import date
-from worklog.views import get_past_n_days, find_previous_saturday, get_total_hours_from_workitems
+
+from django.core.urlresolvers import reverse
+from django_webtest import WebTest
+
+from tests.worklog.factories import JobFactory, UserFactory, WorkItemFactory
 from worklog.models import WorkItem
-from tests.worklog.factories import UserFactory, WorkItemFactory, JobFactory
+from worklog.views import (
+    find_previous_saturday, get_past_n_days, get_total_hours_from_workitems,
+)
 
 
 class HomepageViewTestCase(WebTest):

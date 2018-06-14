@@ -1,18 +1,12 @@
-
-from fabric.api import task, roles, env, execute, cd, sudo
-from fabric.contrib import files
-from fabtools import require
-from fabtools import postgres
-from fabtools import python
-from fabtools import user
-from prefab import pipeline
-from prefab import secrets
-from prefab.utils import host_roles, role_hosts
-
 import re
 
-from project.fabfile import config
-from project.fabfile import PG_VERSION
+from fabric.api import cd, env, execute, roles, sudo, task
+from fabric.contrib import files
+from fabtools import postgres, python, require, user
+from prefab import pipeline, secrets
+from prefab.utils import host_roles, role_hosts
+
+from project.fabfile import PG_VERSION, config
 
 
 IP_ADDR = re.compile(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')

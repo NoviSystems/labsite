@@ -1,6 +1,6 @@
 # flake8: noqa
-
 from django.conf.urls import url
+
 from accounting import views
 
 

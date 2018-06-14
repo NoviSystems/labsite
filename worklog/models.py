@@ -2,7 +2,8 @@ import datetime
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q, Case, When
+from django.db.models import Case, Q, When
+
 
 User = settings.AUTH_USER_MODEL
 

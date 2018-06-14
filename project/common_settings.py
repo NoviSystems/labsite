@@ -11,15 +11,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-from datetime import timedelta
 import os
 import sys
-
-from django.urls import reverse_lazy
-from django.contrib.messages import constants as messages, DEFAULT_TAGS
+from datetime import timedelta
 
 from celery.schedules import crontab
+from django.contrib.messages import DEFAULT_TAGS
+from django.contrib.messages import constants as messages
+from django.urls import reverse_lazy
 from environ import Env
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

@@ -1,12 +1,11 @@
 import datetime
 
-from django.core import mail  # for testing email functionality
 from django.contrib.auth.models import User
-
-from worklog.models import WorkDay, WorkItem, Job
+from django.core import mail
 
 import worklog.tasks as tasks
 from tests.worklog import WorklogTestCaseBase
+from worklog.models import Job, WorkDay, WorkItem
 
 
 class SendReminderEmailsTestCase(WorklogTestCaseBase):

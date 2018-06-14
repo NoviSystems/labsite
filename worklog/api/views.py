@@ -1,9 +1,8 @@
+from django.contrib.auth.models import User
+from rest_framework import viewsets
 
 from worklog import models
 from worklog.api import filters, serializers
-from rest_framework import viewsets
-
-from django.contrib.auth.models import User
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

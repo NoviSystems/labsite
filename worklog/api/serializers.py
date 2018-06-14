@@ -1,9 +1,10 @@
-from worklog.models import WorkDay, WorkItem, Job
-from rest_framework import serializers
+import datetime
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import serializers
 
-import datetime
+from worklog.models import Job, WorkDay, WorkItem
 
 
 class UserSerializer(serializers.ModelSerializer):

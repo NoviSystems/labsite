@@ -1,13 +1,10 @@
-
-from fabric.api import task, env, sudo, puts
-from fabric.contrib import files
-from fabtools.files import is_file
-from fabtools import require
-from fabtools import user
-from prefab import pipeline
-from prefab import secrets
-from prefab import utils
 import posixpath
+
+from fabric.api import env, puts, sudo, task
+from fabric.contrib import files
+from fabtools import require, user
+from fabtools.files import is_file
+from prefab import pipeline, secrets, utils
 
 
 __all__ = (

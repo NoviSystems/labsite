@@ -3,21 +3,23 @@ from collections import OrderedDict
 from datetime import date
 from decimal import Decimal
 
-from django.db.models import Sum, Value as V
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.db.models import Sum
+from django.db.models import Value as V
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
-from django.contrib import messages
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
-from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, FormView
+from django.views.generic import (
+    CreateView, DeleteView, FormView, TemplateView, UpdateView,
+)
 
-from accounting import models
-from accounting import forms
-from accounting.utils import format_currency, Month, FiscalCalendar
+from accounting import forms, models
+from accounting.utils import FiscalCalendar, Month, format_currency
 
 
 class DecimalEncoder(json.JSONEncoder):

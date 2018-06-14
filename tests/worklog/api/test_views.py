@@ -1,20 +1,17 @@
 import datetime
+import uuid
+from random import randrange
 
 from django.contrib.auth.models import User
 from django.db.models import Q
-import uuid
-
+from faker.factory import Factory as FakeFactory
 from rest_framework import status
 from rest_framework.request import Request
-from rest_framework.test import APITestCase, APIRequestFactory
+from rest_framework.test import APIRequestFactory, APITestCase
 
-from faker.factory import Factory as FakeFactory
-
-from worklog.models import WorkItem, Job
-from tests.worklog import factories, WorklogTestCaseBase
-
-from worklog.api.views import WorkItemViewSet, JobViewSet
-from random import randrange
+from tests.worklog import WorklogTestCaseBase, factories
+from worklog.api.views import JobViewSet, WorkItemViewSet
+from worklog.models import Job, WorkItem
 
 
 faker = FakeFactory.create()

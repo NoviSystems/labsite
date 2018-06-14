@@ -1,6 +1,8 @@
-from django import forms
-from foodapp import models
 import datetime
+
+from django import forms
+
+from foodapp import models
 
 
 class OrderBaseForm(forms.ModelForm):

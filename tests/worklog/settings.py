@@ -1,6 +1,7 @@
 import os
 import socket
 
+
 PROJECT_PATH = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 BASE_DIR = os.path.dirname(__file__)
 
@@ -49,8 +50,8 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_DIRS = (
-      # os.path.join(PROJECT_PATH, 'worklog', 'templates'),
-      os.path.join(BASE_DIR, 'templates'),
+    # os.path.join(PROJECT_PATH, 'worklog', 'templates'),
+    os.path.join(BASE_DIR, 'templates'),
 )
 
 STATIC_URL = '/static/'

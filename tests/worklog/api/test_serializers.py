@@ -1,12 +1,12 @@
 import datetime
 
 from django.contrib.auth.models import User
-
-from rest_framework.test import APITestCase
 from rest_framework.serializers import ValidationError
+from rest_framework.test import APITestCase
+
+from tests.worklog import factories
 from worklog.api.serializers import WorkItemSerializer
 from worklog.models import Job
-from tests.worklog import factories
 
 
 class WorkItemSerializerTestCase(APITestCase):

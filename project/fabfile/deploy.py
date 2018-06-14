@@ -1,18 +1,13 @@
-
-from fabric.api import task, runs_once
-from fabric.api import settings, env, hide, cd
-from fabric.api import local, run, sudo
-from fabric.contrib.files import append, upload_template
-from fabtools import require
-from fabtools import supervisor
-from fabtools import python
-from fabtools import files
-from fabtools import user
-from prefab import pipeline
-
+import posixpath
 from importlib import import_module
 from inspect import getsourcefile
-import posixpath
+
+from fabric.api import (
+    cd, env, hide, local, run, runs_once, settings, sudo, task,
+)
+from fabric.contrib.files import append, upload_template
+from fabtools import files, python, require, supervisor, user
+from prefab import pipeline
 
 
 __all__ = (
@@ -44,9 +39,7 @@ def pre_log():
 @task
 @pipeline.once
 def post_log():
-    with settings(hide('running')), \
-         user.masquerade('labuser'):
-
+    with settings(hide('running')), user.masquerade('labuser'):
         details = {
             'branch': run('git --git-dir labsite/.git symbolic-ref --short HEAD', quiet=True),
             'commit': run('git --git-dir labsite/.git rev-parse HEAD', quiet=True),

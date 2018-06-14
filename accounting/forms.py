@@ -1,6 +1,6 @@
 from collections import OrderedDict
-from itertools import chain
 from datetime import date
+from itertools import chain
 
 from django import forms
 from django.db.models import DateField

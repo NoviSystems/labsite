@@ -1,15 +1,14 @@
 import calendar
 import datetime
 
+from celery import shared_task
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.urlresolvers import reverse
-from django.template import Template, Context
+from django.template import Context, Template
 
-from celery import shared_task
-
-from worklog.models import Employee, WorkItem, Job, WorkDay
+from worklog.models import Employee, Job, WorkDay, WorkItem
 
 
 email_msg = Template("""

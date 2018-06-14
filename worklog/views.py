@@ -1,4 +1,3 @@
-
 import calendar
 import datetime
 import json
@@ -14,10 +13,10 @@ from django.forms.models import modelformset_factory
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View, TemplateView, RedirectView
+from django.views.generic import RedirectView, TemplateView, View
 
-from worklog.forms import WorkItemForm, WorkItemBaseFormSet
-from worklog.models import WorkItem, Job, Funding, Holiday
+from worklog.forms import WorkItemBaseFormSet, WorkItemForm
+from worklog.models import Funding, Holiday, Job, WorkItem
 from worklog.tasks import generate_invoice, get_reminder_dates_for_user
 
 

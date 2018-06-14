@@ -5,17 +5,18 @@ from datetime import date
 from operator import attrgetter
 from zipfile import ZipFile
 
+from django import forms
 from django.contrib import admin, messages
-from django.contrib.admin import helpers, SimpleListFilter
-from django.db.models import Sum, Q
+from django.contrib.admin import SimpleListFilter, helpers
+from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
-from django import forms
 from django.utils.translation import ugettext_lazy as _
-
 from rangefilter.filter import DateRangeFilter
 
-from worklog.models import WorkItem, Job, BillingSchedule, Funding, Employee, Holiday, WorkPeriod
+from worklog.models import (
+    BillingSchedule, Employee, Funding, Holiday, Job, WorkItem, WorkPeriod,
+)
 
 
 class RelatedFieldListFilter(admin.RelatedFieldListFilter):

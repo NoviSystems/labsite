@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import models
 from django.utils.translation import ugettext_lazy as _
-
 from registration_invite.admin import UserInvitationAdmin
 
 

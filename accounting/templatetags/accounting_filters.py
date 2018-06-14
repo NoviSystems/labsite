@@ -1,5 +1,7 @@
 from django import template
+
 from accounting.utils import format_currency
+
 
 register = template.Library()
 

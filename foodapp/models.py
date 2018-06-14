@@ -1,11 +1,11 @@
-
 from datetime import date, datetime
 from multiprocessing.pool import ThreadPool as Pool
 
-from django.db import models
-from django.conf import settings
-
 import stripe
+from django.conf import settings
+from django.db import models
+
+
 stripe.api_key = settings.STRIPE_API_SECRET_KEY
 
 
