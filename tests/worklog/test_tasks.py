@@ -5,43 +5,40 @@ from django.core import mail
 
 import worklog.tasks as tasks
 from tests.worklog import WorklogTestCaseBase
-from worklog.models import Job, WorkDay, WorkItem
+from worklog.models import Employee, Job, WorkDay, WorkItem
 
 
 class SendReminderEmailsTestCase(WorklogTestCaseBase):
-    def setUp(self):
-        super(SendReminderEmailsTestCase, self).setUp()
-        self.user3 = User.objects.create_user(username="user3", email="user3@example.com", password="password")
-        self.user4 = User.objects.create_user(username="user4", email="user4@example.com", password="password")
-        self.user5 = User.objects.create_user(username="user5", email="user5@example.com", password="password")
-
-    def tearDown(self):
-        # Delete all test users.
-        self.user3.delete()
-        self.user4.delete()
-        self.user5.delete()
-        super(SendReminderEmailsTestCase, self).tearDown()
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user3 = User.objects.create_user(username="user3", email="user3@example.com", password="password")
+        cls.user4 = User.objects.create_user(username="user4", email="user4@example.com", password="password")
+        cls.user5 = User.objects.create_user(username="user5", email="user5@example.com", password="password")
+        Employee.objects.create(user=cls.user)
+        Employee.objects.create(user=cls.user2)
+        Employee.objects.create(user=cls.user3)
+        Employee.objects.create(user=cls.user4)
+        Employee.objects.create(user=cls.user5)
 
     def test_basic(self):
         # create some work items
+        job = Job.objects.get(name="Job_Today")
         items = [
-            # user, date, hours, text, job
-            (self.user, self.today, 1, "item1", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.yesterday, 2, "item2", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.today_minus_2, 3, "item3", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.today_minus_3, 4, "item4", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.today, 5, "item5", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.yesterday, 6, "item6", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.today_minus_2, 7, "item7", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.today_minus_3, 8, "item8", Job.objects.filter(name="Job_Today")[0]),
-            (self.user3, self.yesterday, 9, "item9", Job.objects.filter(name="Job_Today")[0]),
-            (self.user4, self.last_week, 10, "item10", Job.objects.filter(name="Job_Today")[0]),
-            (self.user5, self.tomorrow, 11, "item11", Job.objects.filter(name="Job_Today")[0]),
+            WorkItem.objects.create(user=self.user, date=self.today, hours=1, text="item1", job=job),
+            WorkItem.objects.create(user=self.user, date=self.yesterday, hours=2, text="item2", job=job),
+            WorkItem.objects.create(user=self.user, date=self.today_minus_2, hours=3, text="item3", job=job),
+            WorkItem.objects.create(user=self.user, date=self.today_minus_3, hours=4, text="item4", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.today, hours=5, text="item5", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.yesterday, hours=6, text="item6", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.today_minus_2, hours=7, text="item7", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.today_minus_3, hours=8, text="item8", job=job),
+            WorkItem.objects.create(user=self.user3, date=self.yesterday, hours=9, text="item9", job=job),
+            WorkItem.objects.create(user=self.user4, date=self.last_week, hours=10, text="item10", job=job),
+            WorkItem.objects.create(user=self.user5, date=self.tomorrow, hours=11, text="item11", job=job),
         ]
         for item in items:
-            wi = WorkItem.objects.create(user=item[0], date=item[1], hours=item[2], text=item[3], job=item[4])
-            wi.save()
-            workday, created = WorkDay.objects.get_or_create(user=item[0], date=item[1])
+            workday, _ = WorkDay.objects.get_or_create(user=item.user, date=item.date)
             workday.reconciled = True
             workday.save()
 
@@ -70,34 +67,31 @@ class SendReminderEmailsTestCase(WorklogTestCaseBase):
 
     def test_empty(self):
         # create some work items
+        job = Job.objects.get(name="Job_Today")
         items = [
-            # user, date, hours, text, job
-            (self.user, self.today, 1, "item1", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.today, 2, "item2", Job.objects.filter(name="Job_Today")[0]),
-            (self.user3, self.today, 3, "item3", Job.objects.filter(name="Job_Today")[0]),
-            (self.user4, self.today, 4, "item4", Job.objects.filter(name="Job_Today")[0]),
-            (self.user5, self.today, 5, "item5", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.yesterday, 6, "item6", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.yesterday, 7, "item7", Job.objects.filter(name="Job_Today")[0]),
-            (self.user3, self.yesterday, 8, "item8", Job.objects.filter(name="Job_Today")[0]),
-            (self.user4, self.yesterday, 9, "item9", Job.objects.filter(name="Job_Today")[0]),
-            (self.user5, self.yesterday, 10, "item10", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.today_minus_2, 11, "item11", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.today_minus_2, 12, "item12", Job.objects.filter(name="Job_Today")[0]),
-            (self.user3, self.today_minus_2, 13, "item13", Job.objects.filter(name="Job_Today")[0]),
-            (self.user4, self.today_minus_2, 14, "item14", Job.objects.filter(name="Job_Today")[0]),
-            (self.user5, self.today_minus_2, 15, "item15", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.today_minus_3, 16, "item16", Job.objects.filter(name="Job_Today")[0]),
-            (self.user2, self.today_minus_3, 17, "item17", Job.objects.filter(name="Job_Today")[0]),
-            (self.user3, self.today_minus_3, 18, "item18", Job.objects.filter(name="Job_Today")[0]),
-            (self.user4, self.today_minus_3, 19, "item19", Job.objects.filter(name="Job_Today")[0]),
-            (self.user5, self.today_minus_3, 20, "item20", Job.objects.filter(name="Job_Today")[0]),
-            ]
-
+            WorkItem.objects.create(user=self.user, date=self.today, hours=1, text="item1", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.today, hours=2, text="item2", job=job),
+            WorkItem.objects.create(user=self.user3, date=self.today, hours=3, text="item3", job=job),
+            WorkItem.objects.create(user=self.user4, date=self.today, hours=4, text="item4", job=job),
+            WorkItem.objects.create(user=self.user5, date=self.today, hours=5, text="item5", job=job),
+            WorkItem.objects.create(user=self.user, date=self.yesterday, hours=6, text="item6", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.yesterday, hours=7, text="item7", job=job),
+            WorkItem.objects.create(user=self.user3, date=self.yesterday, hours=8, text="item8", job=job),
+            WorkItem.objects.create(user=self.user4, date=self.yesterday, hours=9, text="item9", job=job),
+            WorkItem.objects.create(user=self.user5, date=self.yesterday, hours=10, text="item10", job=job),
+            WorkItem.objects.create(user=self.user, date=self.today_minus_2, hours=11, text="item11", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.today_minus_2, hours=12, text="item12", job=job),
+            WorkItem.objects.create(user=self.user3, date=self.today_minus_2, hours=13, text="item13", job=job),
+            WorkItem.objects.create(user=self.user4, date=self.today_minus_2, hours=14, text="item14", job=job),
+            WorkItem.objects.create(user=self.user5, date=self.today_minus_2, hours=15, text="item15", job=job),
+            WorkItem.objects.create(user=self.user, date=self.today_minus_3, hours=16, text="item16", job=job),
+            WorkItem.objects.create(user=self.user2, date=self.today_minus_3, hours=17, text="item17", job=job),
+            WorkItem.objects.create(user=self.user3, date=self.today_minus_3, hours=18, text="item18", job=job),
+            WorkItem.objects.create(user=self.user4, date=self.today_minus_3, hours=19, text="item19", job=job),
+            WorkItem.objects.create(user=self.user5, date=self.today_minus_3, hours=20, text="item20", job=job),
+        ]
         for item in items:
-            wi = WorkItem.objects.create(user=item[0], date=item[1], hours=item[2], text=item[3], job=item[4])
-            wi.save()
-            workday, created = WorkDay.objects.get_or_create(user=item[0], date=item[1])
+            workday, created = WorkDay.objects.get_or_create(user=item.user, date=item.date)
             workday.reconciled = True
             workday.save()
 
