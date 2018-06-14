@@ -207,7 +207,9 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
                 query_params = {'date': random_date, 'name': random_job, 'user': user}
                 expected_qs = Job.get_jobs_open_on(random_date)
                 expected_qs = expected_qs.filter(name=random_job)
-                expected_qs = expected_qs.filter(Q(users__id=user) | Q(available_all_users=True)).distinct().order_by('pk')
+                expected_qs = expected_qs.filter(Q(users__id=user) | Q(available_all_users=True)) \
+                                         .distinct() \
+                                         .order_by('pk')
                 response = self.client.get('/worklog/api/jobs/', query_params)
                 actual_qs = [value["id"] for value in response.data]
                 expected_qs = [value.id for value in expected_qs]
@@ -270,14 +272,14 @@ class CreateWorkItemTestCase(WorklogTestCaseBase):
 
             qs = Job.get_jobs_open_on(self.today)
 
-            self.assertEquals(qs.count(),4)
+            self.assertEquals(qs.count(), 4)
             names = list(job.name for job in qs)
             self.assertTrue("Job_Today" in names)
             self.assertTrue("Job_OneDay" in names)
             self.assertTrue("Job_LastWeek" in names)
             self.assertTrue("Job_LastWeek2" in names)
 
-            self.assertEquals(len(response.context['items']),0)
+            self.assertEquals(len(response.context['items']), 0)
 
     def test_badUser(self):
         uuidstr = '00001111000011110000111100001111'
@@ -298,7 +300,7 @@ class CreateWorkItemTestCase(WorklogTestCaseBase):
         with self.scoped_login('master', 'password'):
             response = self.client.get('/worklog/' + str(self.today) + '/')
 
-            self.assertEquals(len(response.context['items']),1)
+            self.assertEquals(len(response.context['items']), 1)
             items = response.context['items']
 
             # order of columns depends on configuration, so just check that they exist
@@ -322,7 +324,8 @@ class ViewWorkTestCase(WorklogTestCaseBase):
             (self.user, self.last_week, 6, "item6", Job.objects.filter(name="Job_Today")[0]),
 
             (self.user2, self.today, 7, "item7", Job.objects.filter(name="Job_Today")[0]),
-            ]
+        ]
+
         for item in items:
             wi = WorkItem.objects.create(user=item[0], date=item[1], hours=item[2], text=item[3], job=item[4])
             wi.save()
@@ -347,82 +350,82 @@ class ViewWorkTestCase(WorklogTestCaseBase):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/?user=999')
-            self.assertEquals(len(response.context['items']),0)
-            self.assertEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),1)
+            self.assertEquals(len(response.context['items']), 0)
+            self.assertEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 1)
 
     def test_badUser2(self):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/badusername/')
-            self.assertEquals(len(response.context['items']),0)
-            self.assertNotEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),1)
+            self.assertEquals(len(response.context['items']), 0)
+            self.assertNotEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 1)
 
     def test_badJob(self):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/?job=999')
-            self.assertEquals(len(response.context['items']),0)
-            self.assertEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),1)
+            self.assertEquals(len(response.context['items']), 0)
+            self.assertEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 1)
 
     def test_today(self):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/today/')
-            self.assertEquals(len(response.context['items']),4)
-            self.assertNotEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),2)  # 2, one for datemin, one for datemax
+            self.assertEquals(len(response.context['items']), 4)
+            self.assertNotEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 2)  # 2, one for datemin, one for datemax
 
             texts = list(x.text for x in response.context['items'])
             texts.sort()
-            self.assertEqual(texts,['item1','item2','item3','item7',])
+            self.assertEqual(texts, ['item1', 'item2', 'item3', 'item7', ])
 
     def test_today2(self):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/?datemin={0}&datemax={0}'.format(self.today))
-            self.assertEquals(len(response.context['items']),4)
-            self.assertEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),2)  # 2, one for datemin, one for datemax
+            self.assertEquals(len(response.context['items']), 4)
+            self.assertEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 2)  # 2, one for datemin, one for datemax
 
             texts = list(x.text for x in response.context['items'])
             texts.sort()
-            self.assertEqual(texts,['item1','item2','item3','item7',])
+            self.assertEqual(texts, ['item1', 'item2', 'item3', 'item7', ])
 
     def test_user(self):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/user2/')
-            self.assertEquals(len(response.context['items']),1)
-            self.assertNotEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),1)
+            self.assertEquals(len(response.context['items']), 1)
+            self.assertNotEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 1)
 
             texts = list(x.text for x in response.context['items'])
             texts.sort()
-            self.assertEqual(texts,['item7',])
+            self.assertEqual(texts, ['item7'])
 
     def test_userToday(self):
         with self.scoped_login(username='master', password='password'):
 
             response = self.client.get('/worklog/view/master/today/')
-            self.assertEquals(len(response.context['items']),3)
-            self.assertNotEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),3)
+            self.assertEquals(len(response.context['items']), 3)
+            self.assertNotEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 3)
 
             texts = list(x.text for x in response.context['items'])
             texts.sort()
-            self.assertEqual(texts,['item1','item2','item3',])
+            self.assertEqual(texts, ['item1', 'item2', 'item3'])
 
     def test_dateRange(self):
         with self.scoped_login(username='master', password='password'):
 
-            response = self.client.get('/worklog/view/?datemin={0}&datemax={1}'.format(self.last_week,self.yesterday))
-            self.assertEquals(len(response.context['items']),2)
-            self.assertEquals(response.context['menulink_base'],'')
-            self.assertEquals(len(response.context['current_filters']),2)  # 2, one for datemin, one for datemax
+            response = self.client.get('/worklog/view/?datemin={0}&datemax={1}'.format(self.last_week, self.yesterday))
+            self.assertEquals(len(response.context['items']), 2)
+            self.assertEquals(response.context['menulink_base'], '')
+            self.assertEquals(len(response.context['current_filters']), 2)  # 2, one for datemin, one for datemax
 
             texts = list(x.text for x in response.context['items'])
             texts.sort()
-            self.assertEqual(texts,['item4','item6',])
+            self.assertEqual(texts, ['item4', 'item6'])

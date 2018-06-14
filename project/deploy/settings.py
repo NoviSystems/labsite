@@ -6,7 +6,8 @@ checklist and make any necessary changes.
 https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 '''
 
-from ..common_settings import *
+from ..common_settings import *  # noqa
+from ..common_settings import path
 
 
 SECURE_SSL_REDIRECT = True

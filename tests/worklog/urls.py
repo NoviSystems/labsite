@@ -1,5 +1,6 @@
-from django.conf.urls import include, url, patterns
+from django.conf.urls import include, url
+
 
 urlpatterns = [
-   url(r'^worklog/', include('worklog.urls', namespace='worklog')),
- ]
+    url(r'^worklog/', include('worklog.urls', namespace='worklog')),
+]

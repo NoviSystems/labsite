@@ -50,7 +50,7 @@ html_email_msg = Template("""
 """)
 
 
-@shared_task
+@shared_task  # noqa: C901
 def generate_invoice(default_date=None):
     if default_date is None:
         default_date = datetime.date.today()
@@ -187,8 +187,9 @@ def create_reminder_email(email_address, date, date_list=[]):
     url = create_reminder_url(date)
     url_list = [create_reminder_url(rem_date) for rem_date in date_list]
 
-    msg = email_msg.render(Context({'url': url, 'url_list': url_list, 'exp_date': str(exp_date), 'date': str(date)}))
-    html_msg = html_email_msg.render(Context({'url': url, 'url_list': url_list, 'exp_date': str(exp_date), 'date': str(date)}))
+    context = Context({'url': url, 'url_list': url_list, 'exp_date': str(exp_date), 'date': str(date)})
+    msg = email_msg.render(context)
+    html_msg = html_email_msg.render(context)
 
     subj = "Worklog reminder for %s" % str(date)
     from_email = settings.DEFAULT_FROM_EMAIL
@@ -235,9 +236,6 @@ def send_reminder_emails():
             for email in email_list:
                 email.connection = connection
                 email.send()
-    #     print "Reminder emails sent"
-    # else:
-    #     print "Reminder emails turned off, not sent."
 
 
 def test_send_reminder_email(username, date=datetime.date.today()):

@@ -51,7 +51,7 @@ class WorkItemForm(ModelForm):
 
         self.fields["text"].widget.attrs['rows'] = '6'
 
-    def clean(self):
+    def clean(self):  # noqa: C901
         cleaned_data = super(WorkItemForm, self).clean()
         try:
             hours = cleaned_data["hours"]
@@ -72,20 +72,23 @@ class WorkItemForm(ModelForm):
         if (hours % 1 != 0) and (hours % 1 % .25 != 0):
             message_list = ["Please, Hammer, don't hurt 'em! Use 15-minute increments.",
                             "All your mantissa are belong to us. 15-minute increments only. Please.",
-                            "You thought we wouldn't notice that you didn't use 15-minute increments. You were wrong. Try again, jerk.",
-                            "Hey buddy. How's it going? Listen, not a huge deal, but we've got this thing where we use 15-minute increments.",
+                            "You thought we wouldn't notice that you didn't use 15-minute increments. You were wrong. Try again, jerk.",  # noqa: E501
+                            "Hey buddy. How's it going? Listen, not a huge deal, but we've got this thing where we use 15-minute increments.",  # noqa: E501
                             "If you could go ahead and use 15-minute increments, that would be grrrreeaat."]
             error_message = message_list[random.randint(0, len(message_list) - 1)]
             self._errors["hours"] = self.error_class([error_message])
             if hours:
                 del cleaned_data["hours"]
         elif hours < 0:
-            error_message = "We here at <Insert Company Name here> would like you to have a non-negative work experience. Please enter a non-negative number of hours."
+            error_message = ("We here at <Insert Company Name here> would like you to "
+                             "have a non-negative work experience. Please enter a "
+                             "non-negative number of hours.")
             self._errors["hours"] = self.error_class([error_message])
             if hours:
                 del cleaned_data["hours"]
         elif not hours:
-            error_message = "If you work at <Insert Company Name here>, you're more hero than zero. Enter an hero number of hours."
+            error_message = ("If you work at <Insert Company Name here>, you're "
+                             "more hero than zero. Enter an hero number of hours.")
             self._errors["hours"] = self.error_class([error_message])
             if hours:
                 del cleaned_data["hours"]
@@ -98,7 +101,8 @@ class WorkItemForm(ModelForm):
                 del cleaned_data["text"]
 
         if job is None or job == "":
-            error_message = "i.e., the thing you're supposed to wear pants for, but you probably don't, since you're a programmer."
+            error_message = ("i.e., the thing you're supposed to wear pants for, "
+                             "but you probably don't, since you're a programmer.")
             self._errors["job"] = self.error_class([error_message])
             if job:
                 del cleaned_data["job"]

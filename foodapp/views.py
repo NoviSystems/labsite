@@ -103,10 +103,13 @@ class HomeView(LoginRequiredMixin, CreateView):
         now = datetime.datetime.now()
         orders = models.Order.objects.filter(date=datetime.date.today())
 
+        rice_quantity = orders.filter(item__description__icontains='rice') \
+                              .aggregate(Sum('quantity'))['quantity__sum'] or 0
+
         context['last_month'] = "%02d" % (now.month - 1)
         context['year'] = now.year
         context['orders'] = orders
-        context['rice_quantity'] = (orders.filter(item__description__icontains='rice').aggregate(Sum('quantity'))['quantity__sum'] or 0) * .5
+        context['rice_quantity'] = rice_quantity * .5
         context['rice_is_on'] = models.RiceCooker.objects.filter(is_on=True).exists()
         context['customer_exists'] = True if get_stripe_customer(self.request.user) else False
         return context
@@ -310,14 +313,21 @@ class LeaderboardView(LoginRequiredMixin, TemplateView):
 
     def get_burrito_eater_diet(self, year=None, month=None, rookie=False):
         if rookie is True:
-            return User.objects.filter(orders__item__name__iexact="Burrito", date_joined__year__gte=year, date_joined__month__gte=month)
+            return User.objects.filter(
+                orders__item__name__iexact="Burrito",
+                date_joined__year__gte=year,
+                date_joined__month__gte=month)
         elif month is None and year is not None:
-            return User.objects.filter(orders__item__name__iexact="Burrito", orders__date__year=year)
+            return User.objects.filter(
+                orders__item__name__iexact="Burrito",
+                orders__date__year=year)
         elif month is not None and year is not None:
-            return User.objects.filter(orders__item__name__iexact="Burrito", orders__date__year=year, orders__date__month=month)
+            return User.objects.filter(
+                orders__item__name__iexact="Burrito",
+                orders__date__year=year,
+                orders__date__month=month)
 
         return User.objects.filter(orders__item__name__iexact="Burrito")
-
 
     def get_context_data(self, **kwargs):
         context = super(LeaderboardView, self).get_context_data(**kwargs)
@@ -329,11 +339,11 @@ class LeaderboardView(LoginRequiredMixin, TemplateView):
         last_year_date = datetime.date(int(now.year - 1), 1, 1)
 
         all_time_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet())
-        last_year_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_year_date.year))
+        last_year_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_year_date.year))  # noqa: E501
         this_year_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year))
-        last_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_month_date.year, month=last_month_date.month))
-        current_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year, month=now.month))
-        rookie_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year - 1, month=now.month, rookie=True))
+        last_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=last_month_date.year, month=last_month_date.month))  # noqa: E501
+        current_month_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year, month=now.month))  # noqa: E501
+        rookie_burrito_eaters_score = self.annotate_user_orders(self.get_burrito_eater_diet(year=now.year - 1, month=now.month, rookie=True))  # noqa: E501
 
         sorted_alltime = []
         sorted_year = []
@@ -403,12 +413,14 @@ class MonthOrdersView(LoginRequiredMixin, TemplateView):
         rice_products = month_orders.filter(item__description__icontains="rice")
 
         for order in rice_products.filter(item__name__iexact="Burrito"):
-            user_to_orders_dict[order.user.username] = [user_to_orders_dict.get(order.user.username, [0, 0])[0] + order.quantity, 0]
+            user_to_orders_dict[order.user.username] = \
+                [user_to_orders_dict.get(order.user.username, [0, 0])[0] + order.quantity, 0]
 
         for order in rice_products.exclude(item__name__iexact="Burrito"):
             if (order.user.username not in user_to_orders_dict):
                 user_to_orders_dict[order.user.username] = [0, 0]
-            user_to_orders_dict[order.user.username][1] = user_to_orders_dict.get(order.user.username, [0, 0])[1] + order.quantity * .5
+            user_to_orders_dict[order.user.username][1] =  \
+                user_to_orders_dict.get(order.user.username, [0, 0])[1] + order.quantity * .5
 
         for username in user_to_orders_dict:
             num_burritos = user_to_orders_dict[username][0]
@@ -430,7 +442,10 @@ class SuperMonthOrdersView(LoginRequiredMixin, TemplateView):
         if request.user.is_superuser:
             year = self.kwargs['year']
             month = self.kwargs['month']
-            filtered_orders = models.Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year)
+            filtered_orders = models.Order.objects \
+                                          .filter(item__name__iexact="Burrito") \
+                                          .filter(date__month=month) \
+                                          .filter(date__year=year)
 
             usernames = {}
             for order in filtered_orders:
@@ -444,7 +459,11 @@ class SuperMonthOrdersView(LoginRequiredMixin, TemplateView):
                         form_id = 'id_' + order.user.username
                         form = request.POST.get(form_id)
                         if form:
-                            new_save = models.AmountPaid(amount=form, user=order.user, date=order.date)
+                            new_save = models.AmountPaid(
+                                amount=form,
+                                user=order.user,
+                                date=order.date,
+                            )
                             new_save.save()
         return HttpResponseRedirect(success_url)
 
@@ -485,7 +504,9 @@ class SuperMonthOrdersView(LoginRequiredMixin, TemplateView):
 
         # Creates a dictionary of user to number of burritos consumed
         user_to_orders_dict = {}
-        for order in models.Order.objects.filter(item__name__iexact="Burrito").filter(date__month=month).filter(date__year=year):
+        for order in models.Order.objects.filter(item__name__iexact="Burrito") \
+                                         .filter(date__month=month) \
+                                         .filter(date__year=year):
             user_to_orders_dict[order.user.username] = user_to_orders_dict.get(order.user.username, 0) + order.quantity
         for username in user_to_orders_dict:
             money_paid = Decimal(0)
@@ -517,7 +538,7 @@ class BurritoProjectionView(LoginRequiredMixin, TemplateView):
     @staticmethod
     def monthdelta(date, delta):
         # https://stackoverflow.com/a/22443132/1103124
-        m, y = (date.month+delta) % 12, date.year + ((date.month)+delta-1) // 12
+        m, y = (date.month + delta) % 12, date.year + ((date.month) + delta - 1) // 12
         if not m:
             m = 12
         d = min(date.day, calendar.monthrange(y, m)[1])

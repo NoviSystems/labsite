@@ -30,7 +30,9 @@ class JobFactory(DjangoModelFactory):
         model = Job
 
     open_date = factory.LazyAttribute(lambda p: faker.date_time_between(start_date='-1y', end_date='-1y'))
-    close_date = factory.LazyAttribute(lambda p: faker.date_time_between(start_date='-1y') if random.choice([True, False]) else None)
+    close_date = factory.LazyAttribute(
+        lambda p: faker.date_time_between(start_date='-1y') if random.choice([True, False]) else None
+    )
     name = factory.LazyAttribute(lambda p: faker.sentence(nb_words=3))
     available_all_users = factory.LazyAttribute(lambda p: faker.boolean())
 

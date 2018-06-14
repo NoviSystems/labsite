@@ -36,6 +36,7 @@ def _itercolumns(item):
     for key, title in _column_layout:
         yield getattr(item, key)
 
+
 no_reminder_msg = 'There is no stored reminder with the given id.  Perhaps that reminder was already used?'
 
 
@@ -81,7 +82,10 @@ class HomepageView(LoginRequiredMixin, TemplateView):
         for date in get_past_n_days(today):
             # get the year-month-date representation, strip off the year and
             # any 0's in front of the month
-            datestring = "{weekday} {date}".format(weekday=day_list[date.weekday()], date=date.strftime('%m-%d').lstrip('0'))
+            datestring = "{weekday} {date}".format(
+                weekday=day_list[date.weekday()],
+                date=date.strftime('%m-%d').lstrip('0')
+            )
             # get the total hours for that day's workitems
             hours = get_total_hours_from_workitems(WorkItem.objects.filter(user=user, date=date))
             # only show the link to the workitem if it's recent and unreconciled
@@ -182,7 +186,8 @@ class WorkViewMenu(object):
 
 class WorkViewerFilter(object):
 
-    def __init__(self, key, title, filter_lookup, query_fmtstring="{0}={1}", model=None, error_name="ERROR", name_attr=None):
+    def __init__(self, key, title, filter_lookup, query_fmtstring="{0}={1}",
+                 model=None, error_name="ERROR", name_attr=None):
         self.key = key
         self.title = title
         self.filter_lookup = filter_lookup
@@ -378,7 +383,6 @@ class ReportView(LoginRequiredMixin, TemplateView):
         if 'date' in request.GET:
             try:
                 date = request.GET['date']
-                date_time = datetime.datetime.strptime(date, '%Y-%m-%d')
             except ValueError:
                 date = datetime.date.today()
                 return self.render_to_response({
@@ -386,7 +390,7 @@ class ReportView(LoginRequiredMixin, TemplateView):
                     'date': date
                 })
         else:
-            date = unicode(datetime.date.today())
+            date = str(datetime.date.today())
 
         return self.render_to_response({'date': date})
 
@@ -445,9 +449,7 @@ class ChartView(LoginRequiredMixin, TemplateView):
         else:
             return self.render_to_response(context)
 
-    def post(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-
+    def post(self, request, *args, **kwargs):  # noqa: C901
         job_id = request.POST['job_id']
         start_date = None
         end_date = None
@@ -459,7 +461,7 @@ class ChartView(LoginRequiredMixin, TemplateView):
         # Check if the job doesnt exist due to a bad param
         try:
             job = Job.objects.get(pk=job_id)
-        except:
+        except Exception:
             return self.error('Job with id %s does not exist' % job_id)
 
         if job is not None:
@@ -585,12 +587,6 @@ class ChartView(LoginRequiredMixin, TemplateView):
                     # If we have a difference between the initial date and start date
                     # then we need to calculate up to the initial days
                     if initial_days > 0:
-                        if funding is not None:
-                            initial_hours = funding.order_by(
-                                'date_available')[0].hours
-                        else:
-                            initial_hours = 0
-                        initial_hours = 0
                         for n in range(initial_days):
                             if work_items is not None:
                                 for work_item in work_items.filter(date=initial_date):

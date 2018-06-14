@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^view/' + DATERANGE1 + '/$', views.WorklogView.as_view(), name='view-daterange'),
     url(r'^view/' + DATERANGE2 + '/$', views.WorklogView.as_view(), name='view-datemax'),
     url(r'^view/' + USERNAME + '/$', views.WorklogView.as_view(), name='view-user'),
-    url(r'^view/' + USERNAME + '/today/$', views.WorklogView.as_view(), {'datemin': 'today', 'datemax': 'today'}, name='view-user-today'),
+    url(r'^view/' + USERNAME + '/today/$', views.WorklogView.as_view(), {'datemin': 'today', 'datemax': 'today'}, name='view-user-today'),  # noqa: E501
     url(r'^view/' + USERNAME + '/' + DATERANGE1 + '/$', views.WorklogView.as_view(), name='view-user-daterange'),
     url(r'^view/' + USERNAME + '/' + DATERANGE2 + '/$', views.WorklogView.as_view(), name='view-user-datemax'),
 

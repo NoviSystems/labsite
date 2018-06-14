@@ -22,13 +22,13 @@ class WorklogTestCaseBase(TestCase):
 
         today = datetime.date.today()
         self.today = today
-        last_week  = today - datetime.timedelta(days=7)
+        last_week = today - datetime.timedelta(days=7)
         last_2week = today - datetime.timedelta(days=14)
-        next_week  = today + datetime.timedelta(days=7)
+        next_week = today + datetime.timedelta(days=7)
         self.last_week = last_week
         self.next_week = next_week
         self.yesterday = self.today - datetime.timedelta(days=1)
-        self.tomorrow  = self.today + datetime.timedelta(days=1)
+        self.tomorrow = self.today + datetime.timedelta(days=1)
         self.today_minus_2 = self.today - datetime.timedelta(days=2)
         self.today_minus_3 = self.today - datetime.timedelta(days=3)
 

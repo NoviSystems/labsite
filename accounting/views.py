@@ -55,7 +55,10 @@ class AccountingMixin(LoginRequiredMixin):
     @cached_property
     def team_role(self):
         try:
-            return models.UserTeamRole.objects.get(user=self.user, business_unit=self.current_business_unit)
+            return models.UserTeamRole.objects.get(
+                user=self.user,
+                business_unit=self.current_business_unit,
+            )
         except models.UserTeamRole.DoesNotExist:
             return None
 
@@ -185,23 +188,26 @@ class ContractCtxMixin(object):
     """
 
     def make_contract_context(self, contract):
+        url_kwargs = self.contract_url_kwargs(contract)
+
         return {
             'contract': contract,
             'invoices': [
                 self.make_invoice_context(invoice) for invoice
                 in models.Invoice.objects.filter(contract=contract).order_by('-expected_invoice_date')
             ],
-            'update_url': reverse('accounting:update_contract', kwargs=self.contract_url_kwargs(contract)),
-            'invoice_url': reverse('accounting:create_invoice', kwargs=self.contract_url_kwargs(contract)),
-            'detail_url': reverse('accounting:contract_detail', kwargs=self.contract_url_kwargs(contract)),
+            'update_url': reverse('accounting:update_contract', kwargs=url_kwargs),
+            'invoice_url': reverse('accounting:create_invoice', kwargs=url_kwargs),
+            'detail_url': reverse('accounting:contract_detail', kwargs=url_kwargs),
         }
 
     def make_invoice_context(self, invoice):
+        url_kwargs = self.invoice_url_kwargs(invoice)
         return {
             'invoice': invoice,
-            'delete_url': reverse('accounting:delete_invoice', kwargs=self.invoice_url_kwargs(invoice)),
-            'update_url': reverse('accounting:update_invoice', kwargs=self.invoice_url_kwargs(invoice)),
-            'print_url': reverse('accounting:print_invoice', kwargs=self.invoice_url_kwargs(invoice)),
+            'delete_url': reverse('accounting:delete_invoice', kwargs=url_kwargs),
+            'update_url': reverse('accounting:update_invoice', kwargs=url_kwargs),
+            'print_url': reverse('accounting:print_invoice', kwargs=url_kwargs),
         }
 
     def contract_url_kwargs(self, contract):
@@ -336,10 +342,14 @@ class DashboardView(ViewerMixin, TemplateView):
         cash_balances = balances['Cash Balance']
         invoice_groups_and_totals = list(zip(invoice_groups, balances['Invoices']))
 
+        next_kwargs = {'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}
+        prev_kwargs = {'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}
+        current_kwargs = {'business_unit': self.current_business_unit.pk}
+
         context.update({
-            'next_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
-            'prev_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
-            'current_url': reverse('accounting:dashboard', kwargs={'business_unit': self.current_business_unit.pk}),
+            'next_url': reverse('accounting:dashboard', kwargs=next_kwargs),
+            'prev_url': reverse('accounting:dashboard', kwargs=prev_kwargs),
+            'current_url': reverse('accounting:dashboard', kwargs=current_kwargs),
 
             'invoice_groups_and_totals': invoice_groups_and_totals,
             'billing_month': self.current_billing_month,
@@ -495,10 +505,15 @@ class MonthlyReconcileView(ViewerMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        next_kwargs = {'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}
+        prev_kwargs = {'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}
+        current_kwargs = {'business_unit': self.current_business_unit.pk}
+
         context.update({
-            'next_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year + 1}),
-            'prev_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk, 'fiscal_year': self.fiscal_year - 1}),
-            'current_url': reverse('accounting:reconcile', kwargs={'business_unit': self.current_business_unit.pk}),
+            'next_url': reverse('accounting:reconcile', kwargs=next_kwargs),
+            'prev_url': reverse('accounting:reconcile', kwargs=prev_kwargs),
+            'current_url': reverse('accounting:reconcile', kwargs=current_kwargs),
             'billing_prefix': '%d_%02d' % (self.current_billing_month.year, self.current_billing_month.month, )
         })
         return context
@@ -602,7 +617,10 @@ class BusinessUnitUpdateView(ManagerMixin, UpdateView):
     pk_url_kwarg = 'business_unit'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:business_unit_settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy(
+            'accounting:business_unit_settings',
+            kwargs={'business_unit': self.kwargs['business_unit']},
+        )
 
 
 ################################################################
@@ -653,11 +671,19 @@ class ContractDetailView(ContractMixin, ContractCtxMixin, TemplateView):
 
         if activate is not None:
             self.activate(instance)
-            return redirect('accounting:contract_detail', business_unit=self.current_business_unit.pk, contract=kwargs['contract'])
+            return redirect(
+                'accounting:contract_detail',
+                business_unit=self.current_business_unit.pk,
+                contract=kwargs['contract'],
+            )
 
         elif complete is not None:
             self.complete(instance)
-            return redirect('accounting:contract_detail', business_unit=self.current_business_unit.pk, contract=kwargs['contract'])
+            return redirect(
+                'accounting:contract_detail',
+                business_unit=self.current_business_unit.pk,
+                contract=kwargs['contract'],
+            )
 
         elif delete is not None:
             self.delete(instance)
@@ -775,7 +801,10 @@ class UserTeamRoleCreateView(ManagerMixin, CreateView):
     template_name = 'accounting/base_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy(
+            'accounting:user_team_roles_settings',
+            kwargs={'business_unit': self.kwargs['business_unit']},
+        )
 
     def form_valid(self, form):
         business_unit = models.BusinessUnit.objects.get(pk=self.kwargs['business_unit'])
@@ -784,7 +813,7 @@ class UserTeamRoleCreateView(ManagerMixin, CreateView):
         try:
             response = super(UserTeamRoleCreateView, self).form_valid(form)
             return response
-        except:
+        except Exception:
             form.add_error(None, 'This user already has a role in this team.')
             return self.form_invalid(form)
 
@@ -796,13 +825,17 @@ class UserTeamRoleDeleteView(ManagerMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if self.object.role == 'MANAGER' and models.UserTeamRole.objects.filter(role='MANAGER', business_unit=self.object.business_unit).count() == 1:
+        role_count = models.UserTeamRole.objects.filter(role='MANAGER', business_unit=self.object.business_unit).count()
+        if self.object.role == 'MANAGER' and role_count == 1:
             raise Http404()
         else:
             return super(UserTeamRoleDeleteView, self).delete(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy(
+            'accounting:user_team_roles_settings',
+            kwargs={'business_unit': self.kwargs['business_unit']},
+        )
 
 
 class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
@@ -812,4 +845,7 @@ class UserTeamRoleUpdateView(ManagerMixin, UpdateView):
     pk_url_kwarg = 'user_team_role'
 
     def get_success_url(self):
-        return reverse_lazy('accounting:user_team_roles_settings', kwargs={'business_unit': self.kwargs['business_unit']})
+        return reverse_lazy(
+            'accounting:user_team_roles_settings',
+            kwargs={'business_unit': self.kwargs['business_unit']},
+        )
