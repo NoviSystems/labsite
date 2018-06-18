@@ -130,7 +130,7 @@ class WorkItem(models.Model):
         if (not Job.objects.available_to(self.user).filter(name=self.job.name).exists()):
             raise ValueError("Specified job is not available to {user}".format(user=str(self.user)))
 
-        if (not Job.objects.open_on(self.date).filter(name=self.job.name).exists()):
-            raise ValueError("Specified job is not open on {date}".format(date=self.date.isoformat()))
+        # if (not Job.objects.open_on(self.date).filter(name=self.job.name).exists()):
+        #     raise ValueError("Specified job is not open on {date}".format(date=self.date.isoformat()))
 
         super(WorkItem, self).save(*args, **kwargs)
