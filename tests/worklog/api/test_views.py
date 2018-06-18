@@ -127,7 +127,7 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
         date_list = [today - datetime.timedelta(days=x) for x in range(0, (today - oldest_job.open_date).days)]
 
         for date in date_list:
-            expected_qs = Job.get_jobs_open_on(date)
+            expected_qs = Job.objects.open_on(date).order_by('pk')
             response = self.client.get('/worklog/api/jobs/', {'date': date})
             actual_qs = [value["id"] for value in response.data]
             expected_qs = [value.id for value in expected_qs]
@@ -142,9 +142,10 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
             expected_qs = [value.id for value in expected_qs]
             self.assertEqual(list(actual_qs), list(expected_qs))
 
-        for user in range(1, 30):
-            expected_qs = Job.objects.filter(Q(users__id=user) | Q(available_all_users=True)).distinct().order_by('pk')
-            response = self.client.get('/worklog/api/jobs/', {'user': user})
+        for user_id in self.user_pks:
+            user = User.objects.get(id=user_id)
+            expected_qs = Job.objects.available_to(user=user).distinct().order_by('pk')
+            response = self.client.get('/worklog/api/jobs/', {'user': user_id})
             actual_qs = [value["id"] for value in response.data]
             expected_qs = [value.id for value in expected_qs]
             self.assertEqual(list(actual_qs), list(expected_qs))
@@ -156,7 +157,7 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
             random_job = job_names[randrange(len(job_names))]
             for user in range(1, 10):
                 query_params = {'date': random_date, 'name': random_job, 'user': user}
-                expected_qs = Job.get_jobs_open_on(random_date)
+                expected_qs = Job.objects.open_on(random_date)
                 expected_qs = expected_qs.filter(name=random_job)
                 expected_qs = expected_qs.filter(Q(users__id=user) | Q(available_all_users=True)) \
                                          .distinct() \
@@ -214,7 +215,7 @@ class CreateWorkItemTestCase(WorklogTestCaseBase):
         with self.scoped_login('master', 'password'):
             response = self.client.get('/worklog/' + str(self.today) + '/')
 
-            qs = Job.get_jobs_open_on(self.today)
+            qs = Job.objects.open_on(self.today)
 
             self.assertEquals(qs.count(), 4)
             names = list(job.name for job in qs)

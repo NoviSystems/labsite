@@ -19,7 +19,7 @@ class WorkItemSerializerTestCase(APITestCase):
         factories.JobFactory.create_batch(10)
 
         self.jobs = Job.objects.all()
-        self.open_jobs = Job.get_jobs_open_on(datetime.date.today())
+        self.open_jobs = Job.objects.open_on(datetime.date.today())
         self.closed_jobs = Job.objects.exclude(pk__in=self.open_jobs.values_list('pk', flat=True))
 
     def test_fixtures(self):
