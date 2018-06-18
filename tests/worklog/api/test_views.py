@@ -6,11 +6,9 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from faker.factory import Factory as FakeFactory
 from rest_framework import status
-from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory, APITestCase
 
 from tests.worklog import WorklogTestCaseBase, factories
-from worklog.api.views import JobViewSet, WorkItemViewSet
 from worklog.models import Job, WorkItem
 
 
@@ -19,53 +17,26 @@ faker = FakeFactory.create()
 
 class ViewSetBaseTestCase(APITestCase):
 
-    def setUp(self):
-
-        self._factory = APIRequestFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = APIRequestFactory()
 
         factories.UserFactory.create_batch(10)
         factories.WorkItemFactory.create_batch(10)
         factories.JobFactory.create_batch(10)
 
-        self.user_pks = list(User.objects.all().values_list('pk', flat=True))
-        self.workitem_pks = list(WorkItem.objects.all().values_list('pk', flat=True))
-        self.job_pks = list(Job.get_jobs_open_on(datetime.date.today()).values_list('pk', flat=True))
+        cls.user_pks = User.objects.all().values_list('pk', flat=True).order_by('pk')
+        cls.workitem_pks = WorkItem.objects.all().values_list('pk', flat=True).order_by('pk')
+        cls.job_pks = Job.objects.open_on(datetime.date.today()).values_list('pk', flat=True).order_by('pk')
 
+    def setUp(self):
         auth_user = User.objects.get(pk=self.user_pks[0])
         self.client.force_authenticate(user=auth_user)
-
-    def tearDown(self):
-
-        WorkItem.objects.all().delete()
-        Job.objects.all().delete()
-
-    def get_queryset(self, query_params=None):
-
-        request = self.factory.get('')
-        request.GET = query_params
-        drf_request = Request(request)
-        self.viewset.request = drf_request
-        return self.viewset.get_queryset().order_by('pk')
-
-    @property
-    def factory(self):
-        return self._factory
-
-    @property
-    def viewset(self):
-        raise NotImplementedError("Property must be implemented in subclass.")
 
 
 class WorkItemViewSetTestCase(ViewSetBaseTestCase):
 
-    def setUp(self):
-
-        self._viewset = WorkItemViewSet()
-
-        super(WorkItemViewSetTestCase, self).setUp()
-
     def test_get_queryset(self):
-
         oldest_workitem = WorkItem.objects.all().order_by('date')[0]
         today = datetime.date.today()
         date_list = [today - datetime.timedelta(days=x) for x in range(0, (today - oldest_workitem.date).days)]
@@ -96,7 +67,6 @@ class WorkItemViewSetTestCase(ViewSetBaseTestCase):
                 self.assertEqual(list(actual_qs), list(expected_qs))
 
     def test_post(self):
-
         data = {
             'user': self.user_pks[0],
             'date': '2014-06-21',
@@ -109,7 +79,6 @@ class WorkItemViewSetTestCase(ViewSetBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_put(self):
-
         data = {
             'id': 10,
             'user': self.user_pks[0],
@@ -119,10 +88,7 @@ class WorkItemViewSetTestCase(ViewSetBaseTestCase):
             'text': 'testing severythin news',
         }
 
-        # print "WorkItem Count", WorkItem.objects.values_list("pk", flat=True)
-
         response = self.client.put('/worklog/api/workitems/' + str(data['id']) + '/', data, format='json')
-        # print response.content
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         data = {
@@ -146,28 +112,16 @@ class WorkItemViewSetTestCase(ViewSetBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get(self):
-
         workitems = WorkItem.objects.all().values_list('id', flat=True)
 
         for workitem in workitems:
             response = self.client.get('/worklog/api/workitems/' + str(workitem) + '/')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @property
-    def viewset(self):
-        return self._viewset
-
 
 class JobViewSetTestCase(ViewSetBaseTestCase):
 
-    def setUp(self):
-
-        self._viewset = JobViewSet()
-
-        super(JobViewSetTestCase, self).setUp()
-
     def test_get_queryset(self):
-
         oldest_job = Job.objects.all().order_by('open_date')[0]
         today = datetime.date.today()
         date_list = [today - datetime.timedelta(days=x) for x in range(0, (today - oldest_job.open_date).days)]
@@ -213,7 +167,6 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
                 self.assertEqual(list(actual_qs), list(expected_qs))
 
     def test_post(self):
-
         data = {
             'id': 7114,
             'user': 29,
@@ -227,7 +180,6 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_put(self):
-
         data = {
             'id': 7114,
             'user': self.user_pks[0],
@@ -241,7 +193,6 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_patch(self):
-
         data = {
             'id': self.job_pks[3],
             'name': 'Bad banana on Broadway'
@@ -255,10 +206,6 @@ class JobViewSetTestCase(ViewSetBaseTestCase):
         for job in self.job_pks:
             response = self.client.get('/worklog/api/jobs/' + str(job) + '/')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    @property
-    def viewset(self):
-        return self._viewset
 
 
 class CreateWorkItemTestCase(WorklogTestCaseBase):
@@ -307,25 +254,22 @@ class CreateWorkItemTestCase(WorklogTestCaseBase):
 
 
 class ViewWorkTestCase(WorklogTestCaseBase):
-    def setUp(self):
-        super(ViewWorkTestCase, self).setUp()
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
         # create some work items
-        items = [
-            # user, date, hours, text, job
-            (self.user, self.today, 1, "item1", Job.objects.filter(name="Job_Today")[0]),
-            (self.user, self.today, 2, "item2", Job.objects.filter(name="Job_OneDay")[0]),
-            (self.user, self.today, 3, "item3", Job.objects.filter(name="Job_LastWeek2")[0]),
+        job = Job.objects.get(name="Job_Today")
+        WorkItem.objects.create(user=cls.user, date=cls.today, hours=1, text="item1", job=job),
+        WorkItem.objects.create(user=cls.user, date=cls.today, hours=2, text="item2", job=job),
+        WorkItem.objects.create(user=cls.user, date=cls.today, hours=3, text="item3", job=job),
 
-            (self.user, self.yesterday, 4, "item4", Job.objects.filter(name="Job_OneDay")[0]),
-            (self.user, self.tomorrow, 5, "item5", Job.objects.filter(name="Job_LastWeek2")[0]),
-            (self.user, self.last_week, 6, "item6", Job.objects.filter(name="Job_Today")[0]),
+        WorkItem.objects.create(user=cls.user, date=cls.yesterday, hours=4, text="item4", job=job),
+        WorkItem.objects.create(user=cls.user, date=cls.tomorrow, hours=5, text="item5", job=job),
+        WorkItem.objects.create(user=cls.user, date=cls.last_week, hours=6, text="item6", job=job),
 
-            (self.user2, self.today, 7, "item7", Job.objects.filter(name="Job_Today")[0]),
-        ]
-
-        for item in items:
-            wi = WorkItem.objects.create(user=item[0], date=item[1], hours=item[2], text=item[3], job=item[4])
-            wi.save()
+        WorkItem.objects.create(user=cls.user2, date=cls.today, hours=7, text="item7", job=job),
 
     def test_basic(self):
         with self.scoped_login(username='master', password='password'):

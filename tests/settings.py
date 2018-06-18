@@ -1,4 +1,5 @@
 from project.common_settings import *  # noqa
+from project.common_settings import LOGGING
 
 
 DATABASES = {
@@ -21,3 +22,7 @@ WORKLOG_SEND_REMINDERS = True
 WORKLOG_SEND_REMINDERS_HOUR = 18
 
 WORKLOG_EMAIL_REMINDERS_EXPIRE_AFTER = 4
+
+
+# Logging
+LOGGING['root']['level'] = 'ERROR'
