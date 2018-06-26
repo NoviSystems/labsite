@@ -1,11 +1,6 @@
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth import views as auth_views
-from django.views.generic import TemplateView
 from template_forms import bs3
-
-
-class HomepageView(TemplateView):
-    template_name = 'labsite/home.html'
 
 
 # Auth forms
