@@ -23,7 +23,7 @@ from environ import Env
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def path(value):
@@ -31,11 +31,18 @@ def path(value):
     return os.path.abspath(os.path.join(BASE_DIR, value))
 
 
+# Base directory for configuration files
+LABSITE_CONF = os.path.abspath(os.environ['LABSITE_CONF'])
+
+
 # Read in environment variables. Default values should be secure.
 env = Env(
     DEBUG=(bool, False),
     SECRET_KEY=str,
-    HOST_NAME=str,
+    ALLOWED_HOSTS=list,
+    SITE_URL=(str, 'http://localhost'),
+
+    DATABASE_URL=str,
     BROKER_URL=str,
 
     WORKLOG_SEND_REMINDERS=bool,
@@ -46,7 +53,7 @@ env = Env(
 
     SENTRY_DSN=(str, ''),
 )
-env.read_env(path('.env'))  # parse .env into os.environ
+env.read_env(os.path.join(LABSITE_CONF, 'labsite.env'))
 
 
 # Authentication
@@ -74,7 +81,7 @@ SECRET_KEY = env('SECRET_KEY')
 # With DEBUG off, Django checks that the Host header in requests matches one of
 # these. If you turn off DEBUG and you're suddenly getting HTTP 400 Bad
 # Request responses, you need to add the host names to this list
-ALLOWED_HOSTS = [env('HOST_NAME'), ]
+ALLOWED_HOSTS = env('ALLOWED_HOSTS')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -260,7 +267,7 @@ STRIPE_API_SECRET_KEY = env('STRIPE_API_SECRET_KEY')
 STRIPE_API_PUBLISHABLE_KEY = env('STRIPE_API_PUBLISHABLE_KEY')
 
 # Labsite
-SITE_URL = env('HOST_NAME')
+SITE_URL = env('SITE_URL')
 
 LABSITE_APPS = [
     {
