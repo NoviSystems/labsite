@@ -1,5 +1,8 @@
 # lab.oscar #
 
+[![Build Status](https://travis-ci.org/ITNG/labsite.svg?branch=master)](https://travis-ci.org/ITNG/labsite)
+[![Codecov](https://codecov.io/gh/ITNG/labsite/branch/master/graph/badge.svg)](https://codecov.io/gh/ITNG/labsite)
+
 Labsite is a simple project that organizes the internal apps used at OSCAR Lab.
 
 
