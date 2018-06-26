@@ -97,7 +97,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.forms',
 
-    'raven.contrib.django.raven_compat',
     'template_forms',
     'rest_framework',
     'registration',
