@@ -1,19 +1,3 @@
-django<2.0
-django-environ>=0.4.3
-django-fsm
-django-registration
-django-registration-invite
-django-template-forms
-django-admin-rangefilter
-djangorestframework<3.8
-djangorestframework-filters<1
-celery[redis]
-colorlog
+-e .[sentry]
 gunicorn
-psycopg2
-stripe
-raven
-pytz
-
-# To compile the requirements.txt
-pip-tools
+psycopg2-binary

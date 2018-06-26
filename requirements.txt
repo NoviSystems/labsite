@@ -4,12 +4,12 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
+-e file:///Users/bagel/Documents/labsite
 amqp==2.2.2               # via kombu
 billiard==3.5.0.3         # via celery
 celery[redis]==4.1.0
 certifi==2018.1.18        # via requests
 chardet==3.0.4            # via requests
-click==6.7                # via pip-tools
 colorlog==3.1.2
 confusable-homoglyphs==3.0.0  # via django-registration
 django-admin-rangefilter==0.3.1
@@ -19,20 +19,18 @@ django-fsm==2.6.0
 django-registration-invite==0.0.2
 django-registration==2.4.1
 django-template-forms==0.3.1
-django==1.11.10
+django==1.11.10           # via django-environ, django-registration
 djangorestframework-filters==0.10.2
-djangorestframework==3.7.7
-first==2.0.1              # via pip-tools
+djangorestframework==3.7.7  # via djangorestframework-filters
 gunicorn==19.7.1
 idna==2.6                 # via requests
 kombu==4.1.0              # via celery
-pip-tools==1.11.0
-psycopg2==2.7.3.2
-pytz==2017.3
+psycopg2-binary==2.7.5
+pytz==2017.3              # via celery, django
 raven==6.5.0
 redis==2.10.6             # via celery
 requests==2.18.4          # via stripe
-six==1.11.0               # via django-environ, pip-tools
+six==1.11.0               # via django-environ
 stripe==1.77.1
 urllib3==1.22             # via requests
 vine==1.1.4               # via amqp

@@ -3,9 +3,9 @@ import datetime
 from django.contrib.auth.models import User
 from django.core import mail
 
-import worklog.tasks as tasks
+from labsite.worklog import tasks
+from labsite.worklog.models import Employee, Job, WorkDay, WorkItem
 from tests.worklog import WorklogTestCaseBase
-from worklog.models import Employee, Job, WorkDay, WorkItem
 
 
 class SendReminderEmailsTestCase(WorklogTestCaseBase):

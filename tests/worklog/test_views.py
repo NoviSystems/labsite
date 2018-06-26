@@ -3,11 +3,11 @@ from datetime import date
 from django.core.urlresolvers import reverse
 from django_webtest import WebTest
 
-from tests.worklog.factories import JobFactory, UserFactory, WorkItemFactory
-from worklog.models import WorkItem
-from worklog.views import (
+from labsite.worklog.models import WorkItem
+from labsite.worklog.views import (
     find_previous_saturday, get_past_n_days, get_total_hours_from_workitems,
 )
+from tests.worklog.factories import JobFactory, UserFactory, WorkItemFactory
 
 
 class HomepageViewTestCase(WebTest):

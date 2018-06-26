@@ -19,7 +19,7 @@ class UserLoginContext(object):
 class WorklogTestCaseBase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        from worklog.models import Job
+        from labsite.worklog.models import Job
 
         today = datetime.date.today()
         cls.today = today
