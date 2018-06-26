@@ -104,10 +104,10 @@ INSTALLED_APPS = [
     'registration_invite',
     'rangefilter',
 
-    'project.utils',
-    'accounting',
-    'foodapp',
-    'worklog',
+    'labsite.accounting',
+    'labsite.foodapp',
+    'labsite.worklog',
+    'labsite.utils',
 ]
 
 MIDDLEWARE = [
@@ -120,9 +120,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'labsite.urls'
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'labsite.wsgi.application'
 
 TEMPLATES = [
     {
@@ -136,7 +136,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'project.utils.context_processors.navbar_context',
+                'labsite.utils.context_processors.navbar_context',
             ],
         },
     },

@@ -15,9 +15,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, TemplateView, View
 
-from worklog.forms import WorkItemBaseFormSet, WorkItemForm
-from worklog.models import Funding, Holiday, Job, WorkItem
-from worklog.tasks import generate_invoice, get_reminder_dates_for_user
+from .forms import WorkItemBaseFormSet, WorkItemForm
+from .models import Funding, Holiday, Job, WorkItem
+from .tasks import generate_invoice, get_reminder_dates_for_user
 
 
 # 'columns' determines the layout of the view table

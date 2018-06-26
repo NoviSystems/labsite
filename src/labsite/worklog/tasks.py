@@ -8,7 +8,7 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.template import Context, Template
 
-from worklog.models import Employee, Job, WorkDay, WorkItem
+from .models import Employee, Job, WorkDay, WorkItem
 
 
 email_msg = Template("""

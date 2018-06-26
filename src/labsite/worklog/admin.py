@@ -14,7 +14,7 @@ from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
 from rangefilter.filter import DateRangeFilter
 
-from worklog.models import (
+from .models import (
     BillingSchedule, Employee, Funding, Holiday, Job, WorkItem, WorkPeriod,
 )
 

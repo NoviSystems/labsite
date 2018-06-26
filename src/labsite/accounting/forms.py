@@ -7,8 +7,8 @@ from django.db.models import DateField
 from django.utils.formats import date_format
 from django.utils.translation import ugettext as _
 
-from accounting import models
-from accounting.utils import Month, format_currency
+from . import models
+from .utils import Month, format_currency
 
 
 empty = object()

@@ -1,7 +1,7 @@
 import rest_framework_filters as filters
 from django.contrib.auth import get_user_model
 
-from worklog import models
+from .. import models
 
 
 User = get_user_model()

@@ -18,8 +18,8 @@ from django.views.generic import (
     CreateView, DeleteView, FormView, TemplateView, UpdateView,
 )
 
-from accounting import forms, models
-from accounting.utils import FiscalCalendar, Month, format_currency
+from . import forms, models
+from .utils import FiscalCalendar, Month, format_currency
 
 
 class DecimalEncoder(json.JSONEncoder):

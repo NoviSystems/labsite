@@ -1,6 +1,6 @@
 from django import template
 
-from accounting.utils import format_currency
+from ..utils import format_currency
 
 
 register = template.Library()

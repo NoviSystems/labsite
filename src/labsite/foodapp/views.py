@@ -12,7 +12,7 @@ from django.shortcuts import redirect
 from django.utils.functional import cached_property
 from django.views.generic import CreateView, ListView, TemplateView
 
-from foodapp import forms, models
+from . import forms, models
 
 
 def get_stripe_customer(user):

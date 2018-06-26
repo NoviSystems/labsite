@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^accounts/', include('registration_invite.urls.activation')),
 
     # App urls
-    url(r'^lunch/', include('foodapp.urls')),
-    url(r'^worklog/', include('worklog.urls')),
-    url(r'^accounting/', include('accounting.urls')),
+    url(r'^lunch/', include('labsite.foodapp.urls')),
+    url(r'^worklog/', include('labsite.worklog.urls')),
+    url(r'^accounting/', include('labsite.accounting.urls')),
 ]

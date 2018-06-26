@@ -11,8 +11,9 @@ from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from django_fsm import FSMField, transition
 
-from accounting.utils import Month, get_or_none
-from project.utils import choices
+from labsite.utils import choices
+
+from .utils import Month, get_or_none
 
 
 User = settings.AUTH_USER_MODEL

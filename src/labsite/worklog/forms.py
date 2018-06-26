@@ -5,7 +5,7 @@ from django import forms
 from django.forms import ModelForm
 from django.forms.formsets import BaseFormSet
 
-from worklog.models import Job, WorkItem
+from .models import Job, WorkItem
 
 
 class WorkItemBaseFormSet(BaseFormSet):

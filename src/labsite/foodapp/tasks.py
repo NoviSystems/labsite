@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template import Context, Template
 
-from foodapp import models
+from . import models
 
 
 PAYMENT_REQUIRED_BODY = Template("""

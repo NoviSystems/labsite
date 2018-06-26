@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from worklog.models import Job, WorkDay, WorkItem
+from ..models import Job, WorkDay, WorkItem
 
 
 class UserSerializer(serializers.ModelSerializer):

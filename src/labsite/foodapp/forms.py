@@ -2,7 +2,7 @@ import datetime
 
 from django import forms
 
-from foodapp import models
+from . import models
 
 
 class OrderBaseForm(forms.ModelForm):

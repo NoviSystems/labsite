@@ -1,7 +1,7 @@
 # flake8: noqa
 from django.conf.urls import url
 
-from accounting import views
+from . import views
 
 
 app_name = 'accounting'

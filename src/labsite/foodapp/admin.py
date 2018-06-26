@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from foodapp import models
+from . import models
 
 
 class ItemAdmin(admin.ModelAdmin):
