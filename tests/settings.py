@@ -1,5 +1,5 @@
-from project.common_settings import *  # noqa
-from project.common_settings import LOGGING
+from labsite.settings import *  # noqa
+from labsite.settings import LOGGING
 
 
 DATABASES = {

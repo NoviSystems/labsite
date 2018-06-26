@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from factory.django import DjangoModelFactory
 from faker.factory import Factory as FakeFactory
 
-from worklog.models import Job, WorkItem
+from labsite.worklog.models import Job, WorkItem
 
 
 User = get_user_model()

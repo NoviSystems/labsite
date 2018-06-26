@@ -8,8 +8,8 @@ from faker.factory import Factory as FakeFactory
 from rest_framework import status
 from rest_framework.test import APIRequestFactory, APITestCase
 
+from labsite.worklog.models import Job, WorkItem
 from tests.worklog import WorklogTestCaseBase, factories
-from worklog.models import Job, WorkItem
 
 
 faker = FakeFactory.create()
