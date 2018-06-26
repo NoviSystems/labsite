@@ -1,6 +1,15 @@
 from django.conf.urls import include, url
+from rest_framework.routers import DefaultRouter
 
-from worklog import views
+from . import views
+from .api import views as api_views
+
+
+router = DefaultRouter()
+router.register(r'workdays', api_views.WorkDayViewSet)
+router.register(r'workitems', api_views.WorkItemViewSet)
+router.register(r'users', api_views.UserViewSet)
+router.register(r'jobs', api_views.JobViewSet)
 
 
 DATEMIN = r'(?P<datemin>\d{4}-\d{2}-\d{2})'
@@ -35,5 +44,5 @@ urlpatterns = [
     url(r'^chart/$', views.ChartView.as_view(), name='chart_url'),
     url(r'^chart/job/$', views.JobDataView.as_view(), name='job_data_url'),
 
-    url(r'^api/', include('worklog.api.urls')),
+    url(r'^api/', include(router.urls)),
 ]
