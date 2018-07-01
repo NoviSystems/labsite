@@ -1,11 +1,19 @@
 import io
 import sys
+from subprocess import PIPE, run
 
 from setuptools import setup, find_packages
 
 
 assert 'upload' not in sys.argv, \
     'Not intended for public distribution.'
+
+
+def get_version():
+    return run(
+        ['git', 'rev-parse', '--short=16', 'HEAD'],
+        stdout=PIPE, encoding='utf-8', check=True,
+    ).stdout.strip()
 
 
 def get_long_description():
@@ -36,7 +44,7 @@ requirements = [
 
 setup(
     name='labsite',
-    version='0.0.0',
+    version=get_version(),
     author='ITNG',
     url='https://github.com/ITNG/labsite',
     description='ITNG lab website',
